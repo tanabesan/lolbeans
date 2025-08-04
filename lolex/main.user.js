@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LOL.ex
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.51
 // @description  LOLBeans Extension
 // @author       yuki
 // @match        https://lolbeans.io/*
@@ -9,8 +9,8 @@
 // @match        https://obby.lol/*
 // @grant        unsafeWindow
 // @run-at       document-idle
-// @updateURL    https://raw.githubusercontent.com/<ユーザー名>/<リポ名>/master/lol_full.user.js
-// @downloadURL  https://raw.githubusercontent.com/<ユーザー名>/<リポ名>/master/lol_full.user.js
+// @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
+// @downloadURL  https://tanabesan.github.io/lolbeans/lolex/main.user.js
 
 // ==/UserScript==
 

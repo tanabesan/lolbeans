@@ -1,12 +1,13 @@
 // ==UserScript==
-// @name         LOL.ex
+// @name         LOL.ex ver0.52 α
 // @namespace    http://tampermonkey.net/
-// @version      0.51
+// @version      0.52
 // @description  LOLBeans Extension
-// @author       yuki
+// @author       ユウキ / yuki
 // @match        https://lolbeans.io/*
 // @match        https://bean.lol/*
 // @match        https://obby.lol/*
+// @match        https://web.archive.org/web/20201101001650/https://lolbeans.io/*
 // @grant        unsafeWindow
 // @run-at       document-idle
 // @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
@@ -283,7 +284,7 @@
     const rules = courses.map(c => ({ keyword: c.keyword, id: c.id, message: c.message }));
     function buildChatMessage(mapName) {
         const r = rules.find(r => mapName.toLowerCase().includes(r.keyword.toLowerCase()));
-        return r ? `Next Map... ${r.message}` : `Next Round... ${mapName}`;
+        return r ? `Next Level... ${r.message}` : `Next Level... ${mapName}`;
     }
 
     window.addEventListener('message', e => {
@@ -309,6 +310,18 @@
             }
         }
     });
+
+    // 背景画像変更
+     const css = `
+    html body #screens #home-screen,
+    html body #screens #profile-screen,
+    html body #screens #shop-screen {
+      background-image: url('https://lolbeans.io/ui/changelog-map-newballdrop.png') !important;
+    }
+  `;
+  const style = document.createElement('style');
+  style.textContent = css;
+  document.documentElement.appendChild(style);
 
     // ─── console.log フック ───────────────────────────────────────
     const hook = document.createElement('script');

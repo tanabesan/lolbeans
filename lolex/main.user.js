@@ -1,21 +1,25 @@
 // ==UserScript==
-// @name          LOL.ex ver0.53.6 α
-// @namespace     http://tampermonkey.net/
-// @version       0.53.6
-// @description   LOLBeans Extension
-// @author        ユウキ / yuki
-// @match         https://lolbeans.io/*
-// @match         https://bean.lol/*
-// @match         https://obby.lol/*
-// @match         https://web.archive.org/web/20201101001650/https://lolbeans.io/*
-// @grant         unsafeWindow
-// @run-at        document-idle
-// @updateURL     https://tanabesan.github.io/lolbeans/lolex/main.user.js
-// @downloadURL   https://tanabesan.github.io/lolbeans/lolex/main.user.js
+// @name         LOL.ex ver0.53.8 α
+// @namespace    http://tampermonkey.net/
+// @version      0.53.8
+// @description  LOLBeans Extension with YouTube API Shuffle
+// @author       ユウキ / yuki
+// @match        https://lolbeans.io/*
+// @match        https://bean.lol/*
+// @match        https://obby.lol/*
+// @match        https://web.archive.org/web/20201101001650/https://lolbeans.io/*
+// @grant        unsafeWindow
+// @run-at       document-idle
+// @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
+// @downloadURL  https://tanabesan.github.io/lolbeans/lolex/main.user.js
 // ==/UserScript==
 
 (function () {
     'use strict';
+
+    // ─── グローバル変数 (YouTube Player) ──────────────────────────
+    let player;
+    let isApiReady = false;
 
     // ─── コース設定一覧 ───────────────────────────────────────────
     const courses = [
@@ -78,16 +82,13 @@
         if (stored !== null) clickAirMovementRadio(stored === 'true');
     }
 
-    // ─── 保存済みBot送信設定取得（デフォルト：オフ） ───────────────────────────────
+    // ─── 保存済みBot送信設定取得（デフォルト：オフ） ──────────────────
     function getStoredBotEnabled() {
-        const stored = localStorage.getItem('enableBot');
-        // stored が 'true' のときのみ有効、null（未設定）や 'false' の場合はオフ
-        return stored === 'true';
+        return localStorage.getItem('enableBot') === 'true';
     }
 
-    // YouTube URLから動画IDと再生リストIDを抽出する関数
+    // ─── YouTube URLパーサー ──────────────────────────────────────
     function extractIds(input) {
-        // 通常URL + /live/VIDEO_ID に対応
         const urlRegex = /(?:youtube\.com\/(?:live\/|[^\/]+\/.+\/|(?:v|e(?:mbed)?|watch)\/|.*[?&]v=)|youtu\.be\/|youtube\.googleapis\.com\/v\/)([a-zA-Z0-9_-]{11})/;
         const playlistRegex = /[?&]list=([a-zA-Z0-9_-]+)/;
         const videoMatch = input.match(urlRegex);
@@ -98,6 +99,74 @@
         };
     }
 
+    // ─── YouTube API ローダー ────────────────────────────────────
+    const apiScript = document.createElement('script');
+    apiScript.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(apiScript);
+
+    // ─── YouTube API 対応関数 ────────────────────────────────────
+    unsafeWindow.onYouTubeIframeAPIReady = function() {
+        isApiReady = true;
+        player = new YT.Player('yt-player', {
+            height: '100%',
+            width: '100%',
+            playerVars: {
+                'playsinline': 1,
+                'autoplay': 0
+            },
+            events: {
+                'onReady': onPlayerReady
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        loadYouTubeContent();
+    }
+
+    function loadYouTubeContent() {
+        if (!player || typeof player.loadPlaylist !== 'function') {
+            return;
+        }
+
+        const storedVideoId = localStorage.getItem('yt-videoId');
+        const storedPlaylistId = localStorage.getItem('yt-playlistId');
+        const loopEnabled = localStorage.getItem('yt-loop') === 'true';
+        const shuffleEnabled = localStorage.getItem('yt-shuffle') === 'true';
+        const playerWrapper = document.querySelector('.youtube-player-wrapper');
+
+        if (storedPlaylistId) {
+            playerWrapper.style.display = 'block';
+            player.loadPlaylist({
+                list: storedPlaylistId,
+                listType: 'playlist',
+                index: 0,
+                startSeconds: 0,
+                suggestedQuality: 'large'
+            });
+
+            setTimeout(() => {
+                 player.setLoop(loopEnabled);
+                 player.setShuffle(shuffleEnabled);
+                 player.playVideo();
+            }, 1000);
+
+        } else if (storedVideoId) {
+            playerWrapper.style.display = 'block';
+            player.loadVideoById(storedVideoId);
+             setTimeout(() => {
+                player.setLoop(loopEnabled);
+                player.playVideo();
+            }, 1000);
+
+        } else {
+            if (player && typeof player.stopVideo === 'function') {
+                player.stopVideo();
+            }
+            if(playerWrapper) playerWrapper.style.display = 'none';
+        }
+    }
+
 
     // ─── 設定UIタブ追加 ───────────────────────────────────────────
     function createSettingsTab() {
@@ -106,21 +175,21 @@
 
         const style = document.createElement('style');
         style.textContent = `
-             .tab5 h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.75em; letter-spacing: 0.5px; line-height: 1.3; }
-             #tab5:checked ~ nav + section > .tab5 { display: block !important; }
-             .pc-tab section > .tab5 { display: none; }
-             .setting-section { padding: 1em; border-bottom: 1px solid rgba(0,0,0,0.2); }
-             .setting-row { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0.5em 0; }
-             .setting-name { font-weight: bold; }
-             .setting-radio { display: flex; gap: 1em; }
-             .youtube-container { display: flex; flex-direction: column; gap: 1em; }
-             .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
-             .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
-             .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
-             .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; }
-             .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-             .tab5 ul { padding-left: 20px; }
-　　　　　　　.tab5 li { margin-bottom: 0.5em; }
+              .tab5 h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.75em; letter-spacing: 0.5px; line-height: 1.3; }
+              #tab5:checked ~ nav + section > .tab5 { display: block !important; }
+              .pc-tab section > .tab5 { display: none; }
+              .setting-section { padding: 1em; border-bottom: 1px solid rgba(0,0,0,0.2); }
+              .setting-row { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0.5em 0; }
+              .setting-name { font-weight: bold; }
+              .setting-radio { display: flex; gap: 1em; }
+              .youtube-container { display: flex; flex-direction: column; gap: 1em; }
+              .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
+              .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
+              .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
+              .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; display: none; }
+              .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+              .tab5 ul { padding-left: 20px; }
+              .tab5 li { margin-bottom: 0.5em; }
         `;
         tabContainer.appendChild(style);
 
@@ -128,7 +197,7 @@
         input.id = 'tab5'; input.type = 'radio'; input.name = 'pct';
         tabContainer.insertBefore(input, tabContainer.querySelector('nav'));
         const li = document.createElement('li');
-        li.className = 'tab5'; li.innerHTML = '<label for="tab5">Extensions</label>';
+        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex</label>';
         tabContainer.querySelector('nav ul').appendChild(li);
 
         const section = tabContainer.querySelector('section');
@@ -154,6 +223,7 @@
             radio.addEventListener('change', () => localStorage.setItem('enableBot', radio.value));
         });
 
+
         // コース設定セクション
         const courseSection = document.createElement('div');
         courseSection.className = 'setting-section';
@@ -176,7 +246,7 @@
         });
         panel.appendChild(courseSection);
 
-        // YouTube設定セクションの追加
+        // YouTube設定セクション
         const ytSection = document.createElement('div');
         ytSection.className = 'setting-section';
         ytSection.innerHTML = `
@@ -193,102 +263,85 @@
                         <label><input type="radio" name="yt-loop" value="true"> On</label>
                     </div>
                 </div>
+                <div class="setting-row">
+                    <div class="setting-name">Shuffle Playlist</div>
+                    <div class="setting-radio">
+                        <label><input type="radio" name="yt-shuffle" value="false"> Off</label>
+                        <label><input type="radio" name="yt-shuffle" value="true"> On</label>
+                    </div>
+                </div>
                 <div class="youtube-player-wrapper">
-                    <iframe id="yt-player" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    <div id="yt-player"></div>
                 </div>
             </div>`;
         panel.appendChild(ytSection);
 
-        // 最新アップデートセクションの追加
+        // 最新アップデートセクション
         const updatesSection = document.createElement('div');
         updatesSection.className = 'setting-section';
         updatesSection.innerHTML = `
-            <h3>Latest Updates ver0.53.6 α</h3>
-            <ul style="list-style-type: disc; margin-left: 20px; padding: 0;">
-                <li style="margin-bottom: 0.5em;">YouTubeプレイヤー : URLの入力欄に何も入力しなかった場合、動画が表示されないようになりました。</li>
-                <li style="margin-bottom: 0.5em;">YouTubeプレイヤー : ライブ配信に対応しました。</li>
-            </ul>
-        `;
+            <h3>Latest Updates ver0.53.8 α</h3>
+            <ul style="list-style-type: disc; margin-left: 20px;">
+                <li style="margin-bottom: 0.5em;"><b>New:</b> Youtubeの再生リストのシャッフル再生に対応しました。</li>
+                <li style="margin-bottom: 0.5em;"><b>Fix:</b> Youtubeのライブ配信に対応しました。</li>
+            </ul>`;
         panel.appendChild(updatesSection);
 
+        // UIイベントリスナー設定
+        setupYouTubeEventListeners();
+    }
+
+    function setupYouTubeEventListeners() {
         const videoIdInput = document.getElementById('yt-video-id-input');
         const loadButton = document.getElementById('yt-load-button');
-        const player = document.getElementById('yt-player');
-        const playerWrapper = document.querySelector('.youtube-player-wrapper');
         const loopRadios = document.querySelectorAll('input[name="yt-loop"]');
+        const shuffleRadios = document.querySelectorAll('input[name="yt-shuffle"]');
 
-        const buildAndLoadPlayer = () => {
-            const loopEnabled = localStorage.getItem('yt-loop') === 'true';
-            const storedVideoId = localStorage.getItem('yt-videoId');
-            const storedPlaylistId = localStorage.getItem('yt-playlistId');
-            let embedUrl = '';
+        // 保存値から入力欄を復元
+        const storedPlaylistId = localStorage.getItem('yt-playlistId');
+        const storedVideoId = localStorage.getItem('yt-videoId');
+        if (storedPlaylistId) {
+            videoIdInput.value = `https://www.youtube.com/playlist?list=${storedPlaylistId}`;
+        } else if (storedVideoId) {
+            videoIdInput.value = `https://www.youtube.com/watch?v=${storedVideoId}`;
+        }
 
-            if (storedPlaylistId) {
-                // 再生リストのURLを構築
-                const params = new URLSearchParams({ list: storedPlaylistId, autoplay: '1' });
-                if (loopEnabled) params.append('loop', '1');
-                embedUrl = `https://www.youtube.com/embed?${params.toString()}`;
-            } else if (storedVideoId) {
-                // 単一動画のURLを構築
-                const params = new URLSearchParams({ autoplay: '1', enablejsapi: '1' });
-                if (loopEnabled) {
-                    params.append('loop', '1');
-                    params.append('playlist', storedVideoId);
-                }
-                embedUrl = `https://www.youtube.com/embed/${storedVideoId}?${params.toString()}`;
-            }
-
-            if (embedUrl) {
-                player.src = embedUrl;
-                playerWrapper.style.display = 'block';
-                // ローカルストレージの値に基づいて入力欄を更新
-                if(storedPlaylistId) {
-                    videoIdInput.value = `https://www.youtube.com/playlist?list=${storedPlaylistId}`;
-                } else if (storedVideoId) {
-                    videoIdInput.value = `https://www.youtube.com/watch?v=${storedVideoId}`;
-                }
-            } else {
-                player.src = '';
-                playerWrapper.style.display = 'none';
-                videoIdInput.value = '';
-            }
-        };
-
-        // ループ設定の読み込みとイベントリスナー
+        // ループ設定
         const savedLoop = localStorage.getItem('yt-loop') === 'true';
         document.querySelector(`input[name="yt-loop"][value="${savedLoop}"]`).checked = true;
         loopRadios.forEach(radio => radio.addEventListener('change', (e) => {
             localStorage.setItem('yt-loop', e.target.value);
-            buildAndLoadPlayer();
+            if (player) player.setLoop(e.target.value === 'true');
         }));
 
-        // 読み込みボタンのクリックイベント
+        // シャッフル設定
+        const savedShuffle = localStorage.getItem('yt-shuffle') === 'true';
+        document.querySelector(`input[name="yt-shuffle"][value="${savedShuffle}"]`).checked = true;
+        shuffleRadios.forEach(radio => radio.addEventListener('change', (e) => {
+            localStorage.setItem('yt-shuffle', e.target.value);
+            if (player) player.setShuffle(e.target.value === 'true');
+        }));
+
+        // 読み込みボタン
         loadButton.addEventListener('click', () => {
             const inputVal = videoIdInput.value.trim();
-
             if (inputVal === '') {
                 localStorage.removeItem('yt-videoId');
                 localStorage.removeItem('yt-playlistId');
-                buildAndLoadPlayer();
-                return;
-            }
-
-            const ids = extractIds(inputVal);
-
-            if (ids.playlistId) {
-                localStorage.setItem('yt-playlistId', ids.playlistId);
-                localStorage.removeItem('yt-videoId');
-            } else if (ids.videoId) {
-                localStorage.setItem('yt-videoId', ids.videoId);
-                localStorage.removeItem('yt-playlistId');
             } else {
-                return alert('Invalid YouTube URL or ID.');
+                const ids = extractIds(inputVal);
+                if (ids.playlistId) {
+                    localStorage.setItem('yt-playlistId', ids.playlistId);
+                    localStorage.removeItem('yt-videoId');
+                } else if (ids.videoId) {
+                    localStorage.setItem('yt-videoId', ids.videoId);
+                    localStorage.removeItem('yt-playlistId');
+                } else {
+                    return alert('Invalid YouTube URL or ID.');
+                }
             }
-            buildAndLoadPlayer();
+            loadYouTubeContent();
         });
-
-        // 初期読み込み
-        buildAndLoadPlayer();
     }
 
     // ─── 既存UIバインド ─────────────────────────────────────────
@@ -342,11 +395,11 @@
 
     // 背景画像変更
     const css = `
-     html body #screens #home-screen,
-     html body #screens #profile-screen,
-     html body #screens #shop-screen {
-       background-image: url('https://lolbeans.io/ui/changelog-map-newballdrop.png') !important;
-     }
+      html body #screens #home-screen,
+      html body #screens #profile-screen,
+      html body #screens #shop-screen {
+        background-image: url('https://lolbeans.io/ui/changelog-map-newballdrop.png') !important;
+      }
     `;
     const style = document.createElement('style');
     style.textContent = css;
@@ -365,13 +418,20 @@
     `;
     document.documentElement.appendChild(hook);
 
-    // ─── 初期化 ─────────────────────────────────────────────────
-    applyStoredAirMovement();
-    createSettingsTab();
-    bindExistingUI();
-    new MutationObserver(() => {
+    // ─── 初期化処理 ──────────────────────────────────────────
+    function initialize() {
+        if (document.getElementById('tab5')) return;
+
+        applyStoredAirMovement();
         createSettingsTab();
         bindExistingUI();
+    }
+
+    // ─── DOM監視と初期化実行 ─────────────────────────────────────
+    new MutationObserver((mutations, observer) => {
+        if (document.querySelector('#settings-screen .pc-tab')) {
+            initialize();
+        }
     }).observe(document.body, { childList: true, subtree: true });
 
 })();

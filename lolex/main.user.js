@@ -1,18 +1,17 @@
 // ==UserScript==
-// @name         LOL.ex ver0.53 α
-// @namespace    http://tampermonkey.net/
-// @version      0.53
-// @description  LOLBeans Extension
-// @author       ユウキ / yuki
-// @match        https://lolbeans.io/*
-// @match        https://bean.lol/*
-// @match        https://obby.lol/*
-// @match        https://web.archive.org/web/20201101001650/https://lolbeans.io/*
-// @grant        unsafeWindow
-// @run-at       document-idle
-// @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
-// @downloadURL  https://tanabesan.github.io/lolbeans/lolex/main.user.js
-
+// @name          LOL.ex ver0.53.5 α
+// @namespace     http://tampermonkey.net/
+// @version       0.53.5
+// @description   LOLBeans Extension
+// @author        ユウキ / yuki
+// @match         https://lolbeans.io/*
+// @match         https://bean.lol/*
+// @match         https://obby.lol/*
+// @match         https://web.archive.org/web/20201101001650/https://lolbeans.io/*
+// @grant         unsafeWindow
+// @run-at        document-idle
+// @updateURL     https://tanabesan.github.io/lolbeans/lolex/main.user.js
+// @downloadURL   https://tanabesan.github.io/lolbeans/lolex/main.user.js
 // ==/UserScript==
 
 (function () {
@@ -20,31 +19,31 @@
 
     // ─── コース設定一覧 ───────────────────────────────────────────
     const courses = [
-        { id: 'beacon-bay',      keyword: 'BeaconBay',          message: '🚨 Beacon Bay 🚨',      displayName: 'Beacon Bay' },
-        { id: 'boulder-hill',    keyword: "BoulderHill",        message: "🐛 Boulder Hill 🐛",      displayName: "Boulder Hill" },
-        { id: 'circus-contest',  keyword: "CircusContest",      message: "🎪 Circus Contest 🎪",    displayName: "Circus Contest" },
-        { id: 'devils-trick',    keyword: "DevilsTrick",        message: "👿 Devil's Trick 👿",    displayName: "Devil's Trick" },
-        { id: 'dash-cup',        keyword: "FastRace",           message: "🏆 Dash Cup 🏆",         displayName: "Dash Cup" },
-        { id: 'gravity-gates',   keyword: "GravityGates",       message: "🌌 Gravity Gates 🌌",     displayName: "Gravity Gates" },
-        { id: 'hammer-ville',    keyword: "HammerVille",        message: "🍩 Hammer Ville 🍩",     displayName: "Hammer Ville" },
-        { id: 'jungle-temple',   keyword: "JungleTemple",       message: "🐍 Jungle Temple 🐍",     displayName: "Jungle Temple" },
-        { id: 'kittie-kegs',     keyword: "KittieKegs",         message: "🐱 Kittie Kegs 🙀",     displayName: "Kittie Kegs" },
-        { id: 'lava-lake',       keyword: "FloorIsLava",        message: "🌋 Lava Lake 🌋",       displayName: "Lava Lake" },
-        { id: 'mecha-maze',      keyword: "MechaMaze",          message: "🤖 MechaMaze 🤖",        displayName: "Mecha Maze" },
-        { id: 'mill-valley',     keyword: "MillValley",         message: "🌾 Mill Valley 🍃",     displayName: "Mill Valley" },
-        { id: 'monster-manor',   keyword: "MonsterManor",       message: "🎃 Monster Manor 💀",   displayName: "Monster Manor" },
-        { id: 'polar-path',      keyword: "PolarPath",          message: "🧊 Polar Path 🧊",      displayName: "Polar Path" },
-        { id: '123-red-light',   keyword: "RedLightGreenLight", message: "🦑 1-2-3 Red Light 🦑",  displayName: "1-2-3 Red Light" },
-        { id: 'nasty-seals',     keyword: "NastySeals",         message: "🦑 Nasty Seals 🦑",      displayName: "Nasty Seals" },
-        { id: 'rickety-run',     keyword: "RicketyRun",         message: "🟦 Rickety Run 🟪",      displayName: "Rickety Run" },
-        { id: 'risky-cliffs',    keyword: "RiskyCliffs",        message: "🎅 Risky Cliffs 🎅",    displayName: "Risky Cliffs" },
-        { id: 'shark-park',      keyword: "SharkPark",          message: "🦈 SharkPark 🦈",        displayName: "Shark Park" },
-        { id: 'silly-slide',     keyword: "SillySlide",         message: "🛝 Silly Slide 🛝",      displayName: "Silly Slide" },
-        { id: 'spiky-slopes',    keyword: "SpikySlopes",        message: "🔨 Spiky Slopes 🔨",    displayName: "Spiky Slopes" },
-        { id: 'splash-dash',     keyword: "SplashDash",         message: "🏊 Splash Dash 🏊",      displayName: "Splash Dash" },
-        { id: 'tumble-town',     keyword: "TumbleTown",         message: "✋ Tunble Town ✋",      displayName: "Tumble Town" },
-        { id: 'tricky-traps',    keyword: "TrickyTraps",        message: "🎁 Tricky Traps 🎁",    displayName: "Tricky Traps" },
-        { id: 'ufo-attack',      keyword: 'UFOAttack',          message: '🛸 UFO Attack 🛸',      displayName: 'UFO Attack' }
+        { id: 'beacon-bay', keyword: 'BeaconBay', message: '🚨 Beacon Bay 🚨', displayName: 'Beacon Bay' },
+        { id: 'boulder-hill', keyword: "BoulderHill", message: "🐛 Boulder Hill 🐛", displayName: "Boulder Hill" },
+        { id: 'circus-contest', keyword: "CircusContest", message: "🎪 Circus Contest 🎪", displayName: "Circus Contest" },
+        { id: 'devils-trick', keyword: "DevilsTrick", message: "👿 Devil's Trick 👿", displayName: "Devil's Trick" },
+        { id: 'dash-cup', keyword: "FastRace", message: "🏆 Dash Cup 🏆", displayName: "Dash Cup" },
+        { id: 'gravity-gates', keyword: "GravityGates", message: "🌌 Gravity Gates 🌌", displayName: "Gravity Gates" },
+        { id: 'hammer-ville', keyword: "HammerVille", message: "🍩 Hammer Ville 🍩", displayName: "Hammer Ville" },
+        { id: 'jungle-temple', keyword: "JungleTemple", message: "🐍 Jungle Temple 🐍", displayName: "Jungle Temple" },
+        { id: 'kittie-kegs', keyword: "KittieKegs", message: "🐱 Kittie Kegs 🙀", displayName: "Kittie Kegs" },
+        { id: 'lava-lake', keyword: "FloorIsLava", message: "🌋 Lava Lake 🌋", displayName: "Lava Lake" },
+        { id: 'mecha-maze', keyword: "MechaMaze", message: "🤖 MechaMaze 🤖", displayName: "Mecha Maze" },
+        { id: 'mill-valley', keyword: "MillValley", message: "🌾 Mill Valley 🍃", displayName: "Mill Valley" },
+        { id: 'monster-manor', keyword: "MonsterManor", message: "🎃 Monster Manor 💀", displayName: "Monster Manor" },
+        { id: 'polar-path', keyword: "PolarPath", message: "🧊 Polar Path 🧊", displayName: "Polar Path" },
+        { id: '123-red-light', keyword: "RedLightGreenLight", message: "🦑 1-2-3 Red Light 🦑", displayName: "1-2-3 Red Light" },
+        { id: 'nasty-seals', keyword: "NastySeals", message: "🦑 Nasty Seals 🦑", displayName: "Nasty Seals" },
+        { id: 'rickety-run', keyword: "RicketyRun", message: "🟦 Rickety Run 🟪", displayName: "Rickety Run" },
+        { id: 'risky-cliffs', keyword: "RiskyCliffs", message: "🎅 Risky Cliffs 🎅", displayName: "Risky Cliffs" },
+        { id: 'shark-park', keyword: "SharkPark", message: "🦈 SharkPark 🦈", displayName: "Shark Park" },
+        { id: 'silly-slide', keyword: "SillySlide", message: "🛝 Silly Slide 🛝", displayName: "Silly Slide" },
+        { id: 'spiky-slopes', keyword: "SpikySlopes", message: "🔨 Spiky Slopes 🔨", displayName: "Spiky Slopes" },
+        { id: 'splash-dash', keyword: "SplashDash", message: "🏊 Splash Dash 🏊", displayName: "Splash Dash" },
+        { id: 'tumble-town', keyword: "TumbleTown", message: "✋ Tunble Town ✋", displayName: "Tumble Town" },
+        { id: 'tricky-traps', keyword: "TrickyTraps", message: "🎁 Tricky Traps 🎁", displayName: "Tricky Traps" },
+        { id: 'ufo-attack', keyword: 'UFOAttack', message: '🛸 UFO Attack 🛸', displayName: 'UFO Attack' }
     ];
 
     // ─── キーボードEnterイベント生成 ─────────────────────────────
@@ -60,7 +59,7 @@
             input.focus();
             input.value = message;
             input.dispatchEvent(new Event('input', { bubbles: true }));
-            ['keydown','keypress','keyup'].forEach(type => {
+            ['keydown', 'keypress', 'keyup'].forEach(type => {
                 input.dispatchEvent(createEnterEvent(type));
             });
         }
@@ -105,20 +104,20 @@
 
         const style = document.createElement('style');
         style.textContent = `
-              .tab5 h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.75em; letter-spacing: 0.5px; line-height: 1.3; }
-              #tab5:checked ~ nav + section > .tab5 { display: block !important; }
-              .pc-tab section > .tab5 { display: none; }
-              .setting-section { padding: 1em; border-bottom: 1px solid rgba(0,0,0,0.2); }
-              .setting-row { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0.5em 0; }
-              .setting-name { font-weight: bold; }
-              .setting-radio { display: flex; gap: 1em; }
-              .youtube-container { display: flex; flex-direction: column; gap: 1em; }
-              .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
-              .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
-              .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
-              .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; }
-              .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-              .tab5 ul { padding-left: 20px; }
+             .tab5 h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.75em; letter-spacing: 0.5px; line-height: 1.3; }
+             #tab5:checked ~ nav + section > .tab5 { display: block !important; }
+             .pc-tab section > .tab5 { display: none; }
+             .setting-section { padding: 1em; border-bottom: 1px solid rgba(0,0,0,0.2); }
+             .setting-row { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0.5em 0; }
+             .setting-name { font-weight: bold; }
+             .setting-radio { display: flex; gap: 1em; }
+             .youtube-container { display: flex; flex-direction: column; gap: 1em; }
+             .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
+             .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
+             .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
+             .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; }
+             .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+             .tab5 ul { padding-left: 20px; }
 　　　　　　　.tab5 li { margin-bottom: 0.5em; }
         `;
         tabContainer.appendChild(style);
@@ -199,22 +198,20 @@
         panel.appendChild(ytSection);
 
         // 最新アップデートセクションの追加
-　　　　const updatesSection = document.createElement('div');
-　　　　updatesSection.className = 'setting-section';
-　　　　updatesSection.innerHTML = `
-   　　　　 <h3>Latest Updates</h3>
-　　　　    <ul style="list-style-type: disc; margin-left: 20px; padding: 0;">
-  　　　　      <li style="margin-bottom: 0.5em;">YouTubeプレイヤー : 動画と再生リストをループ再生する機能を追加しました。</li>
-  　　　　      <li style="margin-bottom: 0.5em;">ボット設定 : マップ名送信ボットのデフォルト設定をオフに変更しました。</li>
- 　　　　       <li style="margin-bottom: 0.5em;">UI : 設定タブを読みやすくするためにデザインを改善しました。</li>
- 　　　　       <li style="margin-bottom: 0.5em;">バグ修正 : 背景画像が正しく読み込まれない問題を修正しました。</li>
- 　　　　   </ul>
-　　　　`;
-　　　　panel.appendChild(updatesSection);
+        const updatesSection = document.createElement('div');
+        updatesSection.className = 'setting-section';
+        updatesSection.innerHTML = `
+            <h3>Latest Updates ver0.53.5 α</h3>
+            <ul style="list-style-type: disc; margin-left: 20px; padding: 0;">
+                <li style="margin-bottom: 0.5em;">YouTubeプレイヤー : URLの入力欄に何も入力しなかった場合、動画が表示されないようになりました。</li>
+            </ul>
+        `;
+        panel.appendChild(updatesSection);
 
         const videoIdInput = document.getElementById('yt-video-id-input');
         const loadButton = document.getElementById('yt-load-button');
         const player = document.getElementById('yt-player');
+        const playerWrapper = document.querySelector('.youtube-player-wrapper');
         const loopRadios = document.querySelectorAll('input[name="yt-loop"]');
 
         const buildAndLoadPlayer = () => {
@@ -227,7 +224,7 @@
                 // 再生リストのURLを構築
                 const params = new URLSearchParams({ list: storedPlaylistId, autoplay: '1' });
                 if (loopEnabled) params.append('loop', '1');
-                embedUrl = `https://www.youtube.com/embed/videoseries?${params.toString()}`;
+                embedUrl = `https://www.youtube.com/embed?${params.toString()}`;
             } else if (storedVideoId) {
                 // 単一動画のURLを構築
                 const params = new URLSearchParams({ autoplay: '1', enablejsapi: '1' });
@@ -240,12 +237,17 @@
 
             if (embedUrl) {
                 player.src = embedUrl;
+                playerWrapper.style.display = 'block';
                 // ローカルストレージの値に基づいて入力欄を更新
                 if(storedPlaylistId) {
                     videoIdInput.value = `https://www.youtube.com/playlist?list=${storedPlaylistId}`;
                 } else if (storedVideoId) {
                     videoIdInput.value = `https://www.youtube.com/watch?v=${storedVideoId}`;
                 }
+            } else {
+                player.src = '';
+                playerWrapper.style.display = 'none';
+                videoIdInput.value = '';
             }
         };
 
@@ -260,6 +262,14 @@
         // 読み込みボタンのクリックイベント
         loadButton.addEventListener('click', () => {
             const inputVal = videoIdInput.value.trim();
+
+            if (inputVal === '') {
+                localStorage.removeItem('yt-videoId');
+                localStorage.removeItem('yt-playlistId');
+                buildAndLoadPlayer();
+                return;
+            }
+
             const ids = extractIds(inputVal);
 
             if (ids.playlistId) {
@@ -328,16 +338,16 @@
     });
 
     // 背景画像変更
-     const css = `
-    html body #screens #home-screen,
-    html body #screens #profile-screen,
-    html body #screens #shop-screen {
-      background-image: url('https://lolbeans.io/ui/changelog-map-newballdrop.png') !important;
-    }
-  `;
-  const style = document.createElement('style');
-  style.textContent = css;
-  document.documentElement.appendChild(style);
+    const css = `
+     html body #screens #home-screen,
+     html body #screens #profile-screen,
+     html body #screens #shop-screen {
+       background-image: url('https://lolbeans.io/ui/changelog-map-newballdrop.png') !important;
+     }
+    `;
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.documentElement.appendChild(style);
 
     // ─── console.log フック ───────────────────────────────────────
     const hook = document.createElement('script');

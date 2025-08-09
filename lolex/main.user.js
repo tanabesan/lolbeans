@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LOL.ex ver0.52 α
+// @name         LOL.ex ver0.53 α
 // @namespace    http://tampermonkey.net/
-// @version      0.52
+// @version      0.53
 // @description  LOLBeans Extension
 // @author       ユウキ / yuki
 // @match        https://lolbeans.io/*
@@ -118,6 +118,8 @@
               .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
               .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; }
               .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+              .tab5 ul { padding-left: 20px; }
+　　　　　　　.tab5 li { margin-bottom: 0.5em; }
         `;
         tabContainer.appendChild(style);
 
@@ -195,6 +197,20 @@
                 </div>
             </div>`;
         panel.appendChild(ytSection);
+
+        // 最新アップデートセクションの追加
+　　　　const updatesSection = document.createElement('div');
+　　　　updatesSection.className = 'setting-section';
+　　　　updatesSection.innerHTML = `
+   　　　　 <h3>Latest Updates</h3>
+　　　　    <ul style="list-style-type: disc; margin-left: 20px; padding: 0;">
+  　　　　      <li style="margin-bottom: 0.5em;">YouTubeプレイヤー : 動画と再生リストをループ再生する機能を追加しました。</li>
+  　　　　      <li style="margin-bottom: 0.5em;">ボット設定 : マップ名送信ボットのデフォルト設定をオフに変更しました。</li>
+ 　　　　       <li style="margin-bottom: 0.5em;">UI : 設定タブを読みやすくするためにデザインを改善しました。</li>
+ 　　　　       <li style="margin-bottom: 0.5em;">バグ修正 : 背景画像が正しく読み込まれない問題を修正しました。</li>
+ 　　　　   </ul>
+　　　　`;
+　　　　panel.appendChild(updatesSection);
 
         const videoIdInput = document.getElementById('yt-video-id-input');
         const loadButton = document.getElementById('yt-load-button');

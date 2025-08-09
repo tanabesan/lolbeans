@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name          LOL.ex ver0.53.5 α
+// @name          LOL.ex ver0.53.6 α
 // @namespace     http://tampermonkey.net/
-// @version       0.53.5
+// @version       0.53.6
 // @description   LOLBeans Extension
 // @author        ユウキ / yuki
 // @match         https://lolbeans.io/*
@@ -85,9 +85,10 @@
         return stored === 'true';
     }
 
-    // ─── YouTube URLから動画IDと再生リストIDを抽出する関数 ───────────
+    // YouTube URLから動画IDと再生リストIDを抽出する関数
     function extractIds(input) {
-        const urlRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|watch)\/|.*[?&]v=)|youtu\.be\/|youtube\.googleapis\.com\/v\/)([a-zA-Z0-9_-]{11})/;
+        // 通常URL + /live/VIDEO_ID に対応
+        const urlRegex = /(?:youtube\.com\/(?:live\/|[^\/]+\/.+\/|(?:v|e(?:mbed)?|watch)\/|.*[?&]v=)|youtu\.be\/|youtube\.googleapis\.com\/v\/)([a-zA-Z0-9_-]{11})/;
         const playlistRegex = /[?&]list=([a-zA-Z0-9_-]+)/;
         const videoMatch = input.match(urlRegex);
         const playlistMatch = input.match(playlistRegex);
@@ -96,6 +97,7 @@
             playlistId: playlistMatch ? playlistMatch[1] : null,
         };
     }
+
 
     // ─── 設定UIタブ追加 ───────────────────────────────────────────
     function createSettingsTab() {
@@ -201,9 +203,10 @@
         const updatesSection = document.createElement('div');
         updatesSection.className = 'setting-section';
         updatesSection.innerHTML = `
-            <h3>Latest Updates ver0.53.5 α</h3>
+            <h3>Latest Updates ver0.53.6 α</h3>
             <ul style="list-style-type: disc; margin-left: 20px; padding: 0;">
                 <li style="margin-bottom: 0.5em;">YouTubeプレイヤー : URLの入力欄に何も入力しなかった場合、動画が表示されないようになりました。</li>
+                <li style="margin-bottom: 0.5em;">YouTubeプレイヤー : ライブ配信に対応しました。</li>
             </ul>
         `;
         panel.appendChild(updatesSection);

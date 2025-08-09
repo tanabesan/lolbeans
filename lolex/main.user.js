@@ -197,7 +197,7 @@
         input.id = 'tab5'; input.type = 'radio'; input.name = 'pct';
         tabContainer.insertBefore(input, tabContainer.querySelector('nav'));
         const li = document.createElement('li');
-        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex</label>';
+        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex ver0.53.8</label>';
         tabContainer.querySelector('nav ul').appendChild(li);
 
         const section = tabContainer.querySelector('section');

@@ -1,13 +1,12 @@
 // ==UserScript==
-// @name         LOL.ex ver0.53.8 α
+// @name         LOL.ex ver0.55 α
 // @namespace    http://tampermonkey.net/
-// @version      0.53.8
+// @version      0.55
 // @description  LOLBeans Extension with YouTube API Shuffle
 // @author       ユウキ / yuki
 // @match        https://lolbeans.io/*
 // @match        https://bean.lol/*
 // @match        https://obby.lol/*
-// @match        https://web.archive.org/web/20201101001650/https://lolbeans.io/*
 // @grant        unsafeWindow
 // @run-at       document-idle
 // @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
@@ -50,45 +49,21 @@
         { id: 'ufo-attack', keyword: 'UFOAttack', message: '🛸 UFO Attack 🛸', displayName: 'UFO Attack' }
     ];
 
-    // ─── キーボードEnterイベント生成 ─────────────────────────────
-    function createEnterEvent(type) {
-        return new KeyboardEvent(type, { bubbles: true, cancelable: true, key: 'Enter', code: 'Enter', keyCode: 13, which: 13 });
-    }
-
-    // ─── チャット送信 ────────────────────────────────────────────
-    function sendChatByEnter(message) {
-        const input = document.getElementById('chat-input');
-        if (!input) return;
-        for (let i = 0; i < 2; i++) {
-            input.focus();
-            input.value = message;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            ['keydown', 'keypress', 'keyup'].forEach(type => {
-                input.dispatchEvent(createEnterEvent(type));
-            });
-        }
-    }
-
     // ─── StopAirMoveラジオクリック ─────────────────────────────────
-    function clickAirMovementRadio(enabled) {
+    function clickAirMoveRadio(enabled) {
         const selector = enabled ? '#air-movement-on' : '#air-movement-off';
         const radio = document.querySelector(selector);
         if (radio && !radio.checked) radio.click();
     }
 
     // ─── 保存済みStopAirMove適用 ───────────────────────────────────
-    function applyStoredAirMovement() {
+    function applyStoredAirMove() {
         const stored = localStorage.getItem('stopAirMove');
-        if (stored !== null) clickAirMovementRadio(stored === 'true');
-    }
-
-    // ─── 保存済みBot送信設定取得（デフォルト：オフ） ──────────────────
-    function getStoredBotEnabled() {
-        return localStorage.getItem('enableBot') === 'true';
+        if (stored !== null) clickAirMoveRadio(stored === 'true');
     }
 
     // ─── YouTube URLパーサー ──────────────────────────────────────
-    function extractIds(input) {
+    function getYouTubeIds(input) {
         const urlRegex = /(?:youtube\.com\/(?:live\/|[^\/]+\/.+\/|(?:v|e(?:mbed)?|watch)\/|.*[?&]v=)|youtu\.be\/|youtube\.googleapis\.com\/v\/)([a-zA-Z0-9_-]{11})/;
         const playlistRegex = /[?&]list=([a-zA-Z0-9_-]+)/;
         const videoMatch = input.match(urlRegex);
@@ -121,10 +96,10 @@
     }
 
     function onPlayerReady(event) {
-        loadYouTubeContent();
+        loadYouTube();
     }
 
-    function loadYouTubeContent() {
+    function loadYouTube() {
         if (!player || typeof player.loadPlaylist !== 'function') {
             return;
         }
@@ -146,15 +121,15 @@
             });
 
             setTimeout(() => {
-                 player.setLoop(loopEnabled);
-                 player.setShuffle(shuffleEnabled);
-                 player.playVideo();
+                player.setLoop(loopEnabled);
+                player.setShuffle(shuffleEnabled);
+                player.playVideo();
             }, 1000);
 
         } else if (storedVideoId) {
             playerWrapper.style.display = 'block';
             player.loadVideoById(storedVideoId);
-             setTimeout(() => {
+            setTimeout(() => {
                 player.setLoop(loopEnabled);
                 player.playVideo();
             }, 1000);
@@ -169,27 +144,27 @@
 
 
     // ─── 設定UIタブ追加 ───────────────────────────────────────────
-    function createSettingsTab() {
+    function createSettings() {
         const tabContainer = document.querySelector('#settings-screen .pc-tab');
         if (!tabContainer || document.getElementById('tab5')) return;
 
         const style = document.createElement('style');
         style.textContent = `
-              .tab5 h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.75em; letter-spacing: 0.5px; line-height: 1.3; }
-              #tab5:checked ~ nav + section > .tab5 { display: block !important; }
-              .pc-tab section > .tab5 { display: none; }
-              .setting-section { padding: 1em; border-bottom: 1px solid rgba(0,0,0,0.2); }
-              .setting-row { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0.5em 0; }
-              .setting-name { font-weight: bold; }
-              .setting-radio { display: flex; gap: 1em; }
-              .youtube-container { display: flex; flex-direction: column; gap: 1em; }
-              .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
-              .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
-              .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
-              .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; display: none; }
-              .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-              .tab5 ul { padding-left: 20px; }
-              .tab5 li { margin-bottom: 0.5em; }
+                  .tab5 h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.75em; letter-spacing: 0.5px; line-height: 1.3; }
+                  #tab5:checked ~ nav + section > .tab5 { display: block !important; }
+                  .pc-tab section > .tab5 { display: none; }
+                  .setting-section { padding: 1em; border-bottom: 1px solid rgba(0,0,0,0.2); }
+                  .setting-row { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0.5em 0; }
+                  .setting-name { font-weight: bold; }
+                  .setting-radio { display: flex; gap: 1em; }
+                  .youtube-container { display: flex; flex-direction: column; gap: 1em; }
+                  .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
+                  .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
+                  .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
+                  .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; display: none; }
+                  .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+                  .tab5 ul { padding-left: 20px; }
+                  .tab5 li { margin-bottom: 0.5em; }
         `;
         tabContainer.appendChild(style);
 
@@ -197,7 +172,7 @@
         input.id = 'tab5'; input.type = 'radio'; input.name = 'pct';
         tabContainer.insertBefore(input, tabContainer.querySelector('nav'));
         const li = document.createElement('li');
-        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex ver0.53.8</label>';
+        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex ver0.55</label>';
         tabContainer.querySelector('nav ul').appendChild(li);
 
         const section = tabContainer.querySelector('section');
@@ -205,24 +180,7 @@
         panel.className = 'tab5';
         section.appendChild(panel);
 
-        // Bot設定セクション
-        const botSection = document.createElement('div');
-        botSection.className = 'setting-section';
-        botSection.innerHTML = `<h3>Bot Settings</h3>
-            <div class="setting-row">
-                <div class="setting-name">Send Map Name Bot</div>
-                <div class="setting-radio">
-                    <label><input type="radio" name="enable-bot" value="false"> Off</label>
-                    <label><input type="radio" name="enable-bot" value="true"> On</label>
-                </div>
-            </div>`;
-        panel.appendChild(botSection);
-        const botEnabled = getStoredBotEnabled();
-        botSection.querySelectorAll('input[name="enable-bot"]').forEach(radio => {
-            if (String(botEnabled) === radio.value) radio.checked = true;
-            radio.addEventListener('change', () => localStorage.setItem('enableBot', radio.value));
-        });
-
+        // --- Bot設定セクションはここから削除されました ---
 
         // コース設定セクション
         const courseSection = document.createElement('div');
@@ -234,10 +192,10 @@
             const row = document.createElement('div');
             row.className = 'setting-row';
             row.innerHTML = `<div class="setting-name">${displayName}</div>
-                <div class="setting-radio">
-                    <label><input type="radio" name="stopair-${id}" value="false"> Off</label>
-                    <label><input type="radio" name="stopair-${id}" value="true"> On</label>
-                </div>`;
+                  <div class="setting-radio">
+                      <label><input type="radio" name="stopair-${id}" value="false"> Off</label>
+                      <label><input type="radio" name="stopair-${id}" value="true"> On</label>
+                  </div>`;
             courseSection.appendChild(row);
             row.querySelectorAll('input').forEach(radio => {
                 if (radio.value === current) radio.checked = true;
@@ -250,54 +208,53 @@
         const ytSection = document.createElement('div');
         ytSection.className = 'setting-section';
         ytSection.innerHTML = `
-            <h3>YouTube Player</h3>
-            <div class="youtube-container">
-                <div class="youtube-input-group">
-                    <input type="text" id="yt-video-id-input" placeholder="Enter YouTube video or playlist URL">
-                    <button id="yt-load-button">Load</button>
-                </div>
-                <div class="setting-row">
-                    <div class="setting-name">Loop Video/Playlist</div>
-                    <div class="setting-radio">
-                        <label><input type="radio" name="yt-loop" value="false"> Off</label>
-                        <label><input type="radio" name="yt-loop" value="true"> On</label>
+                <h3>YouTube Player</h3>
+                <div class="youtube-container">
+                    <div class="youtube-input-group">
+                        <input type="text" id="yt-video-id-input" placeholder="Enter YouTube video or playlist URL">
+                        <button id="yt-load-button">Load</button>
                     </div>
-                </div>
-                <div class="setting-row">
-                    <div class="setting-name">Shuffle Playlist</div>
-                    <div class="setting-radio">
-                        <label><input type="radio" name="yt-shuffle" value="false"> Off</label>
-                        <label><input type="radio" name="yt-shuffle" value="true"> On</label>
+                    <div class="setting-row">
+                        <div class="setting-name">Loop Video/Playlist</div>
+                        <div class="setting-radio">
+                            <label><input type="radio" name="yt-loop" value="false"> Off</label>
+                            <label><input type="radio" name="yt-loop" value="true"> On</label>
+                        </div>
                     </div>
-                </div>
-                <div class="youtube-player-wrapper">
-                    <div id="yt-player"></div>
-                </div>
-            </div>`;
+                    <div class="setting-row">
+                        <div class="setting-name">Shuffle Playlist</div>
+                        <div class="setting-radio">
+                            <label><input type="radio" name="yt-shuffle" value="false"> Off</label>
+                            <label><input type="radio" name="yt-shuffle" value="true"> On</label>
+                        </div>
+                    </div>
+                    <div class="youtube-player-wrapper">
+                        <div id="yt-player"></div>
+                    </div>
+                </div>`;
         panel.appendChild(ytSection);
 
         // 最新アップデートセクション
         const updatesSection = document.createElement('div');
         updatesSection.className = 'setting-section';
         updatesSection.innerHTML = `
-            <h3>Latest Updates ver0.53.8 α</h3>
-            <ul style="list-style-type: disc; margin-left: 20px;">
-                <li style="margin-bottom: 0.5em;"><b>New:</b> Youtubeの再生リストのシャッフル再生に対応しました。</li>
-                <li style="margin-bottom: 0.5em;"><b>Fix:</b> Youtubeのライブ配信に対応しました。</li>
-            </ul>`;
+                <h3>Latest Updates ver0.55 α</h3>
+                <ul style="list-style-type: disc; margin-left: 20px;">
+                    <li style="margin-bottom: 0.5em;"><b>Reomoved : </b>コース名送信BOTを削除しました。</li>
+                    <li style="margin-bottom: 0.5em;"><b>New : </b>メニューを開いた際に次のコースの名前が表示されるようになりました。</li>
+                </ul>`;
         panel.appendChild(updatesSection);
 
         // UIイベントリスナー設定
-        setupYouTubeEventListeners();
+        setupYouTubeUI();
     }
 
-    function setupYouTubeEventListeners() {
+    function setupYouTubeUI() {
         const videoIdInput = document.getElementById('yt-video-id-input');
         const loadButton = document.getElementById('yt-load-button');
         const loopRadios = document.querySelectorAll('input[name="yt-loop"]');
         const shuffleRadios = document.querySelectorAll('input[name="yt-shuffle"]');
 
-        // 保存値から入力欄を復元
         const storedPlaylistId = localStorage.getItem('yt-playlistId');
         const storedVideoId = localStorage.getItem('yt-videoId');
         if (storedPlaylistId) {
@@ -306,7 +263,6 @@
             videoIdInput.value = `https://www.youtube.com/watch?v=${storedVideoId}`;
         }
 
-        // ループ設定
         const savedLoop = localStorage.getItem('yt-loop') === 'true';
         document.querySelector(`input[name="yt-loop"][value="${savedLoop}"]`).checked = true;
         loopRadios.forEach(radio => radio.addEventListener('change', (e) => {
@@ -314,7 +270,6 @@
             if (player) player.setLoop(e.target.value === 'true');
         }));
 
-        // シャッフル設定
         const savedShuffle = localStorage.getItem('yt-shuffle') === 'true';
         document.querySelector(`input[name="yt-shuffle"][value="${savedShuffle}"]`).checked = true;
         shuffleRadios.forEach(radio => radio.addEventListener('change', (e) => {
@@ -322,14 +277,13 @@
             if (player) player.setShuffle(e.target.value === 'true');
         }));
 
-        // 読み込みボタン
         loadButton.addEventListener('click', () => {
             const inputVal = videoIdInput.value.trim();
             if (inputVal === '') {
                 localStorage.removeItem('yt-videoId');
                 localStorage.removeItem('yt-playlistId');
             } else {
-                const ids = extractIds(inputVal);
+                const ids = getYouTubeIds(inputVal);
                 if (ids.playlistId) {
                     localStorage.setItem('yt-playlistId', ids.playlistId);
                     localStorage.removeItem('yt-videoId');
@@ -340,12 +294,12 @@
                     return alert('Invalid YouTube URL or ID.');
                 }
             }
-            loadYouTubeContent();
+            loadYouTube();
         });
     }
 
     // ─── 既存UIバインド ─────────────────────────────────────────
-    function bindExistingUI() {
+    function bindUI() {
         const container = document.getElementById('air-movement-settings');
         if (!container) return;
         const stored = localStorage.getItem('stopAirMove');
@@ -357,38 +311,51 @@
         container.querySelectorAll('input[name="air-movement-option"]').forEach(i => {
             i.addEventListener('change', () => {
                 localStorage.setItem('stopAirMove', i.value);
-                clickAirMovementRadio(i.value === 'true');
+                clickAirMoveRadio(i.value === 'true');
             });
         });
     }
 
     // ─── マップ読み込み検知と処理 ─────────────────────────────────
     const rules = courses.map(c => ({ keyword: c.keyword, id: c.id, message: c.message }));
-    function buildChatMessage(mapName) {
-        const r = rules.find(r => mapName.toLowerCase().includes(r.keyword.toLowerCase()));
-        return r ? `Next Level... ${r.message}` : `Next Level... ${mapName}`;
-    }
 
     window.addEventListener('message', e => {
         if (e.data?.source !== 'console_proxy') return;
         const [tag, mapName] = e.data.args;
         if (tag === 'Loading map' && typeof mapName === 'string') {
-            if (getStoredBotEnabled()) sendChatByEnter(buildChatMessage(mapName));
+            // --- チャット送信機能はここから削除されました ---
+
             const rule = rules.find(r => mapName.toLowerCase().includes(r.keyword.toLowerCase()));
             const id = rule ? rule.id : mapName.toLowerCase().replace(/\s+/g, '-');
             const enabled = localStorage.getItem(`stopAirMove_${id}`) === 'true';
-            clickAirMovementRadio(enabled);
+            clickAirMoveRadio(enabled);
 
             const displayText = rule ? rule.message : mapName;
+
+            // --- ラウンドリザルト画面 (end-match-header) の表示 ---
             const header = document.getElementById('end-match-header');
             if (header) {
-                const prev = document.getElementById('next-round-display');
+                const prev = document.getElementById('next-round-display-header');
                 if (prev) prev.remove();
+
                 const el = document.createElement('div');
-                el.id = 'next-round-display';
+                el.id = 'next-round-display-header';
                 el.textContent = `Next Round... ${displayText}`;
                 el.style.cssText = 'font-size:14px; color:#fff; margin-top:8px; text-align:center;';
                 header.appendChild(el);
+            }
+
+            // --- death-screen の表示 ---
+            const targetContainer = document.querySelector('#death-screen .top-section');
+            if (targetContainer) {
+                const prev = document.getElementById('next-round-display-death');
+                if (prev) prev.remove();
+
+                const el = document.createElement('div');
+                el.id = 'next-round-display-death';
+                el.textContent = `Next Round... ${displayText}`;
+                el.style.cssText = 'font-size: 1.5rem; color: #fff; text-align: center; font-weight: bold; padding-top: 50px; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);';
+                targetContainer.appendChild(el);
             }
         }
     });
@@ -419,18 +386,18 @@
     document.documentElement.appendChild(hook);
 
     // ─── 初期化処理 ──────────────────────────────────────────
-    function initialize() {
+    function init() {
         if (document.getElementById('tab5')) return;
 
-        applyStoredAirMovement();
-        createSettingsTab();
-        bindExistingUI();
+        applyStoredAirMove();
+        createSettings();
+        bindUI();
     }
 
     // ─── DOM監視と初期化実行 ─────────────────────────────────────
     new MutationObserver((mutations, observer) => {
         if (document.querySelector('#settings-screen .pc-tab')) {
-            initialize();
+            init();
         }
     }).observe(document.body, { childList: true, subtree: true });
 

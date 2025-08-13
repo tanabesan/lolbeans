@@ -1,8 +1,233 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>lolbeans</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLex - もっと楽しく、もっと便利に！</title>
+    <style>
+        /* --- 基本的なスタイル --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            overflow: hidden;
+            padding: 0 20px;
+        }
+        h1, h2, h3 {
+            color: #1a237e; /* LOLBeansのテーマカラーに近い濃い青 */
+        }
+
+        /* --- ヘッダー（メインビュー） --- */
+        .main-header {
+            background: #3949ab; /* 少し明るい青 */
+            color: #fff;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        .main-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+        .main-header p {
+            font-size: 1.2rem;
+        }
+        .main-header .hero-image {
+            max-width: 90%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            border: 3px solid #fff;
+        }
+
+        /* --- ダウンロードボタン --- */
+        .download-buttons {
+            margin-top: 1.5rem;
+        }
+        .btn {
+            display: inline-block;
+            background: #ffca28; /* LOLBeansの黄色 */
+            color: #333;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background: #ffb300; /* 少し濃い黄色 */
+        }
+
+        /* --- 各セクション --- */
+        section {
+            background: #fff;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* --- 機能紹介セクション --- */
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .feature-item {
+            flex-basis: calc(50% - 20px); /* 2列レイアウト */
+            text-align: center;
+        }
+        .feature-item img {
+            max-width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        @media (max-width: 600px) {
+            .feature-item {
+                flex-basis: 100%; /* スマホでは1列に */
+            }
+        }
+        
+        /* --- 使い方セクション --- */
+        .how-to-use ol {
+            list-style: none;
+            counter-reset: step-counter;
+            padding-left: 0;
+        }
+        .how-to-use li {
+            counter-increment: step-counter;
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 40px;
+        }
+        .how-to-use li::before {
+            content: counter(step-counter);
+            background: #3949ab;
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-block;
+            text-align: center;
+            line-height: 30px;
+            position: absolute;
+            left: 0;
+        }
+
+        /* --- FAQセクション --- */
+        .faq dt {
+            font-weight: bold;
+            color: #1a237e;
+            margin-top: 1rem;
+        }
+        .faq dd {
+            margin-left: 0;
+            margin-bottom: 1rem;
+        }
+
+        /* --- フッター --- */
+        .main-footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .main-footer a {
+            color: #3949ab;
+            text-decoration: none;
+        }
+    </style>
 </head>
-<a>test</a>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <h1>LOLex</h1>
+            <p>あなたのLOLBeansを快適に</p>
+            
+            <img src="images/hero-screenshot.gif" alt="拡張機能の動作デモ" class="hero-image">
+            
+            <div class="download-buttons">
+                <a href="[ChromeウェブストアのURL]" class="btn">Chromeで無料で入手</a>
+                <a href="[Firefox ADD-ONSのURL]" class="btn">Firefoxで無料で入手</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="features">
+            <h2>主な機能</h2>
+            <div class="features">
+                <div class="feature-item">
+                    <h3>✨ カスタムクロスヘア</h3>
+                    <p>好きな色や形に照準をカスタマイズして、エイム精度を向上させましょう。</p>
+                    <img src="images/feature-crosshair.png" alt="カスタムクロスヘアの設定画面">
+                </div>
+                <div class="feature-item">
+                    <h3>📊 ゲーム内統計トラッカー</h3>
+                    <p>勝利数やベストタイムを自動で記録。自分の成長をデータで確認できます。</p>
+                    <img src="images/feature-stats.png" alt="統計トラッカーの表示画面">
+                </div>
+                </div>
+        </section>
+
+        <section id="how-to-use" class="how-to-use">
+            <h2>使い方 (かんたん3ステップ)</h2>
+            <ol>
+                <li>
+                    <strong>インストール</strong>
+                    お使いのブラウザのウェブストアから「Tampermonkey」を追加します。
+                </li>
+                <li>
+                    <strong>ゲームを開く:</strong>
+                    LOLBeans.ioにアクセスしてゲームを開始します。
+                </li>
+                <li>
+                    <strong>楽しむ！:</strong>
+                    新しい機能が自動で有効になります！設定はブラウザのアイコンから変更できます。
+                </li>
+            </ol>
+        </section>
+
+        <section id="faq" class="faq">
+            <h2>よくある質問 (FAQ)</h2>
+            <dl>
+                <dt>Q. この拡張機能は無料ですか？</dt>
+                <dd>A. はい、完全に無料でお使いいただけます。</dd>
+                
+                <dt>Q. 安全ですか？アカウントがBANされたりしませんか？</dt>
+                <dd>A. 運営から許可を得ており、チート行為のような不公平なアドバンテージを提供するものではなく、あくまで便利にするものです。この拡張機能は常に安全性を確保し、ゲームの規約を遵守するよう努めていますが、あらゆるサードパーティ製ツールの使用は、自己責任でお願いいたします。</dd>
+                
+                <dt>Q. どのブラウザに対応していますか？</dt>
+                <dd>A. 現在、Chrome, Safari, Edge, Brave, Firefox, etc...に対応しています。</dd>
+
+                <dt>Q. バグを見つけました / 機能の要望があります</dt>
+                <dd>A. ありがとうございます！お手数ですが、<a href="">Discordの yinkya_ </a>まで、お気軽にご連絡ください。</dd>
+            </dl>
+        </section>
+        
+        <section id="developer">
+            <h2>開発者からひとこと</h2>
+            <p>私自身LOLBeansにはまっている者で、「もっとこうだったら便利なのに！」という思いから、趣味でこの拡張機能を開発しました。多くのプレイヤーに、LOLBeansをさらに楽しんでもらえたら嬉しいです。ぜひ使ってみてください！フィードバックや応援のレビュー、お待ちしています！</p>
+        </section>
+
+    </main>
+
+    <footer class="main-footer">
+        <p>
+            <a href="#">プライバシーポリシー</a> |
+            <a href="https://lolbeans.io/" target="_blank">LOLBeans公式サイト</a>
+        </p>
+        <p>&copy; 2025 ユウキ / yuki </p>
+    </footer>
+
+</body>
 </html>

@@ -11,8 +11,8 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    background-color: #000; /* メインの背景色を黒に */
-    color: #f4f4f4; /* 基本の文字色を明るいグレーに */
+    background-color: #0d0d0d; /* 完全な黒から少しだけ明るく */
+    color: #e0e0e0; /* 基本の文字色を明るいグレーに */
 }
 .container {
     max-width: 1200px;
@@ -22,34 +22,36 @@ body {
 }
 h1, h2, h3 {
     color: #64ffda; /* ネオンシアン */
-    text-shadow: 0 0 5px #64ffda, 0 0 10px #64ffda; /* ネオン効果 */
+    /* 変更点: 発光を弱めて文字をくっきりさせた */
+    text-shadow: 0 0 3px #64ffda, 0 0 6px rgba(100, 255, 218, 0.5);
 }
 
 /* --- ヘッダー（メインビュー） --- */
 .main-header {
-    background: #111; /* ヘッダーの背景を少し濃い黒に */
+    background: #1a1a1a; /* ヘッダーの背景 */
     color: #fff;
     padding: 2rem 0;
     text-align: center;
-    border-bottom: 1px solid #333; /* 区切り線 */
+    border-bottom: 1px solid #333;
 }
 .main-header h1 {
-    font-size: 3rem; /* 少し大きく */
+    font-size: 3rem;
     margin-bottom: 0.5rem;
     color: #ff6ec7; /* ネオンピンク */
-    text-shadow: 0 0 5px #ff6ec7, 0 0 10px #ff6ec7; /* ネオン効果 */
+    /* 変更点: 発光を弱めて文字をくっきりさせた */
+    text-shadow: 0 0 4px #ff6ec7, 0 0 8px rgba(255, 110, 199, 0.6);
 }
 .main-header p {
     font-size: 1.2rem;
-    color: #999;
+    color: #a0a0a0;
 }
 .main-header .hero-image {
     max-width: 90%;
     height: auto;
     border-radius: 8px;
     margin-top: 1.5rem;
-    border: 3px solid #fff; /* 白い枠線で強調 */
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); /* 光彩効果 */
+    border: 2px solid #555;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
 /* --- ダウンロードボタン --- */
@@ -58,31 +60,31 @@ h1, h2, h3 {
 }
 .btn {
     display: inline-block;
-    background: #222; /* ボタンの背景を暗く */
+    background: transparent; /* 背景を透明に */
     color: #ffeb3b; /* ネオンイエロー */
     padding: 10px 20px;
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
     margin: 5px;
-    border: 1px solid #ffeb3b; /* ネオンイエローの枠線 */
-    box-shadow: 0 0 5px #ffeb3b; /* ネオン効果 */
-    transition: background-color 0.3s;
+    border: 1px solid #ffeb3b;
+    /* 変更点: ボタンの影も少し控えめに */
+    box-shadow: 0 0 4px #ffeb3b, inset 0 0 4px rgba(255, 235, 59, 0.5);
+    transition: all 0.3s ease;
 }
 .btn:hover {
-    background: #ffeb3b; /* ホバーでネオンイエローに */
-    color: #222; /* ホバーで文字色を暗く */
-    box-shadow: 0 0 10px #ffeb3b; /* より強いネオン効果 */
+    background: #ffeb3b;
+    color: #1a1a1a;
+    box-shadow: 0 0 8px #ffeb3b, inset 0 0 8px rgba(255, 235, 59, 0.8);
 }
 
 /* --- 各セクション --- */
 section {
-    background: #111; /* セクションの背景も暗く */
+    background: #1a1a1a;
     margin: 20px 0;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    border: 1px solid #333; /* セクションの区切り線 */
+    border: 1px solid #333;
 }
 
 /* --- 機能紹介セクション --- */
@@ -98,23 +100,23 @@ section {
     box-sizing: border-box;
 }
 .feature-item h3 {
-    color: #a7ffeb; /* 少し明るいシアン */
-    text-shadow: 0 0 5px #a7ffeb, 0 0 10px #a7ffeb;
+    color: #a7ffeb;
+    /* 変更点: 発光を弱めて文字をくっきりさせた */
+    text-shadow: 0 0 3px #a7ffeb, 0 0 6px rgba(167, 255, 235, 0.5);
 }
 .feature-item p {
-    color: #ddd;
+    color: #ccc;
 }
 .feature-item img {
     max-width: 100%;
     border-radius: 5px;
-    border: 1px solid #555;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+    border: 1px solid #444;
 }
 
 /* --- 使い方セクション --- */
 .how-to-use h2 {
     color: #f9f871; /* ネオンライム */
-    text-shadow: 0 0 5px #f9f871, 0 0 10px #f9f871;
+    text-shadow: 0 0 4px #f9f871, 0 0 8px rgba(249, 248, 113, 0.6);
 }
 .how-to-use ol {
     list-style: none;
@@ -125,24 +127,25 @@ section {
     counter-increment: step-counter;
     margin-bottom: 1rem;
     position: relative;
-    padding-left: 40px;
-    color: #eee;
+    padding-left: 45px;
+    color: #e0e0e0;
 }
 .how-to-use li strong {
-    color: #64ffda; /* 強調部分をシアンに */
-    text-shadow: 0 0 3px #64ffda;
+    color: #64ffda;
+    /* 変更点: ごく弱い発光に */
+    text-shadow: 0 0 2px rgba(100, 255, 218, 0.7);
 }
 .how-to-use li a {
-    color: #ff6ec7; /* リンクをネオンピンクに */
-    text-shadow: 0 0 3px #ff6ec7;
+    color: #ff6ec7;
+    text-shadow: 0 0 3px rgba(255, 110, 199, 0.7);
 }
 .how-to-use li a:hover {
     text-decoration: underline;
 }
 .how-to-use li::before {
     content: counter(step-counter);
-    background: #333; /* カウンターの背景を少し明るく */
-    color: #64ffda; /* カウンターの文字色をシアンに */
+    background: #1a1a1a;
+    color: #64ffda;
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -151,76 +154,63 @@ section {
     line-height: 30px;
     position: absolute;
     left: 0;
-    border: 1px solid #64ffda; /* カウンターの枠線 */
-    box-shadow: 0 0 5px #64ffda; /* カウンターのネオン効果 */
+    top: -2px;
+    border: 1px solid #64ffda;
+    box-shadow: 0 0 5px rgba(100, 255, 218, 0.5);
 }
 
 /* --- FAQセクション --- */
 .faq h2 {
-    color: #a0f; /* ネオンパープル */
-    text-shadow: 0 0 5px #a0f, 0 0 10px #a0f;
+    color: #c792ea; /* ネオンラベンダー */
+    text-shadow: 0 0 4px #c792ea, 0 0 8px rgba(199, 146, 234, 0.6);
 }
 .faq dt {
     font-weight: bold;
-    color: #64ffda; /* 質問をシアンに */
-    text-shadow: 0 0 3px #64ffda;
+    color: #64ffda;
     margin-top: 1rem;
 }
 .faq dd {
     margin-left: 0;
     margin-bottom: 1rem;
-    color: #ddd;
+    color: #ccc;
 }
 .faq dd a {
-    color: #ff6ec7; /* リンクをネオンピンクに */
-    text-shadow: 0 0 3px #ff6ec7;
-}
-.faq dd a:hover {
-    text-decoration: underline;
+    color: #ff6ec7;
+    text-shadow: 0 0 3px rgba(255, 110, 199, 0.7);
 }
 
 /* --- iframeのスタイル --- */
-#play-game {
-    text-align: center;
-}
 #play-game h2 {
     color: #f0f; /* ネオンマゼンタ */
-    text-shadow: 0 0 5px #f0f, 0 0 10px #f0f;
+    text-shadow: 0 0 4px #f0f, 0 0 8px rgba(255, 0, 255, 0.6);
 }
 .game-iframe {
     width: 100%;
     aspect-ratio: 16 / 9;
-    border: 2px solid #555; /* 少し目立つ枠線 */
+    border: 1px solid #444;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-    background-color: #222; /* iframeの背景も暗く */
 }
 
 /* --- フッター --- */
 .main-footer {
     text-align: center;
     padding: 20px;
-    color: #777;
-    border-top: 1px solid #333; /* 上部の区切り線 */
-    background: #111;
+    color: #888;
+    border-top: 1px solid #333;
+    background: #1a1a1a;
 }
 .main-footer a {
-    color: #64ffda; /* フッターのリンクもシアンに */
-    text-shadow: 0 0 3px #64ffda;
+    color: #64ffda;
     text-decoration: none;
+    transition: color 0.3s;
 }
 .main-footer a:hover {
-    text-decoration: underline;
-}
-.main-footer p {
-    margin-top: 0.5rem;
+    color: #fff;
+    text-shadow: 0 0 4px #64ffda;
 }
 
 /* --- レスポンシブ対応のスタイル --- */
 @media (max-width: 600px) {
-    .container {
-        padding: 0 10px;
-    }
     .main-header h1 {
         font-size: 2.5rem;
     }
@@ -229,11 +219,6 @@ section {
     }
     .feature-item {
         flex-basis: 100%;
-        margin-bottom: 20px;
-    }
-    .btn {
-        padding: 8px 15px;
-        font-size: 0.9rem;
     }
 }
     </style>

@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         LOL.ex ver0.55 α
+// @name         LOL.ex ver0.56 α
 // @namespace    http://tampermonkey.net/
-// @version      0.55
-// @description  LOLBeans Extension with YouTube API Shuffle
-// @author       ユウキ / yuki
+// @version      0.56
+// @description  LOLBeans.io Extension
+// @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
 // @match        https://bean.lol/*
 // @match        https://obby.lol/*
@@ -142,6 +142,31 @@
         }
     }
 
+    // ─── カスタム背景画像適用 ──────────────────────────────────
+    function applyCustomBackground() {
+        const customStyleId = 'custom-background-style';
+        const existingStyle = document.getElementById(customStyleId);
+        if (existingStyle) {
+            existingStyle.remove(); // 既存のスタイルを削除
+        }
+
+        const imageUrl = localStorage.getItem('customBackgroundUrl');
+
+        // URLが設定されている場合のみ新しいスタイルを適用
+        if (imageUrl) {
+            const css = `
+              html body #screens #home-screen,
+              html body #screens #profile-screen,
+              html body #screens #shop-screen {
+                background-image: url('${imageUrl}') !important;
+              }
+            `;
+            const style = document.createElement('style');
+            style.id = customStyleId;
+            style.textContent = css;
+            document.documentElement.appendChild(style);
+        }
+    }
 
     // ─── 設定UIタブ追加 ───────────────────────────────────────────
     function createSettings() {
@@ -150,21 +175,21 @@
 
         const style = document.createElement('style');
         style.textContent = `
-                  .tab5 h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.75em; letter-spacing: 0.5px; line-height: 1.3; }
-                  #tab5:checked ~ nav + section > .tab5 { display: block !important; }
-                  .pc-tab section > .tab5 { display: none; }
-                  .setting-section { padding: 1em; border-bottom: 1px solid rgba(0,0,0,0.2); }
-                  .setting-row { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0.5em 0; }
-                  .setting-name { font-weight: bold; }
-                  .setting-radio { display: flex; gap: 1em; }
-                  .youtube-container { display: flex; flex-direction: column; gap: 1em; }
-                  .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
-                  .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
-                  .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
-                  .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; display: none; }
-                  .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-                  .tab5 ul { padding-left: 20px; }
-                  .tab5 li { margin-bottom: 0.5em; }
+                    .tab5 h3 { font-size: 1.25rem; font-weight: 500; margin-bottom: 0.75em; letter-spacing: 0.5px; line-height: 1.3; }
+                    #tab5:checked ~ nav + section > .tab5 { display: block !important; }
+                    .pc-tab section > .tab5 { display: none; }
+                    .setting-section { padding: 1em; border-bottom: 1px solid rgba(0,0,0,0.2); }
+                    .setting-row { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0.5em 0; }
+                    .setting-name { font-weight: bold; }
+                    .setting-radio { display: flex; gap: 1em; }
+                    .youtube-container { display: flex; flex-direction: column; gap: 1em; }
+                    .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
+                    .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
+                    .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
+                    .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; display: none; }
+                    .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+                    .tab5 ul { padding-left: 20px; }
+                    .tab5 li { margin-bottom: 0.5em; }
         `;
         tabContainer.appendChild(style);
 
@@ -172,15 +197,13 @@
         input.id = 'tab5'; input.type = 'radio'; input.name = 'pct';
         tabContainer.insertBefore(input, tabContainer.querySelector('nav'));
         const li = document.createElement('li');
-        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex ver0.55</label>';
+        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex ver0.56</label>';
         tabContainer.querySelector('nav ul').appendChild(li);
 
         const section = tabContainer.querySelector('section');
         const panel = document.createElement('div');
         panel.className = 'tab5';
         section.appendChild(panel);
-
-        // --- Bot設定セクションはここから削除されました ---
 
         // コース設定セクション
         const courseSection = document.createElement('div');
@@ -192,10 +215,10 @@
             const row = document.createElement('div');
             row.className = 'setting-row';
             row.innerHTML = `<div class="setting-name">${displayName}</div>
-                  <div class="setting-radio">
-                      <label><input type="radio" name="stopair-${id}" value="false"> Off</label>
-                      <label><input type="radio" name="stopair-${id}" value="true"> On</label>
-                  </div>`;
+                    <div class="setting-radio">
+                        <label><input type="radio" name="stopair-${id}" value="false"> Off</label>
+                        <label><input type="radio" name="stopair-${id}" value="true"> On</label>
+                    </div>`;
             courseSection.appendChild(row);
             row.querySelectorAll('input').forEach(radio => {
                 if (radio.value === current) radio.checked = true;
@@ -234,19 +257,35 @@
                 </div>`;
         panel.appendChild(ytSection);
 
+        // 背景設定セクション
+        const bgSection = document.createElement('div');
+        bgSection.className = 'setting-section';
+        bgSection.innerHTML = `
+            <h3>Custom Background Image</h3>
+            <div class="youtube-container">
+                <div class="youtube-input-group">
+                    <input type="text" id="background-url-input" placeholder="Enter image URL">
+                    <button id="background-apply-button">Apply</button>
+                    <button id="background-reset-button">Reset</button>
+                </div>
+            </div>
+            <p style="font-size: 0.8em; margin-top: 0.5em; color: #555;">Leave empty and click Apply/Reset to restore the default background.</p>
+        `;
+        panel.appendChild(bgSection);
+
         // 最新アップデートセクション
         const updatesSection = document.createElement('div');
         updatesSection.className = 'setting-section';
         updatesSection.innerHTML = `
-                <h3>Latest Updates ver0.55 α</h3>
+                <h3>Latest Updates ver0.56 α</h3>
                 <ul style="list-style-type: disc; margin-left: 20px;">
-                    <li style="margin-bottom: 0.5em;"><b>Reomoved : </b>コース名送信BOTを削除しました。</li>
-                    <li style="margin-bottom: 0.5em;"><b>New : </b>メニューを開いた際に次のコースの名前が表示されるようになりました。</li>
+                    <li style="margin-bottom: 0.5em;"><b>New : </b>背景画像を自由に変更できる機能を追加しました。</li>
                 </ul>`;
         panel.appendChild(updatesSection);
 
         // UIイベントリスナー設定
         setupYouTubeUI();
+        setupBackgroundUI();
     }
 
     function setupYouTubeUI() {
@@ -298,6 +337,33 @@
         });
     }
 
+    function setupBackgroundUI() {
+        const urlInput = document.getElementById('background-url-input');
+        const applyButton = document.getElementById('background-apply-button');
+        const resetButton = document.getElementById('background-reset-button');
+
+        const savedUrl = localStorage.getItem('customBackgroundUrl');
+        if (savedUrl) {
+            urlInput.value = savedUrl;
+        }
+
+        applyButton.addEventListener('click', () => {
+            const newUrl = urlInput.value.trim();
+            if (newUrl) {
+                localStorage.setItem('customBackgroundUrl', newUrl);
+            } else {
+                localStorage.removeItem('customBackgroundUrl');
+            }
+            applyCustomBackground();
+        });
+
+        resetButton.addEventListener('click', () => {
+            urlInput.value = '';
+            localStorage.removeItem('customBackgroundUrl');
+            applyCustomBackground();
+        });
+    }
+
     // ─── 既存UIバインド ─────────────────────────────────────────
     function bindUI() {
         const container = document.getElementById('air-movement-settings');
@@ -323,8 +389,6 @@
         if (e.data?.source !== 'console_proxy') return;
         const [tag, mapName] = e.data.args;
         if (tag === 'Loading map' && typeof mapName === 'string') {
-            // --- チャット送信機能はここから削除されました ---
-
             const rule = rules.find(r => mapName.toLowerCase().includes(r.keyword.toLowerCase()));
             const id = rule ? rule.id : mapName.toLowerCase().replace(/\s+/g, '-');
             const enabled = localStorage.getItem(`stopAirMove_${id}`) === 'true';
@@ -360,18 +424,6 @@
         }
     });
 
-    // 背景画像変更
-    const css = `
-      html body #screens #home-screen,
-      html body #screens #profile-screen,
-      html body #screens #shop-screen {
-        background-image: url('https://lolbeans.io/ui/changelog-map-newballdrop.png') !important;
-      }
-    `;
-    const style = document.createElement('style');
-    style.textContent = css;
-    document.documentElement.appendChild(style);
-
     // ─── console.log フック ───────────────────────────────────────
     const hook = document.createElement('script');
     hook.textContent = `
@@ -390,6 +442,7 @@
         if (document.getElementById('tab5')) return;
 
         applyStoredAirMove();
+        applyCustomBackground(); // <-- 追加
         createSettings();
         bindUI();
     }

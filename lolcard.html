@@ -312,8 +312,8 @@
             <input type="text" id="discord_id" placeholder="lol_user">
         </div>
         <div class="input-group">
-            <label for="x_id">X (旧Twitter)のID</label>
-            <input type="text" id="x_id" placeholder="@lol_x">
+            <label for="youtube_id">YouTubeチャンネルID</label>
+            <input type="text" id="youtube_id" placeholder="@youtube_channel">
         </div>
         <div class="input-group">
             <label for="age">年齢</label>
@@ -438,7 +438,7 @@
                 <div id="card-icon"></div>
                 <div class="social-links">
                     <div id="card-discord-id" class="social-link"></div>
-                    <div id="card-x-id" class="social-link"></div>
+                    <div id="card-youtube-id" class="social-link"></div>
                 </div>
                 <div class="card-right-content">
                     <div id="card-motto"></div>
@@ -461,12 +461,12 @@
             'game': 'card-game', 'kinks': 'card-kinks', 'motto': 'card-motto',
             'comment': 'card-comment'
         };
-        const socialMapping = ['discord_id', 'x_id'];
+        const socialMapping = ['discord_id', 'youtube_id'];
 
         // --- SVGアイコン ---
         const svgIcons = {
             discord_id: `<svg viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4464.8245-.6667 1.2486-2.2884-.2854-4.5862-.2854-6.8747 0-.2203-.4241-.4558-.8733-.6667-1.2486a.077.077 0 0 0-.0785-.0371 19.7485 19.7485 0 0 0-4.8851 1.5152.069.069 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0321.056c2.0527 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0849-.0277c.4616-.5767.8851-1.225 1.2644-1.9361a.07.07 0 0 0-.0188-.0934 12.3232 12.3232 0 0 1-1.4324-.8177.071.071 0 0 1-.0094-.0973c.0321-.0461.0642-.0922.0922-.1383a.066.066 0 0 1 .0642-.0277c.1242.0461.2483.0922.3725.1342a.0683.0683 0 0 0 .0743-.0148 10.4668 10.4668 0 0 0 6.1437 0 .0683.0683 0 0 0 .0743.0148c.1242-.042.2483-.0881.3725-.1342a.066.066 0 0 1 .0642.0277c.0277.0461.06.0922.0922.1383a.071.071 0 0 1-.0094.0973 12.3232 12.3232 0 0 1-1.4324.8177.07.07 0 0 0-.0188.0934c.3793.7111.8028 1.3594 1.2644 1.9361a.0777.0777 0 0 0 .0849.0277c1.9516-.6067 3.9402-1.5219 5.9929-3.0294a.0824.0824 0 0 0 .0321-.056c.5229-5.4843-.5097-10.0076-2.6734-13.6602a.069.069 0 0 0-.0321-.0277ZM8.02 15.3312c-.9432 0-1.71-.764-1.71-1.71s.7668-1.71 1.71-1.71c.9474 0 1.71.764 1.71 1.71.0042.946-.7584 1.71-1.71 1.71Zm7.9748 0c-.9432 0-1.71-.764-1.71-1.71s.7668-1.71 1.71-1.71c.9474 0 1.71.764 1.71 1.71.0042.946-.7584 1.71-1.71 1.71Z"/></svg>`,
-            x_id: `<svg viewBox="0 0 16 16"><path d="M9.237 6.524 14.51.21h-1.2l-4.633 5.34L4.69.21H.21l5.525 7.928L.21 15.79h1.2l4.88-5.585 4.12 5.585h4.48L9.237 6.524Zm-1.13 1.62L7.26 7.02l-4.75-6.59h2.4l3.85 5.33.84 1.17 5.02 6.96h-2.4l-4.1-5.66Z"/></svg>`
+            youtube_id: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.582,6.186c-0.23-0.86-0.908-1.538-1.768-1.768C18.267,4,12,4,12,4S5.733,4,4.186,4.418 c-0.86,0.23-1.538,0.908-1.768,1.768C2,7.733,2,12,2,12s0,4.267,0.418,5.814c0.23,0.86,0.908,1.538,1.768,1.768 C5.733,20,12,20,12,20s6.267,0,7.814-0.418c0.861-0.23,1.538-0.908,1.768-1.768C22,16.267,22,12,22,12S22,7.733,21.582,6.186z M10,15.464V8.536L16,12L10,15.464z"></path></svg>`
         };
 
         // --- 関数定義 ---
@@ -480,7 +480,6 @@
         
         const updateSocial = (inputId) => {
             const inputElement = document.getElementById(inputId);
-            // 修正点: idのアンダースコアをハイフンに置換して正しい要素を取得
             const cardElementId = 'card-' + inputId.replace('_', '-');
             const cardElement = document.getElementById(cardElementId);
             if (!inputElement || !cardElement) return;
@@ -491,8 +490,8 @@
                 return;
             }
             
-            // discord_idには@を付けない想定、x_idには付ける
-            if (inputId === 'x_id' && !value.startsWith('@')) {
+            // youtube_idの場合、@で始まっていなければ追加する
+            if (inputId === 'youtube_id' && !value.startsWith('@')) {
                 value = '@' + value;
             }
             
@@ -552,14 +551,13 @@
                 const link = document.createElement('a');
                 link.href = canvas.toDataURL('image/png');
                 const name = document.getElementById('name').value.trim() || '名無し';
-                link.download = `${name}_lolbeans_card.png`; // 修正: ファイル名を変更
+                link.download = `${name}_lolbeans_card.png`;
                 link.click();
             });
         });
         
         // --- ページ読み込み時の初期化処理 ---
         window.onload = () => {
-            // 全てのテキストフィールドとセレクトボックスを初期値で更新
             Object.keys(mapping).forEach(updateText);
             socialMapping.forEach(updateSocial);
             updateTimes();

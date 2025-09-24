@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOL.ex ファイルライブラリ</title>
+    <title>LOL.ex - ファイル配布</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -53,11 +53,16 @@
             margin: 0;
         }
 
+        /* ナビゲーションバーのスタイル変更 */
         .navbar {
-            background-color: #fff;
+            position: fixed; /* 常に画面に固定 */
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            padding: 15px 20px;
-            text-align: center;
+            padding: 10px 20px;
+            border-radius: 30px;
+            z-index: 1000;
         }
         .navbar a {
             color: var(--text-color-dark);
@@ -65,9 +70,19 @@
             margin: 0 15px;
             font-weight: 500;
             transition: color 0.3s ease;
+            display: inline-block;
         }
         .navbar a:hover {
             color: var(--primary-color);
+        }
+
+        /* ハンバーガーメニューのスタイル */
+        .hamburger-menu {
+            display: none; /* デフォルトでは非表示 */
+            cursor: pointer;
+            font-size: 1.5em;
+            color: var(--text-color-dark);
+            padding: 5px;
         }
 
         .container {
@@ -76,11 +91,23 @@
             padding: 40px 20px;
         }
 
+        /* ファイル数が少ない場合でも均等に配置 */
         .download-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(3, 1fr); /* 常に3列で表示 */
             gap: 30px;
             margin-top: 40px;
+            place-items: center; /* カードを中央に配置 */
+        }
+        @media (max-width: 900px) {
+            .download-grid {
+                grid-template-columns: repeat(2, 1fr); /* 画面が狭い場合は2列に */
+            }
+        }
+        @media (max-width: 600px) {
+            .download-grid {
+                grid-template-columns: 1fr; /* スマホサイズでは1列に */
+            }
         }
         .download-item-card {
             background: var(--card-color);
@@ -89,6 +116,7 @@
             transition: transform 0.4s ease, box-shadow 0.4s ease;
             overflow: hidden;
             position: relative;
+            width: 100%; /* グリッド内で幅をいっぱいに使う */
         }
         .download-item-card:hover {
             transform: translateY(-10px);
@@ -169,6 +197,34 @@
             margin-top: 15px;
             font-size: 0.85em;
         }
+
+        /* 小画面用のメディアクエリ */
+        @media (max-width: 768px) {
+            .navbar a {
+                display: none; /* メニュー項目を非表示 */
+            }
+            .navbar {
+                background-color: transparent;
+                box-shadow: none;
+                padding: 10px;
+            }
+            .hamburger-menu {
+                display: block; /* ハンバーガーアイコンを表示 */
+            }
+            .navbar.open a {
+                display: block;
+                margin: 10px 0;
+            }
+            .navbar.open {
+                background-color: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                padding: 20px;
+                border-radius: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+        }
     </style>
 </head>
 <body>
@@ -179,6 +235,7 @@
     </header>
 
     <nav class="navbar">
+        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
         <a href="https://tanabesan.github.io/lolbeans/">メインページ</a>
         <a href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
         <a href="#">よくある質問</a>
@@ -214,6 +271,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const fileListContainer = document.getElementById('file-list');
             const searchInput = document.getElementById('search-input');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const navbar = document.querySelector('.navbar');
             let allFiles = [];
 
             const displayFiles = (files) => {
@@ -265,6 +324,11 @@
                     );
                 });
                 displayFiles(filteredFiles);
+            });
+
+            // ハンバーガーメニューの開閉機能
+            hamburgerIcon.addEventListener('click', () => {
+                navbar.classList.toggle('open');
             });
         });
     </script>

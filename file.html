@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOL.ex ファイル配布</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #5D54A4;
+            --secondary-color: #6A799E;
+            --background-color: #F4F7FB;
+            --card-color: #FFFFFF;
+            --text-color-dark: #2C3E50;
+            --text-color-light: #F4F7FB;
+            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --download-button-color: #FFC107;
+            --download-button-hover: #FFD54F;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color-dark);
+            line-height: 1.8;
+            scroll-behavior: smooth;
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://tanabesan.github.io/lolbeans/file/page/7396.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: var(--text-color-light);
+            padding: 120px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .hero-section h1 {
+            font-size: 3em;
+            font-weight: 700;
+            margin: 0 0 10px;
+        }
+        .hero-section p {
+            font-size: 1.2em;
+            font-weight: 300;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 15px 20px;
+            text-align: center;
+        }
+        .navbar a {
+            color: var(--text-color-dark);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .navbar a:hover {
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .download-item-card {
+            background: var(--card-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-light);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            overflow: hidden;
+            position: relative;
+        }
+        .download-item-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+        .download-item-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .file-info-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+        }
+        .badge-lol {
+            background-color: #007bff;
+        }
+        .badge-glol {
+            background-color: #28a745;
+        }
+        .download-item-content {
+            padding: 25px;
+        }
+        .download-item-content h3 {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: var(--text-color-dark);
+            margin: 0 0 5px;
+        }
+        .author-name {
+            font-size: 0.9em;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        .download-item-content p {
+            font-size: 0.95em;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        .download-button-small {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--download-button-color);
+            color: var(--text-color-dark);
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+        .download-button-small:hover {
+            background-color: var(--download-button-hover);
+        }
+
+        .footer-section {
+            background-color: var(--text-color-dark);
+            color: var(--text-color-light);
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+        .footer-section .social-icons a {
+            color: var(--text-color-light);
+            font-size: 1.3em;
+            margin: 0 12px;
+            transition: color 0.3s ease;
+        }
+        .footer-section .social-icons a:hover {
+            color: var(--primary-color);
+        }
+        .footer-section p {
+            margin-top: 15px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero-section">
+        <h1>LOL.ex ファイルライブラリ</h1>
+        <p>エディター用ファイルをダウンロード</p>
+    </header>
+
+    <nav class="navbar">
+        <a href="https://tanabesan.github.io/lolbeans/">メインページ</a>
+        <a href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
+        <a href="#">よくある質問</a>
+        <a href="#">お問い合わせ</a>
+    </nav>
+
+    <main class="container">
+        <section id="download-items" style="text-align: center; padding: 40px 0;">
+            <h2>利用可能なファイル</h2>
+            <p style="max-width: 800px; margin: 0 auto 40px; font-size: 1.1em;">
+                ここでは、LOLBenasのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
+            </p>
+
+            <div class="download-grid">
+                
+                <div class="download-item-card">
+                    <img src="https://tanabesan.github.io/lolbeans/file/page/6845.png" alt="コースファイルサムネイル">
+                    <span class="file-info-badge badge-lol">.lol</span>
+                    <div class="download-item-content">
+                        <h3>Neon City</h3>
+                        <p class="author-name">by ユウキ / Yuki</p>
+                        <p>
+                            最大評価4.6を誇るコース。高層ビル群を駆け抜けるスリリングな体験が楽しめます。
+                        </p>
+                        <a href="https://tanabesan.github.io/lolbeans/file/lol/neoncity.lol" class="download-button-small">ダウンロード</a>
+                    </div>
+                </div>
+
+                <div class="download-item-card">
+                    <img src="https://tanabesan.github.io/lolbeans/file/page/build1.png" alt="グループファイルサムネイル">
+                    <span class="file-info-badge badge-glol">.glol</span>
+                    <div class="download-item-content">
+                        <h3>Neon Build1</h3>
+                        <p class="author-name">by ユウキ / Yuki</p>
+                        <p>
+                            neoncityのグループファイル。コースの建物のファイルです。
+                        </p>
+                        <a href="https://tanabesan.github.io/lolbeans/file/glol/build1.glol" class="download-button-small">ダウンロード</a>
+                    </div>
+                </div>
+
+                <div class="download-item-card">
+                    <img src="https://tanabesan.github.io/lolbeans/file/page/7396.png" alt="別のファイルサムネイル">
+                    <span class="file-info-badge badge-lol">.lol</span>
+                    <div class="download-item-content">
+                        <h3>Kraken Island</h3>
+                        <p class="author-name">by ユウキ / Yuki</p>
+                        <p>
+                            クラーケンをコースのギミックに落とし込んだユニークなコース。冒険心をくすぐるデザインが魅力。
+                        </p>
+                        <a href="https://tanabesan.github.io/lolbeans/file/lol/kraken.lol" class="download-button-small">ダウンロード</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-section">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-discord"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+        <p style="margin-top: 15px;">2025 Yuki. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

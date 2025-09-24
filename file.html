@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOL.ex - ファイル配布</title>
+    <title>LOL.ex ファイルライブラリ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -192,6 +192,10 @@
                 ここでは、LOL.exのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
             </p>
 
+            <div style="margin-bottom: 30px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <input type="text" id="search-input" placeholder="ファイル名や作者名で検索..." style="width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
             <div id="file-list" class="download-grid">
                 </div>
         </section>
@@ -209,8 +213,32 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const fileListContainer = document.getElementById('file-list');
+            const searchInput = document.getElementById('search-input');
+            let allFiles = [];
 
-            // JSONファイルを読み込む
+            const displayFiles = (files) => {
+                fileListContainer.innerHTML = '';
+                if (files.length === 0) {
+                    fileListContainer.innerHTML = '<p style="text-align: center; color: var(--secondary-color);">検索結果が見つかりませんでした。</p>';
+                    return;
+                }
+                files.forEach(item => {
+                    const cardHtml = `
+                        <div class="download-item-card">
+                            <img src="${item.thumbnailUrl}" alt="${item.title}のサムネイル">
+                            <span class="file-info-badge badge-${item.type}">${item.type.toUpperCase()}</span>
+                            <div class="download-item-content">
+                                <h3>${item.title}</h3>
+                                <p class="author-name">by ${item.author}</p>
+                                <p>${item.description}</p>
+                                <a href="${item.downloadUrl}" class="download-button-small">ダウンロード</a>
+                            </div>
+                        </div>
+                    `;
+                    fileListContainer.innerHTML += cardHtml;
+                });
+            };
+
             fetch('data.json')
                 .then(response => {
                     if (!response.ok) {
@@ -219,27 +247,25 @@
                     return response.json();
                 })
                 .then(data => {
-                    // JSONデータから各アイテムを生成
-                    data.forEach(item => {
-                        const cardHtml = `
-                            <div class="download-item-card">
-                                <img src="${item.thumbnailUrl}" alt="${item.title}のサムネイル">
-                                <span class="file-info-badge badge-${item.type}">${item.type.toUpperCase()}</span>
-                                <div class="download-item-content">
-                                    <h3>${item.title}</h3>
-                                    <p class="author-name">by ${item.author}</p>
-                                    <p>${item.description}</p>
-                                    <a href="${item.downloadUrl}" class="download-button-small">ダウンロード</a>
-                                </div>
-                            </div>
-                        `;
-                        fileListContainer.innerHTML += cardHtml;
-                    });
+                    allFiles = data;
+                    displayFiles(allFiles);
                 })
                 .catch(error => {
-                    console.error('There has been a problem with your fetch operation:', error);
-                    fileListContainer.innerHTML = '<p style="color: red;">ファイルの読み込みに失敗しました。後でもう一度お試しください。</p>';
+                    console.error('ファイルの読み込みに失敗しました:', error);
+                    fileListContainer.innerHTML = '<p style="color: red; text-align: center;">ファイルの読み込みに失敗しました。後でもう一度お試しください。</p>';
                 });
+
+            searchInput.addEventListener('keyup', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredFiles = allFiles.filter(file => {
+                    return (
+                        file.title.toLowerCase().includes(searchTerm) ||
+                        file.author.toLowerCase().includes(searchTerm) ||
+                        file.description.toLowerCase().includes(searchTerm)
+                    );
+                });
+                displayFiles(filteredFiles);
+            });
         });
     </script>
 </body>

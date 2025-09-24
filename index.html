@@ -3,317 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOLex - もっと楽しく、もっと便利に！</title>
+    <title>Lolbeans Enhancer - 次世代のゲーム体験</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-/* --- 基本的なスタイル --- */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    background-color: #0d0d0d; /* 完全な黒から少しだけ明るく */
-    color: #e0e0e0; /* 基本の文字色を明るいグレーに */
-}
-.container {
-    max-width: 1200px;
-    margin: auto;
-    overflow: hidden;
-    padding: 0 20px;
-}
-h1, h2, h3 {
-    color: #64ffda; /* ネオンシアン */
-    /* 変更点: 発光を弱めて文字をくっきりさせた */
-    text-shadow: 0 0 3px #64ffda, 0 0 6px rgba(100, 255, 218, 0.5);
-}
+        :root {
+            --primary-color: #5D54A4;
+            --secondary-color: #6A799E;
+            --background-color: #F4F7FB;
+            --card-color: #FFFFFF;
+            --text-color-dark: #2C3E50;
+            --text-color-light: #F4F7FB;
+            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
 
-/* --- ヘッダー（メインビュー） --- */
-.main-header {
-    background: #1a1a1a; /* ヘッダーの背景 */
-    color: #fff;
-    padding: 2rem 0;
-    text-align: center;
-    border-bottom: 1px solid #333;
-}
-.main-header h1 {
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-    color: #ff6ec7; /* ネオンピンク */
-    /* 変更点: 発光を弱めて文字をくっきりさせた */
-    text-shadow: 0 0 4px #ff6ec7, 0 0 8px rgba(255, 110, 199, 0.6);
-}
-.main-header p {
-    font-size: 1.2rem;
-    color: #a0a0a0;
-}
-.main-header .hero-image {
-    max-width: 90%;
-    height: auto;
-    border-radius: 8px;
-    margin-top: 1.5rem;
-    border: 2px solid #555;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color-dark);
+            line-height: 1.8;
+            scroll-behavior: smooth;
+        }
 
-/* --- ダウンロードボタン --- */
-.download-buttons {
-    margin-top: 1.5rem;
-}
-.btn {
-    display: inline-block;
-    background: transparent; /* 背景を透明に */
-    color: #ffeb3b; /* ネオンイエロー */
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: bold;
-    margin: 5px;
-    border: 1px solid #ffeb3b;
-    /* 変更点: ボタンの影も少し控えめに */
-    box-shadow: 0 0 4px #ffeb3b, inset 0 0 4px rgba(255, 235, 59, 0.5);
-    transition: all 0.3s ease;
-}
-.btn:hover {
-    background: #ffeb3b;
-    color: #1a1a1a;
-    box-shadow: 0 0 8px #ffeb3b, inset 0 0 8px rgba(255, 235, 59, 0.8);
-}
+        /* Hero Section */
+        .hero-section {
+            /* 背景を画像に変更 */
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://tanabesan.github.io/lolbeans/file/page/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            color: var(--text-color-light);
+            padding: 120px 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        .hero-content h1 {
+            font-size: 4.5em;
+            font-weight: 700;
+            margin: 0 0 10px;
+        }
+        .hero-content p {
+            font-size: 1.5em;
+            font-weight: 300;
+            margin: 0 0 40px;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 18px 40px;
+            background-color: #FFC107;
+            color: var(--text-color-dark);
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-5px);
+            background-color: #FFD54F;
+        }
 
-/* --- 各セクション --- */
-section {
-    background: #1a1a1a;
-    margin: 20px 0;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #333;
-}
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
 
-/* --- 機能紹介セクション --- */
-.features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-.feature-item {
-    flex-basis: calc(50% - 40px);
-    text-align: center;
-    box-sizing: border-box;
-}
-.feature-item h3 {
-    color: #a7ffeb;
-    /* 変更点: 発光を弱めて文字をくっきりさせた */
-    text-shadow: 0 0 3px #a7ffeb, 0 0 6px rgba(167, 255, 235, 0.5);
-}
-.feature-item p {
-    color: #ccc;
-}
-.feature-item img {
-    max-width: 100%;
-    border-radius: 5px;
-    border: 1px solid #444;
-}
+        /* Feature Section */
+        .features-section {
+            text-align: center;
+            padding: 60px 0;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .feature-card {
+            background: var(--card-color);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: var(--shadow-light);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .feature-card:nth-child(1) { transition-delay: 0s; }
+        .feature-card:nth-child(2) { transition-delay: 0.1s; }
+        .feature-card:nth-child(3) { transition-delay: 0.2s; }
+        .feature-card:nth-child(4) { transition-delay: 0.3s; }
+        .feature-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+        .feature-card i {
+            font-size: 3em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .feature-card h3 {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin: 0 0 10px;
+        }
 
-/* --- 使い方セクション --- */
-.how-to-use h2 {
-    color: #f9f871; /* ネオンライム */
-    text-shadow: 0 0 4px #f9f871, 0 0 8px rgba(249, 248, 113, 0.6);
-}
-.how-to-use ol {
-    list-style: none;
-    counter-reset: step-counter;
-    padding-left: 0;
-}
-.how-to-use li {
-    counter-increment: step-counter;
-    margin-bottom: 1rem;
-    position: relative;
-    padding-left: 45px;
-    color: #e0e0e0;
-}
-.how-to-use li strong {
-    color: #64ffda;
-    /* 変更点: ごく弱い発光に */
-    text-shadow: 0 0 2px rgba(100, 255, 218, 0.7);
-}
-.how-to-use li a {
-    color: #ff6ec7;
-    text-shadow: 0 0 3px rgba(255, 110, 199, 0.7);
-}
-.how-to-use li a:hover {
-    text-decoration: underline;
-}
-.how-to-use li::before {
-    content: counter(step-counter);
-    background: #1a1a1a;
-    color: #64ffda;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: inline-block;
-    text-align: center;
-    line-height: 30px;
-    position: absolute;
-    left: 0;
-    top: -2px;
-    border: 1px solid #64ffda;
-    box-shadow: 0 0 5px rgba(100, 255, 218, 0.5);
-}
-
-/* --- FAQセクション --- */
-.faq h2 {
-    color: #c792ea; /* ネオンラベンダー */
-    text-shadow: 0 0 4px #c792ea, 0 0 8px rgba(199, 146, 234, 0.6);
-}
-.faq dt {
-    font-weight: bold;
-    color: #64ffda;
-    margin-top: 1rem;
-}
-.faq dd {
-    margin-left: 0;
-    margin-bottom: 1rem;
-    color: #ccc;
-}
-.faq dd a {
-    color: #ff6ec7;
-    text-shadow: 0 0 3px rgba(255, 110, 199, 0.7);
-}
-
-/* --- iframeのスタイル --- */
-#play-game h2 {
-    color: #f0f; /* ネオンマゼンタ */
-    text-shadow: 0 0 4px #f0f, 0 0 8px rgba(255, 0, 255, 0.6);
-}
-.game-iframe {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    border: 1px solid #444;
-    border-radius: 8px;
-}
-
-/* --- フッター --- */
-.main-footer {
-    text-align: center;
-    padding: 20px;
-    color: #888;
-    border-top: 1px solid #333;
-    background: #1a1a1a;
-}
-.main-footer a {
-    color: #64ffda;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-.main-footer a:hover {
-    color: #fff;
-    text-shadow: 0 0 4px #64ffda;
-}
-
-/* --- レスポンシブ対応のスタイル --- */
-@media (max-width: 600px) {
-    .main-header h1 {
-        font-size: 2.5rem;
-    }
-    .main-header p {
-        font-size: 1rem;
-    }
-    .feature-item {
-        flex-basis: 100%;
-    }
-}
+        /* Footer */
+        .footer-section {
+            background-color: var(--text-color-dark);
+            color: var(--text-color-light);
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .footer-section .social-icons a {
+            color: var(--text-color-light);
+            font-size: 1.5em;
+            margin: 0 15px;
+            transition: color 0.3s ease;
+        }
+        .footer-section .social-icons a:hover {
+            color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
 
-    <header class="main-header">
-        <div class="container">
+    <header class="hero-section">
+        <div class="hero-content">
             <h1>LOL.ex</h1>
-            <p>あなたのLOLBeansを快適に</p>
-            
-            <img src="images/hero-screenshot.gif" alt="拡張機能の動作デモ" class="hero-image">
-            
-            <div class="download-buttons">
-                <a href="https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" class="btn">Chromeで無料で入手</a>
-                <a href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" class="btn">Edgeで無料で入手</a>
-            </div>
+            <p>ゲームの可能性を、どこまでも。</p>
+            <a href="lolex/main.user.js" class="cta-button">今すぐダウンロード</a>
         </div>
     </header>
 
     <main class="container">
-        <section id="features">
-            <h2>主な機能</h2>
-            <div class="features">
-                <div class="feature-item">
-                    <h3>✨ オートスイッチ</h3>
-                    <p>コースごとに Air Move 設定をして自動で慣性設定を切り替えよう！</p>
-                    <img src="https://tanabesan.github.io/lolbeans/file/page/airmove.png" alt="オートスイッチ">
+        <section id="features" class="features-section">
+            <h2>強化された主な機能</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-rocket"></i>
+                    <h3>オートエアスイッチ</h3>
+                    <p>
+                        事前に設定された情報からエアムーブ設定を自動で切り替え。シームレスな操作体験を実現します。
+                    </p>
                 </div>
-                <div class="feature-item">
-                    <h3>▶️ Youtubeプレイヤー</h3>
-                    <p>LOLBeans内でYoutubeを再生できます。</p>
-                    <img src="https://tanabesan.github.io/lolbeans/file/page/youtube.png" alt="Youtubeプレイヤー">
+                <div class="feature-card">
+                    <i class="fas fa-crosshairs"></i>
+                    <h3>ラウンドスコープ</h3>
+                    <p>
+                        次のラウンドを予測し余裕を持って準備。戦略的な優位性を確保します。
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Youtubeプレイヤー</h3>
+                    <p>
+                        リアルタイムでYouTube動画を再生し、ゲームプレイを妨げることなくエンターテインメントを楽しめます。
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-palette"></i>
+                    <h3>バックグラウンドデザイナー</h3>
+                    <p>
+                        ロビーの背景をカスタマイズし、個性的なゲーム環境を作り出します。
+                    </p>
                 </div>
             </div>
         </section>
 
-        <section id="how-to-use" class="how-to-use">
-            <h2>使い方 (かんたん4ステップ)</h2>
-            <ol>
-                <li>
-                    <strong>インストール</strong>
-                    お使いのブラウザのウェブストアから「Tampermonkey」を追加します。
-                </li>
-                <li>
-                    <strong>LOLexのインストール</strong>
-                    <a href="https://tanabesan.github.io/lolbeans/lolex/main.user.js" target="_blank">リンク</a>からユーザースクリプトをインストールする。
-                </li>
-                <li>
-                    <strong>ゲームを開く:</strong>
-                    LOLBeans.ioにアクセスしてゲームを開始します。
-                </li>
-                <li>
-                    <strong>楽しむ！:</strong>
-                    新しい機能が自動で有効になります！設定はブラウザのアイコンから変更できます。
-                </li>
-            </ol>
+        <section class="content-section" style="text-align: center; padding: 60px 0;">
+            <h2>体験版デモ</h2>
+            <p>
+                LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。
+            </p>
+            <div style="margin-top: 30px; background: #ddd; height: 400px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">
+                現在デモ動画は準備中です。
+            </div>
         </section>
-
-        <section id="faq" class="faq">
-            <h2>よくある質問 (FAQ)</h2>
-            <dl>
-                <dt>Q. この拡張機能は無料ですか？</dt>
-                <dd>A. はい、完全に無料でお使いいただけます。</dd>
-                
-                <dt>Q. 安全ですか？アカウントがBANされたりしませんか？</dt>
-                <dd>A. 運営から許可を得ており、チート行為のような不公平なアドバンテージを提供するものではなく、あくまで便利にするものです。この拡張機能は常に安全性を確保し、ゲームの規約を遵守するよう努めていますが、あらゆるサードパーティ製ツールの使用は、自己責任でお願いいたします。</dd>
-                
-                <dt>Q. どのブラウザに対応していますか？</dt>
-                <dd>A. 現在、Chrome, Safari, Edge, Brave, Firefox, etc...に対応しています。</dd>
-
-                <dt>Q. バグを見つけました / 機能の要望があります</dt>
-                <dd>A. ありがとうございます！お手数ですが、<a href="">Discordの yinkya_ </a>まで、お気軽にご連絡ください。</dd>
-            </dl>
-        </section>
-        
-        <section id="developer">
-            <h2>開発者からひとこと</h2>
-            <p>私自身LOLBeansにはまっている者で、「もっとこうだったら便利なのに！」という思いから、趣味でこの拡張機能を開発しました。多くのプレイヤーに、LOLBeansをさらに楽しんでもらえたら嬉しいです。ぜひ使ってみてください！フィードバックや応援のレビュー、お待ちしています！</p>
-        </section>
-
-        <section id="play-game">
-            <h2>ゲームをプレイ</h2>
-            <iframe class="game-iframe" src="https://lolbeans.io/"></iframe>
-        </section>
-
     </main>
 
-    <footer class="main-footer">
-        <p>
-            <a href="#">プライバシーポリシー</a> |
-            <a href="https://lolbeans.io/" target="_blank">LOLBeans公式サイト</a>
-        </p>
-        <p>&copy; 2025 ユウキ / yuki </p>
+    <footer class="footer-section">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-discord"></i></a>
+            <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+        <p style="margin-top: 20px;">2025 Yuki</p>
     </footer>
 
+    <script>
+        // スクロール時のアニメーション
+        const cards = document.querySelectorAll('.feature-card');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        cards.forEach(card => observer.observe(card));
+    </script>
 </body>
 </html>

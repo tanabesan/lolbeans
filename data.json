@@ -1,5 +1,13 @@
 [
   {
+    "title": "LOLBeans Normal Editor",
+    "author": "枕草子",
+    "description": "枕草子作のエディターコース。基礎的なハンマーなどのギミックが楽しめます。",
+    "type": "lol",
+    "thumbnailUrl": "https://tanabesan.github.io/lolbeans/file/page/lolbeansnormaleditor.png",
+    "downloadUrl": "https://tanabesan.github.io/lolbeans/file/lol/lolbeansnormaleditor.lol"
+  },
+  {
     "title": "Neon City",
     "author": "ユウキ / Yuki",
     "description": "最大評価4.6を誇るコース。高層ビル群を駆け抜けるスリリングな体験が楽しめます。",

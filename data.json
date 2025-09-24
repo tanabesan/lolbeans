@@ -1,0 +1,26 @@
+[
+  {
+    "title": "Neon City",
+    "author": "ユウキ / Yuki",
+    "description": "最大評価4.6を誇るコース。高層ビル群を駆け抜けるスリリングな体験が楽しめます。",
+    "type": "lol",
+    "thumbnailUrl": "https://tanabesan.github.io/lolbeans/file/page/6845.png",
+    "downloadUrl": "https://tanabesan.github.io/lolbeans/file/lol/neoncity.lol"
+  },
+  {
+    "title": "Neon Build1",
+    "author": "ユウキ / Yuki",
+    "description": "neoncityのグループファイル。コースの建物のファイルです。",
+    "type": "glol",
+    "thumbnailUrl": "https://tanabesan.github.io/lolbeans/file/page/build1.png",
+    "downloadUrl": "https://tanabesan.github.io/lolbeans/file/glol/build1.glol"
+  },
+  {
+    "title": "Kraken Island",
+    "author": "ユウキ / Yuki",
+    "description": "クラーケンをコースのギミックに落とし込んだユニークなコース。冒険心をくすぐるデザインが魅力。",
+    "type": "lol",
+    "thumbnailUrl": "https://tanabesan.github.io/lolbeans/file/page/7396.png",
+    "downloadUrl": "https://tanabesan.github.io/lolbeans/file/lol/kraken.lol"
+  }
+]

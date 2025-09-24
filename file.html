@@ -63,7 +63,7 @@
 
         /* ナビゲーションバーのスタイル変更 */
         .navbar {
-            position: fixed; /* 常に画面に固定 */
+            position: fixed;
             top: 20px;
             right: 20px;
             background-color: rgba(255, 255, 255, 0.9);
@@ -86,7 +86,7 @@
 
         /* ハンバーガーメニューのスタイル */
         .hamburger-menu {
-            display: none; /* デフォルトでは非表示 */
+            display: none;
             cursor: pointer;
             font-size: 1.5em;
             color: var(--text-color-dark);
@@ -99,22 +99,42 @@
             padding: 40px 20px;
         }
 
+        /* フィルタリングボタンのスタイル */
+        .filter-button {
+            background-color: #e0e0e0;
+            color: var(--text-color-dark);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin: 0 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .filter-button:hover {
+            background-color: #d0d0d0;
+        }
+        .filter-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
         /* ファイル数が少ない場合でも均等に配置 */
         .download-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 常に3列で表示 */
+            grid-template-columns: repeat(3, 1fr);
             gap: 30px;
             margin-top: 40px;
-            place-items: center; /* カードを中央に配置 */
+            place-items: center;
         }
         @media (max-width: 900px) {
             .download-grid {
-                grid-template-columns: repeat(2, 1fr); /* 画面が狭い場合は2列に */
+                grid-template-columns: repeat(2, 1fr);
             }
         }
         @media (max-width: 600px) {
             .download-grid {
-                grid-template-columns: 1fr; /* スマホサイズでは1列に */
+                grid-template-columns: 1fr;
             }
         }
         .download-item-card {
@@ -124,7 +144,7 @@
             transition: transform 0.4s ease, box-shadow 0.4s ease;
             overflow: hidden;
             position: relative;
-            width: 100%; /* グリッド内で幅をいっぱいに使う */
+            width: 100%;
         }
         .download-item-card:hover {
             transform: translateY(-10px);
@@ -209,7 +229,7 @@
         /* 小画面用のメディアクエリ */
         @media (max-width: 768px) {
             .navbar a {
-                display: none; /* メニュー項目を非表示 */
+                display: none;
             }
             .navbar {
                 background-color: transparent;
@@ -217,7 +237,7 @@
                 padding: 10px;
             }
             .hamburger-menu {
-                display: block; /* ハンバーガーアイコンを表示 */
+                display: block;
             }
             .navbar.open a {
                 display: block;
@@ -257,12 +277,18 @@
                 ここでは、LOL.exのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
             </p>
 
+            <div class="filter-tags" style="margin-bottom: 20px; text-align: center;">
+                <button class="filter-button active" data-filter="all">すべて</button>
+                <button class="filter-button" data-filter="lol">.lol</button>
+                <button class="filter-button" data-filter="glol">.glol</button>
+            </div>
+
             <div style="margin-bottom: 30px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
                 <input type="text" id="search-input" placeholder="ファイル名や作者名で検索..." style="width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
             </div>
 
             <div id="file-list" class="download-grid">
-                </div>
+            </div>
         </section>
     </main>
 
@@ -281,7 +307,25 @@
             const searchInput = document.getElementById('search-input');
             const hamburgerIcon = document.getElementById('hamburger-icon');
             const navbar = document.querySelector('.navbar');
+            const filterButtons = document.querySelectorAll('.filter-button');
             let allFiles = [];
+
+            const filterAndDisplayFiles = () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const activeFilter = document.querySelector('.filter-button.active').dataset.filter;
+
+                const filteredFiles = allFiles.filter(file => {
+                    const matchesSearch = 
+                        file.title.toLowerCase().includes(searchTerm) ||
+                        file.author.toLowerCase().includes(searchTerm) ||
+                        file.description.toLowerCase().includes(searchTerm);
+                    
+                    const matchesFilter = (activeFilter === 'all' || file.type === activeFilter);
+                    
+                    return matchesSearch && matchesFilter;
+                });
+                displayFiles(filteredFiles);
+            };
 
             const displayFiles = (files) => {
                 fileListContainer.innerHTML = '';
@@ -315,26 +359,25 @@
                 })
                 .then(data => {
                     allFiles = data;
-                    displayFiles(allFiles);
+                    filterAndDisplayFiles();
                 })
                 .catch(error => {
                     console.error('ファイルの読み込みに失敗しました:', error);
                     fileListContainer.innerHTML = '<p style="color: red; text-align: center;">ファイルの読み込みに失敗しました。後でもう一度お試しください。</p>';
                 });
 
-            searchInput.addEventListener('keyup', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredFiles = allFiles.filter(file => {
-                    return (
-                        file.title.toLowerCase().includes(searchTerm) ||
-                        file.author.toLowerCase().includes(searchTerm) ||
-                        file.description.toLowerCase().includes(searchTerm)
-                    );
-                });
-                displayFiles(filteredFiles);
+            searchInput.addEventListener('keyup', () => {
+                filterAndDisplayFiles();
             });
 
-            // ハンバーガーメニューの開閉機能
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    filterAndDisplayFiles();
+                });
+            });
+
             hamburgerIcon.addEventListener('click', () => {
                 navbar.classList.toggle('open');
             });

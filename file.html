@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOL.ex ファイル配布</title>
+    <title>LOL.ex - ファイル配布</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -189,50 +189,11 @@
         <section id="download-items" style="text-align: center; padding: 40px 0;">
             <h2>利用可能なファイル</h2>
             <p style="max-width: 800px; margin: 0 auto 40px; font-size: 1.1em;">
-                ここでは、LOLBenasのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
+                ここでは、LOL.exのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
             </p>
 
-            <div class="download-grid">
-                
-                <div class="download-item-card">
-                    <img src="https://tanabesan.github.io/lolbeans/file/page/6845.png" alt="コースファイルサムネイル">
-                    <span class="file-info-badge badge-lol">.lol</span>
-                    <div class="download-item-content">
-                        <h3>Neon City</h3>
-                        <p class="author-name">by ユウキ / Yuki</p>
-                        <p>
-                            最大評価4.6を誇るコース。高層ビル群を駆け抜けるスリリングな体験が楽しめます。
-                        </p>
-                        <a href="https://tanabesan.github.io/lolbeans/file/lol/neoncity.lol" class="download-button-small">ダウンロード</a>
-                    </div>
+            <div id="file-list" class="download-grid">
                 </div>
-
-                <div class="download-item-card">
-                    <img src="https://tanabesan.github.io/lolbeans/file/page/build1.png" alt="グループファイルサムネイル">
-                    <span class="file-info-badge badge-glol">.glol</span>
-                    <div class="download-item-content">
-                        <h3>Neon Build1</h3>
-                        <p class="author-name">by ユウキ / Yuki</p>
-                        <p>
-                            neoncityのグループファイル。コースの建物のファイルです。
-                        </p>
-                        <a href="https://tanabesan.github.io/lolbeans/file/glol/build1.glol" class="download-button-small">ダウンロード</a>
-                    </div>
-                </div>
-
-                <div class="download-item-card">
-                    <img src="https://tanabesan.github.io/lolbeans/file/page/7396.png" alt="別のファイルサムネイル">
-                    <span class="file-info-badge badge-lol">.lol</span>
-                    <div class="download-item-content">
-                        <h3>Kraken Island</h3>
-                        <p class="author-name">by ユウキ / Yuki</p>
-                        <p>
-                            クラーケンをコースのギミックに落とし込んだユニークなコース。冒険心をくすぐるデザインが魅力。
-                        </p>
-                        <a href="https://tanabesan.github.io/lolbeans/file/lol/kraken.lol" class="download-button-small">ダウンロード</a>
-                    </div>
-                </div>
-            </div>
         </section>
     </main>
 
@@ -242,8 +203,44 @@
             <a href="#"><i class="fab fa-discord"></i></a>
             <a href="#"><i class="fab fa-github"></i></a>
         </div>
-        <p style="margin-top: 15px;">2025 Yuki. All rights reserved.</p>
+        <p style="margin-top: 15px;">&copy; 2025 Yuki. All rights reserved.</p>
     </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileListContainer = document.getElementById('file-list');
+
+            // JSONファイルを読み込む
+            fetch('data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // JSONデータから各アイテムを生成
+                    data.forEach(item => {
+                        const cardHtml = `
+                            <div class="download-item-card">
+                                <img src="${item.thumbnailUrl}" alt="${item.title}のサムネイル">
+                                <span class="file-info-badge badge-${item.type}">${item.type.toUpperCase()}</span>
+                                <div class="download-item-content">
+                                    <h3>${item.title}</h3>
+                                    <p class="author-name">by ${item.author}</p>
+                                    <p>${item.description}</p>
+                                    <a href="${item.downloadUrl}" class="download-button-small">ダウンロード</a>
+                                </div>
+                            </div>
+                        `;
+                        fileListContainer.innerHTML += cardHtml;
+                    });
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                    fileListContainer.innerHTML = '<p style="color: red;">ファイルの読み込みに失敗しました。後でもう一度お試しください。</p>';
+                });
+        });
+    </script>
 </body>
 </html>

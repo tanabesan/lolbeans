@@ -32,18 +32,15 @@
 
         /* Hero Section */
         .hero-section {
-            /* 背景を画像に変更 */
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://tanabesan.github.io/lolbeans/file/page/bg.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            
             color: var(--text-color-light);
             padding: 120px 20px;
             text-align: center;
             position: relative;
         }
-        
         .hero-content {
             position: relative;
             z-index: 2;
@@ -73,6 +70,37 @@
             background-color: #FFD54F;
         }
 
+        /* Navbar Section */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 10px 20px;
+            border-radius: 30px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        .navbar a {
+            color: var(--text-color-dark);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .navbar a:hover {
+            color: var(--primary-color);
+        }
+        .hamburger-menu {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: var(--text-color-dark);
+            padding: 5px;
+        }
+        
         /* Main Content */
         .container {
             max-width: 1200px;
@@ -141,6 +169,34 @@
         .footer-section .social-icons a:hover {
             color: var(--primary-color);
         }
+        
+        /* Media Queries for Responsive Design */
+        @media (max-width: 768px) {
+            .navbar a {
+                display: none;
+            }
+            .navbar {
+                background-color: transparent;
+                box-shadow: none;
+                padding: 10px;
+            }
+            .hamburger-menu {
+                display: block;
+            }
+            .navbar.open a {
+                display: block;
+                margin: 10px 0;
+            }
+            .navbar.open {
+                background-color: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                padding: 20px;
+                border-radius: 12px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+            }
+        }
     </style>
 </head>
 <body>
@@ -152,6 +208,14 @@
             <a href="lolex/main.user.js" class="cta-button">今すぐダウンロード</a>
         </div>
     </header>
+
+    <nav class="navbar">
+        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
+        <a href="https://tanabesan.github.io/lolbeans/">メインページ</a>
+        <a href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
+        <a href="#">よくある質問</a>
+        <a href="#">お問い合わせ</a>
+    </nav>
 
     <main class="container">
         <section id="features" class="features-section">
@@ -205,7 +269,7 @@
             <a href="#"><i class="fab fa-discord"></i></a>
             <a href="#"><i class="fab fa-github"></i></a>
         </div>
-        <p style="margin-top: 20px;">2025 Yuki</p>
+        <p style="margin-top: 20px;">&copy; 2025 Yuki</p>
     </footer>
 
     <script>
@@ -220,6 +284,14 @@
             });
         }, { threshold: 0.5 });
         cards.forEach(card => observer.observe(card));
+
+        // ハンバーガーメニューの開閉
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const navbar = document.querySelector('.navbar');
+
+        hamburgerIcon.addEventListener('click', () => {
+            navbar.classList.toggle('open');
+        });
     </script>
 </body>
 </html>

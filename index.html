@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOL.ex 次世代のゲーム体験</title>
+    <title id="page-title">LOL.ex 次世代のゲーム体験</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -80,7 +80,7 @@
             padding: 10px 20px;
             border-radius: 30px;
             z-index: 1000;
-            display: flex;
+            display: flex; /* 言語セレクタ対応 */
             align-items: center;
         }
         .navbar a {
@@ -89,6 +89,7 @@
             margin: 0 15px;
             font-weight: 500;
             transition: color 0.3s ease;
+            display: inline-block;
         }
         .navbar a:hover {
             color: var(--primary-color);
@@ -100,7 +101,16 @@
             color: var(--text-color-dark);
             padding: 5px;
         }
-        
+        /* 言語セレクタのスタイル */
+        #language-switcher {
+            padding: 8px 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            margin-left: 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
         /* Main Content */
         .container {
             max-width: 1200px;
@@ -129,6 +139,7 @@
             opacity: 0;
             transform: translateY(20px);
         }
+        /* アニメーション遅延 */
         .feature-card:nth-child(1) { transition-delay: 0s; }
         .feature-card:nth-child(2) { transition-delay: 0.1s; }
         .feature-card:nth-child(3) { transition-delay: 0.2s; }
@@ -172,16 +183,25 @@
         
         /* Media Queries for Responsive Design */
         @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 3.5em;
+            }
             .navbar a {
                 display: none;
+            }
+            #language-switcher {
+                margin-left: 0;
             }
             .navbar {
                 background-color: transparent;
                 box-shadow: none;
                 padding: 10px;
+                flex-direction: column-reverse; /* 言語セレクタが上になるように調整 */
+                align-items: flex-end;
             }
             .hamburger-menu {
                 display: block;
+                margin-bottom: 10px;
             }
             .navbar.open a {
                 display: block;
@@ -193,8 +213,11 @@
                 padding: 20px;
                 border-radius: 12px;
                 display: flex;
-                flex-direction: column;
-                align-items: flex-end;
+            }
+            .navbar.open #language-switcher {
+                 display: block;
+                 width: 100%;
+                 margin: 10px 0;
             }
         }
     </style>
@@ -203,49 +226,53 @@
 
     <header class="hero-section">
         <div class="hero-content">
-            <h1>LOL.ex</h1>
-            <p>ゲームの可能性を、どこまでも。</p>
-            <a href="lolex/main.user.js" class="cta-button">今すぐダウンロード</a>
+            <h1 id="hero-title">LOL.ex</h1>
+            <p id="hero-subtitle">ゲームの可能性を、どこまでも。</p>
+            <a href="lolex/main.user.js" class="cta-button" id="cta-button">今すぐダウンロード</a>
         </div>
     </header>
 
     <nav class="navbar">
         <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
-        <a href="https://tanabesan.github.io/lolbeans/">メインページ</a>
-        <a href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
-        <a href="#">よくある質問</a>
-        <a href="#">お問い合わせ</a>
+        <a id="nav-main-page" href="https://tanabesan.github.io/lolbeans/">メインページ</a>
+        <a id="nav-file-library" href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
+        <a id="nav-faq" href="#">よくある質問</a>
+        <a id="nav-contact" href="#">お問い合わせ</a>
+        <select id="language-switcher">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+        </select>
     </nav>
 
     <main class="container">
         <section id="features" class="features-section">
-            <h2>強化された主な機能</h2>
+            <h2 id="features-title">強化された主な機能</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <i class="fas fa-rocket"></i>
-                    <h3>オートエアスイッチ</h3>
-                    <p>
+                    <h3 id="feature1-title">オートエアスイッチ</h3>
+                    <p id="feature1-desc">
                         事前に設定された情報からエアムーブ設定を自動で切り替え。シームレスな操作体験を実現します。
                     </p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-crosshairs"></i>
-                    <h3>ラウンドスコープ</h3>
-                    <p>
+                    <h3 id="feature2-title">ラウンドスコープ</h3>
+                    <p id="feature2-desc">
                         次のラウンドを予測し余裕を持って準備。戦略的な優位性を確保します。
                     </p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-chart-line"></i>
-                    <h3>Youtubeプレイヤー</h3>
-                    <p>
+                    <h3 id="feature3-title">Youtubeプレイヤー</h3>
+                    <p id="feature3-desc">
                         リアルタイムでYouTube動画を再生し、ゲームプレイを妨げることなくエンターテインメントを楽しめます。
                     </p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-palette"></i>
-                    <h3>バックグラウンドデザイナー</h3>
-                    <p>
+                    <h3 id="feature4-title">バックグラウンドデザイナー</h3>
+                    <p id="feature4-desc">
                         ロビーの背景をカスタマイズし、個性的なゲーム環境を作り出します。
                     </p>
                 </div>
@@ -253,11 +280,11 @@
         </section>
 
         <section class="content-section" style="text-align: center; padding: 60px 0;">
-            <h2>体験版デモ</h2>
-            <p>
+            <h2 id="demo-title">体験版デモ</h2>
+            <p id="demo-desc">
                 LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。
             </p>
-            <div style="margin-top: 30px; background: #ddd; height: 400px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">
+            <div id="demo-placeholder" style="margin-top: 30px; background: #ddd; height: 400px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">
                 現在デモ動画は準備中です。
             </div>
         </section>
@@ -273,24 +300,119 @@
     </footer>
 
     <script>
-        // スクロール時のアニメーション
-        const cards = document.querySelectorAll('.feature-card');
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
+        // 言語データの定義
+        const translations = {
+            ja: {
+                pageTitle: "LOL.ex 次世代のゲーム体験",
+                mainPage: "メインページ",
+                fileLibrary: "ファイルライブラリ",
+                faq: "よくある質問",
+                contact: "お問い合わせ",
+                heroTitle: "LOL.ex",
+                heroSubtitle: "ゲームの可能性を、どこまでも。",
+                downloadButton: "今すぐダウンロード",
+                featuresTitle: "強化された主な機能",
+                feature1Title: "オートエアスイッチ",
+                feature1Desc: "事前に設定された情報からエアムーブ設定を自動で切り替え。シームレスな操作体験を実現します。",
+                feature2Title: "ラウンドスコープ",
+                feature2Desc: "次のラウンドを予測し余裕を持って準備。戦略的な優位性を確保します。",
+                feature3Title: "Youtubeプレイヤー",
+                feature3Desc: "リアルタイムでYouTube動画を再生し、ゲームプレイを妨げることなくエンターテインメントを楽しめます。",
+                feature4Title: "バックグラウンドデザイナー",
+                feature4Desc: "ロビーの背景をカスタマイズし、個性的なゲーム環境を作り出します。",
+                demoTitle: "体験版デモ",
+                demoDesc: "LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。",
+                demoPlaceholder: "現在デモ動画は準備中です。"
+            },
+            en: {
+                pageTitle: "LOL.ex Next Generation Gaming Experience",
+                mainPage: "Main Page",
+                fileLibrary: "File Library",
+                faq: "FAQ",
+                contact: "Contact",
+                heroTitle: "LOL.ex",
+                heroSubtitle: "Unleash the full potential of gaming.",
+                downloadButton: "Download Now",
+                featuresTitle: "Key Enhanced Features",
+                feature1Title: "Auto Air Switch",
+                feature1Desc: "Automatically switches air move settings based on predefined information for a seamless operational experience.",
+                feature2Title: "Round Scope",
+                feature2Desc: "Predict the next round and prepare with ease to secure a strategic advantage.",
+                feature3Title: "Youtube Player",
+                feature3Desc: "Play YouTube videos in real-time and enjoy entertainment without interrupting your gameplay.",
+                feature4Title: "Background Designer",
+                feature4Desc: "Customize your lobby background to create a unique gaming environment.",
+                demoTitle: "Demo Video",
+                demoDesc: "Watch the demo video below to see the innovative experience LOL.ex offers.",
+                demoPlaceholder: "Demo video is currently being prepared."
+            }
+        };
+
+        // 言語設定の取得と適用
+        const applyLanguage = (lang) => {
+            // ローカルストレージに設定を保存
+            localStorage.setItem('language', lang);
+            const langData = translations[lang];
+
+            // HTML要素に翻訳を適用
+            document.getElementById('page-title').textContent = langData.pageTitle;
+            document.getElementById('nav-main-page').textContent = langData.mainPage;
+            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
+            document.getElementById('nav-faq').textContent = langData.faq;
+            document.getElementById('nav-contact').textContent = langData.contact;
+            
+            document.getElementById('hero-title').textContent = langData.heroTitle;
+            document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
+            document.getElementById('cta-button').textContent = langData.downloadButton;
+
+            document.getElementById('features-title').textContent = langData.featuresTitle;
+            document.getElementById('feature1-title').textContent = langData.feature1Title;
+            document.getElementById('feature1-desc').textContent = langData.feature1Desc;
+            document.getElementById('feature2-title').textContent = langData.feature2Title;
+            document.getElementById('feature2-desc').textContent = langData.feature2Desc;
+            document.getElementById('feature3-title').textContent = langData.feature3Title;
+            document.getElementById('feature3-desc').textContent = langData.feature3Desc;
+            document.getElementById('feature4-title').textContent = langData.feature4Title;
+            document.getElementById('feature4-desc').textContent = langData.feature4Desc;
+
+            document.getElementById('demo-title').textContent = langData.demoTitle;
+            document.getElementById('demo-desc').textContent = langData.demoDesc;
+            document.getElementById('demo-placeholder').textContent = langData.demoPlaceholder;
+
+            // 言語セレクターを更新
+            document.getElementById('language-switcher').value = lang;
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const navbar = document.querySelector('.navbar');
+            const languageSwitcher = document.getElementById('language-switcher');
+            const cards = document.querySelectorAll('.feature-card');
+            
+            // 1. ページ読み込み時に言語設定を適用
+            const savedLang = localStorage.getItem('language') || 'ja'; // デフォルトは日本語
+            applyLanguage(savedLang);
+
+            // 2. 言語切り替えイベント
+            languageSwitcher.addEventListener('change', (event) => {
+                applyLanguage(event.target.value);
             });
-        }, { threshold: 0.5 });
-        cards.forEach(card => observer.observe(card));
 
-        // ハンバーガーメニューの開閉
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        const navbar = document.querySelector('.navbar');
-
-        hamburgerIcon.addEventListener('click', () => {
-            navbar.classList.toggle('open');
+            // 3. ハンバーガーメニューの開閉機能
+            hamburgerIcon.addEventListener('click', () => {
+                navbar.classList.toggle('open');
+            });
+            
+            // 4. スクロール時のアニメーション
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            cards.forEach(card => observer.observe(card));
         });
     </script>
 </body>

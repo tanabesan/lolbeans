@@ -9,6 +9,7 @@
     <meta property="og:site_name" content="LOL.ex 公式サイト">
     <meta property="og:locale" content="ja_JP">
     <meta name="twitter:card" content="summary_large_image">
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOL.ex - ファイル配布</title>
@@ -16,6 +17,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --primary-color: #5D54A4;
@@ -71,6 +73,8 @@
             padding: 10px 20px;
             border-radius: 30px;
             z-index: 1000;
+            display: flex; /* 言語セレクタ対応 */
+            align-items: center; /* 言語セレクタ対応 */
         }
         .navbar a {
             color: var(--text-color-dark);
@@ -83,6 +87,17 @@
         .navbar a:hover {
             color: var(--primary-color);
         }
+        
+        /* 言語セレクタのスタイル */
+        #language-switcher {
+            padding: 8px 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            margin-left: 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
 
         /* ハンバーガーメニューのスタイル */
         .hamburger-menu {
@@ -231,13 +246,19 @@
             .navbar a {
                 display: none;
             }
+            #language-switcher {
+                margin-left: 0;
+            }
             .navbar {
                 background-color: transparent;
                 box-shadow: none;
                 padding: 10px;
+                flex-direction: column-reverse; /* 言語セレクタが上になるように調整 */
+                align-items: flex-end;
             }
             .hamburger-menu {
                 display: block;
+                margin-bottom: 10px;
             }
             .navbar.open a {
                 display: block;
@@ -249,8 +270,12 @@
                 padding: 20px;
                 border-radius: 12px;
                 display: flex;
-                flex-direction: column;
-                align-items: flex-end;
+                /* flex-direction: column; はopenクラスでは不要 */
+            }
+            .navbar.open #language-switcher {
+                 display: block;
+                 width: 100%;
+                 margin: 10px 0;
             }
         }
     </style>
@@ -258,8 +283,8 @@
 <body>
 
     <header class="hero-section">
-        <h1>LOL.ex ファイルライブラリ</h1>
-        <p>エディター用ファイルをダウンロード</p>
+        <h1 id="hero-title">LOL.ex ファイルライブラリ</h1>
+        <p id="hero-subtitle">エディター用ファイルをダウンロード</p>
     </header>
 
     <nav class="navbar">
@@ -268,12 +293,16 @@
         <a href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
         <a href="#">よくある質問</a>
         <a href="#">お問い合わせ</a>
+        <select id="language-switcher">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+        </select>
     </nav>
 
     <main class="container">
         <section id="download-items" style="text-align: center; padding: 40px 0;">
-            <h2>利用可能なファイル</h2>
-            <p style="max-width: 800px; margin: 0 auto 40px; font-size: 1.1em;">
+            <h2 id="available-files-title">利用可能なファイル</h2>
+            <p id="description-text" style="max-width: 800px; margin: 0 auto 40px; font-size: 1.1em;">
                 ここでは、LOL.exのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
             </p>
 
@@ -302,17 +331,81 @@
     </footer>
 
     <script>
+        // 言語データの定義
+        const translations = {
+            ja: {
+                mainPage: "メインページ",
+                fileLibrary: "ファイルライブラリ",
+                faq: "よくある質問",
+                contact: "お問い合わせ",
+                heroTitle: "LOL.ex ファイルライブラリ",
+                heroSubtitle: "エディター用ファイルをダウンロード",
+                availableFiles: "利用可能なファイル",
+                descriptionText: "ここでは、LOL.exのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。",
+                searchPlaceholder: "ファイル名や作者名で検索...",
+                allFilter: "すべて",
+                noResults: "検索結果が見つかりませんでした。",
+                loadingError: "ファイルの読み込みに失敗しました。後でもう一度お試しください。",
+                downloadButton: "ダウンロード"
+            },
+            en: {
+                mainPage: "Main Page",
+                fileLibrary: "File Library",
+                faq: "FAQ",
+                contact: "Contact",
+                heroTitle: "LOL.ex File Library",
+                heroSubtitle: "Download editor files",
+                availableFiles: "Available Files",
+                descriptionText: "Here, you can download various files for the LOL.ex in-game editor. Choose your favorite files to enrich your courses.",
+                searchPlaceholder: "Search by file name or author...",
+                allFilter: "All",
+                noResults: "No results found.",
+                loadingError: "Failed to load files. Please try again later.",
+                downloadButton: "Download"
+            }
+        };
+
+        // 言語設定の取得と適用
+        const applyLanguage = (lang) => {
+            // ローカルストレージに設定を保存
+            localStorage.setItem('language', lang);
+            const langData = translations[lang];
+
+            // HTML要素に翻訳を適用
+            document.title = langData.heroTitle;
+            document.querySelector('.navbar a:nth-of-type(1)').textContent = langData.mainPage;
+            document.querySelector('.navbar a:nth-of-type(2)').textContent = langData.fileLibrary;
+            document.querySelector('.navbar a:nth-of-type(3)').textContent = langData.faq;
+            document.querySelector('.navbar a:nth-of-type(4)').textContent = langData.contact;
+            document.getElementById('hero-title').textContent = langData.heroTitle;
+            document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
+            document.getElementById('available-files-title').textContent = langData.availableFiles;
+            document.getElementById('description-text').textContent = langData.descriptionText;
+            document.getElementById('search-input').placeholder = langData.searchPlaceholder;
+            document.querySelector('.filter-button[data-filter="all"]').textContent = langData.allFilter;
+            
+            // 言語セレクターを更新
+            document.getElementById('language-switcher').value = lang;
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const fileListContainer = document.getElementById('file-list');
             const searchInput = document.getElementById('search-input');
             const hamburgerIcon = document.getElementById('hamburger-icon');
             const navbar = document.querySelector('.navbar');
             const filterButtons = document.querySelectorAll('.filter-button');
+            const languageSwitcher = document.getElementById('language-switcher');
             let allFiles = [];
+            
+            // 1. ページ読み込み時に言語設定を適用
+            const savedLang = localStorage.getItem('language') || 'ja'; // デフォルトは日本語
+            applyLanguage(savedLang);
 
+            // 検索とフィルタリングを統合した表示関数
             const filterAndDisplayFiles = () => {
                 const searchTerm = searchInput.value.toLowerCase();
                 const activeFilter = document.querySelector('.filter-button.active').dataset.filter;
+                const langData = translations[localStorage.getItem('language') || 'ja'];
 
                 const filteredFiles = allFiles.filter(file => {
                     const matchesSearch = 
@@ -327,10 +420,13 @@
                 displayFiles(filteredFiles);
             };
 
+            // ファイルカードを生成する関数
             const displayFiles = (files) => {
                 fileListContainer.innerHTML = '';
+                const langData = translations[localStorage.getItem('language') || 'ja'];
+
                 if (files.length === 0) {
-                    fileListContainer.innerHTML = '<p style="text-align: center; color: var(--secondary-color);">検索結果が見つかりませんでした。</p>';
+                    fileListContainer.innerHTML = `<p style="text-align: center; color: var(--secondary-color);">${langData.noResults}</p>`;
                     return;
                 }
                 files.forEach(item => {
@@ -342,7 +438,7 @@
                                 <h3>${item.title}</h3>
                                 <p class="author-name">by ${item.author}</p>
                                 <p>${item.description}</p>
-                                <a href="${item.downloadUrl}" class="download-button-small">ダウンロード</a>
+                                <a href="${item.downloadUrl}" class="download-button-small">${langData.downloadButton}</a>
                             </div>
                         </div>
                     `;
@@ -350,6 +446,7 @@
                 });
             };
 
+            // 2. data.jsonを読み込む（キャッシュ無効化）
             fetch('data.json', { cache: 'no-cache' })
                 .then(response => {
                     if (!response.ok) {
@@ -359,17 +456,20 @@
                 })
                 .then(data => {
                     allFiles = data;
-                    filterAndDisplayFiles();
+                    filterAndDisplayFiles(); // 初回表示
                 })
                 .catch(error => {
                     console.error('ファイルの読み込みに失敗しました:', error);
-                    fileListContainer.innerHTML = '<p style="color: red; text-align: center;">ファイルの読み込みに失敗しました。後でもう一度お試しください。</p>';
+                    const langData = translations[localStorage.getItem('language') || 'ja'];
+                    fileListContainer.innerHTML = `<p style="color: red; text-align: center;">${langData.loadingError}</p>`;
                 });
 
+            // 3. 検索イベント
             searchInput.addEventListener('keyup', () => {
                 filterAndDisplayFiles();
             });
 
+            // 4. フィルタボタンイベント
             filterButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -378,6 +478,13 @@
                 });
             });
 
+            // 5. 言語切り替えイベント
+            languageSwitcher.addEventListener('change', (event) => {
+                applyLanguage(event.target.value);
+                filterAndDisplayFiles(); // 言語切り替え後にカードのボタンテキストなども更新
+            });
+
+            // 6. ハンバーガーメニューの開閉機能
             hamburgerIcon.addEventListener('click', () => {
                 navbar.classList.toggle('open');
             });

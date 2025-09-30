@@ -36,7 +36,7 @@ LOL.exは、以下の2つの主要な側面からゲーム体験を向上させ�
 私たちは、あなたの創造性を歓迎します！
 新しいカスタムファイルをライブラリで共有したい場合は、以下のフォームから作品を投稿してください。あなたの作品が、コミュニティをさらに豊かにします。
 
-  * **[ファイル投稿フォーム](https://www.google.com/search?q=https://docs.google.com/forms/d/e/1FAIpQLSfp_uA5eK6c9eE9N3D4s5vW8x7T1gG3VwG6eP0aI7G7m2Vp7g/viewform%3Fusp%3Dsf_link)**（※このリンクは利用できません。）
+  * **[ファイル投稿フォーム](https://forms.gle/X6BjbSoRypFWApZN7)**
 
 -----
 

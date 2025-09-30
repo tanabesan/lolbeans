@@ -1,5 +1,13 @@
 [
   {
+    "title": "Neon Abyss",
+    "author": "Yuki / ユウキ",
+    "description": "ユウキが制作したエリミネーションマップ。ブロックを使い相手を飛ばしたりできます。",
+    "type": "lol",
+    "thumbnailUrl": "https://tanabesan.github.io/lolbeans/file/page/6989.png",
+    "downloadUrl": "https://tanabesan.github.io/lolbeans/file/lol/abyss.lol"
+  },
+  {
     "title": "LOLBeans Normal Editor",
     "author": "枕草子",
     "description": "枕草子作のエディターコース。基礎的なハンマーなどのギミックが楽しめます。",

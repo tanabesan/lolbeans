@@ -1,5 +1,13 @@
 [
   {
+    "title": "1桁＋1桁の足し算",
+    "author": "KZS",
+    "description": "仕組みは、、、見てください",
+    "type": "lol",
+    "thumbnailUrl": "https://tanabesan.github.io/lolbeans/file/page/1+1.png",
+    "downloadUrl": "https://tanabesan.github.io/lolbeans/file/lol/1+1.lol"
+  },
+  {
     "title": "Neon Abyss",
     "author": "ユウキ / Yuki",
     "description": "ユウキが制作したエリミネーションマップ。ブロックを使い相手を飛ばしたりできます。",

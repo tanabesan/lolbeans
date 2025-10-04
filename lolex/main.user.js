@@ -1,14 +1,14 @@
 // ==UserScript==
-// @name         LOL.ex ver0.56 α
+// @name         LOL.ex ver0.60
 // @namespace    http://tampermonkey.net/
-// @version      0.56
-// @description  LOLBeans.io Extension
+// @version      0.60
+// @description  LOLBeans extension.
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
 // @match        https://bean.lol/*
 // @match        https://obby.lol/*
 // @grant        unsafeWindow
-// @run-at       document-idle
+// @run-at       document-start
 // @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
 // @downloadURL  https://tanabesan.github.io/lolbeans/lolex/main.user.js
 // ==/UserScript==
@@ -16,23 +16,39 @@
 (function () {
     'use strict';
 
-    // ─── グローバル変数 (YouTube Player) ──────────────────────────
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeScript);
+    } else {
+        initializeScript();
+    }
+
     let player;
     let isApiReady = false;
+    let saveTimeInterval;
+    let initCompleted = false;
+    let currentVideoId = null;
 
-    // ─── コース設定一覧 ───────────────────────────────────────────
+    const STORAGE_VIDEO_KEY = 'yt-videoId';
+    const STORAGE_PLAYLIST_KEY = 'yt-playlistId';
+    const STORAGE_TIME_KEY = 'yt-last-time';
+    const STORAGE_BACKGROUND_KEY = 'customBackgroundUrl';
+    const STORAGE_IS_VISIBLE = 'yt-is-visible';
+
+    let lastTime = parseFloat(localStorage.getItem(STORAGE_TIME_KEY)) || 0;
+    currentVideoId = localStorage.getItem(STORAGE_VIDEO_KEY);
+
     const courses = [
         { id: 'beacon-bay', keyword: 'BeaconBay', message: '🚨 Beacon Bay 🚨', displayName: 'Beacon Bay' },
         { id: 'boulder-hill', keyword: "BoulderHill", message: "🐛 Boulder Hill 🐛", displayName: "Boulder Hill" },
         { id: 'circus-contest', keyword: "CircusContest", message: "🎪 Circus Contest 🎪", displayName: "Circus Contest" },
-        { id: 'devils-trick', keyword: "DevilsTrick", message: "👿 Devil's Trick 👿", displayName: "Devil's Trick" },
-        { id: 'dash-cup', keyword: "FastRace", message: "🏆 Dash Cup 🏆", displayName: "Dash Cup" },
+        { id: 'devils-trick', keyword: "DevilsTrick", message: "👿 Devil's Trick 👿", displayName: "Devils Trick" },
+        { id: 'dash-cup', keyword: 'FastRace', message: '🏆 Dash Cup 🏆', displayName: 'Dash Cup' },
         { id: 'gravity-gates', keyword: "GravityGates", message: "🌌 Gravity Gates 🌌", displayName: "Gravity Gates" },
         { id: 'hammer-ville', keyword: "HammerVille", message: "🍩 Hammer Ville 🍩", displayName: "Hammer Ville" },
         { id: 'jungle-temple', keyword: "JungleTemple", message: "🐍 Jungle Temple 🐍", displayName: "Jungle Temple" },
         { id: 'kittie-kegs', keyword: "KittieKegs", message: "🐱 Kittie Kegs 🙀", displayName: "Kittie Kegs" },
         { id: 'lava-lake', keyword: "FloorIsLava", message: "🌋 Lava Lake 🌋", displayName: "Lava Lake" },
-        { id: 'mecha-maze', keyword: "MechaMaze", message: "🤖 MechaMaze 🤖", displayName: "Mecha Maze" },
+        { id: 'mecha-maze', keyword: "MechaMaze", message: "🤖 Mecha Maze 🤖", displayName: "Mecha Maze" },
         { id: 'mill-valley', keyword: "MillValley", message: "🌾 Mill Valley 🍃", displayName: "Mill Valley" },
         { id: 'monster-manor', keyword: "MonsterManor", message: "🎃 Monster Manor 💀", displayName: "Monster Manor" },
         { id: 'polar-path', keyword: "PolarPath", message: "🧊 Polar Path 🧊", displayName: "Polar Path" },
@@ -40,7 +56,7 @@
         { id: 'nasty-seals', keyword: "NastySeals", message: "🦑 Nasty Seals 🦑", displayName: "Nasty Seals" },
         { id: 'rickety-run', keyword: "RicketyRun", message: "🟦 Rickety Run 🟪", displayName: "Rickety Run" },
         { id: 'risky-cliffs', keyword: "RiskyCliffs", message: "🎅 Risky Cliffs 🎅", displayName: "Risky Cliffs" },
-        { id: 'shark-park', keyword: "SharkPark", message: "🦈 SharkPark 🦈", displayName: "Shark Park" },
+        { id: 'shark-park', keyword: "SharkPark", message: "🦈 Shark Park 🦈", displayName: "Shark Park" },
         { id: 'silly-slide', keyword: "SillySlide", message: "🛝 Silly Slide 🛝", displayName: "Silly Slide" },
         { id: 'spiky-slopes', keyword: "SpikySlopes", message: "🔨 Spiky Slopes 🔨", displayName: "Spiky Slopes" },
         { id: 'splash-dash', keyword: "SplashDash", message: "🏊 Splash Dash 🏊", displayName: "Splash Dash" },
@@ -49,20 +65,15 @@
         { id: 'ufo-attack', keyword: 'UFOAttack', message: '🛸 UFO Attack 🛸', displayName: 'UFO Attack' }
     ];
 
-    // ─── StopAirMoveラジオクリック ─────────────────────────────────
     function clickAirMoveRadio(enabled) {
         const selector = enabled ? '#air-movement-on' : '#air-movement-off';
         const radio = document.querySelector(selector);
         if (radio && !radio.checked) radio.click();
     }
-
-    // ─── 保存済みStopAirMove適用 ───────────────────────────────────
     function applyStoredAirMove() {
         const stored = localStorage.getItem('stopAirMove');
         if (stored !== null) clickAirMoveRadio(stored === 'true');
     }
-
-    // ─── YouTube URLパーサー ──────────────────────────────────────
     function getYouTubeIds(input) {
         const urlRegex = /(?:youtube\.com\/(?:live\/|[^\/]+\/.+\/|(?:v|e(?:mbed)?|watch)\/|.*[?&]v=)|youtu\.be\/|youtube\.googleapis\.com\/v\/)([a-zA-Z0-9_-]{11})/;
         const playlistRegex = /[?&]list=([a-zA-Z0-9_-]+)/;
@@ -74,101 +85,390 @@
         };
     }
 
-    // ─── YouTube API ローダー ────────────────────────────────────
-    const apiScript = document.createElement('script');
-    apiScript.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(apiScript);
+    function saveTime() {
+        if (player && typeof player.getCurrentTime === 'function') {
+            try {
+                const t = player.getCurrentTime();
+                // 動画ID取得・保存ロジックを削除
 
-    // ─── YouTube API 対応関数 ────────────────────────────────────
+                if (!isNaN(t) && t >= 0) {
+                    lastTime = t;
+                    localStorage.setItem(STORAGE_TIME_KEY, lastTime);
+                }
+
+                // 動画ID比較・更新ロジックを削除
+            } catch (e) {
+            }
+        }
+    }
+
+    function updateUrlInput(urlInput) {
+        const storedPlaylistId = localStorage.getItem(STORAGE_PLAYLIST_KEY);
+        const storedVideoId = localStorage.getItem(STORAGE_VIDEO_KEY);
+        if (storedPlaylistId) {
+            urlInput.value = `https://www.youtube.com/playlist?list=${storedPlaylistId}`;
+        } else if (storedVideoId) {
+            urlInput.value = `https://www.youtube.com/watch?v=${storedVideoId}`;
+        } else {
+            urlInput.value = '';
+        }
+    }
+    function toggleYouTubeVisibility() {
+        const ytContainer = document.getElementById('yt-fixed-container');
+        if (ytContainer) {
+            const isVisible = ytContainer.classList.toggle('yt-visible');
+            localStorage.setItem(STORAGE_IS_VISIBLE, isVisible);
+        }
+    }
+
     unsafeWindow.onYouTubeIframeAPIReady = function() {
         isApiReady = true;
+        if (document.getElementById('yt-player')) {
+            initializePlayer();
+        }
+    }
+
+    function initializePlayer() {
+        const playerDiv = document.getElementById('yt-player');
+        if (!playerDiv || !isApiReady || player) {
+            return;
+        }
+
+        const playlistId = localStorage.getItem(STORAGE_PLAYLIST_KEY);
+        const initialVideoId = localStorage.getItem(STORAGE_VIDEO_KEY);
+        lastTime = parseFloat(localStorage.getItem(STORAGE_TIME_KEY)) || 0;
+
+        let targetVideoId = initialVideoId;
+        let startSeconds = Math.max(0, Math.floor(lastTime));
+
+        let playerVars = {
+            'playsinline': 1,
+            'autoplay': 1,
+            'mute': 1,
+            'start': startSeconds
+        };
+
+        if (playlistId) {
+            // 再生リストが設定されている場合、リストとしてロード
+            playerVars.listType = 'playlist';
+            playerVars.list = playlistId;
+            targetVideoId = ''; // リストロード時はvideoIdを空にするか、リスト内の最初の動画IDにする
+            playerVars.start = 0; // リストロード時は開始時間は無効化
+        } else {
+            // 単一動画の場合
+            targetVideoId = initialVideoId || '';
+        }
+
         player = new YT.Player('yt-player', {
             height: '100%',
             width: '100%',
-            playerVars: {
-                'playsinline': 1,
-                'autoplay': 0
-            },
+            videoId: targetVideoId,
+            playerVars: playerVars,
             events: {
-                'onReady': onPlayerReady
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
             }
         });
+
+        // ロード後はリセット
+        lastTime = 0;
+        localStorage.setItem(STORAGE_TIME_KEY, 0);
     }
 
     function onPlayerReady(event) {
-        loadYouTube();
+        event.target.unMute();
+
+        const loopEnabled = localStorage.getItem('yt-loop') === 'true';
+        const shuffleEnabled = localStorage.getItem('yt-shuffle') === 'true';
+        event.target.setLoop(loopEnabled);
+
+        const playlistId = localStorage.getItem(STORAGE_PLAYLIST_KEY);
+        // const initialVideoId = localStorage.getItem(STORAGE_VIDEO_KEY); // 削除
+        // lastTime = parseFloat(localStorage.getItem(STORAGE_TIME_KEY)) || 0; // 削除
+
+        // 再生リストがロードされており、かつ最後に見ていた動画IDが保存されている場合 -> 削除
+
+        if (playlistId) { // プレイリストだが、再開動画がない場合はシャッフル設定のみ適用
+             event.target.setShuffle(shuffleEnabled);
+        }
     }
 
-    function loadYouTube() {
+    function onPlayerStateChange(event) {
+        clearInterval(saveTimeInterval);
+        saveTimeInterval = null;
+
+        if (event.data === YT.PlayerState.PLAYING) {
+            // 動画ID保存ロジックを削除
+
+            if (!saveTimeInterval) saveTimeInterval = setInterval(saveTime, 1000);
+        } else if (event.data === YT.PlayerState.ENDED) {
+            saveTime();
+        }
+    }
+
+    function loadYouTube(autoplay = true, loadUrl = null) {
         if (!player || typeof player.loadPlaylist !== 'function') {
             return;
         }
 
-        const storedVideoId = localStorage.getItem('yt-videoId');
-        const storedPlaylistId = localStorage.getItem('yt-playlistId');
+        const urlInput = document.getElementById('yt-video-id-input');
+        const inputVal = (typeof loadUrl === 'string') ? loadUrl.trim() : (urlInput ? urlInput.value.trim() : '');
+
+        let targetVideoId = null;
+        let targetPlaylistId = null;
+
+        if (inputVal && inputVal.length > 0) {
+            const ids = getYouTubeIds(inputVal);
+            if (ids.playlistId) {
+                targetPlaylistId = ids.playlistId;
+                targetVideoId = ids.videoId;
+            } else if (ids.videoId) {
+                targetVideoId = ids.videoId;
+            } else {
+                if(autoplay) alert('Invalid YouTube URL or ID.');
+                return;
+            }
+        } else if (typeof loadUrl === 'string' && loadUrl === '') {
+            localStorage.removeItem(STORAGE_VIDEO_KEY);
+            localStorage.removeItem(STORAGE_PLAYLIST_KEY);
+            targetVideoId = null;
+            targetPlaylistId = null;
+        }
+
+        localStorage.setItem(STORAGE_VIDEO_KEY, targetVideoId || '');
+        localStorage.setItem(STORAGE_PLAYLIST_KEY, targetPlaylistId || '');
+        localStorage.setItem(STORAGE_TIME_KEY, 0);
+        lastTime = 0;
+        currentVideoId = targetVideoId;
+
         const loopEnabled = localStorage.getItem('yt-loop') === 'true';
         const shuffleEnabled = localStorage.getItem('yt-shuffle') === 'true';
-        const playerWrapper = document.querySelector('.youtube-player-wrapper');
+        const startTime = 0;
 
-        if (storedPlaylistId) {
-            playerWrapper.style.display = 'block';
+        if (targetPlaylistId) {
+            // プレイリストのロード
             player.loadPlaylist({
-                list: storedPlaylistId,
+                list: targetPlaylistId,
                 listType: 'playlist',
                 index: 0,
-                startSeconds: 0,
+                startSeconds: startTime,
                 suggestedQuality: 'large'
             });
+            player.setLoop(loopEnabled);
+            player.setShuffle(shuffleEnabled);
+            player.unMute();
+            player.playVideo();
 
-            setTimeout(() => {
-                player.setLoop(loopEnabled);
-                player.setShuffle(shuffleEnabled);
-                player.playVideo();
-            }, 1000);
+            // リスト内の特定の動画IDが取得できている場合は、それを保存（再開用） -> 削除
 
-        } else if (storedVideoId) {
-            playerWrapper.style.display = 'block';
-            player.loadVideoById(storedVideoId);
-            setTimeout(() => {
-                player.setLoop(loopEnabled);
-                player.playVideo();
-            }, 1000);
-
+        } else if (targetVideoId) {
+            // 単一動画のロード
+            player.loadVideoById({ videoId: targetVideoId, startSeconds: startTime });
+            player.setLoop(loopEnabled);
+            player.unMute();
+            player.playVideo();
         } else {
+            // ストップ
             if (player && typeof player.stopVideo === 'function') {
                 player.stopVideo();
             }
-            if(playerWrapper) playerWrapper.style.display = 'none';
         }
     }
 
-    // ─── カスタム背景画像適用 ──────────────────────────────────
+    function addCustomStyleSheet() {
+        if (document.getElementById('lolex-custom-style')) return;
+        const style = document.createElement('style');
+        style.id = 'lolex-custom-style';
+        style.textContent = `
+        .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
+        .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #222; color: #fff; }
+        .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; border: none; border-radius: 4px; }
+
+        #yt-fixed-container {
+            position: fixed;
+            bottom: 10px;
+            right: -500px;
+            width: 480px;
+            height: 300px;
+            z-index: 9999;
+            background: #000;
+            border: 2px solid #555;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s ease-in-out;
+        }
+        #yt-fixed-container.yt-visible {
+            right: 10px;
+        }
+        #yt-fixed-container.yt-collapsed {
+            height: 260px !important;
+        }
+
+        #yt-fixed-container #yt-collapse-toggle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: auto;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            z-index: 10001;
+        }
+
+        #yt-fixed-container .yt-input-area {
+            height: 40px;
+            padding: 4px 4px 4px 75px !important;
+        }
+
+        #yt-mobile-toggle-btn {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            z-index: 10000;
+            cursor: pointer;
+            background: rgba(255, 0, 0, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            display: none;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+             #yt-fixed-container {
+                width: 320px;
+                height: 200px;
+                right: -330px;
+             }
+             #yt-fixed-container.yt-visible {
+                right: 10px;
+             }
+             #yt-fixed-container.yt-collapsed {
+                height: 160px !important;
+             }
+             #yt-mobile-toggle-btn {
+                display: block;
+             }
+             #yt-fixed-container .yt-input-area {
+                 padding: 4px 4px 4px 75px !important;
+             }
+        }
+    `;
+        document.head.appendChild(style);
+    }
+
+    function initYouTubePlayer() {
+        if (document.getElementById('yt-fixed-container')) return;
+
+        addCustomStyleSheet();
+
+        let ytContainer = document.createElement('div');
+        ytContainer.id = 'yt-fixed-container';
+
+        const isCollapsed = localStorage.getItem('yt-collapsed') === 'true';
+        const isVisible = localStorage.getItem(STORAGE_IS_VISIBLE) === 'true';
+
+        if (isCollapsed) ytContainer.classList.add('yt-collapsed');
+        if (isVisible) ytContainer.classList.add('yt-visible');
+
+        ytContainer.innerHTML = `
+            <div id="yt-input-area" class="youtube-input-group yt-input-area" style="background: #333; display: ${isCollapsed ? 'none' : 'flex'};">
+                <input type="text" id="yt-video-id-input" placeholder="YouTube URL or ID" style="flex-grow: 1; padding: 4px; border: 1px solid #555; background: #222; color: #fff;">
+                <button id="yt-load-button" style="padding: 4px 8px; cursor: pointer; background: #4CAF50; color: white;">Load & Save</button>
+            </div>
+            <div class="youtube-player-wrapper" style="flex-grow: 1; position: relative; width: 100%; height: 260px;">
+                <div id="yt-player"></div>
+            </div>
+            <button id="yt-collapse-toggle" style="">
+                ${isCollapsed ? '▼ Open' : '▲ Close'}
+            </button>
+        `;
+        document.body.appendChild(ytContainer);
+        setupYouTubeCoreEventListeners(ytContainer);
+        updateUrlInput(ytContainer.querySelector('#yt-video-id-input'));
+
+        let mobileBtn = document.getElementById('yt-mobile-toggle-btn');
+        if (!mobileBtn) {
+            mobileBtn = document.createElement('button');
+            mobileBtn.id = 'yt-mobile-toggle-btn';
+            mobileBtn.title = 'Toggle YouTube Player (Mobile Only)';
+            document.body.appendChild(mobileBtn);
+
+            mobileBtn.addEventListener('click', toggleYouTubeVisibility);
+        }
+
+        if (!unsafeWindow.YT) {
+            const apiScript = document.createElement('script');
+            apiScript.src = "https://www.youtube.com/iframe_api";
+            document.head.appendChild(apiScript);
+        } else {
+            unsafeWindow.onYouTubeIframeAPIReady();
+        }
+    }
+
+    function setupYouTubeCoreEventListeners(ytContainer) {
+        const inputArea = ytContainer.querySelector('#yt-input-area');
+        const toggleButton = ytContainer.querySelector('#yt-collapse-toggle');
+
+        toggleButton.addEventListener('click', () => {
+            const isCollapsed = ytContainer.classList.toggle('yt-collapsed');
+            inputArea.style.display = isCollapsed ? 'none' : 'flex';
+            toggleButton.innerHTML = isCollapsed ? '▼ Open' : '▲ Close';
+            localStorage.setItem('yt-collapsed', isCollapsed);
+        });
+
+        const urlInput = ytContainer.querySelector('#yt-video-id-input');
+        const loadButton = ytContainer.querySelector('#yt-load-button');
+
+        loadButton.addEventListener('click', () => {
+            loadYouTube(true, urlInput.value.trim());
+        });
+
+        urlInput.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                loadYouTube(true, urlInput.value.trim());
+            }
+            e.stopPropagation();
+        });
+    }
+
+    function setupHotkey() {
+        if (window.innerWidth <= 768) return;
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'y' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                toggleYouTubeVisibility();
+            }
+        });
+    }
+
     function applyCustomBackground() {
         const customStyleId = 'custom-background-style';
         const existingStyle = document.getElementById(customStyleId);
-        if (existingStyle) {
-            existingStyle.remove(); // 既存のスタイルを削除
-        }
+        if (existingStyle) { existingStyle.remove(); }
 
-        const imageUrl = localStorage.getItem('customBackgroundUrl');
+        const imageUrl = localStorage.getItem(STORAGE_BACKGROUND_KEY);
 
-        // URLが設定されている場合のみ新しいスタイルを適用
         if (imageUrl) {
             const css = `
               html body #screens #home-screen,
               html body #screens #profile-screen,
               html body #screens #shop-screen {
                 background-image: url('${imageUrl}') !important;
+                background-size: cover !important;
+                background-position: center !important;
               }
             `;
             const style = document.createElement('style');
             style.id = customStyleId;
-            style.textContent = css;
             document.documentElement.appendChild(style);
+            style.textContent = css;
         }
     }
 
-    // ─── 設定UIタブ追加 ───────────────────────────────────────────
     function createSettings() {
         const tabContainer = document.querySelector('#settings-screen .pc-tab');
         if (!tabContainer || document.getElementById('tab5')) return;
@@ -183,21 +483,17 @@
                     .setting-name { font-weight: bold; }
                     .setting-radio { display: flex; gap: 1em; }
                     .youtube-container { display: flex; flex-direction: column; gap: 1em; }
-                    .youtube-input-group { display: flex; align-items: center; gap: 0.5em; }
-                    .youtube-input-group input { flex-grow: 1; padding: 0.5em; border: 1px solid #ccc; background: #fff; }
-                    .youtube-input-group button { padding: 0.5em 1em; cursor: pointer; }
-                    .youtube-player-wrapper { position: relative; width: 100%; padding-top: 56.25%; display: none; }
-                    .youtube-player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
                     .tab5 ul { padding-left: 20px; }
                     .tab5 li { margin-bottom: 0.5em; }
         `;
         tabContainer.appendChild(style);
 
+
         const input = document.createElement('input');
         input.id = 'tab5'; input.type = 'radio'; input.name = 'pct';
         tabContainer.insertBefore(input, tabContainer.querySelector('nav'));
         const li = document.createElement('li');
-        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex ver0.56</label>';
+        li.className = 'tab5'; li.innerHTML = '<label for="tab5">LOL.ex ver0.60</label>';
         tabContainer.querySelector('nav ul').appendChild(li);
 
         const section = tabContainer.querySelector('section');
@@ -205,7 +501,6 @@
         panel.className = 'tab5';
         section.appendChild(panel);
 
-        // コース設定セクション
         const courseSection = document.createElement('div');
         courseSection.className = 'setting-section';
         courseSection.innerHTML = '<h3>Course Stop Air Move Settings</h3>';
@@ -215,10 +510,10 @@
             const row = document.createElement('div');
             row.className = 'setting-row';
             row.innerHTML = `<div class="setting-name">${displayName}</div>
-                    <div class="setting-radio">
-                        <label><input type="radio" name="stopair-${id}" value="false"> Off</label>
-                        <label><input type="radio" name="stopair-${id}" value="true"> On</label>
-                    </div>`;
+                        <div class="setting-radio">
+                            <label><input type="radio" name="stopair-${id}" value="false"> Off</label>
+                            <label><input type="radio" name="stopair-${id}" value="true"> On</label>
+                        </div>`;
             courseSection.appendChild(row);
             row.querySelectorAll('input').forEach(radio => {
                 if (radio.value === current) radio.checked = true;
@@ -227,114 +522,98 @@
         });
         panel.appendChild(courseSection);
 
-        // YouTube設定セクション
+
         const ytSection = document.createElement('div');
         ytSection.className = 'setting-section';
         ytSection.innerHTML = `
-                <h3>YouTube Player</h3>
-                <div class="youtube-container">
-                    <div class="youtube-input-group">
-                        <input type="text" id="yt-video-id-input" placeholder="Enter YouTube video or playlist URL">
-                        <button id="yt-load-button">Load</button>
+            <h3>YouTube Player Settings</h3>
+
+            <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 1em; color: #fff;">
+                🚨 表示・非表示の切り替え方法 🚨<br>
+                <b>PCの場合:</b> <span style="background: #222; padding: 2px 4px; border-radius: 3px; color: #fff;">Ctrl + Y</span> または <span style="background: #222; padding: 2px 4px; border-radius: 3px; color: #fff;">Command + Y</span><br>
+                <b>モバイルの場合:</b> 画面左下の 小さく透明なボタン をタップ
+            </p>
+
+            <p style="font-size: 0.8em; margin-bottom: 1em; color: #fff;">
+                ✅ プレイヤーが画面外に隠れている状態でも<b>音声は流れ続け/b>、クリップへの映り込みを防ぎます。
+            </p>
+
+            <p style="font-size: 0.8em; color: #555; margin-bottom: 1em;">現在の再生位置: ${lastTime.toFixed(1)}秒</p>
+
+            <div class="youtube-container">
+                <div class="setting-row">
+                    <div class="setting-name">Loop Video/Playlist</div>
+                    <div class="setting-radio">
+                        <label><input type="radio" name="yt-loop" value="false"> Off</label>
+                        <label><input type="radio" name="yt-loop" value="true"> On</label>
                     </div>
-                    <div class="setting-row">
-                        <div class="setting-name">Loop Video/Playlist</div>
-                        <div class="setting-radio">
-                            <label><input type="radio" name="yt-loop" value="false"> Off</label>
-                            <label><input type="radio" name="yt-loop" value="true"> On</label>
-                        </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-name">Shuffle Playlist</div>
+                    <div class="setting-radio">
+                        <label><input type="radio" name="yt-shuffle" value="false"> Off</label>
+                        <label><input type="radio" name="yt-shuffle" value="true"> On</label>
                     </div>
-                    <div class="setting-row">
-                        <div class="setting-name">Shuffle Playlist</div>
-                        <div class="setting-radio">
-                            <label><input type="radio" name="yt-shuffle" value="false"> Off</label>
-                            <label><input type="radio" name="yt-shuffle" value="true"> On</label>
-                        </div>
-                    </div>
-                    <div class="youtube-player-wrapper">
-                        <div id="yt-player"></div>
-                    </div>
-                </div>`;
+                </div>
+            </div>`;
         panel.appendChild(ytSection);
 
-        // 背景設定セクション
         const bgSection = document.createElement('div');
         bgSection.className = 'setting-section';
         bgSection.innerHTML = `
-            <h3>Custom Background Image</h3>
-            <div class="youtube-container">
-                <div class="youtube-input-group">
-                    <input type="text" id="background-url-input" placeholder="Enter image URL">
-                    <button id="background-apply-button">Apply</button>
-                    <button id="background-reset-button">Reset</button>
-                </div>
+        <h3>Custom Background Image</h3>
+        <div class="youtube-container">
+            <div class="youtube-input-group">
+                <input type="text" id="background-url-input" placeholder="Enter image URL" value="${localStorage.getItem(STORAGE_BACKGROUND_KEY) || ''}">
+                <button id="background-apply-button">Apply</button>
+                <button id="background-reset-button">Reset</button>
             </div>
-            <p style="font-size: 0.8em; margin-top: 0.5em; color: #555;">Leave empty and click Apply/Reset to restore the default background.</p>
-        `;
+        </div>
+        <p style="font-size: 0.8em; margin-top: 0.5em; color: #555;">画像URLを入力後「Apply」で適用します。空にしてApply/Resetするとデフォルトに戻ります。</p>
+    `;
         panel.appendChild(bgSection);
 
-        // 最新アップデートセクション
         const updatesSection = document.createElement('div');
         updatesSection.className = 'setting-section';
         updatesSection.innerHTML = `
-                <h3>Latest Updates ver0.56 α</h3>
-                <ul style="list-style-type: disc; margin-left: 20px;">
-                    <li style="margin-bottom: 0.5em;"><b>New : </b>背景画像を自由に変更できる機能を追加しました。</li>
-                </ul>`;
+            <h3>Latest Updates ver0.60</h3>
+            <ul style="list-style-type: disc; margin-left: 20px;">
+                <li style="margin-bottom: 0.5em;">youtube再生リストが使いやすいように最適化されました。</li>
+            </ul>`;
         panel.appendChild(updatesSection);
 
-        // UIイベントリスナー設定
         setupYouTubeUI();
         setupBackgroundUI();
+
+        setTimeout(() => {
+            const tabInput = document.getElementById('tab5');
+            if (tabInput && !tabInput.checked) {
+                tabInput.checked = true;
+            }
+        }, 100);
     }
 
     function setupYouTubeUI() {
-        const videoIdInput = document.getElementById('yt-video-id-input');
-        const loadButton = document.getElementById('yt-load-button');
         const loopRadios = document.querySelectorAll('input[name="yt-loop"]');
         const shuffleRadios = document.querySelectorAll('input[name="yt-shuffle"]');
 
-        const storedPlaylistId = localStorage.getItem('yt-playlistId');
-        const storedVideoId = localStorage.getItem('yt-videoId');
-        if (storedPlaylistId) {
-            videoIdInput.value = `https://www.youtube.com/playlist?list=${storedPlaylistId}`;
-        } else if (storedVideoId) {
-            videoIdInput.value = `https://www.youtube.com/watch?v=${storedVideoId}`;
-        }
-
         const savedLoop = localStorage.getItem('yt-loop') === 'true';
-        document.querySelector(`input[name="yt-loop"][value="${savedLoop}"]`).checked = true;
+        const loopRadio = document.querySelector(`input[name="yt-loop"][value="${savedLoop}"]`);
+        if(loopRadio) loopRadio.checked = true;
+
         loopRadios.forEach(radio => radio.addEventListener('change', (e) => {
             localStorage.setItem('yt-loop', e.target.value);
             if (player) player.setLoop(e.target.value === 'true');
         }));
 
         const savedShuffle = localStorage.getItem('yt-shuffle') === 'true';
-        document.querySelector(`input[name="yt-shuffle"][value="${savedShuffle}"]`).checked = true;
+        const shuffleRadio = document.querySelector(`input[name="yt-shuffle"][value="${savedShuffle}"]`);
+        if(shuffleRadio) shuffleRadio.checked = true;
+
         shuffleRadios.forEach(radio => radio.addEventListener('change', (e) => {
             localStorage.setItem('yt-shuffle', e.target.value);
             if (player) player.setShuffle(e.target.value === 'true');
         }));
-
-        loadButton.addEventListener('click', () => {
-            const inputVal = videoIdInput.value.trim();
-            if (inputVal === '') {
-                localStorage.removeItem('yt-videoId');
-                localStorage.removeItem('yt-playlistId');
-            } else {
-                const ids = getYouTubeIds(inputVal);
-                if (ids.playlistId) {
-                    localStorage.setItem('yt-playlistId', ids.playlistId);
-                    localStorage.removeItem('yt-videoId');
-                } else if (ids.videoId) {
-                    localStorage.setItem('yt-videoId', ids.videoId);
-                    localStorage.removeItem('yt-playlistId');
-                } else {
-                    return alert('Invalid YouTube URL or ID.');
-                }
-            }
-            loadYouTube();
-        });
     }
 
     function setupBackgroundUI() {
@@ -342,29 +621,25 @@
         const applyButton = document.getElementById('background-apply-button');
         const resetButton = document.getElementById('background-reset-button');
 
-        const savedUrl = localStorage.getItem('customBackgroundUrl');
-        if (savedUrl) {
-            urlInput.value = savedUrl;
-        }
+        if (!urlInput || !applyButton || !resetButton) return;
 
         applyButton.addEventListener('click', () => {
             const newUrl = urlInput.value.trim();
             if (newUrl) {
-                localStorage.setItem('customBackgroundUrl', newUrl);
+                localStorage.setItem(STORAGE_BACKGROUND_KEY, newUrl);
             } else {
-                localStorage.removeItem('customBackgroundUrl');
+                localStorage.removeItem(STORAGE_BACKGROUND_KEY);
             }
             applyCustomBackground();
         });
 
         resetButton.addEventListener('click', () => {
             urlInput.value = '';
-            localStorage.removeItem('customBackgroundUrl');
+            localStorage.removeItem(STORAGE_BACKGROUND_KEY);
             applyCustomBackground();
         });
     }
 
-    // ─── 既存UIバインド ─────────────────────────────────────────
     function bindUI() {
         const container = document.getElementById('air-movement-settings');
         if (!container) return;
@@ -382,9 +657,7 @@
         });
     }
 
-    // ─── マップ読み込み検知と処理 ─────────────────────────────────
     const rules = courses.map(c => ({ keyword: c.keyword, id: c.id, message: c.message }));
-
     window.addEventListener('message', e => {
         if (e.data?.source !== 'console_proxy') return;
         const [tag, mapName] = e.data.args;
@@ -392,66 +665,84 @@
             const rule = rules.find(r => mapName.toLowerCase().includes(r.keyword.toLowerCase()));
             const id = rule ? rule.id : mapName.toLowerCase().replace(/\s+/g, '-');
             const enabled = localStorage.getItem(`stopAirMove_${id}`) === 'true';
+
             clickAirMoveRadio(enabled);
 
             const displayText = rule ? rule.message : mapName;
 
-            // --- ラウンドリザルト画面 (end-match-header) の表示 ---
-            const header = document.getElementById('end-match-header');
-            if (header) {
-                const prev = document.getElementById('next-round-display-header');
-                if (prev) prev.remove();
-
-                const el = document.createElement('div');
-                el.id = 'next-round-display-header';
-                el.textContent = `Next Round... ${displayText}`;
-                el.style.cssText = 'font-size:14px; color:#fff; margin-top:8px; text-align:center;';
-                header.appendChild(el);
+            const endMatchHeader = document.getElementById('end-match-header');
+            if (endMatchHeader) {
+                let nextRoundDisplay = document.getElementById('next-round-display-header');
+                if (nextRoundDisplay) {
+                    nextRoundDisplay.textContent = `Next Round... ${displayText}`;
+                } else {
+                    nextRoundDisplay = document.createElement('div');
+                    nextRoundDisplay.id = 'next-round-display-header';
+                    nextRoundDisplay.textContent = `Next Round... ${displayText}`;
+                    nextRoundDisplay.style.cssText = 'font-size:14px; color:#fff; margin-top:8px; text-align:center;';
+                    endMatchHeader.appendChild(nextRoundDisplay);
+                }
             }
 
-            // --- death-screen の表示 ---
-            const targetContainer = document.querySelector('#death-screen .top-section');
-            if (targetContainer) {
-                const prev = document.getElementById('next-round-display-death');
-                if (prev) prev.remove();
-
-                const el = document.createElement('div');
-                el.id = 'next-round-display-death';
-                el.textContent = `Next Round... ${displayText}`;
-                el.style.cssText = 'font-size: 1.5rem; color: #fff; text-align: center; font-weight: bold; padding-top: 50px; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);';
-                targetContainer.appendChild(el);
+            const deathScreenTop = document.querySelector('#death-screen .top-section');
+            if (deathScreenTop) {
+                let nextRoundDisplay = document.getElementById('next-round-display-death');
+                if (nextRoundDisplay) {
+                    nextRoundDisplay.textContent = `Next Round... ${displayText}`;
+                } else {
+                    nextRoundDisplay = document.createElement('div');
+                    nextRoundDisplay.id = 'next-round-display-death';
+                    nextRoundDisplay.textContent = `Next Round... ${displayText}`;
+                    nextRoundDisplay.style.cssText = 'font-size: 1.5rem; color: #fff; text-align: center; font-weight: bold; padding-top: 50px; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);';
+                    deathScreenTop.appendChild(nextRoundDisplay);
+                }
             }
         }
     });
 
-    // ─── console.log フック ───────────────────────────────────────
     const hook = document.createElement('script');
     hook.textContent = `
-        (function(){
-            const o = console.log;
-            console.log = function(...a){
-                window.postMessage({source:'console_proxy', args:a},'*');
-                return o.apply(console,a);
-            };
-        })();
-    `;
+    (function(){
+        const o = console.log;
+        console.log = function(...a){
+            window.postMessage({source:'console_proxy', args:a},'*');
+            return o.apply(console,a);
+        };
+    })();
+`;
     document.documentElement.appendChild(hook);
 
-    // ─── 初期化処理 ──────────────────────────────────────────
-    function init() {
-        if (document.getElementById('tab5')) return;
 
+    function init() {
+        if (initCompleted || document.getElementById('tab5')) return;
+        initCompleted = true;
+
+        const residualContainer = document.getElementById('yt-fixed-container');
+        if (residualContainer) {
+            residualContainer.remove();
+        }
+
+        setTimeout(() => {
+            initYouTubePlayer();
+        }, 1000);
+
+        setupHotkey();
         applyStoredAirMove();
-        applyCustomBackground(); // <-- 追加
+        applyCustomBackground();
+
         createSettings();
         bindUI();
+
+        window.addEventListener('beforeunload', saveTime);
     }
 
-    // ─── DOM監視と初期化実行 ─────────────────────────────────────
-    new MutationObserver((mutations, observer) => {
-        if (document.querySelector('#settings-screen .pc-tab')) {
-            init();
-        }
-    }).observe(document.body, { childList: true, subtree: true });
+    function initializeScript() {
+        new MutationObserver((mutations, observer) => {
+            if (document.querySelector('#settings-screen .pc-tab')) {
+                observer.disconnect();
+                init();
+            }
+        }).observe(document.body, { childList: true, subtree: true });
+    }
 
 })();

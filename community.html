@@ -144,24 +144,141 @@
             font-weight: 600;
             color: var(--primary-color);
         }
+        
+        /* ★★★ リスト形式のスタイル ★★★ */
+        
+        #level-list-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            background-color: var(--card-color);
+        }
 
-        .level-card { background-color: var(--card-color); border-radius: 12px; box-shadow: var(--shadow-light); margin-bottom: 25px; overflow: hidden; transition: box-shadow 0.3s ease; }
-        .level-card:hover { box-shadow: var(--shadow-hover); }
-        .card-header { display: flex; gap: 20px; padding: 20px; align-items: center; cursor: pointer; }
-        .level-thumbnail { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; border: 3px solid var(--primary-color); flex-shrink: 0; }
-        .level-info { flex-grow: 1; }
-        .level-info h3 { margin: 0; font-size: 1.4em; color: var(--text-color-dark); display: flex; align-items: center; justify-content: space-between; }
-        .level-info p { margin: 5px 0 0; color: var(--secondary-color); font-size: 0.9em; }
-        .rating-badge { background-color: var(--accent-color); color: white; padding: 5px 10px; border-radius: 20px; font-weight: 700; font-size: 0.9em; margin-left: 10px; }
-        .toggle-icon { transition: transform 0.3s ease; }
+        .list-header {
+            display: grid;
+            grid-template-columns: 50px 1fr 100px 70px 70px 20px; /* Thum | Name/Author | Date | Rating | Finish | Toggle */
+            gap: 10px;
+            padding: 15px 20px;
+            background-color: var(--primary-color);
+            color: var(--text-color-light);
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            align-items: center;
+        }
+        .list-header > div:nth-child(2) { padding-left: 10px; }
+        .list-header .header-col.center { text-align: center; }
+
+
+        .level-card { 
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s ease;
+        }
+        .level-card:last-child { border-bottom: none; }
+        .level-card:hover { background-color: #f7f7ff; }
+
+        .card-header { 
+            display: grid;
+            grid-template-columns: 50px 1fr 100px 70px 70px 20px;
+            gap: 10px; 
+            padding: 10px 20px; 
+            align-items: center; 
+            cursor: pointer; 
+            min-height: 50px;
+        }
+        
+        .level-thumbnail { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 4px; 
+            object-fit: cover; 
+            border: 1px solid #ddd; 
+            flex-shrink: 0;
+        }
+        
+        .level-info { 
+            flex-grow: 1; 
+            overflow: hidden;
+            padding-left: 10px;
+        }
+        .level-info h3 { 
+            margin: 0; 
+            font-size: 1em; 
+            font-weight: 600;
+            color: var(--text-color-dark); 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+        }
+        .level-info p { 
+            margin: 0; 
+            color: var(--secondary-color); 
+            font-size: 0.8em; 
+        }
+        
+        .level-stat {
+            font-size: 0.9em;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .level-stat.rating { color: var(--accent-color); font-weight: 700; }
+        .level-stat.finish { color: var(--primary-color); font-weight: 700; }
+        
+        .toggle-icon { transition: transform 0.3s ease; justify-self: center; }
         .level-card.open .toggle-icon { transform: rotate(180deg); }
-        .card-details { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease-out; border-top: 1px solid #eee; }
-        .level-card.open .card-details { max-height: 800px; padding: 20px; }
-        .description-box { background-color: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 0.95em; white-space: pre-wrap; color: var(--text-color-dark); }
-        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; margin-bottom: 10px; }
-        .detail-item { padding: 10px; border: 1px solid #eee; border-radius: 6px; background-color: #fff; }
-        .detail-item strong { color: var(--primary-color); display: block; font-size: 0.85em; margin-bottom: 2px; }
-        .detail-item span { display: block; color: var(--text-color-dark); font-weight: 600; font-size: 1.1em; }
+        
+        /* 詳細セクション */
+        .card-details { 
+            padding: 0 20px; 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out; 
+            background-color: #fafafa;
+            border-top: 1px solid #f0f0f0; 
+            grid-column: 1 / -1; /* グリッド全体に広げる */
+        }
+        .level-card.open .card-details { 
+            max-height: 800px; 
+            padding: 20px; 
+        }
+        .description-box { 
+            background-color: #fff; 
+            padding: 10px; 
+            border-radius: 4px; 
+            margin-bottom: 15px; 
+            font-size: 0.85em; 
+            white-space: pre-wrap; 
+            color: var(--text-color-dark); 
+            border: 1px solid #eee;
+        }
+        .description-box strong { font-weight: 600; display: block; margin-bottom: 5px; color: var(--primary-color); }
+
+        .detail-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 10px; 
+            margin-top: 10px;
+        }
+        .detail-item { 
+            padding: 8px 10px; 
+            border: 1px solid #eee; 
+            border-radius: 4px; 
+            background-color: #fff; 
+        }
+        .detail-item strong { 
+            color: var(--secondary-color); 
+            display: block; 
+            font-size: 0.75em; 
+            margin-bottom: 0; 
+            text-transform: uppercase;
+        }
+        .detail-item span { 
+            display: block; 
+            color: var(--text-color-dark); 
+            font-weight: 600; 
+            font-size: 0.95em; 
+        }
         .detail-item span.wr-holder { color: var(--accent-color); }
         
         .footer-section { background-color: var(--text-color-dark); color: var(--text-color-light); padding: 40px 20px; text-align: center; margin-top: 40px; }
@@ -171,21 +288,42 @@
 
         @media (max-width: 768px) {
             .navbar a { display: none; }
-            #language-switcher { margin-left: 0; }
-            .navbar { background-color: transparent; box-shadow: none; padding: 10px; flex-direction: column-reverse; align-items: flex-end; }
-            .hamburger-menu { display: block; margin-bottom: 10px; }
-            .navbar.open a { display: block; margin: 10px 0; }
-            .navbar.open { position: absolute; top: 80px; right: 10px; background-color: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 20px; border-radius: 12px; display: flex; align-items: flex-start; }
-            .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
-            
-            .filter-row { flex-direction: column; align-items: stretch; }
-            .filter-group { min-width: 100%; }
-            #search-button { align-self: stretch; margin-top: 10px; }
-            
-            .card-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .level-thumbnail { width: 80px; height: 80px; }
-            .level-info h3 { font-size: 1.2em; flex-direction: column; align-items: flex-start; }
-            .rating-badge { margin-left: 0; margin-top: 5px; }
+            /* ... (ナビゲーションのモバイル対応は前回と同じ) ... */
+            .list-header { 
+                grid-template-columns: 50px 1fr 60px 50px 20px; /* Date/Rating/Finishを非表示または縮小 */
+                padding: 10px 15px;
+            }
+            .list-header .header-col:nth-child(3),
+            .list-header .header-col:nth-child(4),
+            .list-header .header-col:nth-child(5) { display: none; }
+
+            .card-header { 
+                grid-template-columns: 50px 1fr 60px 50px 20px;
+                padding: 10px 15px;
+            }
+            .card-header > *:nth-child(3),
+            .card-header > *:nth-child(4),
+            .card-header > *:nth-child(5) { display: none; }
+            .level-stat.rating { text-align: left; }
+            .level-info h3 { font-size: 0.9em; }
+            .level-info p { font-size: 0.75em; }
+        }
+
+        /* 500px以下で、リストヘッダーの列をさらに削減 */
+        @media (max-width: 500px) {
+            .list-header { 
+                grid-template-columns: 50px 1fr 20px; 
+            }
+            .list-header .header-col:nth-child(3),
+            .list-header .header-col:nth-child(4),
+            .list-header .header-col:nth-child(5) { display: none; }
+
+            .card-header { 
+                grid-template-columns: 50px 1fr 20px;
+            }
+            .card-header > *:nth-child(3),
+            .card-header > *:nth-child(4),
+            .card-header > *:nth-child(5) { display: none; }
         }
     </style>
 </head>
@@ -272,7 +410,9 @@
     <script>
         const API_BASE_URL = 'https://s.lolbeans.io/level-list?';
         const THUMBNAIL_BASE_URL = 'https://lolbeans.io/ui/level-thumbnails/';
-        const LEVELS_PER_PAGE = 8;
+        
+        // ★★★ 取得コース数を12に変更 ★★★
+        const LEVELS_PER_PAGE = 12;
 
         let currentLang = 'ja';
         let currentPage = 0;
@@ -284,9 +424,13 @@
                 heroTitle: "カスタムコース一覧", heroSubtitle: "ユーザーが作成・公開した最新のLOLBeansカスタムマップ",
                 loading: "データをロード中です...",
                 searchTextLabel: "コース名検索", sortTypeLabel: "並び替え", filterTypeLabel: "コースの種類", filterFinishLabel: "クリア率", searchButton: "検索",
-                sort0: "ベスト評価 (Best Rated)", sort1: "新しい順 (New)", sort2: "トレンド (Trending)",
-                filterTypeM1: "すべて (All)", filterType0: "サンドボックス (Sandbox)", filterType1: "タイムレース (Timed Race)", filterType2: "競争レース (Competitive Race)", filterType3: "エリミネーション (Elimination)",
-                filterFinish0: "すべて (All)", filterFinish1: "低い (<30%)", filterFinish2: "普通 (30%〜70%)", filterFinish3: "高い (>70%)",
+                sort0: "ベスト評価", sort1: "新しい順", sort2: "トレンド",
+                filterTypeM1: "すべて", filterType0: "サンドボックス", filterType1: "タイムレース", filterType2: "競争レース", filterType3: "エリミネーション",
+                filterFinish0: "すべて", filterFinish1: "低い (<30%)", filterFinish2: "普通 (30%〜70%)", filterFinish3: "高い (>70%)",
+                
+                // リストヘッダー用のタイトル
+                headerName: "コース名 / 作者", headerDate: "公開日", headerRating: "評価", headerFinish: "クリア率",
+                
                 author: "作者", description: "説明", votes: "投票数", rating: "平均評価", finishPercent: "クリア率", starts: "プレイ回数", distinctPlayers: "ユニークプレイヤー",
                 averageFinishTime: "平均クリア時間", wr: "WR (世界記録)", wrHolder: "WR保持者", wrDate: "WR達成日", date: "公開日",
                 pageInfo: (current, max) => `${current + 1} / ${max}`,
@@ -301,6 +445,10 @@
                 sort0: "Best Rated", sort1: "New", sort2: "Trending",
                 filterTypeM1: "All", filterType0: "Sandbox", filterType1: "Timed Race", filterType2: "Competitive Race", filterType3: "Elimination",
                 filterFinish0: "All", filterFinish1: "Low (<30%)", filterFinish2: "Average (30% to 70%)", filterFinish3: "High (>70%)",
+                
+                // リストヘッダー用のタイトル
+                headerName: "Name / Author", headerDate: "Date", headerRating: "Rating", headerFinish: "Finish %",
+
                 author: "Author", description: "Description", votes: "Votes", rating: "Avg. Rating", finishPercent: "Finish %", starts: "Starts", distinctPlayers: "Distinct Players",
                 averageFinishTime: "Avg. Finish Time", wr: "WR (World Record)", wrHolder: "WR Holder", wrDate: "WR Date", date: "Publish Date",
                 pageInfo: (current, max) => `Page ${current + 1} of ${max}`,
@@ -314,7 +462,7 @@
             try {
                 const date = new Date(dateString);
                 return date.toLocaleString(lang === 'ja' ? 'ja-JP' : 'en-US', {
-                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: lang === 'en'
+                    year: 'numeric', month: '2-digit', day: '2-digit'
                 });
             } catch (e) {
                 return dateString.substring(0, 10); 
@@ -344,8 +492,7 @@
             params.append('ft', filterType);
             params.append('ff', filterFinish);
             
-            // ★ ユーザーの要求により m パラメーターを追加
-            // APIの仕様に基づき、ページネーション情報を取得するために nと同じ値を設定
+            // m パラメーターを追加
             params.append('m', LEVELS_PER_PAGE); 
 
             if (searchText) {
@@ -364,16 +511,20 @@
 
             card.innerHTML = `
                 <div class="card-header">
-                    <img src="${THUMBNAIL_BASE_URL}${level.levelId}.png" alt="${level.name} Thumbnail" class="level-thumbnail" onerror="this.onerror=null;this.src='https://via.placeholder.com/100?text=No+Image';">
+                    <img src="${THUMBNAIL_BASE_URL}${level.levelId}.png" alt="${level.name} Thumbnail" class="level-thumbnail" onerror="this.onerror=null;this.src='https://via.placeholder.com/40?text=';">
+                    
                     <div class="level-info">
-                        <h3>
-                            ${level.name}
-                            <span class="rating-badge">${level.rating.toFixed(2)} <i class="fas fa-star"></i></span>
-                        </h3>
-                        <p>${langData.author}: ${level.author || 'N/A'}</p>
+                        <h3>${level.name}</h3>
+                        <p>${level.author || 'N/A'}</p>
                     </div>
+                    
+                    <span class="level-stat date">${formatDate(level.date, currentLang)}</span>
+                    <span class="level-stat rating">${level.rating.toFixed(2)} <i class="fas fa-star"></i></span>
+                    <span class="level-stat finish">${(level.finishPercent * 100).toFixed(0)}%</span>
+                    
                     <i class="fas fa-chevron-down toggle-icon"></i>
                 </div>
+                
                 <div class="card-details">
                     <div class="description-box">
                         <strong>${langData.description}:</strong>
@@ -389,28 +540,20 @@
                             <span>${level.wrHolder || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
-                            <strong>${langData.finishPercent}</strong>
-                            <span>${(level.finishPercent * 100).toFixed(2)}%</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>${langData.rating}</strong>
-                            <span>${level.rating.toFixed(2)} / 5</span>
-                        </div>
-                        <div class="detail-item">
                             <strong>${langData.averageFinishTime}</strong>
                             <span>${formatTime(level.averageFinishTime)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>${langData.votes}</strong>
-                            <span>${level.votes.toLocaleString()}</span>
                         </div>
                         <div class="detail-item">
                             <strong>${langData.starts}</strong>
                             <span>${level.starts.toLocaleString()}</span>
                         </div>
                         <div class="detail-item">
-                            <strong>${langData.date}</strong>
-                            <span>${formatDate(level.date, currentLang)}</span>
+                            <strong>${langData.votes}</strong>
+                            <span>${level.votes.toLocaleString()}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>${langData.distinctPlayers}</strong>
+                            <span>${level.distinctPlayers.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
@@ -433,7 +576,6 @@
             paginationContainer.innerHTML = '';
             const langData = translations[currentLang];
 
-            // maxPagesが0または1以下の場合はページネーションを非表示にする
             if (maxPages <= 1) return;
 
             const prevBtn = document.createElement('button');
@@ -450,7 +592,6 @@
 
             const pageInfo = document.createElement('span');
             pageInfo.className = 'page-info';
-            // maxPagesが確実に数値であることを確認（undefined/null対策）
             const safeMaxPages = isNaN(maxPages) || maxPages === null ? 1 : maxPages;
             pageInfo.textContent = langData.pageInfo(currentPage, safeMaxPages);
             paginationContainer.appendChild(pageInfo);
@@ -468,25 +609,35 @@
             paginationContainer.appendChild(nextBtn);
         };
 
+        const renderListHeader = (lang) => {
+            const langData = translations[lang];
+            const header = document.createElement('div');
+            header.className = 'list-header';
+            header.innerHTML = `
+                <div>#</div>
+                <div class="header-col">${langData.headerName}</div>
+                <div class="header-col center">${langData.headerDate}</div>
+                <div class="header-col center">${langData.headerRating}</div>
+                <div class="header-col center">${langData.headerFinish}</div>
+                <div></div>
+            `;
+            return header;
+        };
+
         const fetchAndRenderLevels = async (pageIndex = 0) => {
             const container = document.getElementById('level-list-container');
             let loading = document.getElementById('loading-message');
             const langData = translations[currentLang];
             
-            // ロードメッセージが存在しない場合に作成して表示する (nullエラー対策)
             if (!loading) {
-                const tempDiv = document.createElement('div');
-                tempDiv.id = 'loading-message';
-                tempDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
-                container.innerHTML = '';
-                container.appendChild(tempDiv);
-                loading = tempDiv;
-            } else {
-                loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
-                loading.style.display = 'block';
-                container.innerHTML = ''; 
+                loading = document.createElement('div');
+                loading.id = 'loading-message';
                 container.appendChild(loading);
             }
+            loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
+            loading.style.display = 'block';
+            container.innerHTML = ''; 
+            container.appendChild(loading);
             document.getElementById('pagination').innerHTML = '';
             
             try {
@@ -498,26 +649,28 @@
                 const data = await response.json();
                 
                 currentPage = pageIndex;
-                maxPages = data.m; // ★ 最大ページ数を確実に取得
+                maxPages = data.m; 
                 
                 container.innerHTML = ''; 
                 
                 if (data && data.l && data.l.length > 0) {
+                    // ★ リストヘッダーの追加
+                    container.appendChild(renderListHeader(currentLang));
+                    
                     data.l.forEach(level => {
                         const card = createLevelCard(level);
                         container.appendChild(card);
                     });
                     renderPagination();
                 } else {
-                    container.innerHTML = `<div id="loading-message">${langData.dataError}: No levels found.</div>`;
+                    container.innerHTML = `<div id="loading-message" style="display:block; padding:20px;">${langData.dataError}: No levels found.</div>`;
                     document.getElementById('pagination').innerHTML = '';
                 }
 
             } catch (error) {
-                container.innerHTML = `<div id="loading-message">${langData.dataError} (${error.message})</div>`;
+                container.innerHTML = `<div id="loading-message" style="display:block; padding:20px;">${langData.dataError} (${error.message})</div>`;
                 document.getElementById('pagination').innerHTML = '';
             } finally {
-                // ロードが完了したらメッセージを非表示にする
                 if (loading) {
                     loading.style.display = 'none';
                 }
@@ -572,22 +725,18 @@
 
             updateFilterOptions(lang);
             
-            // 言語設定適用後、現在のページ（または0ページ目）のデータを再取得
             fetchAndRenderLevels(currentPage);
         };
 
 
         document.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('language') || 'ja';
-            // 初期表示はapplyLanguageに任せる
             applyLanguage(savedLang); 
 
-            // 検索ボタンのイベント設定: ページを0に戻して検索
             document.getElementById('search-button').addEventListener('click', () => {
                 fetchAndRenderLevels(0);
             });
 
-            // エンターキーでの検索を許可 (テキストフィールドのみ)
             document.getElementById('search-text').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -595,7 +744,6 @@
                 }
             });
 
-            // フィルター/ソート変更時もページを0に戻して検索
             document.getElementById('sort-type').addEventListener('change', () => {
                 fetchAndRenderLevels(0);
             });

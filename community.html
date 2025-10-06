@@ -347,6 +347,7 @@
             if (searchText) {
                 params.append('ts', searchText);
             }
+            // ★ m はAPIレスポンスに含まれる最大ページ数であり、リクエストパラメータではないため追加しない
 
             return API_BASE_URL + params.toString();
         };
@@ -429,6 +430,7 @@
             paginationContainer.innerHTML = '';
             const langData = translations[currentLang];
 
+            // maxPagesが0または1以下の場合はページネーションを非表示にする
             if (maxPages <= 1) return;
 
             const prevBtn = document.createElement('button');
@@ -445,15 +447,17 @@
 
             const pageInfo = document.createElement('span');
             pageInfo.className = 'page-info';
-            pageInfo.textContent = langData.pageInfo(currentPage, maxPages);
+            // maxPagesが確実に数値であることを確認（念のため）
+            const safeMaxPages = isNaN(maxPages) ? 1 : maxPages;
+            pageInfo.textContent = langData.pageInfo(currentPage, safeMaxPages);
             paginationContainer.appendChild(pageInfo);
 
             const nextBtn = document.createElement('button');
             nextBtn.className = 'page-btn';
             nextBtn.textContent = langData.next;
-            nextBtn.disabled = currentPage >= maxPages - 1;
+            nextBtn.disabled = currentPage >= safeMaxPages - 1;
             nextBtn.addEventListener('click', () => {
-                if (currentPage < maxPages - 1) {
+                if (currentPage < safeMaxPages - 1) {
                     fetchAndRenderLevels(currentPage + 1);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
@@ -463,16 +467,22 @@
 
         const fetchAndRenderLevels = async (pageIndex = 0) => {
             const container = document.getElementById('level-list-container');
-            const loading = document.getElementById('loading-message');
+            let loading = document.getElementById('loading-message');
             const langData = translations[currentLang];
             
-            // 修正箇所: loading要素が存在するか確認してから操作する
-            if (loading) {
+            // ロードメッセージが存在しない場合に作成して表示する
+            if (!loading) {
+                const tempDiv = document.createElement('div');
+                tempDiv.id = 'loading-message';
+                tempDiv.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
+                container.innerHTML = '';
+                container.appendChild(tempDiv);
+                loading = tempDiv;
+            } else {
+                loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
                 loading.style.display = 'block';
                 container.innerHTML = ''; 
                 container.appendChild(loading);
-            } else {
-                container.innerHTML = `<div id="loading-message"><i class="fas fa-spinner fa-spin"></i> ${langData.loading}</div>`;
             }
             document.getElementById('pagination').innerHTML = '';
             
@@ -485,7 +495,7 @@
                 const data = await response.json();
                 
                 currentPage = pageIndex;
-                maxPages = data.m;
+                maxPages = data.m; // ★ 最大ページ数を確実に取得
                 
                 container.innerHTML = ''; 
                 
@@ -504,6 +514,7 @@
                 container.innerHTML = `<div id="loading-message">${langData.dataError} (${error.message})</div>`;
                 document.getElementById('pagination').innerHTML = '';
             } finally {
+                // ロードが完了したらメッセージを非表示にする
                 if (loading) {
                     loading.style.display = 'none';
                 }
@@ -519,6 +530,7 @@
             document.getElementById('label-filter-finish').textContent = langData.filterFinishLabel;
             document.getElementById('search-button').innerHTML = `<i class="fas fa-search"></i> ${langData.searchButton}`;
             
+            // Select Optionの更新 (省略)
             document.querySelector('#sort-type option[value="0"]').textContent = langData.sort0;
             document.querySelector('#sort-type option[value="1"]').textContent = langData.sort1;
             document.querySelector('#sort-type option[value="2"]').textContent = langData.sort2;
@@ -549,7 +561,6 @@
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
             
-            // ロードメッセージのテキストも更新
             const loading = document.getElementById('loading-message');
             if (loading) {
                  loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
@@ -559,14 +570,15 @@
 
             updateFilterOptions(lang);
             
-            // ページングが変わるわけではないので、現在のページを再描画
+            // ★ 言語設定適用後、現在のページ（または0ページ目）のデータを再取得
             fetchAndRenderLevels(currentPage);
         };
 
 
         document.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('language') || 'ja';
-            applyLanguage(savedLang);
+            // 初期表示はapplyLanguageに任せる
+            applyLanguage(savedLang); 
 
             // 検索ボタンのイベント設定: ページを0に戻して検索
             document.getElementById('search-button').addEventListener('click', () => {

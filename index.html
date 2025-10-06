@@ -30,488 +30,356 @@
             scroll-behavior: smooth;
         }
 
-        /* Hero Section - 背景画像 */
+        /* Hero Section */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/icon.png');
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://tanabesan.github.io/lolbeans/file/page/bg.jpg');
             background-size: cover;
             background-position: center;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            background-repeat: no-repeat;
             color: var(--text-color-light);
+            padding: 120px 20px;
+            text-align: center;
             position: relative;
         }
-
         .hero-content {
-            z-index: 10;
-            max-width: 900px;
-            padding: 0 20px;
+            position: relative;
+            z-index: 2;
         }
-
-        .hero-title {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
+        .hero-content h1 {
+            font-size: 4.5em;
             font-weight: 700;
+            margin: 0 0 10px;
         }
-
-        .hero-subtitle {
-            font-size: 1.5rem;
-            margin-bottom: 40px;
+        .hero-content p {
+            font-size: 1.5em;
             font-weight: 300;
+            margin: 0 0 40px;
         }
-
         .cta-button {
             display: inline-block;
-            background-color: var(--primary-color);
-            color: var(--text-color-light);
-            padding: 12px 30px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background-color 0.3s ease, transform 0.2s;
-            box-shadow: var(--shadow-light);
-        }
-
-        .cta-button:hover {
-            background-color: #4A4480;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        /* Header / Navigation */
-        header {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-        }
-
-        .logo a {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .navbar ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-
-        .navbar li {
-            margin-left: 25px;
-        }
-
-        .navbar a {
-            text-decoration: none;
+            padding: 18px 40px;
+            background-color: #FFC107;
             color: var(--text-color-dark);
-            font-weight: 500;
-            font-size: 1rem;
-            padding: 5px 0;
-            transition: color 0.3s ease;
-            position: relative;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-5px);
+            background-color: #FFD54F;
         }
 
+        /* Navbar Section */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 10px 20px;
+            border-radius: 30px;
+            z-index: 1000;
+            display: flex; /* 言語セレクタ対応 */
+            align-items: center;
+        }
+        .navbar a {
+            color: var(--text-color-dark);
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            display: inline-block;
+        }
         .navbar a:hover {
             color: var(--primary-color);
         }
-
-        .navbar a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-
-        .navbar a:hover::after,
-        .navbar a.active::after {
-            width: 100%;
-        }
-
-        /* Language Switcher */
-        .language-switcher-container {
-            display: flex;
-            align-items: center;
-        }
-
-        #language-switcher {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-family: 'Poppins', sans-serif;
-            margin-left: 20px;
-            cursor: pointer;
-            background-color: #fff;
-            color: var(--text-color-dark);
-        }
-
-        /* Hamburger Menu */
-        .hamburger-icon {
+        .hamburger-menu {
             display: none;
-            font-size: 1.5rem;
             cursor: pointer;
-            color: var(--primary-color);
+            font-size: 1.5em;
+            color: var(--text-color-dark);
+            padding: 5px;
+        }
+        /* 言語セレクタのスタイル */
+        #language-switcher {
+            padding: 8px 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            margin-left: 15px;
+            cursor: pointer;
+            font-size: 14px;
         }
 
-        /* Sections */
-        .section {
-            padding: 80px 5% 60px;
-            text-align: center;
-        }
-
-        .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 40px;
-            color: var(--primary-color);
-            font-weight: 600;
-            position: relative;
-            display: inline-block;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: -10px;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 4px;
-            background-color: var(--secondary-color);
-            border-radius: 2px;
-        }
-
-        /* Features Section */
-        #features {
-            background-color: var(--background-color);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+        /* Main Content */
+        .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
 
+        /* Feature Section */
+        .features-section {
+            text-align: center;
+            padding: 60px 0;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
         .feature-card {
-            background-color: var(--card-color);
-            padding: 30px;
-            border-radius: 10px;
+            background: var(--card-color);
+            border-radius: 12px;
+            padding: 40px;
             box-shadow: var(--shadow-light);
-            text-align: left;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            text-align: center;
             opacity: 0;
             transform: translateY(20px);
         }
-
+        /* アニメーション遅延 */
+        .feature-card:nth-child(1) { transition-delay: 0s; }
+        .feature-card:nth-child(2) { transition-delay: 0.1s; }
+        .feature-card:nth-child(3) { transition-delay: 0.2s; }
+        .feature-card:nth-child(4) { transition-delay: 0.3s; }
         .feature-card.visible {
             opacity: 1;
             transform: translateY(0);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
-        
         .feature-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
             box-shadow: var(--shadow-hover);
         }
-
-        .card-icon {
+        .feature-card i {
+            font-size: 3em;
             color: var(--primary-color);
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            display: block;
+            margin-bottom: 20px;
         }
-
-        .card-title {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+        .feature-card h3 {
+            font-size: 1.5em;
             font-weight: 600;
-        }
-
-        .card-description {
-            font-size: 1rem;
             color: var(--secondary-color);
-        }
-
-        /* Demo Section */
-        #demo {
-            background-color: var(--card-color);
-            padding-bottom: 80px;
-        }
-
-        .demo-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .video-placeholder {
-            width: 100%;
-            height: 450px;
-            background-color: #eee;
-            border-radius: 10px;
-            box-shadow: var(--shadow-hover);
-            margin-top: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: var(--secondary-color);
+            margin: 0 0 10px;
         }
 
         /* Footer */
-        footer {
-            background-color: var(--primary-color);
+        .footer-section {
+            background-color: var(--text-color-dark);
             color: var(--text-color-light);
+            padding: 60px 20px;
             text-align: center;
-            padding: 20px 0;
-            font-size: 0.9rem;
         }
-
-        /* Responsive Design */
-        @media (max-width: 900px) {
-            .hero-title {
-                font-size: 3rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1.2rem;
-            }
-
-            .section {
-                padding: 60px 5% 40px;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .demo-content {
-                padding: 0 20px;
-            }
-
-            .video-placeholder {
-                height: 350px;
-            }
+        .footer-section .social-icons a {
+            color: var(--text-color-light);
+            font-size: 1.5em;
+            margin: 0 15px;
+            transition: color 0.3s ease;
         }
-
+        .footer-section .social-icons a:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Media Queries for Responsive Design */
         @media (max-width: 768px) {
-            .navbar {
-                position: absolute;
-                top: 70px; /* Adjust based on header height */
-                left: 0;
-                width: 100%;
-                background-color: rgba(255, 255, 255, 0.98);
-                flex-direction: column;
-                transform: translateY(-200%);
-                transition: transform 0.3s ease-out;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+            .hero-content h1 {
+                font-size: 3.5em;
             }
-
-            .navbar.open {
-                transform: translateY(0);
-            }
-
-            .navbar ul {
-                flex-direction: column;
-                width: 100%;
-                padding: 10px 0;
-            }
-
-            .navbar li {
-                margin: 0;
-                text-align: center;
-                border-bottom: 1px solid #eee;
-            }
-
-            .navbar li:last-child {
-                border-bottom: none;
-            }
-
             .navbar a {
+                display: none;
+            }
+            #language-switcher {
+                margin-left: 0;
+            }
+            .navbar {
+                background-color: transparent;
+                box-shadow: none;
+                padding: 10px;
+                flex-direction: column-reverse; /* 言語セレクタが上になるように調整 */
+                align-items: flex-end;
+            }
+            .hamburger-menu {
                 display: block;
-                padding: 15px 0;
-                font-size: 1.1rem;
+                margin-bottom: 10px;
             }
-
-            .hamburger-icon {
+            .navbar.open a {
                 display: block;
+                margin: 10px 0;
             }
-
-            .language-switcher-container {
-                display: none; /* Hide language switcher on small screens when not in menu */
+            .navbar.open {
+                background-color: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                padding: 20px;
+                border-radius: 12px;
+                display: flex;
             }
-
-            header {
-                padding: 15px 20px;
+            .navbar.open #language-switcher {
+                 display: block;
+                 width: 100%;
+                 margin: 10px 0;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <a href="index.html">LOL.ex</a>
-        </div>
-        <nav class="navbar">
-            <ul>
-                <li><a href="index.html" id="nav-home" class="active">ホーム</a></li>
-                <li><a href="file.html" id="nav-file">ファイル配布</a></li>
-                <li><a href="faq.html" id="nav-faq">よくある質問</a></li>
-                <li><a href="contact.html" id="nav-contact">お問い合わせ</a></li>
-                <li><a href="community.html" id="nav-community">コース一覧</a></li>
-            </ul>
-        </nav>
-        <div class="language-switcher-container">
-            <i class="fas fa-globe"></i>
-            <select id="language-switcher">
-                <option value="ja">日本語</option>
-                <option value="en">English</option>
-            </select>
-        </div>
-        <div class="hamburger-icon" id="hamburger-icon">
-            <i class="fas fa-bars"></i>
+
+    <header class="hero-section">
+        <div class="hero-content">
+            <h1 id="hero-title">LOL.ex</h1>
+            <p id="hero-subtitle">ゲームの可能性を、どこまでも。</p>
+            <a href="lolex/main.user.js" class="cta-button" id="cta-button">今すぐダウンロード</a>
         </div>
     </header>
 
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title" id="hero-title">LOL.ex: 次世代のゲーム体験</h1>
-            <p class="hero-subtitle" id="hero-subtitle">ファイルをダウンロードして、無限のカスタムレベルとコミュニティと交流しよう。</p>
-            <a href="file.html" class="cta-button" id="hero-cta">ファイルをダウンロード</a>
-        </div>
-    </section>
+    <nav class="navbar">
+        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
+        <a id="nav-main-page" href="https://tanabesan.github.io/lolbeans/">メインページ</a>
+        <a id="nav-community" href="community.html">コミュ一覧</a> <a id="nav-file-library" href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
+        <a id="nav-faq" href="https://tanabesan.github.io/lolbeans/faq.html">よくある質問</a>
+        <a id="nav-contact" href="https://tanabesan.github.io/lolbeans/contact.html">お問い合わせ</a>
+        <select id="language-switcher">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+        </select>
+    </nav>
 
-    <section id="features" class="section">
-        <h2 class="section-title" id="features-title">LOL.exの特徴</h2>
-        <div class="features-grid">
-            <div class="feature-card" data-lang-title="cardTitle1" data-lang-desc="cardDesc1">
-                <i class="fas fa-code-branch card-icon"></i>
-                <h3 class="card-title">カスタムマップ</h3>
-                <p class="card-description">LOLBeansのマップをカスタマイズし、オリジナルのコースを作成・プレイするためのファイルを提供します。</p>
+    <main class="container">
+        <section id="features" class="features-section">
+            <h2 id="features-title">強化された主な機能</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-rocket"></i>
+                    <h3 id="feature1-title">オートエアスイッチ</h3>
+                    <p id="feature1-desc">
+                        事前に設定された情報からエアムーブ設定を自動で切り替え。シームレスな操作体験を実現します。
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-crosshairs"></i>
+                    <h3 id="feature2-title">ラウンドスコープ</h3>
+                    <p id="feature2-desc">
+                        次のラウンドを予測し余裕を持って準備。戦略的な優位性を確保します。
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3 id="feature3-title">Youtubeプレイヤー</h3>
+                    <p id="feature3-desc">
+                        リアルタイムでYouTube動画を再生し、ゲームプレイを妨げることなくエンターテインメントを楽しめます。
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-palette"></i>
+                    <h3 id="feature4-title">バックグラウンドデザイナー</h3>
+                    <p id="feature4-desc">
+                        ロビーの背景をカスタマイズし、個性的なゲーム環境を作り出します。
+                    </p>
+                </div>
             </div>
-            <div class="feature-card" data-lang-title="cardTitle2" data-lang-desc="cardDesc2">
-                <i class="fas fa-users card-icon"></i>
-                <h3 class="card-title">コミュニティ連携</h3>
-                <p class="card-description">コミュニティとコースを共有し、新しい遊び方を創出するための連携機能を充実させています。</p>
-            </div>
-            <div class="feature-card" data-lang-title="cardTitle3" data-lang-desc="cardDesc3">
-                <i class="fas fa-lightbulb card-icon"></i>
-                <h3 class="card-title">簡単な導入</h3>
-                <p class="card-description">初心者でも簡単に導入できるよう、詳細な手順とサポートを提供しています。</p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="demo" class="section">
-        <h2 class="section-title" id="demo-title">デモ動画</h2>
-        <div class="demo-content">
-            <p id="demo-subtitle">LOL.exの機能の一部を動画でご紹介します。</p>
-            <div class="video-placeholder" id="demo-placeholder">
-                デモ動画のコンテンツ
+        <section class="content-section" style="text-align: center; padding: 60px 0;">
+            <h2 id="demo-title">体験版デモ</h2>
+            <p id="demo-desc">
+                LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。
+            </p>
+            <div id="demo-placeholder" style="margin-top: 30px; background: #ddd; height: 400px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">
+                現在デモ動画は準備中です。
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <footer>
-        <p>&copy; 2024 LOL.ex. All rights reserved.</p>
+    <footer class="footer-section">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="https://discord.gg/Cpu8vFDmH3"><i class="fab fa-discord"></i></a>
+            <a href="https://github.com/tanabesan/"><i class="fab fa-github"></i></a>
+        </div>
+        <p style="margin-top: 20px;">&copy; 2025 Yuki</p>
     </footer>
 
     <script>
+        // 言語データの定義
         const translations = {
             ja: {
                 pageTitle: "LOL.ex 次世代のゲーム体験",
-                heroTitle: "LOL.ex: 次世代のゲーム体験",
-                heroSubtitle: "ファイルをダウンロードして、無限のカスタムレベルとコミュニティと交流しよう。",
-                heroCta: "ファイルをダウンロード",
-                navHome: "ホーム",
-                navFile: "ファイル配布",
-                navFaq: "よくある質問",
-                navContact: "お問い合わせ",
-                navCommunity: "コース一覧", // ★★★ JavaScriptに追加 ★★★
-                featuresTitle: "LOL.exの特徴",
-                cardTitle1: "カスタムマップ",
-                cardDesc1: "LOLBeansのマップをカスタマイズし、オリジナルのコースを作成・プレイするためのファイルを提供します。",
-                cardTitle2: "コミュニティ連携",
-                cardDesc2: "コミュニティとコースを共有し、新しい遊び方を創出するための連携機能を充実させています。",
-                cardTitle3: "簡単な導入",
-                cardDesc3: "初心者でも簡単に導入できるよう、詳細な手順とサポートを提供しています。",
-                demoTitle: "デモ動画",
-                demoSubtitle: "LOL.exの機能の一部を動画でご紹介します。",
-                demoPlaceholder: "デモ動画のコンテンツ"
+                mainPage: "メインページ",
+                community: "コミュ一覧", // ★ 追加した翻訳データ ★
+                fileLibrary: "ファイルライブラリ",
+                faq: "よくある質問",
+                contact: "お問い合わせ",
+                heroTitle: "LOL.ex",
+                heroSubtitle: "ゲームの可能性を、どこまでも。",
+                downloadButton: "今すぐダウンロード",
+                featuresTitle: "強化された主な機能",
+                feature1Title: "オートエアスイッチ",
+                feature1Desc: "事前に設定された情報からエアムーブ設定を自動で切り替え。シームレスな操作体験を実現します。",
+                feature2Title: "ラウンドスコープ",
+                feature2Desc: "次のラウンドを予測し余裕を持って準備。戦略的な優位性を確保します。",
+                feature3Title: "Youtubeプレイヤー",
+                feature3Desc: "リアルタイムでYouTube動画を再生し、ゲームプレイを妨げることなくエンターテインメントを楽しめます。",
+                feature4Title: "バックグラウンドデザイナー",
+                feature4Desc: "ロビーの背景をカスタマイズし、個性的なゲーム環境を作り出します。",
+                demoTitle: "体験版デモ",
+                demoDesc: "LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。",
+                demoPlaceholder: "現在デモ動画は準備中です。"
             },
             en: {
                 pageTitle: "LOL.ex Next Generation Gaming Experience",
-                heroTitle: "LOL.ex: Next Generation Gaming Experience",
-                heroSubtitle: "Download files to unlock infinite custom levels and interact with the community.",
-                heroCta: "Download Files",
-                navHome: "Home",
-                navFile: "File Library",
-                navFaq: "FAQ",
-                navContact: "Contact",
-                navCommunity: "Course List", // ★★★ JavaScriptに追加 ★★★
-                featuresTitle: "Features of LOL.ex",
-                cardTitle1: "Custom Maps",
-                cardDesc1: "We provide files for customizing LOLBeans maps, allowing you to create and play original courses.",
-                cardTitle2: "Community Integration",
-                cardDesc2: "Enhancing integration features to share courses with the community and create new ways to play.",
-                cardTitle3: "Easy Setup",
-                cardDesc3: "We offer detailed instructions and support to ensure easy setup even for beginners.",
+                mainPage: "Main Page",
+                community: "Community List", // ★ 追加した翻訳データ ★
+                fileLibrary: "File Library",
+                faq: "FAQ",
+                contact: "Contact",
+                heroTitle: "LOL.ex",
+                heroSubtitle: "Unleash the full potential of gaming.",
+                downloadButton: "Download Now",
+                featuresTitle: "Key Enhanced Features",
+                feature1Title: "Auto Air Switch",
+                feature1Desc: "Automatically switches air move settings based on predefined information for a seamless operational experience.",
+                feature2Title: "Round Scope",
+                feature2Desc: "Predict the next round and prepare with ease to secure a strategic advantage.",
+                feature3Title: "Youtube Player",
+                feature3Desc: "Play YouTube videos in real-time and enjoy entertainment without interrupting your gameplay.",
+                feature4Title: "Background Designer",
+                feature4Desc: "Customize your lobby background to create a unique gaming environment.",
                 demoTitle: "Demo Video",
-                demoSubtitle: "See some of the features of LOL.ex in action.",
-                demoPlaceholder: "Demo Video Content"
+                demoDesc: "Watch the demo video below to see the innovative experience LOL.ex offers.",
+                demoPlaceholder: "Demo video is currently being prepared."
             }
         };
 
+        // 言語設定の取得と適用
         const applyLanguage = (lang) => {
-            const langData = translations[lang] || translations.ja;
-            
-            // ページタイトルの更新
-            document.getElementById('page-title').textContent = langData.pageTitle;
+            // ローカルストレージに設定を保存
+            localStorage.setItem('language', lang);
+            const langData = translations[lang];
 
-            // ヒーローセクションの更新
+            // HTML要素に翻訳を適用
+            document.getElementById('page-title').textContent = langData.pageTitle;
+            document.getElementById('nav-main-page').textContent = langData.mainPage;
+            document.getElementById('nav-community').textContent = langData.community; // ★ nav-communityに翻訳を適用 ★
+            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
+            document.getElementById('nav-faq').textContent = langData.faq;
+            document.getElementById('nav-contact').textContent = langData.contact;
+            
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
-            document.getElementById('hero-cta').textContent = langData.heroCta;
+            document.getElementById('cta-button').textContent = langData.downloadButton;
 
-            // ナビゲーションリンクの更新
-            document.getElementById('nav-home').textContent = langData.navHome;
-            document.getElementById('nav-file').textContent = langData.navFile;
-            document.getElementById('nav-faq').textContent = langData.navFaq;
-            document.getElementById('nav-contact').textContent = langData.navContact;
-            document.getElementById('nav-community').textContent = langData.navCommunity; // ★★★ JavaScriptに追加 ★★★
-
-            // 特徴セクションの更新
             document.getElementById('features-title').textContent = langData.featuresTitle;
-            document.querySelectorAll('.feature-card').forEach(card => {
-                const titleKey = card.getAttribute('data-lang-title');
-                const descKey = card.getAttribute('data-lang-desc');
-                card.querySelector('.card-title').textContent = langData[titleKey];
-                card.querySelector('.card-description').textContent = langData[descKey];
-            });
+            document.getElementById('feature1-title').textContent = langData.feature1Title;
+            document.getElementById('feature1-desc').textContent = langData.feature1Desc;
+            document.getElementById('feature2-title').textContent = langData.feature2Title;
+            document.getElementById('feature2-desc').textContent = langData.feature2Desc;
+            document.getElementById('feature3-title').textContent = langData.feature3Title;
+            document.getElementById('feature3-desc').textContent = langData.feature3Desc;
+            document.getElementById('feature4-title').textContent = langData.feature4Title;
+            document.getElementById('feature4-desc').textContent = langData.feature4Desc;
 
-            // デモセクションの更新
             document.getElementById('demo-title').textContent = langData.demoTitle;
-            document.getElementById('demo-subtitle').textContent = langData.demoSubtitle;
+            document.getElementById('demo-desc').textContent = langData.demoDesc;
             document.getElementById('demo-placeholder').textContent = langData.demoPlaceholder;
 
             // 言語セレクターを更新

@@ -28,28 +28,11 @@
             padding: 0;
             background-color: var(--background-color);
             color: var(--text-color-dark);
-            line-height: 1.8;
+            line-height: 1.6;
             scroll-behavior: smooth;
         }
 
-        /* Hero Section - 背景画像 */
-        .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                        url('https://tanabesan.github.io/lolbeans/file/page/icon2.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: var(--text-color-light);
-            padding: 120px 20px;
-            text-align: center;
-        }
-        .hero-section h1 {
-            font-size: 3em;
-            font-weight: 700;
-            margin: 0 0 10px;
-        }
-
-        /* Navbar Section (流用) */
+        /* Navbar Styling */
         .navbar {
             position: fixed;
             top: 20px;
@@ -70,8 +53,9 @@
             transition: color 0.3s ease;
             display: inline-block;
         }
-        .navbar a:hover {
+        .navbar a:hover, .navbar a.active-nav {
             color: var(--primary-color);
+            font-weight: 700;
         }
         #language-switcher {
             padding: 8px 10px;
@@ -89,76 +73,69 @@
             padding: 5px;
         }
 
-        /* Contact Content - フォームの削除によりシンプルなデザインに変更 */
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/icon.png');
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            color: var(--text-color-light); padding: 120px 20px; text-align: center;
+        }
+        .hero-section h1 { font-size: 3em; font-weight: 700; margin: 0 0 10px; }
+        
         .container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 0 20px;
-            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
-        .contact-info-container {
+
+        /* Contact Section */
+        .contact-card {
             background-color: var(--card-color);
-            padding: 40px;
-            border-radius: 10px;
+            padding: 30px;
+            border-radius: 12px;
             box-shadow: var(--shadow-light);
-            text-align: left; /* コンテンツは左寄せに */
-        }
-        .contact-info-container h2 {
-            color: var(--primary-color);
-            font-size: 2em;
-            margin-top: 0;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .contact-info-container p#info-desc {
-            font-size: 1.1em;
-            color: var(--secondary-color);
-            margin-bottom: 40px;
-            text-align: center;
-        }
-        .contact-info-item {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.3s ease;
-        }
-        .contact-info-item:hover {
-            background-color: var(--background-color);
-            border-radius: 5px;
-        }
-        .contact-info-item:last-child {
-            border-bottom: none;
-        }
-        .contact-info-item i {
-            color: var(--primary-color);
-            font-size: 2em;
-            margin-right: 20px;
-        }
-        .contact-info-item div {
-            flex-grow: 1;
-        }
-        .contact-info-item p {
-            margin: 0;
-            line-height: 1.4;
-        }
-        .contact-info-item .contact-label {
-            font-weight: 600;
-            color: var(--text-color-dark);
-        }
-        .contact-info-item .contact-detail {
-            font-size: 0.9em;
-            color: var(--secondary-color);
-        }
-        .contact-info-item a {
-            text-decoration: none;
-            color: inherit; 
-            display: flex; 
-            width: 100%;
-            align-items: center;
+            margin-bottom: 30px;
         }
         
-        /* Footer (流用) */
+        .contact-card h2 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .info-item {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+
+        .info-item label {
+            display: block;
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .info-item span, .info-item a {
+            font-size: 1.1em;
+            color: var(--text-color-dark);
+            word-break: break-all;
+        }
+
+        .info-item a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
         .footer-section {
             background-color: var(--text-color-dark);
             color: var(--text-color-light);
@@ -166,29 +143,41 @@
             text-align: center;
             margin-top: 40px;
         }
+
         .footer-section .social-icons a {
             color: var(--text-color-light);
             font-size: 1.3em;
             margin: 0 12px;
             transition: color 0.3s ease;
         }
+
         .footer-section .social-icons a:hover {
             color: var(--primary-color);
         }
+
         .footer-section p {
             margin-top: 15px;
             font-size: 0.85em;
         }
 
-        /* Media Queries (流用) */
         @media (max-width: 768px) {
             .navbar a { display: none; }
-            #language-switcher { margin-left: 0; }
-            .navbar { background-color: transparent; box-shadow: none; padding: 10px; flex-direction: column-reverse; align-items: flex-end; }
-            .hamburger-menu { display: block; margin-bottom: 10px; }
-            .navbar.open a { display: block; margin: 10px 0; }
-            .navbar.open { background-color: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 20px; border-radius: 12px; display: flex; }
-            .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
+            .navbar.open {
+                flex-direction: column;
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 250px;
+                height: 100vh;
+                background-color: var(--card-color);
+                box-shadow: -4px 0 10px rgba(0,0,0,0.1);
+                padding: 40px 20px;
+                border-radius: 0;
+                align-items: flex-start;
+            }
+            .navbar.open a { display: block; }
+            .navbar.open #language-switcher { margin-left: 0; margin-top: 15px; }
+            .hamburger-menu { display: block; position: absolute; top: 15px; right: 15px; z-index: 1001; }
         }
     </style>
 </head>
@@ -196,15 +185,16 @@
 
     <header class="hero-section">
         <h1 id="hero-title">お問い合わせ</h1>
-        <p id="hero-subtitle">ご質問、ご意見、不具合報告など、お気軽にご連絡ください。</p>
+        <p id="hero-subtitle">バグ報告、ご提案、ご協力について</p>
     </header>
 
     <nav class="navbar">
         <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
         <a id="nav-main-page" href="index.html">メインページ</a>
         <a id="nav-file-library" href="file.html">ファイルライブラリ</a>
-        <a id="nav-faq" href="faq.html">よくある質問</a>
-        <a id="nav-contact" href="contact.html">お問い合わせ</a>
+        <a id="nav-level-list" href="level-list.html">コース一覧</a>
+        <a id="nav-community" href="https://discord.gg/Cpu8vFDmH3" target="_blank">コミュニティ</a> <a id="nav-faq" href="faq.html">よくある質問</a>
+        <a id="nav-contact" href="contact.html" class="active-nav">お問い合わせ</a>
         <select id="language-switcher">
             <option value="ja">日本語</option>
             <option value="en">English</option>
@@ -212,33 +202,32 @@
     </nav>
 
     <main class="container">
-        <div class="contact-info-container">
-            <h2 id="info-title">ご連絡方法</h2>
-            <p id="info-desc">
-                サーバー側のフォーム機能は使用していません。<br>
-                お手数ですが、以下の連絡先からご連絡ください。
-            </p>
+        <section class="contact-card">
+            <h2 id="info-title">ご連絡先情報</h2>
+            <p id="info-desc">バグの報告、機能の提案、コラボレーションの提案など、お気軽にご連絡ください。</p>
+            
+            <div class="contact-info">
+                <div class="info-item">
+                    <label id="discord-label"><i class="fab fa-discord"></i> Discordサーバー</label>
+                    <a id="discord-text" href="https://discord.gg/Cpu8vFDmH3" target="_blank">https://discord.gg/Cpu8vFDmH3</a>
+                </div>
+                
+                <div class="info-item">
+                    <label id="email-label"><i class="fas fa-envelope"></i> メールアドレス</label>
+                    <a id="email-text" href="mailto:tanabesan.contact@gmail.com">tanabesan.contact@gmail.com</a>
+                </div>
+                
+                <div class="info-item">
+                    <label id="github-label"><i class="fab fa-github"></i> GitHub</label>
+                    <a id="github-text" href="https://github.com/tanabesan" target="_blank">https://github.com/tanabesan</a>
+                </div>
 
-            <div class="contact-info-item">
-                <i class="fab fa-discord"></i>
-                <a href="https://discord.gg/Cpu8vFDmH3" style="text-decoration: none; color: inherit; display: flex; width: 100%; align-items: center;">
-                    <div>
-                        <p class="contact-label" id="discord-label">Discordサーバー</p>
-                        <p class="contact-detail" id="discord-text">問題報告やコミュニティでの交流にご利用ください。</p>
-                    </div>
-                    <i class="fas fa-arrow-right" style="margin-left: auto; color: var(--secondary-color); font-size: 1.2em;"></i>
-                </a>
+                <div class="info-item">
+                    <label id="youtube-label"><i class="fab fa-youtube"></i> YouTube (開発者)</label>
+                    <span id="youtube-text">ユウキ / Yuki</span>
+                </div>
             </div>
-
-            <div class="contact-info-item">
-                <i class="fab fa-youtube"></i> <a href="#" style="text-decoration: none; color: inherit; display: flex; width: 100%; align-items: center;">
-                    <div>
-                        <p class="contact-label" id="youtube-label">YouTube</p> <p class="contact-detail" id="youtube-text">デモ動画のコメント欄やメッセージでご意見をお寄せください。</p>
-                    </div>
-                    <i class="fas fa-arrow-right" style="margin-left: auto; color: var(--secondary-color); font-size: 1.2em;"></i>
-                </a>
-            </div>
-        </div>
+        </section>
     </main>
 
     <footer class="footer-section">
@@ -247,43 +236,58 @@
             <a href="https://discord.gg/Cpu8vFDmH3"><i class="fab fa-discord"></i></a>
             <a href="https://github.com/tanabesan/"><i class="fab fa-github"></i></a>
         </div>
-        <p>&copy; 2025 Yuki. </p>
+        <p>2025 Yuki. </p>
     </footer>
 
     <script>
-        // 言語データ (YouTubeに合わせて修正)
+        let currentLang = 'ja';
+
         const translations = {
             ja: {
-                mainPage: "メインページ", fileLibrary: "ファイルライブラリ", faq: "よくある質問", contact: "お問い合わせ",
-                heroTitle: "お問い合わせ", 
-                heroSubtitle: "ご質問、ご意見、不具合報告など、お気軽にご連絡ください。",
-                infoTitle: "ご連絡方法", 
-                infoDesc: "サーバー側のフォーム機能は使用していません。<br>お手数ですが、以下の連絡先からご連絡ください。",
-                discordLabel: "Discordサーバー", discordText: "問題報告やコミュニティでの交流にご利用ください。",
-                youtubeLabel: "YouTube", youtubeText: "デモ動画のコメント欄やメッセージでご意見をお寄せください。" // YouTube用のテキスト
+                mainPage: "メインページ", fileLibrary: "ファイルライブラリ", levelList: "コース一覧", community: "コミュニティ", faq: "よくある質問", contact: "お問い合わせ",
+                heroTitle: "お問い合わせ", heroSubtitle: "バグ報告、ご提案、ご協力について",
+                infoTitle: "ご連絡先情報",
+                infoDesc: "バグの報告、機能の提案、コラボレーションの提案など、お気軽にご連絡ください。",
+                discordLabel: "Discordサーバー",
+                discordText: "https://discord.gg/Cpu8vFDmH3",
+                emailLabel: "メールアドレス",
+                emailText: "tanabesan.contact@gmail.com",
+                githubLabel: "GitHub",
+                githubText: "https://github.com/tanabesan",
+                youtubeLabel: "YouTube (開発者)",
+                youtubeText: "ユウキ / Yuki",
             },
             en: {
-                mainPage: "Main Page", fileLibrary: "File Library", faq: "FAQ", contact: "Contact",
-                heroTitle: "Contact Us", 
-                heroSubtitle: "Feel free to contact us with any questions, feedback, or bug reports.",
-                infoTitle: "How to Contact Us", 
-                infoDesc: "We do not use server-side form functionality.<br>Please use the following contact methods.",
-                discordLabel: "Discord Server", discordText: "For bug reports and community interaction.",
-                youtubeLabel: "YouTube", youtubeText: "Please leave feedback in the comment section or send a message on our demo videos." // YouTube用のテキスト
+                mainPage: "Main Page", fileLibrary: "File Library", levelList: "Course List", community: "Community", faq: "FAQ", contact: "Contact",
+                heroTitle: "Contact Us", heroSubtitle: "Bug reports, suggestions, and collaborations",
+                infoTitle: "Contact Information",
+                infoDesc: "Feel free to reach out for bug reports, feature suggestions, or collaboration inquiries.",
+                discordLabel: "Discord Server",
+                discordText: "https://discord.gg/Cpu8vFDmH3",
+                emailLabel: "Email Address",
+                emailText: "tanabesan.contact@gmail.com",
+                githubLabel: "GitHub",
+                githubText: "https://github.com/tanabesan",
+                youtubeLabel: "YouTube (Developer)",
+                youtubeText: "Yuki",
             }
         };
 
-        // 言語設定の取得と適用
         const applyLanguage = (lang) => {
+            currentLang = lang;
             localStorage.setItem('language', lang);
             const langData = translations[lang];
 
-            // ページタイトルとナビゲーション
+            // ページタイトルとナビゲーションの更新
             document.getElementById('page-title').textContent = `LOL.ex - ${langData.contact}`;
             document.getElementById('nav-main-page').textContent = langData.mainPage;
             document.getElementById('nav-file-library').textContent = langData.fileLibrary;
+            document.getElementById('nav-level-list').textContent = langData.levelList;
+            document.getElementById('nav-community').textContent = langData.community; // ★追加したリンクのテキストを更新★
             document.getElementById('nav-faq').textContent = langData.faq;
             document.getElementById('nav-contact').textContent = langData.contact;
+
+            // ヒーローセクションの更新
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
             
@@ -292,8 +296,12 @@
             document.getElementById('info-desc').innerHTML = langData.infoDesc; 
             document.getElementById('discord-label').textContent = langData.discordLabel;
             document.getElementById('discord-text').textContent = langData.discordText;
-            document.getElementById('youtube-label').textContent = langData.youtubeLabel; // IDを修正
-            document.getElementById('youtube-text').textContent = langData.youtubeText; // IDを修正
+            document.getElementById('email-label').textContent = langData.emailLabel;
+            document.getElementById('email-text').textContent = langData.emailText;
+            document.getElementById('github-label').textContent = langData.githubLabel;
+            document.getElementById('github-text').textContent = langData.githubText;
+            document.getElementById('youtube-label').textContent = langData.youtubeLabel;
+            document.getElementById('youtube-text').textContent = langData.youtubeText; 
             
             document.getElementById('language-switcher').value = lang;
         };

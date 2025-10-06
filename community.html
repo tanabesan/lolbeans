@@ -343,11 +343,14 @@
             params.append('t', sortType);
             params.append('ft', filterType);
             params.append('ff', filterFinish);
+            
+            // ★ ユーザーの要求により m パラメーターを追加
+            // APIの仕様に基づき、ページネーション情報を取得するために nと同じ値を設定
+            params.append('m', LEVELS_PER_PAGE); 
 
             if (searchText) {
                 params.append('ts', searchText);
             }
-            // ★ m はAPIレスポンスに含まれる最大ページ数であり、リクエストパラメータではないため追加しない
 
             return API_BASE_URL + params.toString();
         };
@@ -447,8 +450,8 @@
 
             const pageInfo = document.createElement('span');
             pageInfo.className = 'page-info';
-            // maxPagesが確実に数値であることを確認（念のため）
-            const safeMaxPages = isNaN(maxPages) ? 1 : maxPages;
+            // maxPagesが確実に数値であることを確認（undefined/null対策）
+            const safeMaxPages = isNaN(maxPages) || maxPages === null ? 1 : maxPages;
             pageInfo.textContent = langData.pageInfo(currentPage, safeMaxPages);
             paginationContainer.appendChild(pageInfo);
 
@@ -470,7 +473,7 @@
             let loading = document.getElementById('loading-message');
             const langData = translations[currentLang];
             
-            // ロードメッセージが存在しない場合に作成して表示する
+            // ロードメッセージが存在しない場合に作成して表示する (nullエラー対策)
             if (!loading) {
                 const tempDiv = document.createElement('div');
                 tempDiv.id = 'loading-message';
@@ -530,7 +533,6 @@
             document.getElementById('label-filter-finish').textContent = langData.filterFinishLabel;
             document.getElementById('search-button').innerHTML = `<i class="fas fa-search"></i> ${langData.searchButton}`;
             
-            // Select Optionの更新 (省略)
             document.querySelector('#sort-type option[value="0"]').textContent = langData.sort0;
             document.querySelector('#sort-type option[value="1"]').textContent = langData.sort1;
             document.querySelector('#sort-type option[value="2"]').textContent = langData.sort2;
@@ -570,7 +572,7 @@
 
             updateFilterOptions(lang);
             
-            // ★ 言語設定適用後、現在のページ（または0ページ目）のデータを再取得
+            // 言語設定適用後、現在のページ（または0ページ目）のデータを再取得
             fetchAndRenderLevels(currentPage);
         };
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">LOL.ex - コミュニティレベル</title>
+    <title id="page-title">LOL.ex - コミュニティレベルレベル</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -11,7 +11,6 @@
     <link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon.png">
     
     <style>
-        /* 共通デザイン変数 */
         :root {
             --primary-color: #5D54A4;
             --secondary-color: #6A799E;
@@ -35,13 +34,13 @@
             scroll-behavior: smooth;
         }
 
-        /* Hero & Navbar - (前のコードと同じため省略) */
         .hero-section {
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/6845.png');
             background-size: cover; background-position: center; background-repeat: no-repeat;
             color: var(--text-color-light); padding: 120px 20px; text-align: center;
         }
         .hero-section h1 { font-size: 3em; font-weight: 700; margin: 0 0 10px; }
+        
         .navbar {
             position: fixed; top: 20px; right: 20px; background-color: rgba(255, 255, 255, 0.9);
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 10px 20px; border-radius: 30px;
@@ -53,7 +52,6 @@
         .hamburger-menu { display: none; cursor: pointer; font-size: 1.5em; color: var(--text-color-dark); padding: 5px; }
 
 
-        /* フィルター・検索セクション */
         .filter-section {
             background-color: var(--card-color);
             padding: 20px;
@@ -97,7 +95,7 @@
             cursor: pointer;
             font-weight: 600;
             transition: background-color 0.3s;
-            align-self: flex-end; /* 右端に配置 */
+            align-self: flex-end;
         }
         #search-button:hover {
             background-color: #4c4687;
@@ -115,7 +113,6 @@
             color: var(--secondary-color);
         }
 
-        /* ページネーションスタイル */
         .pagination {
             display: flex;
             justify-content: center;
@@ -148,7 +145,6 @@
             color: var(--primary-color);
         }
 
-        /* カードスタイル - (前のコードと同じため省略) */
         .level-card { background-color: var(--card-color); border-radius: 12px; box-shadow: var(--shadow-light); margin-bottom: 25px; overflow: hidden; transition: box-shadow 0.3s ease; }
         .level-card:hover { box-shadow: var(--shadow-hover); }
         .card-header { display: flex; gap: 20px; padding: 20px; align-items: center; cursor: pointer; }
@@ -167,17 +163,13 @@
         .detail-item strong { color: var(--primary-color); display: block; font-size: 0.85em; margin-bottom: 2px; }
         .detail-item span { display: block; color: var(--text-color-dark); font-weight: 600; font-size: 1.1em; }
         .detail-item span.wr-holder { color: var(--accent-color); }
-        /* Footer - (前のコードと同じため省略) */
+        
         .footer-section { background-color: var(--text-color-dark); color: var(--text-color-light); padding: 40px 20px; text-align: center; margin-top: 40px; }
         .footer-section .social-icons a { color: var(--text-color-light); font-size: 1.3em; margin: 0 12px; transition: color 0.3s ease; }
         .footer-section .social-icons a:hover { color: var(--primary-color); }
         .footer-section p { margin-top: 15px; font-size: 0.85em; }
 
         @media (max-width: 768px) {
-            .filter-row { flex-direction: column; align-items: stretch; }
-            .filter-group { min-width: 100%; }
-            #search-button { align-self: stretch; margin-top: 10px; }
-            /* 他のモバイル対応スタイル... */
             .navbar a { display: none; }
             #language-switcher { margin-left: 0; }
             .navbar { background-color: transparent; box-shadow: none; padding: 10px; flex-direction: column-reverse; align-items: flex-end; }
@@ -185,6 +177,15 @@
             .navbar.open a { display: block; margin: 10px 0; }
             .navbar.open { position: absolute; top: 80px; right: 10px; background-color: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 20px; border-radius: 12px; display: flex; align-items: flex-start; }
             .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
+            
+            .filter-row { flex-direction: column; align-items: stretch; }
+            .filter-group { min-width: 100%; }
+            #search-button { align-self: stretch; margin-top: 10px; }
+            
+            .card-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .level-thumbnail { width: 80px; height: 80px; }
+            .level-info h3 { font-size: 1.2em; flex-direction: column; align-items: flex-start; }
+            .rating-badge { margin-left: 0; margin-top: 5px; }
         }
     </style>
 </head>
@@ -250,11 +251,11 @@
             <div id="loading-message">
                 <i class="fas fa-spinner fa-spin"></i> データをロード中です...
             </div>
-            </section>
+        </section>
         
         <div class="pagination-container">
             <div class="pagination" id="pagination">
-                </div>
+            </div>
         </div>
 
     </main>
@@ -269,16 +270,14 @@
     </footer>
 
     <script>
-        // API情報とデフォルト値
         const API_BASE_URL = 'https://s.lolbeans.io/level-list?';
         const THUMBNAIL_BASE_URL = 'https://lolbeans.io/ui/level-thumbnails/';
-        const LEVELS_PER_PAGE = 8; // APIのn=8に合わせておく
+        const LEVELS_PER_PAGE = 8;
 
         let currentLang = 'ja';
-        let currentPage = 0; // i=0
-        let maxPages = 0; // m
+        let currentPage = 0;
+        let maxPages = 0;
 
-        // 言語データ
         const translations = {
             ja: {
                 mainPage: "メインページ", fileLibrary: "ファイルライブラリ", levelList: "コース一覧", faq: "よくある質問", contact: "お問い合わせ",
@@ -310,7 +309,6 @@
             }
         };
 
-        // --- ヘルパー関数 ---
         const formatDate = (dateString, lang) => {
             if (!dateString) return 'N/A';
             try {
@@ -333,38 +331,26 @@
             return `${m}:${s}.${ms}`;
         };
 
-        // --- フィルターとAPI関連のロジック ---
-
-        /**
-         * 現在のフィルター設定に基づいてAPI URLを構築する
-         * @param {number} pageIndex - ページ番号 (i)
-         * @returns {string} 構築されたAPI URL
-         */
         const buildApiUrl = (pageIndex) => {
             const searchText = document.getElementById('search-text').value.trim();
             const sortType = document.getElementById('sort-type').value;
             const filterType = document.getElementById('filter-type').value;
             const filterFinish = document.getElementById('filter-finish').value;
 
-            // APIパラメータの構築
             const params = new URLSearchParams();
-            params.append('i', pageIndex);          // ページ番号
-            params.append('n', LEVELS_PER_PAGE);    // 取得コース数
-            params.append('m', 0);                  // mはダミー (API側で付与されるため)
-            params.append('t', sortType);           // ソートタイプ
-            params.append('ft', filterType);        // コースタイプフィルター
-            params.append('ff', filterFinish);      // クリア率フィルター
+            params.append('i', pageIndex);
+            params.append('n', LEVELS_PER_PAGE);
+            params.append('t', sortType);
+            params.append('ft', filterType);
+            params.append('ff', filterFinish);
 
             if (searchText) {
-                params.append('ts', searchText);    // 検索文字列
+                params.append('ts', searchText);
             }
 
             return API_BASE_URL + params.toString();
         };
 
-        /**
-         * コースカードHTMLを生成する
-         */
         const createLevelCard = (level) => {
             const langData = translations[currentLang];
             const card = document.createElement('div');
@@ -426,7 +412,6 @@
                 </div>
             `;
 
-            // クリックイベントリスナー
             card.querySelector('.card-header').addEventListener('click', () => {
                 document.querySelectorAll('.level-card.open').forEach(openCard => {
                     if (openCard !== card) {
@@ -439,9 +424,6 @@
             return card;
         };
 
-        /**
-         * ページネーションUIを生成する
-         */
         const renderPagination = () => {
             const paginationContainer = document.getElementById('pagination');
             paginationContainer.innerHTML = '';
@@ -449,7 +431,6 @@
 
             if (maxPages <= 1) return;
 
-            // 前へボタン
             const prevBtn = document.createElement('button');
             prevBtn.className = 'page-btn';
             prevBtn.textContent = langData.prev;
@@ -462,13 +443,11 @@
             });
             paginationContainer.appendChild(prevBtn);
 
-            // ページ情報の表示
             const pageInfo = document.createElement('span');
             pageInfo.className = 'page-info';
             pageInfo.textContent = langData.pageInfo(currentPage, maxPages);
             paginationContainer.appendChild(pageInfo);
 
-            // 次へボタン
             const nextBtn = document.createElement('button');
             nextBtn.className = 'page-btn';
             nextBtn.textContent = langData.next;
@@ -482,16 +461,11 @@
             paginationContainer.appendChild(nextBtn);
         };
 
-        /**
-         * データを取得してレンダリングするメイン関数
-         * @param {number} pageIndex - ページ番号 (i)
-         */
         const fetchAndRenderLevels = async (pageIndex = 0) => {
             const container = document.getElementById('level-list-container');
             const loading = document.getElementById('loading-message');
             const langData = translations[currentLang];
             
-            // ロード中表示
             loading.style.display = 'block';
             container.innerHTML = ''; 
             container.appendChild(loading);
@@ -505,11 +479,9 @@
                 }
                 const data = await response.json();
                 
-                // ページ情報とコースデータを更新
                 currentPage = pageIndex;
                 maxPages = data.m;
                 
-                // リストをクリア
                 container.innerHTML = ''; 
                 
                 if (data && data.l && data.l.length > 0) {
@@ -517,22 +489,19 @@
                         const card = createLevelCard(level);
                         container.appendChild(card);
                     });
-                    renderPagination(); // ページネーションを再描画
+                    renderPagination();
                 } else {
                     container.innerHTML = `<div id="loading-message">${langData.dataError}: No levels found.</div>`;
-                    document.getElementById('pagination').innerHTML = ''; // データがない場合はページング非表示
+                    document.getElementById('pagination').innerHTML = '';
                 }
 
             } catch (error) {
-                console.error('Fetching levels failed:', error);
                 container.innerHTML = `<div id="loading-message">${langData.dataError} (${error.message})</div>`;
                 document.getElementById('pagination').innerHTML = '';
             } finally {
                 loading.style.display = 'none';
             }
         };
-
-        // --- UIとイベントリスナー ---
 
         const updateFilterOptions = (lang) => {
             const langData = translations[lang];
@@ -543,19 +512,16 @@
             document.getElementById('label-filter-finish').textContent = langData.filterFinishLabel;
             document.getElementById('search-button').innerHTML = `<i class="fas fa-search"></i> ${langData.searchButton}`;
             
-            // ソートオプション
             document.querySelector('#sort-type option[value="0"]').textContent = langData.sort0;
             document.querySelector('#sort-type option[value="1"]').textContent = langData.sort1;
             document.querySelector('#sort-type option[value="2"]').textContent = langData.sort2;
 
-            // コースタイプフィルター
             document.querySelector('#filter-type option[value="-1"]').textContent = langData.filterTypeM1;
             document.querySelector('#filter-type option[value="0"]').textContent = langData.filterType0;
             document.querySelector('#filter-type option[value="1"]').textContent = langData.filterType1;
             document.querySelector('#filter-type option[value="2"]').textContent = langData.filterType2;
             document.querySelector('#filter-type option[value="3"]').textContent = langData.filterType3;
 
-            // クリア率フィルター
             document.querySelector('#filter-finish option[value="0"]').textContent = langData.filterFinish0;
             document.querySelector('#filter-finish option[value="1"]').textContent = langData.filterFinish1;
             document.querySelector('#filter-finish option[value="2"]').textContent = langData.filterFinish2;
@@ -567,7 +533,6 @@
             localStorage.setItem('language', lang);
             const langData = translations[lang];
 
-            // ページ全体のテキスト更新
             document.getElementById('page-title').textContent = `LOL.ex - ${langData.levelList}`;
             document.getElementById('nav-main-page').textContent = langData.mainPage;
             document.getElementById('nav-file-library').textContent = langData.fileLibrary;
@@ -579,25 +544,20 @@
             document.getElementById('loading-message').innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
             document.getElementById('language-switcher').value = lang;
 
-            updateFilterOptions(lang); // フィルターオプションのテキスト更新
+            updateFilterOptions(lang);
             
-            // データを再取得し、現在のページを再描画
             fetchAndRenderLevels(currentPage);
         };
 
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 初期ロード時の言語設定
             const savedLang = localStorage.getItem('language') || 'ja';
             applyLanguage(savedLang);
 
-            // フィルター/検索ボタンのイベント設定
             document.getElementById('search-button').addEventListener('click', () => {
-                // 検索時はページを0に戻す
                 fetchAndRenderLevels(0);
             });
 
-            // エンターキーでの検索を許可 (テキストフィールドのみ)
             document.getElementById('search-text').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -605,19 +565,16 @@
                 }
             });
 
-            // フィルター/ソート変更時もページを0に戻して検索
             document.getElementById('sort-type').addEventListener('change', () => fetchAndRenderLevels(0));
             document.getElementById('filter-type').addEventListener('change', () => fetchAndRenderLevels(0));
             document.getElementById('filter-finish').addEventListener('change', () => fetchAndRenderLevels(0));
 
-            // ハンバーガーメニューの開閉
             const hamburgerIcon = document.getElementById('hamburger-icon');
             const navbar = document.querySelector('.navbar');
             hamburgerIcon.addEventListener('click', () => {
                 navbar.classList.toggle('open');
             });
             
-            // 言語切り替えイベント
             const languageSwitcher = document.getElementById('language-switcher');
             languageSwitcher.addEventListener('change', (event) => {
                 applyLanguage(event.target.value);

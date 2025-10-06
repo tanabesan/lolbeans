@@ -30,6 +30,8 @@
             --text-color-light: #F4F7FB;
             --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.05);
             --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --download-button-color: #FFC107;
+            --download-button-hover: #FFD54F;
         }
 
         body {
@@ -42,569 +44,421 @@
             scroll-behavior: smooth;
         }
 
-        /* Hero Section - 背景画像 */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/icon.png');
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://tanabesan.github.io/lolbeans/file/page/7396.png');
             background-size: cover;
             background-position: center;
-            height: 40vh; /* ファイルページ用に高さを調整 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            background-repeat: no-repeat;
             color: var(--text-color-light);
+            padding: 120px 20px;
+            text-align: center;
             position: relative;
-            padding-top: 70px; /* ヘッダーの高さ分調整 */
         }
-
-        .hero-content {
-            z-index: 10;
-            max-width: 900px;
-            padding: 0 20px;
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            margin-bottom: 10px;
+        .hero-section h1 {
+            font-size: 3em;
             font-weight: 700;
+            margin: 0 0 10px;
         }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
+        .hero-section p {
+            font-size: 1.2em;
             font-weight: 300;
-        }
-
-        /* Header / Navigation */
-        header {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-        }
-
-        .logo a {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .navbar ul {
-            list-style: none;
             margin: 0;
-            padding: 0;
-            display: flex;
         }
 
-        .navbar li {
-            margin-left: 25px;
+        /* ナビゲーションバーのスタイル変更 */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 10px 20px;
+            border-radius: 30px;
+            z-index: 1000;
+            display: flex; /* 言語セレクタ対応 */
+            align-items: center; /* 言語セレクタ対応 */
         }
-
         .navbar a {
-            text-decoration: none;
             color: var(--text-color-dark);
+            text-decoration: none;
+            margin: 0 15px;
             font-weight: 500;
-            font-size: 1rem;
-            padding: 5px 0;
             transition: color 0.3s ease;
-            position: relative;
+            display: inline-block;
         }
-
         .navbar a:hover {
             color: var(--primary-color);
         }
-
-        .navbar a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-
-        .navbar a:hover::after,
-        .navbar a.active::after {
-            width: 100%;
-        }
-
-        /* Language Switcher */
-        .language-switcher-container {
-            display: flex;
-            align-items: center;
-        }
-
+        
+        /* 言語セレクタのスタイル */
         #language-switcher {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-family: 'Poppins', sans-serif;
-            margin-left: 20px;
+            padding: 8px 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            margin-left: 15px;
             cursor: pointer;
-            background-color: #fff;
-            color: var(--text-color-dark);
+            font-size: 14px;
         }
 
-        /* Hamburger Menu */
-        .hamburger-icon {
+
+        /* ハンバーガーメニューのスタイル */
+        .hamburger-menu {
             display: none;
-            font-size: 1.5rem;
             cursor: pointer;
-            color: var(--primary-color);
+            font-size: 1.5em;
+            color: var(--text-color-dark);
+            padding: 5px;
         }
 
-        /* File Library Section */
-        .file-library-section {
-            padding: 40px 5%;
+        .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
 
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .search-container {
-            display: flex;
-            flex-grow: 1;
-            max-width: 400px;
-            min-width: 200px;
-        }
-
-        #search-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-family: 'Poppins', sans-serif;
-            box-sizing: border-box;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .filter-buttons button {
-            padding: 10px 15px;
-            border: 1px solid var(--primary-color);
-            border-radius: 5px;
-            background-color: #fff;
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: background-color 0.3s, color 0.3s;
-            font-family: 'Poppins', sans-serif;
+        /* フィルタリングボタンのスタイル */
+        .filter-button {
+            background-color: #e0e0e0;
+            color: var(--text-color-dark);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin: 0 5px;
             font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
-
-        .filter-buttons button:hover:not(.active) {
-            background-color: rgba(93, 84, 164, 0.1);
+        .filter-button:hover {
+            background-color: #d0d0d0;
         }
-
-        .filter-buttons button.active {
+        .filter-button.active {
             background-color: var(--primary-color);
-            color: var(--text-color-light);
+            color: white;
         }
 
-        .file-list {
+        /* ファイル数が少ない場合でも均等に配置 */
+        .download-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+            place-items: center;
         }
-
-        .file-card {
-            background-color: var(--card-color);
-            padding: 20px;
-            border-radius: 10px;
+        @media (max-width: 900px) {
+            .download-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .download-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .download-item-card {
+            background: var(--card-color);
+            border-radius: 12px;
             box-shadow: var(--shadow-light);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
         }
-
-        .file-card:hover {
-            transform: translateY(-3px);
+        .download-item-card:hover {
+            transform: translateY(-10px);
             box-shadow: var(--shadow-hover);
         }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
+        .download-item-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
         }
-
-        .file-icon {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            margin-right: 15px;
+        .file-info-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
         }
-
-        .file-title {
-            font-size: 1.3rem;
+        .badge-lol {
+            background-color: #007bff;
+        }
+        .badge-glol {
+            background-color: #28a745;
+        }
+        .download-item-content {
+            padding: 25px;
+        }
+        .download-item-content h3 {
+            font-size: 1.6em;
             font-weight: 600;
-            margin: 0;
-            line-height: 1.4;
+            color: var(--text-color-dark);
+            margin: 0 0 5px;
         }
-
-        .file-meta {
-            font-size: 0.9rem;
+        .author-name {
+            font-size: 0.9em;
             color: var(--secondary-color);
             margin-bottom: 15px;
         }
-
-        .file-desc {
-            font-size: 1rem;
-            color: var(--text-color-dark);
-            flex-grow: 1;
-            margin-bottom: 20px;
-        }
-
-        .download-button {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: var(--text-color-light);
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 500;
-            text-align: center;
-            transition: background-color 0.3s ease, transform 0.2s;
-            box-shadow: var(--shadow-light);
-            margin-top: auto; /* ボタンを下に配置 */
-        }
-
-        .download-button:hover {
-            background-color: #4A4480;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        #file-list-container.loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.2rem;
+        .download-item-content p {
+            font-size: 0.95em;
             color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        .download-button-small {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: var(--download-button-color);
+            color: var(--text-color-dark);
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+        .download-button-small:hover {
+            background-color: var(--download-button-hover);
         }
 
-        /* Footer */
-        footer {
-            background-color: var(--primary-color);
+        .footer-section {
+            background-color: var(--text-color-dark);
             color: var(--text-color-light);
+            padding: 40px 20px;
             text-align: center;
-            padding: 20px 0;
-            font-size: 0.9rem;
+            margin-top: 60px;
+        }
+        .footer-section .social-icons a {
+            color: var(--text-color-light);
+            font-size: 1.3em;
+            margin: 0 12px;
+            transition: color 0.3s ease;
+        }
+        .footer-section .social-icons a:hover {
+            color: var(--primary-color);
+        }
+        .footer-section p {
+            margin-top: 15px;
+            font-size: 0.85em;
         }
 
-        /* Responsive Design */
-        @media (max-width: 900px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-            }
-        }
-
+        /* 小画面用のメディアクエリ */
         @media (max-width: 768px) {
-            .navbar {
-                position: absolute;
-                top: 70px;
-                left: 0;
-                width: 100%;
-                background-color: rgba(255, 255, 255, 0.98);
-                flex-direction: column;
-                transform: translateY(-200%);
-                transition: transform 0.3s ease-out;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
-            }
-
-            .navbar.open {
-                transform: translateY(0);
-            }
-
-            .navbar ul {
-                flex-direction: column;
-                width: 100%;
-                padding: 10px 0;
-            }
-
-            .navbar li {
-                margin: 0;
-                text-align: center;
-                border-bottom: 1px solid #eee;
-            }
-
-            .navbar li:last-child {
-                border-bottom: none;
-            }
-
             .navbar a {
-                display: block;
-                padding: 15px 0;
-                font-size: 1.1rem;
-            }
-
-            .hamburger-icon {
-                display: block;
-            }
-
-            .language-switcher-container {
                 display: none;
             }
-
-            header {
-                padding: 15px 20px;
+            #language-switcher {
+                margin-left: 0;
             }
-
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
+            .navbar {
+                background-color: transparent;
+                box-shadow: none;
+                padding: 10px;
+                flex-direction: column-reverse; /* 言語セレクタが上になるように調整 */
+                align-items: flex-end;
             }
-
-            .search-container {
-                max-width: 100%;
-                margin-bottom: 15px;
+            .hamburger-menu {
+                display: block;
+                margin-bottom: 10px;
             }
-
-            .filter-buttons {
-                justify-content: center;
+            .navbar.open a {
+                display: block;
+                margin: 10px 0;
             }
-
-            .file-list {
-                grid-template-columns: 1fr;
+            .navbar.open {
+                background-color: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                padding: 20px;
+                border-radius: 12px;
+                display: flex;
+                /* flex-direction: column; はopenクラスでは不要 */
+            }
+            .navbar.open #language-switcher {
+                 display: block;
+                 width: 100%;
+                 margin: 10px 0;
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <a href="index.html">LOL.ex</a>
-        </div>
-        <nav class="navbar">
-            <ul>
-                <li><a href="index.html" id="nav-home">ホーム</a></li>
-                <li><a href="file.html" id="nav-file" class="active">ファイル配布</a></li>
-                <li><a href="faq.html" id="nav-faq">よくある質問</a></li>
-                <li><a href="contact.html" id="nav-contact">お問い合わせ</a></li>
-                <li><a href="community.html" id="nav-community">コース一覧</a></li>
-            </ul>
-        </nav>
-        <div class="language-switcher-container">
-            <i class="fas fa-globe"></i>
-            <select id="language-switcher">
-                <option value="ja">日本語</option>
-                <option value="en">English</option>
-            </select>
-        </div>
-        <div class="hamburger-icon" id="hamburger-icon">
-            <i class="fas fa-bars"></i>
-        </div>
+
+    <header class="hero-section">
+        <h1 id="hero-title">LOL.ex ファイルライブラリ</h1>
+        <p id="hero-subtitle">エディター用ファイルをダウンロード</p>
     </header>
 
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title" id="hero-title">ファイルライブラリ</h1>
-            <p class="hero-subtitle" id="hero-subtitle">カスタムレベルや機能拡張のためのファイルをダウンロードできます。</p>
-        </div>
-    </section>
+    <nav class="navbar">
+        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
+        <a id="nav-main-page" href="https://tanabesan.github.io/lolbeans/">メインページ</a>
+        <a id="nav-community" href="community.html">コミュ一覧</a> <a id="nav-file-library" href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
+        <a id="nav-faq" href="https://tanabesan.github.io/lolbeans/faq.html">よくある質問</a>
+        <a id="nav-contact" href="https://tanabesan.github.io/lolbeans/contact.html">お問い合わせ</a>
+        <select id="language-switcher">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+        </select>
+    </nav>
 
-    <div class="file-library-section">
-        <div class="controls">
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="ファイルを検索...">
+    <main class="container">
+        <section id="download-items" style="text-align: center; padding: 40px 0;">
+            <h2 id="available-files-title">利用可能なファイル</h2>
+            <p id="description-text" style="max-width: 800px; margin: 0 auto 40px; font-size: 1.1em;">
+                ここでは、LOL.exのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
+            </p>
+
+            <div class="filter-tags" style="margin-bottom: 20px; text-align: center;">
+                <button class="filter-button active" data-filter="all">すべて</button>
+                <button class="filter-button" data-filter="lol">.lol</button>
+                <button class="filter-button" data-filter="glol">.glol</button>
             </div>
-            <div class="filter-buttons">
-                <button id="filter-all" class="active" data-filter="all">全て</button>
-                <button id="filter-map" data-filter="map">マップ</button>
-                <button id="filter-mod" data-filter="mod">機能拡張</button>
-                <button id="filter-other" data-filter="other">その他</button>
+
+            <div style="margin-bottom: 30px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <input type="text" id="search-input" placeholder="ファイル名や作者名で検索..." style="width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
             </div>
-        </div>
 
-        <div class="file-list" id="file-list-container">
-            <div class="loading" id="loading-message">ファイルを読み込み中...</div>
-        </div>
-    </div>
+            <div id="file-list" class="download-grid">
+            </div>
+        </section>
+    </main>
 
-    <footer>
-        <p>&copy; 2024 LOL.ex. All rights reserved.</p>
+    <footer class="footer-section">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="https://discord.gg/Cpu8vFDmH3"><i class="fab fa-discord"></i></a>
+            <a href="https://github.com/tanabesan/"><i class="fab fa-github"></i></a>
+        </div>
+        <p style="margin-top: 15px;">2025 Yuki.</p>
     </footer>
 
     <script>
+        // 言語データの定義
         const translations = {
             ja: {
-                pageTitle: "LOL.ex - ファイル配布",
-                heroTitle: "ファイルライブラリ",
-                heroSubtitle: "カスタムレベルや機能拡張のためのファイルをダウンロードできます。",
-                navHome: "ホーム",
-                navFile: "ファイル配布",
-                navFaq: "よくある質問",
-                navContact: "お問い合わせ",
-                navCommunity: "コース一覧", // ★★★ JavaScriptに追加 ★★★
-                searchPlaceholder: "ファイルを検索...",
-                filterAll: "全て",
-                filterMap: "マップ",
-                filterMod: "機能拡張",
-                filterOther: "その他",
-                loading: "ファイルを読み込み中...",
-                loadingError: "ファイルの読み込みに失敗しました。",
-                download: "ダウンロード",
-                noResults: "該当するファイルはありません。"
+                mainPage: "メインページ",
+                community: "コミュ一覧", // ★ 新規追加 ★
+                fileLibrary: "ファイルライブラリ",
+                faq: "よくある質問",
+                contact: "お問い合わせ",
+                heroTitle: "LOL.ex ファイルライブラリ",
+                heroSubtitle: "エディター用ファイルをダウンロード",
+                availableFiles: "利用可能なファイル",
+                descriptionText: "ここでは、LOL.exのゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。",
+                searchPlaceholder: "ファイル名や作者名で検索...",
+                allFilter: "すべて",
+                noResults: "検索結果が見つかりませんでした。",
+                loadingError: "ファイルの読み込みに失敗しました。後でもう一度お試しください。",
+                downloadButton: "ダウンロード"
             },
             en: {
-                pageTitle: "LOL.ex - File Library",
-                heroTitle: "File Library",
-                heroSubtitle: "Download files for custom levels and feature extensions.",
-                navHome: "Home",
-                navFile: "File Library",
-                navFaq: "FAQ",
-                navContact: "Contact",
-                navCommunity: "Course List", // ★★★ JavaScriptに追加 ★★★
-                searchPlaceholder: "Search files...",
-                filterAll: "All",
-                filterMap: "Maps",
-                filterMod: "Mods",
-                filterOther: "Other",
-                loading: "Loading files...",
-                loadingError: "Failed to load files.",
-                download: "Download",
-                noResults: "No matching files found."
+                mainPage: "Main Page",
+                community: "Community List", // ★ 新規追加 ★
+                fileLibrary: "File Library",
+                faq: "FAQ",
+                contact: "Contact",
+                heroTitle: "LOL.ex File Library",
+                heroSubtitle: "Download editor files",
+                availableFiles: "Available Files",
+                descriptionText: "Here, you can download various files for the LOL.ex in-game editor. Choose your favorite files to enrich your courses.",
+                searchPlaceholder: "Search by file name or author...",
+                allFilter: "All",
+                noResults: "No results found.",
+                loadingError: "Failed to load files. Please try again later.",
+                downloadButton: "Download"
             }
         };
 
-        let allFiles = [];
-
+        // 言語設定の取得と適用
         const applyLanguage = (lang) => {
-            const langData = translations[lang] || translations.ja;
+            // ローカルストレージに設定を保存
+            localStorage.setItem('language', lang);
+            const langData = translations[lang];
 
-            // ページタイトルの更新
-            document.title = langData.pageTitle;
+            // HTML要素に翻訳を適用
+            document.title = langData.heroTitle;
+
+            // ★ ナビゲーションリンクのテキストをIDで更新 ★
+            document.getElementById('nav-main-page').textContent = langData.mainPage;
+            document.getElementById('nav-community').textContent = langData.community; // ★ 新規追加 ★
+            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
+            document.getElementById('nav-faq').textContent = langData.faq;
+            document.getElementById('nav-contact').textContent = langData.contact;
             
-            // ヒーローセクションの更新
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
-
-            // ナビゲーションリンクの更新
-            document.getElementById('nav-home').textContent = langData.navHome;
-            document.getElementById('nav-file').textContent = langData.navFile;
-            document.getElementById('nav-faq').textContent = langData.navFaq;
-            document.getElementById('nav-contact').textContent = langData.navContact;
-            document.getElementById('nav-community').textContent = langData.navCommunity; // ★★★ JavaScriptに追加 ★★★
-
-            // 検索・フィルターの更新
+            document.getElementById('available-files-title').textContent = langData.availableFiles;
+            document.getElementById('description-text').textContent = langData.descriptionText;
             document.getElementById('search-input').placeholder = langData.searchPlaceholder;
-            document.getElementById('filter-all').textContent = langData.filterAll;
-            document.getElementById('filter-map').textContent = langData.filterMap;
-            document.getElementById('filter-mod').textContent = langData.filterMod;
-            document.getElementById('filter-other').textContent = langData.filterOther;
-            document.getElementById('loading-message').textContent = langData.loading;
-
+            document.querySelector('.filter-button[data-filter="all"]').textContent = langData.allFilter;
+            
             // 言語セレクターを更新
             document.getElementById('language-switcher').value = lang;
         };
 
-        const fileListContainer = document.getElementById('file-list-container');
-        const searchInput = document.getElementById('search-input');
-        const filterButtons = document.querySelectorAll('.filter-buttons button');
-        const languageSwitcher = document.getElementById('language-switcher');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        const navbar = document.querySelector('.navbar');
-
-
-        // ファイルカードのHTML生成（多言語対応）
-        const createDownloadButton = (file, langData) => {
-            const button = document.createElement('a');
-            button.href = file.downloadUrl;
-            button.className = 'download-button';
-            button.textContent = langData.download;
-            button.download = file.fileName; // ダウンロード時のファイル名を指定
-            return button;
-        };
-
-        const displayFileCard = (file, langData) => {
-            const card = document.createElement('div');
-            card.className = 'file-card';
-
-            const title = file.name[langData.lang] || file.name.ja;
-            const desc = file.description[langData.lang] || file.description.ja;
-
-            card.innerHTML = `
-                <div class="card-header">
-                    <i class="fas fa-file-download file-icon"></i>
-                    <h3 class="file-title">${title}</h3>
-                </div>
-                <div class="file-meta">
-                    <span class="file-type">${file.type}</span> | 
-                    <span class="file-version">${file.version}</span> | 
-                    <span class="file-date">${file.date}</span> | 
-                    <span class="file-author">${file.author}</span>
-                </div>
-                <p class="file-desc">${desc}</p>
-            `;
-            
-            // ダウンロードボタンを動的に作成・追加
-            card.appendChild(createDownloadButton(file, langData));
-            
-            return card;
-        };
-
-        const filterAndDisplayFiles = () => {
-            const lang = localStorage.getItem('language') || 'ja';
-            const langData = translations[lang] || translations.ja;
-            langData.lang = lang; // displayFileCardに言語キーを渡す
-
-            const query = searchInput.value.toLowerCase();
-            const activeFilter = document.querySelector('.filter-buttons .active').getAttribute('data-filter');
-
-            const filteredFiles = allFiles.filter(file => {
-                const title = file.name.ja.toLowerCase() + (file.name.en ? ' ' + file.name.en.toLowerCase() : '');
-                const desc = file.description.ja.toLowerCase() + (file.description.en ? ' ' + file.description.en.toLowerCase() : '');
-                const author = file.author.toLowerCase();
-                const matchesSearch = title.includes(query) || desc.includes(query) || author.includes(query);
-
-                const matchesFilter = activeFilter === 'all' || file.type.toLowerCase() === activeFilter;
-
-                return matchesSearch && matchesFilter;
-            });
-
-            fileListContainer.innerHTML = ''; // 一旦クリア
-            if (filteredFiles.length === 0) {
-                fileListContainer.innerHTML = `<div class="loading">${langData.noResults}</div>`;
-            } else {
-                filteredFiles.forEach(file => {
-                    fileListContainer.appendChild(displayFileCard(file, langData));
-                });
-            }
-        };
-
-
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. ページ読み込み時の初期設定
-            const savedLang = localStorage.getItem('language') || 'ja';
+            const fileListContainer = document.getElementById('file-list');
+            const searchInput = document.getElementById('search-input');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const navbar = document.querySelector('.navbar');
+            const filterButtons = document.querySelectorAll('.filter-button');
+            const languageSwitcher = document.getElementById('language-switcher');
+            let allFiles = [];
+            
+            // 1. ページ読み込み時に言語設定を適用
+            const savedLang = localStorage.getItem('language') || 'ja'; // デフォルトは日本語
             applyLanguage(savedLang);
 
-            // 2. JSONデータの読み込み
-            fetch('files.json') // ファイルリストのJSONファイルを読み込む
+            // 検索とフィルタリングを統合した表示関数
+            const filterAndDisplayFiles = () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const activeFilter = document.querySelector('.filter-button.active').dataset.filter;
+                const langData = translations[localStorage.getItem('language') || 'ja'];
+
+                const filteredFiles = allFiles.filter(file => {
+                    const matchesSearch = 
+                        file.title.toLowerCase().includes(searchTerm) ||
+                        file.author.toLowerCase().includes(searchTerm) ||
+                        file.description.toLowerCase().includes(searchTerm);
+                    
+                    const matchesFilter = (activeFilter === 'all' || file.type === activeFilter);
+                    
+                    return matchesSearch && matchesFilter;
+                });
+                displayFiles(filteredFiles);
+            };
+
+            // ファイルカードを生成する関数
+            const displayFiles = (files) => {
+                fileListContainer.innerHTML = '';
+                const langData = translations[localStorage.getItem('language') || 'ja'];
+
+                if (files.length === 0) {
+                    fileListContainer.innerHTML = `<p style="text-align: center; color: var(--secondary-color);">${langData.noResults}</p>`;
+                    return;
+                }
+                files.forEach(item => {
+                    const cardHtml = `
+                        <div class="download-item-card">
+                            <img src="${item.thumbnailUrl}" alt="${item.title}のサムネイル">
+                            <span class="file-info-badge badge-${item.type}">${item.type.toUpperCase()}</span>
+                            <div class="download-item-content">
+                                <h3>${item.title}</h3>
+                                <p class="author-name">by ${item.author}</p>
+                                <p>${item.description}</p>
+                                <a href="${item.downloadUrl}" class="download-button-small">${langData.downloadButton}</a>
+                            </div>
+                        </div>
+                    `;
+                    fileListContainer.innerHTML += cardHtml;
+                });
+            };
+
+            // 2. data.jsonを読み込む（キャッシュ無効化）
+            fetch('data.json', { cache: 'no-cache' })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(response.statusText);
+                        throw new Error('Network response was not ok ' + response.statusText);
                     }
                     return response.json();
                 })

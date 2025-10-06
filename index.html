@@ -30,392 +30,485 @@
             scroll-behavior: smooth;
         }
 
-        /* Navbar Styling */
-        .navbar {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            padding: 10px 20px;
-            border-radius: 30px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-        }
-        .navbar a {
-            color: var(--text-color-dark);
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: 500;
-            transition: color 0.3s ease;
-            display: inline-block;
-        }
-        .navbar a:hover, .navbar a.active-nav {
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-        #language-switcher {
-            padding: 8px 10px;
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            margin-left: 15px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .hamburger-menu {
-            display: none;
-            cursor: pointer;
-            font-size: 1.5em;
-            color: var(--text-color-dark);
-            padding: 5px;
-        }
-        .navbar.open {
-            /* モバイルで開いたときのスタイル (必要に応じて調整) */
-        }
-
-
-        /* Hero Section */
+        /* Hero Section - 背景画像 */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://tanabesan.github.io/lolbeans/file/page/bg.jpg');
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/icon.png');
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
-            color: var(--text-color-light);
-            padding: 120px 20px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+            color: var(--text-color-light);
             position: relative;
         }
 
-        .hero-content h1 {
-            font-size: 4em;
-            font-weight: 700;
-            margin-bottom: 10px;
+        .hero-content {
+            z-index: 10;
+            max-width: 900px;
+            padding: 0 20px;
         }
 
-        .hero-content p {
-            font-size: 1.5em;
-            margin-bottom: 30px;
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            font-weight: 300;
         }
 
         .cta-button {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: 600;
-            transition: background-color 0.3s;
             display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--text-color-light);
+            padding: 12px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s;
+            box-shadow: var(--shadow-light);
         }
 
         .cta-button:hover {
-            background-color: #4c4687;
+            background-color: #4A4480;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
         }
 
-        /* Container & Sections */
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 50px 20px;
+        /* Header / Navigation */
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .logo a {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .navbar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .navbar li {
+            margin-left: 25px;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: var(--text-color-dark);
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 5px 0;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .navbar a:hover {
+            color: var(--primary-color);
+        }
+
+        .navbar a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .navbar a:hover::after,
+        .navbar a.active::after {
+            width: 100%;
+        }
+
+        /* Language Switcher */
+        .language-switcher-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #language-switcher {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            margin-left: 20px;
+            cursor: pointer;
+            background-color: #fff;
+            color: var(--text-color-dark);
+        }
+
+        /* Hamburger Menu */
+        .hamburger-icon {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+
+        /* Sections */
+        .section {
+            padding: 80px 5% 60px;
+            text-align: center;
         }
 
         .section-title {
-            text-align: center;
-            font-size: 2.5em;
-            font-weight: 700;
-            margin-bottom: 60px;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
             color: var(--primary-color);
+            font-weight: 600;
             position: relative;
-            padding-bottom: 10px;
+            display: inline-block;
         }
+
         .section-title::after {
             content: '';
             position: absolute;
-            bottom: 0;
             left: 50%;
+            bottom: -10px;
             transform: translateX(-50%);
-            width: 80px;
+            width: 60px;
             height: 4px;
             background-color: var(--secondary-color);
             border-radius: 2px;
         }
 
         /* Features Section */
+        #features {
+            background-color: var(--background-color);
+        }
+
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .feature-card {
             background-color: var(--card-color);
             padding: 30px;
-            border-radius: 12px;
+            border-radius: 10px;
             box-shadow: var(--shadow-light);
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s, opacity 0.6s ease-out;
+            text-align: left;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             opacity: 0;
             transform: translateY(20px);
         }
-        
+
         .feature-card.visible {
             opacity: 1;
             transform: translateY(0);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
         }
 
-        .feature-card i {
-            font-size: 3em;
+        .card-icon {
             color: var(--primary-color);
+            font-size: 2.5rem;
             margin-bottom: 15px;
+            display: block;
         }
 
-        .feature-card h3 {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin-top: 0;
+        .card-title {
+            font-size: 1.5rem;
             margin-bottom: 10px;
+            font-weight: 600;
         }
 
-        .feature-card p {
+        .card-description {
+            font-size: 1rem;
             color: var(--secondary-color);
-            font-size: 1em;
         }
-        
+
         /* Demo Section */
-        .demo-section {
-            background-color: var(--primary-color);
-            color: var(--text-color-light);
-            padding: 60px 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-top: 50px;
+        #demo {
+            background-color: var(--card-color);
+            padding-bottom: 80px;
         }
 
-        .demo-section h2 {
-            font-size: 2em;
-            margin-bottom: 20px;
+        .demo-content {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        .demo-section p {
-            font-size: 1.1em;
-            margin-bottom: 30px;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        #demo-placeholder {
+        .video-placeholder {
             width: 100%;
-            height: 350px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            height: 450px;
+            background-color: #eee;
+            border-radius: 10px;
+            box-shadow: var(--shadow-hover);
+            margin-top: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5em;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            color: var(--secondary-color);
         }
 
         /* Footer */
-        .footer-section {
-            background-color: var(--text-color-dark);
+        footer {
+            background-color: var(--primary-color);
             color: var(--text-color-light);
-            padding: 40px 20px;
             text-align: center;
-            margin-top: 40px;
+            padding: 20px 0;
+            font-size: 0.9rem;
         }
 
-        .footer-section .social-icons a {
-            color: var(--text-color-light);
-            font-size: 1.3em;
-            margin: 0 12px;
-            transition: color 0.3s ease;
-        }
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .hero-title {
+                font-size: 3rem;
+            }
 
-        .footer-section .social-icons a:hover {
-            color: var(--primary-color);
-        }
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
 
-        .footer-section p {
-            margin-top: 15px;
-            font-size: 0.85em;
-        }
+            .section {
+                padding: 60px 5% 40px;
+            }
 
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .demo-content {
+                padding: 0 20px;
+            }
+
+            .video-placeholder {
+                height: 350px;
+            }
+        }
 
         @media (max-width: 768px) {
             .navbar {
-                top: 10px;
-                right: 10px;
-                padding: 10px;
-                border-radius: 8px;
-            }
-            .navbar a {
-                display: none; /* デフォルトで非表示 */
-                margin: 10px 0;
-                width: 100%;
-                text-align: left;
-                padding: 5px 0;
-            }
-            .navbar.open {
-                flex-direction: column;
-                position: fixed;
-                top: 0;
-                right: 0;
-                width: 250px;
-                height: 100vh;
-                background-color: var(--card-color);
-                box-shadow: -4px 0 10px rgba(0,0,0,0.1);
-                padding: 40px 20px;
-                border-radius: 0;
-                align-items: flex-start;
-            }
-            .navbar.open a {
-                display: block; /* 開いたときに表示 */
-            }
-            .navbar.open #language-switcher {
-                margin-left: 0;
-                margin-top: 15px;
-            }
-            .hamburger-menu {
-                display: block;
                 position: absolute;
-                top: 15px;
-                right: 15px;
-                z-index: 1001;
+                top: 70px; /* Adjust based on header height */
+                left: 0;
+                width: 100%;
+                background-color: rgba(255, 255, 255, 0.98);
+                flex-direction: column;
+                transform: translateY(-200%);
+                transition: transform 0.3s ease-out;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
             }
-            .hero-content h1 {
-                font-size: 3em;
+
+            .navbar.open {
+                transform: translateY(0);
             }
-            .hero-content p {
-                font-size: 1.2em;
+
+            .navbar ul {
+                flex-direction: column;
+                width: 100%;
+                padding: 10px 0;
             }
-            .section-title {
-                font-size: 2em;
+
+            .navbar li {
+                margin: 0;
+                text-align: center;
+                border-bottom: 1px solid #eee;
+            }
+
+            .navbar li:last-child {
+                border-bottom: none;
+            }
+
+            .navbar a {
+                display: block;
+                padding: 15px 0;
+                font-size: 1.1rem;
+            }
+
+            .hamburger-icon {
+                display: block;
+            }
+
+            .language-switcher-container {
+                display: none; /* Hide language switcher on small screens when not in menu */
+            }
+
+            header {
+                padding: 15px 20px;
             }
         }
     </style>
 </head>
 <body>
-
-    <header class="hero-section">
-        <div class="hero-content">
-            <h1 id="hero-title">LOL.ex</h1>
-            <p id="hero-subtitle">次世代のLOLBeans体験へようこそ</p>
-            <a href="#about" class="cta-button" id="cta-button">詳細を見る</a>
+    <header>
+        <div class="logo">
+            <a href="index.html">LOL.ex</a>
+        </div>
+        <nav class="navbar">
+            <ul>
+                <li><a href="index.html" id="nav-home" class="active">ホーム</a></li>
+                <li><a href="file.html" id="nav-file">ファイル配布</a></li>
+                <li><a href="faq.html" id="nav-faq">よくある質問</a></li>
+                <li><a href="contact.html" id="nav-contact">お問い合わせ</a></li>
+                <li><a href="community.html" id="nav-community">コース一覧</a></li>
+            </ul>
+        </nav>
+        <div class="language-switcher-container">
+            <i class="fas fa-globe"></i>
+            <select id="language-switcher">
+                <option value="ja">日本語</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+        <div class="hamburger-icon" id="hamburger-icon">
+            <i class="fas fa-bars"></i>
         </div>
     </header>
 
-    <nav class="navbar">
-        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
-        <a id="nav-main-page" href="index.html" class="active-nav">メインページ</a>
-        <a id="nav-file-library" href="file.html">ファイルライブラリ</a>
-        <a id="nav-level-list" href="community.html">コース一覧</a>
-        <a id="nav-community" href="https://discord.gg/Cpu8vFDmH3" target="_blank">コミュニティ</a> <a id="nav-faq" href="faq.html">よくある質問</a>
-        <a id="nav-contact" href="contact.html">お問い合わせ</a>
-        <select id="language-switcher">
-            <option value="ja">日本語</option>
-            <option value="en">English</option>
-        </select>
-    </nav>
-
-    <main class="container">
-        <section id="about">
-            <h2 class="section-title" id="about-title">LOL.exについて</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <i class="fas fa-magic"></i>
-                    <h3 id="feature1-title">新しい機能の追加</h3>
-                    <p id="feature1-desc">ゲームプレイを劇的に変えるカスタム機能、エアムーブ、カスタム背景、YouTubeオーバーレイなどを提供します。</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-level-up-alt"></i>
-                    <h3 id="feature2-title">レベルエディタ拡張</h3>
-                    <p id="feature2-desc">マップ制作を強力にサポートする外部ファイル機能を提供。複雑な構造も簡単に組み込めます。</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-users"></i>
-                    <h3 id="feature3-title">コミュニティ連携</h3>
-                    <p id="feature3-desc">Discordサーバーを通じて、開発者や他のプレイヤーと交流し、最新情報を常に得ることができます。</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="demo-section">
-            <h2 id="demo-title">動作デモ</h2>
-            <p id="demo-subtitle">LOL.exがどのようにゲーム体験を向上させるかをご覧ください。</p>
-            <div id="demo-placeholder">
-                デモ動画ロード中...
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer-section">
-        <div class="social-icons">
-            <a href="#"><i class="fab fa-youtube"></i></a>
-            <a href="https://discord.gg/Cpu8vFDmH3"><i class="fab fa-discord"></i></a>
-            <a href="https://github.com/tanabesan/"><i class="fab fa-github"></i></a>
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title" id="hero-title">LOL.ex: 次世代のゲーム体験</h1>
+            <p class="hero-subtitle" id="hero-subtitle">ファイルをダウンロードして、無限のカスタムレベルとコミュニティと交流しよう。</p>
+            <a href="file.html" class="cta-button" id="hero-cta">ファイルをダウンロード</a>
         </div>
-        <p>2025 Yuki.</p>
+    </section>
+
+    <section id="features" class="section">
+        <h2 class="section-title" id="features-title">LOL.exの特徴</h2>
+        <div class="features-grid">
+            <div class="feature-card" data-lang-title="cardTitle1" data-lang-desc="cardDesc1">
+                <i class="fas fa-code-branch card-icon"></i>
+                <h3 class="card-title">カスタムマップ</h3>
+                <p class="card-description">LOLBeansのマップをカスタマイズし、オリジナルのコースを作成・プレイするためのファイルを提供します。</p>
+            </div>
+            <div class="feature-card" data-lang-title="cardTitle2" data-lang-desc="cardDesc2">
+                <i class="fas fa-users card-icon"></i>
+                <h3 class="card-title">コミュニティ連携</h3>
+                <p class="card-description">コミュニティとコースを共有し、新しい遊び方を創出するための連携機能を充実させています。</p>
+            </div>
+            <div class="feature-card" data-lang-title="cardTitle3" data-lang-desc="cardDesc3">
+                <i class="fas fa-lightbulb card-icon"></i>
+                <h3 class="card-title">簡単な導入</h3>
+                <p class="card-description">初心者でも簡単に導入できるよう、詳細な手順とサポートを提供しています。</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="section">
+        <h2 class="section-title" id="demo-title">デモ動画</h2>
+        <div class="demo-content">
+            <p id="demo-subtitle">LOL.exの機能の一部を動画でご紹介します。</p>
+            <div class="video-placeholder" id="demo-placeholder">
+                デモ動画のコンテンツ
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 LOL.ex. All rights reserved.</p>
     </footer>
 
     <script>
-        let currentLang = 'ja';
-
         const translations = {
             ja: {
-                mainPage: "メインページ", fileLibrary: "ファイルライブラリ", levelList: "コース一覧", community: "コミュニティ", faq: "よくある質問", contact: "お問い合わせ",
-                pageTitle: "LOL.ex 次世代のゲーム体験", heroTitle: "LOL.ex", heroSubtitle: "次世代のLOLBeans体験へようこそ",
-                ctaButton: "詳細を見る",
-                aboutTitle: "LOL.exについて",
-                feature1Title: "新しい機能の追加", feature1Desc: "ゲームプレイを劇的に変えるカスタム機能、エアムーブ、カスタム背景、YouTubeオーバーレイなどを提供します。",
-                feature2Title: "レベルエディタ拡張", feature2Desc: "マップ制作を強力にサポートする外部ファイル機能を提供。複雑な構造も簡単に組み込めます。",
-                feature3Title: "コミュニティ連携", feature3Desc: "Discordサーバーを通じて、開発者や他のプレイヤーと交流し、最新情報を常に得ることができます。",
-                demoTitle: "動作デモ", demoSubtitle: "LOL.exがどのようにゲーム体験を向上させるかをご覧ください。",
-                demoPlaceholder: "デモ動画ロード中..."
+                pageTitle: "LOL.ex 次世代のゲーム体験",
+                heroTitle: "LOL.ex: 次世代のゲーム体験",
+                heroSubtitle: "ファイルをダウンロードして、無限のカスタムレベルとコミュニティと交流しよう。",
+                heroCta: "ファイルをダウンロード",
+                navHome: "ホーム",
+                navFile: "ファイル配布",
+                navFaq: "よくある質問",
+                navContact: "お問い合わせ",
+                navCommunity: "コース一覧", // ★★★ JavaScriptに追加 ★★★
+                featuresTitle: "LOL.exの特徴",
+                cardTitle1: "カスタムマップ",
+                cardDesc1: "LOLBeansのマップをカスタマイズし、オリジナルのコースを作成・プレイするためのファイルを提供します。",
+                cardTitle2: "コミュニティ連携",
+                cardDesc2: "コミュニティとコースを共有し、新しい遊び方を創出するための連携機能を充実させています。",
+                cardTitle3: "簡単な導入",
+                cardDesc3: "初心者でも簡単に導入できるよう、詳細な手順とサポートを提供しています。",
+                demoTitle: "デモ動画",
+                demoSubtitle: "LOL.exの機能の一部を動画でご紹介します。",
+                demoPlaceholder: "デモ動画のコンテンツ"
             },
             en: {
-                mainPage: "Main Page", fileLibrary: "File Library", levelList: "Course List", community: "Community", faq: "FAQ", contact: "Contact",
-                pageTitle: "LOL.ex Next-Gen Gaming Experience", heroTitle: "LOL.ex", heroSubtitle: "Welcome to the Next-Gen LOLBeans Experience",
-                ctaButton: "Learn More",
-                aboutTitle: "About LOL.ex",
-                feature1Title: "New Feature Additions", feature1Desc: "Provides custom features, air movement, custom backgrounds, YouTube overlay, and more to dramatically change gameplay.",
-                feature2Title: "Level Editor Expansion", feature2Desc: "Offers external file functionality to strongly support map creation, allowing for easy integration of complex structures.",
-                feature3Title: "Community Integration", feature3Desc: "Stay connected with developers and other players and get the latest information through our Discord server.",
-                demoTitle: "Live Demo", demoSubtitle: "See how LOL.ex enhances your gaming experience.",
-                demoPlaceholder: "Demo video loading..."
+                pageTitle: "LOL.ex Next Generation Gaming Experience",
+                heroTitle: "LOL.ex: Next Generation Gaming Experience",
+                heroSubtitle: "Download files to unlock infinite custom levels and interact with the community.",
+                heroCta: "Download Files",
+                navHome: "Home",
+                navFile: "File Library",
+                navFaq: "FAQ",
+                navContact: "Contact",
+                navCommunity: "Course List", // ★★★ JavaScriptに追加 ★★★
+                featuresTitle: "Features of LOL.ex",
+                cardTitle1: "Custom Maps",
+                cardDesc1: "We provide files for customizing LOLBeans maps, allowing you to create and play original courses.",
+                cardTitle2: "Community Integration",
+                cardDesc2: "Enhancing integration features to share courses with the community and create new ways to play.",
+                cardTitle3: "Easy Setup",
+                cardDesc3: "We offer detailed instructions and support to ensure easy setup even for beginners.",
+                demoTitle: "Demo Video",
+                demoSubtitle: "See some of the features of LOL.ex in action.",
+                demoPlaceholder: "Demo Video Content"
             }
         };
 
         const applyLanguage = (lang) => {
-            currentLang = lang;
-            localStorage.setItem('language', lang);
-            const langData = translations[lang];
-
-            // ページタイトルとナビゲーションの更新
+            const langData = translations[lang] || translations.ja;
+            
+            // ページタイトルの更新
             document.getElementById('page-title').textContent = langData.pageTitle;
-            document.getElementById('nav-main-page').textContent = langData.mainPage;
-            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
-            document.getElementById('nav-level-list').textContent = langData.levelList;
-            document.getElementById('nav-community').textContent = langData.community; // ★追加したリンクのテキストを更新★
-            document.getElementById('nav-faq').textContent = langData.faq;
-            document.getElementById('nav-contact').textContent = langData.contact;
 
             // ヒーローセクションの更新
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
-            document.getElementById('cta-button').textContent = langData.ctaButton;
+            document.getElementById('hero-cta').textContent = langData.heroCta;
+
+            // ナビゲーションリンクの更新
+            document.getElementById('nav-home').textContent = langData.navHome;
+            document.getElementById('nav-file').textContent = langData.navFile;
+            document.getElementById('nav-faq').textContent = langData.navFaq;
+            document.getElementById('nav-contact').textContent = langData.navContact;
+            document.getElementById('nav-community').textContent = langData.navCommunity; // ★★★ JavaScriptに追加 ★★★
 
             // 特徴セクションの更新
-            document.getElementById('about-title').textContent = langData.aboutTitle;
-            document.getElementById('feature1-title').textContent = langData.feature1Title;
-            document.getElementById('feature1-desc').textContent = langData.feature1Desc;
-            document.getElementById('feature2-title').textContent = langData.feature2Title;
-            document.getElementById('feature2-desc').textContent = langData.feature2Desc;
-            document.getElementById('feature3-title').textContent = langData.feature3Title;
-            document.getElementById('feature3-desc').textContent = langData.feature3Desc;
-            
+            document.getElementById('features-title').textContent = langData.featuresTitle;
+            document.querySelectorAll('.feature-card').forEach(card => {
+                const titleKey = card.getAttribute('data-lang-title');
+                const descKey = card.getAttribute('data-lang-desc');
+                card.querySelector('.card-title').textContent = langData[titleKey];
+                card.querySelector('.card-description').textContent = langData[descKey];
+            });
+
             // デモセクションの更新
             document.getElementById('demo-title').textContent = langData.demoTitle;
             document.getElementById('demo-subtitle').textContent = langData.demoSubtitle;

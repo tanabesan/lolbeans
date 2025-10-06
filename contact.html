@@ -34,422 +34,271 @@
 
         /* Hero Section - 背景画像 */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/icon.png');
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                        url('https://tanabesan.github.io/lolbeans/file/page/icon2.png');
             background-size: cover;
             background-position: center;
-            height: 40vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            background-repeat: no-repeat;
             color: var(--text-color-light);
-            position: relative;
-            padding-top: 70px;
+            padding: 120px 20px;
+            text-align: center;
         }
-
-        .hero-content {
-            z-index: 10;
-            max-width: 900px;
-            padding: 0 20px;
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            margin-bottom: 10px;
+        .hero-section h1 {
+            font-size: 3em;
             font-weight: 700;
+            margin: 0 0 10px;
         }
 
-        .hero-subtitle {
-            font-size: 1.2rem;
-            font-weight: 300;
-        }
-
-
-        /* Header / Navigation */
-        header {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        /* Navbar Section (流用) */
+        .navbar {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 100;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 10px 20px;
+            border-radius: 30px;
+            z-index: 1000;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            box-sizing: border-box;
         }
-
-        .logo a {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .navbar ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-
-        .navbar li {
-            margin-left: 25px;
-        }
-
         .navbar a {
-            text-decoration: none;
             color: var(--text-color-dark);
+            text-decoration: none;
+            margin: 0 15px;
             font-weight: 500;
-            font-size: 1rem;
-            padding: 5px 0;
             transition: color 0.3s ease;
-            position: relative;
+            display: inline-block;
         }
-
         .navbar a:hover {
             color: var(--primary-color);
         }
-
-        .navbar a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-
-        .navbar a:hover::after,
-        .navbar a.active::after {
-            width: 100%;
-        }
-
-        /* Language Switcher */
-        .language-switcher-container {
-            display: flex;
-            align-items: center;
-        }
-
         #language-switcher {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-family: 'Poppins', sans-serif;
-            margin-left: 20px;
+            padding: 8px 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            margin-left: 15px;
             cursor: pointer;
-            background-color: #fff;
-            color: var(--text-color-dark);
+            font-size: 14px;
         }
-
-        /* Hamburger Menu */
-        .hamburger-icon {
+        .hamburger-menu {
             display: none;
-            font-size: 1.5rem;
             cursor: pointer;
-            color: var(--primary-color);
+            font-size: 1.5em;
+            color: var(--text-color-dark);
+            padding: 5px;
         }
 
-        /* Contact Section */
-        .contact-section {
-            padding: 40px 5%;
-            max-width: 800px;
-            margin: 0 auto;
+        /* Contact Content - フォームの削除によりシンプルなデザインに変更 */
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
             text-align: center;
         }
-
-        .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 40px;
-            color: var(--primary-color);
-            font-weight: 600;
-            position: relative;
-            display: inline-block;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: -10px;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 4px;
-            background-color: var(--secondary-color);
-            border-radius: 2px;
-        }
-
-        .contact-info {
-            text-align: left;
+        .contact-info-container {
             background-color: var(--card-color);
-            padding: 30px;
+            padding: 40px;
             border-radius: 10px;
             box-shadow: var(--shadow-light);
+            text-align: left; /* コンテンツは左寄せに */
         }
-
-        .info-title {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: var(--text-color-dark);
+        .contact-info-container h2 {
+            color: var(--primary-color);
+            font-size: 2em;
+            margin-top: 0;
+            margin-bottom: 10px;
             text-align: center;
         }
-
-        .info-desc {
-            font-size: 1rem;
+        .contact-info-container p#info-desc {
+            font-size: 1.1em;
             color: var(--secondary-color);
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             text-align: center;
         }
-
-        .contact-item {
+        .contact-info-item {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            transition: background-color 0.3s;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
         }
-
-        .contact-item:hover {
-            background-color: #f9f9f9;
+        .contact-info-item:hover {
+            background-color: var(--background-color);
+            border-radius: 5px;
         }
-
-        .contact-icon {
-            font-size: 1.5rem;
+        .contact-info-item:last-child {
+            border-bottom: none;
+        }
+        .contact-info-item i {
             color: var(--primary-color);
+            font-size: 2em;
             margin-right: 20px;
-            min-width: 30px;
-            text-align: center;
         }
-
-        .item-details {
-            display: flex;
-            flex-direction: column;
+        .contact-info-item div {
+            flex-grow: 1;
         }
-
-        .item-label {
+        .contact-info-item p {
+            margin: 0;
+            line-height: 1.4;
+        }
+        .contact-info-item .contact-label {
             font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 5px;
+            color: var(--text-color-dark);
         }
-
-        .item-text a {
-            color: var(--primary-color);
+        .contact-info-item .contact-detail {
+            font-size: 0.9em;
+            color: var(--secondary-color);
+        }
+        .contact-info-item a {
             text-decoration: none;
-            word-break: break-all;
+            color: inherit; 
+            display: flex; 
+            width: 100%;
+            align-items: center;
         }
-
-        /* Footer */
-        footer {
-            background-color: var(--primary-color);
+        
+        /* Footer (流用) */
+        .footer-section {
+            background-color: var(--text-color-dark);
             color: var(--text-color-light);
+            padding: 40px 20px;
             text-align: center;
-            padding: 20px 0;
-            font-size: 0.9rem;
             margin-top: 40px;
         }
-
-        /* Responsive Design */
-        @media (max-width: 900px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-            }
+        .footer-section .social-icons a {
+            color: var(--text-color-light);
+            font-size: 1.3em;
+            margin: 0 12px;
+            transition: color 0.3s ease;
+        }
+        .footer-section .social-icons a:hover {
+            color: var(--primary-color);
+        }
+        .footer-section p {
+            margin-top: 15px;
+            font-size: 0.85em;
         }
 
+        /* Media Queries (流用) */
         @media (max-width: 768px) {
-            .navbar {
-                position: absolute;
-                top: 70px;
-                left: 0;
-                width: 100%;
-                background-color: rgba(255, 255, 255, 0.98);
-                flex-direction: column;
-                transform: translateY(-200%);
-                transition: transform 0.3s ease-out;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
-            }
-
-            .navbar.open {
-                transform: translateY(0);
-            }
-
-            .navbar ul {
-                flex-direction: column;
-                width: 100%;
-                padding: 10px 0;
-            }
-
-            .navbar li {
-                margin: 0;
-                text-align: center;
-                border-bottom: 1px solid #eee;
-            }
-
-            .navbar li:last-child {
-                border-bottom: none;
-            }
-
-            .navbar a {
-                display: block;
-                padding: 15px 0;
-                font-size: 1.1rem;
-            }
-
-            .hamburger-icon {
-                display: block;
-            }
-
-            .language-switcher-container {
-                display: none;
-            }
-
-            header {
-                padding: 15px 20px;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
+            .navbar a { display: none; }
+            #language-switcher { margin-left: 0; }
+            .navbar { background-color: transparent; box-shadow: none; padding: 10px; flex-direction: column-reverse; align-items: flex-end; }
+            .hamburger-menu { display: block; margin-bottom: 10px; }
+            .navbar.open a { display: block; margin: 10px 0; }
+            .navbar.open { background-color: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 20px; border-radius: 12px; display: flex; }
+            .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <a href="index.html">LOL.ex</a>
-        </div>
-        <nav class="navbar">
-            <ul>
-                <li><a href="index.html" id="nav-home">ホーム</a></li>
-                <li><a href="file.html" id="nav-file">ファイル配布</a></li>
-                <li><a href="faq.html" id="nav-faq">よくある質問</a></li>
-                <li><a href="contact.html" id="nav-contact" class="active">お問い合わせ</a></li>
-                <li><a href="community.html" id="nav-community">コース一覧</a></li>
-            </ul>
-        </nav>
-        <div class="language-switcher-container">
-            <i class="fas fa-globe"></i>
-            <select id="language-switcher">
-                <option value="ja">日本語</option>
-                <option value="en">English</option>
-            </select>
-        </div>
-        <div class="hamburger-icon" id="hamburger-icon">
-            <i class="fas fa-bars"></i>
-        </div>
+
+    <header class="hero-section">
+        <h1 id="hero-title">お問い合わせ</h1>
+        <p id="hero-subtitle">ご質問、ご意見、不具合報告など、お気軽にご連絡ください。</p>
     </header>
 
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title" id="hero-title">お問い合わせ</h1>
-            <p class="hero-subtitle" id="hero-subtitle">ご質問、ご意見、バグ報告など、お気軽にお寄せください。</p>
-        </div>
-    </section>
+    <nav class="navbar">
+        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
+        <a id="nav-main-page" href="index.html">メインページ</a>
+        <a id="nav-community" href="community.html">コミュ一覧</a> <a id="nav-file-library" href="file.html">ファイルライブラリ</a>
+        <a id="nav-faq" href="faq.html">よくある質問</a>
+        <a id="nav-contact" href="contact.html">お問い合わせ</a>
+        <select id="language-switcher">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+        </select>
+    </nav>
 
-    <div class="contact-section">
-        <h2 class="section-title" id="contact-section-title">連絡先情報</h2>
-        
-        <div class="contact-info">
-            <p class="info-title" id="info-title">以下の連絡先からお問い合わせください。</p>
-            <p class="info-desc" id="info-desc">Discordコミュニティへの参加が、最も早いサポートを受ける方法です。バグ報告や機能改善の提案も歓迎します。<br>メールでの対応も可能ですが、返信にお時間をいただく場合がございます。</p>
+    <main class="container">
+        <div class="contact-info-container">
+            <h2 id="info-title">ご連絡方法</h2>
+            <p id="info-desc">
+                サーバー側のフォーム機能は使用していません。<br>
+                お手数ですが、以下の連絡先からご連絡ください。
+            </p>
 
-            <div class="contact-item">
-                <div class="contact-icon"><i class="fab fa-discord"></i></div>
-                <div class="item-details">
-                    <span class="item-label" id="discord-label">Discordコミュニティ</span>
-                    <span class="item-text" id="discord-text"><a href="https://discord.gg/your-discord-link" target="_blank">招待リンクはこちら</a></span>
-                </div>
+            <div class="contact-info-item">
+                <i class="fab fa-discord"></i>
+                <a href="https://discord.gg/Cpu8vFDmH3" style="text-decoration: none; color: inherit; display: flex; width: 100%; align-items: center;">
+                    <div>
+                        <p class="contact-label" id="discord-label">Discordサーバー</p>
+                        <p class="contact-detail" id="discord-text">問題報告やコミュニティでの交流にご利用ください。</p>
+                    </div>
+                    <i class="fas fa-arrow-right" style="margin-left: auto; color: var(--secondary-color); font-size: 1.2em;"></i>
+                </a>
             </div>
 
-            <div class="contact-item">
-                <div class="contact-icon"><i class="fab fa-youtube"></i></div>
-                <div class="item-details">
-                    <span class="item-label" id="youtube-label">YouTubeチャンネル</span>
-                    <span class="item-text" id="youtube-text"><a href="https://youtube.com/@your-youtube-channel" target="_blank">チャンネルはこちら</a></span>
-                </div>
+            <div class="contact-info-item">
+                <i class="fab fa-youtube"></i> <a href="#" style="text-decoration: none; color: inherit; display: flex; width: 100%; align-items: center;">
+                    <div>
+                        <p class="contact-label" id="youtube-label">YouTube</p> <p class="contact-detail" id="youtube-text">デモ動画のコメント欄やメッセージでご意見をお寄せください。</p>
+                    </div>
+                    <i class="fas fa-arrow-right" style="margin-left: auto; color: var(--secondary-color); font-size: 1.2em;"></i>
+                </a>
             </div>
-            
         </div>
-    </div>
+    </main>
 
-    <footer>
-        <p>&copy; 2024 LOL.ex. All rights reserved.</p>
+    <footer class="footer-section">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="https://discord.gg/Cpu8vFDmH3"><i class="fab fa-discord"></i></a>
+            <a href="https://github.com/tanabesan/"><i class="fab fa-github"></i></a>
+        </div>
+        <p>&copy; 2025 Yuki. </p>
     </footer>
 
     <script>
+        // 言語データ (YouTubeに合わせて修正)
         const translations = {
             ja: {
-                pageTitle: "LOL.ex - お問い合わせ",
-                heroTitle: "お問い合わせ",
-                heroSubtitle: "ご質問、ご意見、バグ報告など、お気軽にお寄せください。",
-                navHome: "ホーム",
-                navFile: "ファイル配布",
-                navFaq: "よくある質問",
-                navContact: "お問い合わせ",
-                navCommunity: "コース一覧", // ★★★ JavaScriptに追加 ★★★
-                contactSectionTitle: "連絡先情報",
-                infoTitle: "以下の連絡先からお問い合わせください。",
-                infoDesc: 'Discordコミュニティへの参加が、最も早いサポートを受ける方法です。バグ報告や機能改善の提案も歓迎します。<br>メールでの対応も可能ですが、返信にお時間をいただく場合がございます。',
-                discordLabel: "Discordコミュニティ",
-                discordText: '<a href="https://discord.gg/your-discord-link" target="_blank">招待リンクはこちら</a>',
-                youtubeLabel: "YouTubeチャンネル",
-                youtubeText: '<a href="https://youtube.com/@your-youtube-channel" target="_blank">チャンネルはこちら</a>',
+                mainPage: "メインページ", 
+                community: "コミュ一覧", // ★ 新規追加 ★
+                fileLibrary: "ファイルライブラリ", faq: "よくある質問", contact: "お問い合わせ",
+                heroTitle: "お問い合わせ", 
+                heroSubtitle: "ご質問、ご意見、不具合報告など、お気軽にご連絡ください。",
+                infoTitle: "ご連絡方法", 
+                infoDesc: "サーバー側のフォーム機能は使用していません。<br>お手数ですが、以下の連絡先からご連絡ください。",
+                discordLabel: "Discordサーバー", discordText: "問題報告やコミュニティでの交流にご利用ください。",
+                youtubeLabel: "YouTube", youtubeText: "デモ動画のコメント欄やメッセージでご意見をお寄せください。" // YouTube用のテキスト
             },
             en: {
-                pageTitle: "LOL.ex - Contact",
-                heroTitle: "Contact Us",
-                heroSubtitle: "Feel free to send us your questions, feedback, or bug reports.",
-                navHome: "Home",
-                navFile: "File Library",
-                navFaq: "FAQ",
-                navContact: "Contact",
-                navCommunity: "Course List", // ★★★ JavaScriptに追加 ★★★
-                contactSectionTitle: "Contact Information",
-                infoTitle: "Please contact us through the following channels.",
-                infoDesc: 'Joining our Discord community is the fastest way to get support. Bug reports and feature suggestions are also welcome.<br>We also handle inquiries via email, but responses may take longer.',
-                discordLabel: "Discord Community",
-                discordText: '<a href="https://discord.gg/your-discord-link" target="_blank">Invitation Link</a>',
-                youtubeLabel: "YouTube Channel",
-                youtubeText: '<a href="https://youtube.com/@your-youtube-channel" target="_blank">Channel Link</a>',
+                mainPage: "Main Page", 
+                community: "Community List", // ★ 新規追加 ★
+                fileLibrary: "File Library", faq: "FAQ", contact: "Contact",
+                heroTitle: "Contact Us", 
+                heroSubtitle: "Feel free to contact us with any questions, feedback, or bug reports.",
+                infoTitle: "How to Contact Us", 
+                infoDesc: "We do not use server-side form functionality.<br>Please use the following contact methods.",
+                discordLabel: "Discord Server", discordText: "For bug reports and community interaction.",
+                youtubeLabel: "YouTube", youtubeText: "Please leave feedback in the comment section or send a message on our demo videos." // YouTube用のテキスト
             }
         };
 
+        // 言語設定の取得と適用
         const applyLanguage = (lang) => {
-            const langData = translations[lang] || translations.ja;
+            localStorage.setItem('language', lang);
+            const langData = translations[lang];
 
-            // ページタイトルの更新
-            document.getElementById('page-title').textContent = langData.pageTitle;
-            
-            // ヒーローセクションの更新
+            // ページタイトルとナビゲーション
+            document.getElementById('page-title').textContent = `LOL.ex - ${langData.contact}`;
+            document.getElementById('nav-main-page').textContent = langData.mainPage;
+            document.getElementById('nav-community').textContent = langData.community; // ★ 新規追加 ★
+            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
+            document.getElementById('nav-faq').textContent = langData.faq;
+            document.getElementById('nav-contact').textContent = langData.contact;
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
-
-            // ナビゲーションリンクの更新
-            document.getElementById('nav-home').textContent = langData.navHome;
-            document.getElementById('nav-file').textContent = langData.navFile;
-            document.getElementById('nav-faq').textContent = langData.navFaq;
-            document.getElementById('nav-contact').textContent = langData.navContact;
-            document.getElementById('nav-community').textContent = langData.navCommunity; // ★★★ JavaScriptに追加 ★★★
-
-            // セクションタイトルの更新
-            document.getElementById('contact-section-title').textContent = langData.contactSectionTitle;
             
             // コンタクト情報の更新
             document.getElementById('info-title').textContent = langData.infoTitle;
             document.getElementById('info-desc').innerHTML = langData.infoDesc; 
             document.getElementById('discord-label').textContent = langData.discordLabel;
-            document.getElementById('discord-text').innerHTML = langData.discordText; // innerHTMLを使用
-            document.getElementById('youtube-label').textContent = langData.youtubeLabel;
-            document.getElementById('youtube-text').innerHTML = langData.youtubeText; // innerHTMLを使用
+            document.getElementById('discord-text').textContent = langData.discordText;
+            document.getElementById('youtube-label').textContent = langData.youtubeLabel; // IDを修正
+            document.getElementById('youtube-text').textContent = langData.youtubeText; // IDを修正
             
             document.getElementById('language-switcher').value = lang;
         };

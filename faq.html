@@ -34,430 +34,324 @@
 
         /* Hero Section - 背景画像 */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/icon.png');
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                        url('https://tanabesan.github.io/lolbeans/file/page/icon.png');
             background-size: cover;
             background-position: center;
-            height: 40vh; /* 高さ調整 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            background-repeat: no-repeat;
             color: var(--text-color-light);
-            position: relative;
-            padding-top: 70px; /* ヘッダーの高さ分調整 */
+            padding: 120px 20px;
+            text-align: center;
         }
-
-        .hero-content {
-            z-index: 10;
-            max-width: 900px;
-            padding: 0 20px;
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            margin-bottom: 10px;
+        .hero-section h1 {
+            font-size: 3em;
             font-weight: 700;
+            margin: 0 0 10px;
         }
 
-        .hero-subtitle {
-            font-size: 1.2rem;
-            font-weight: 300;
-        }
-
-
-        /* Header / Navigation */
-        header {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 15px 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        /* Navbar Section (流用) */
+        .navbar {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 100;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 10px 20px;
+            border-radius: 30px;
+            z-index: 1000;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            box-sizing: border-box;
         }
-
-        .logo a {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .navbar ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-
-        .navbar li {
-            margin-left: 25px;
-        }
-
         .navbar a {
-            text-decoration: none;
             color: var(--text-color-dark);
+            text-decoration: none;
+            margin: 0 15px;
             font-weight: 500;
-            font-size: 1rem;
-            padding: 5px 0;
             transition: color 0.3s ease;
-            position: relative;
+            display: inline-block;
         }
-
         .navbar a:hover {
             color: var(--primary-color);
         }
-
-        .navbar a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 0;
-            background-color: var(--primary-color);
-            transition: width 0.3s ease;
-        }
-
-        .navbar a:hover::after,
-        .navbar a.active::after {
-            width: 100%;
-        }
-
-        /* Language Switcher */
-        .language-switcher-container {
-            display: flex;
-            align-items: center;
-        }
-
         #language-switcher {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-family: 'Poppins', sans-serif;
-            margin-left: 20px;
+            padding: 8px 10px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            margin-left: 15px;
             cursor: pointer;
-            background-color: #fff;
-            color: var(--text-color-dark);
+            font-size: 14px;
         }
-
-        /* Hamburger Menu */
-        .hamburger-icon {
+        .hamburger-menu {
             display: none;
-            font-size: 1.5rem;
             cursor: pointer;
-            color: var(--primary-color);
+            font-size: 1.5em;
+            color: var(--text-color-dark);
+            padding: 5px;
         }
 
-        /* FAQ Section */
-        .faq-section {
-            padding: 40px 5%;
+        /* FAQ Content */
+        .container {
             max-width: 900px;
             margin: 0 auto;
+            padding: 40px 20px;
         }
-
-        .faq-title {
-            font-size: 2.5rem;
-            margin-bottom: 40px;
-            color: var(--primary-color);
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .faq-list {
-            margin-top: 30px;
-        }
-
         .faq-item {
             background-color: var(--card-color);
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             box-shadow: var(--shadow-light);
-            overflow: hidden;
             transition: box-shadow 0.3s ease;
         }
-
         .faq-item:hover {
             box-shadow: var(--shadow-hover);
         }
-
         .faq-question {
-            padding: 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            padding: 20px 25px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: var(--text-color-dark);
-            background-color: #f9f9f9;
-            transition: background-color 0.3s;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--primary-color);
         }
-
-        .faq-question:hover {
-            background-color: #eee;
-        }
-
         .faq-question i {
             transition: transform 0.3s ease;
         }
-
+        .faq-answer {
+            padding: 0 25px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+            border-top: 1px solid #eee;
+        }
+        .faq-answer p {
+            padding: 20px 0;
+            margin: 0;
+            color: var(--secondary-color);
+        }
+        .faq-answer ul {
+            list-style-type: '— ';
+            padding-left: 20px;
+        }
         .faq-item.open .faq-question i {
             transform: rotate(180deg);
         }
-
-        .faq-answer {
-            padding: 0 20px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
-            color: var(--secondary-color);
-        }
-
         .faq-item.open .faq-answer {
-            max-height: 500px; /* 答えの長さに応じて調整 */
-            padding: 10px 20px 20px;
+            max-height: 500px; /* 十分な高さを設定 */
+            padding: 0 25px 20px;
         }
-
-        /* Footer */
-        footer {
-            background-color: var(--primary-color);
+        
+        /* Footer (流用) */
+        .footer-section {
+            background-color: var(--text-color-dark);
             color: var(--text-color-light);
+            padding: 40px 20px;
             text-align: center;
-            padding: 20px 0;
-            font-size: 0.9rem;
             margin-top: 40px;
         }
-
-        /* Responsive Design */
-        @media (max-width: 900px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-            }
+        .footer-section .social-icons a {
+            color: var(--text-color-light);
+            font-size: 1.3em;
+            margin: 0 12px;
+            transition: color 0.3s ease;
+        }
+        .footer-section .social-icons a:hover {
+            color: var(--primary-color);
+        }
+        .footer-section p {
+            margin-top: 15px;
+            font-size: 0.85em;
         }
 
+        /* Media Queries (流用) */
         @media (max-width: 768px) {
-            .navbar {
-                position: absolute;
-                top: 70px;
-                left: 0;
-                width: 100%;
-                background-color: rgba(255, 255, 255, 0.98);
-                flex-direction: column;
-                transform: translateY(-200%);
-                transition: transform 0.3s ease-out;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
-            }
-
-            .navbar.open {
-                transform: translateY(0);
-            }
-
-            .navbar ul {
-                flex-direction: column;
-                width: 100%;
-                padding: 10px 0;
-            }
-
-            .navbar li {
-                margin: 0;
-                text-align: center;
-                border-bottom: 1px solid #eee;
-            }
-
-            .navbar li:last-child {
-                border-bottom: none;
-            }
-
-            .navbar a {
-                display: block;
-                padding: 15px 0;
-                font-size: 1.1rem;
-            }
-
-            .hamburger-icon {
-                display: block;
-            }
-
-            .language-switcher-container {
-                display: none;
-            }
-
-            header {
-                padding: 15px 20px;
-            }
-
-            .faq-title {
-                font-size: 2rem;
-            }
+            .navbar a { display: none; }
+            #language-switcher { margin-left: 0; }
+            .navbar { background-color: transparent; box-shadow: none; padding: 10px; flex-direction: column-reverse; align-items: flex-end; }
+            .hamburger-menu { display: block; margin-bottom: 10px; }
+            .navbar.open a { display: block; margin: 10px 0; }
+            .navbar.open { background-color: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 20px; border-radius: 12px; display: flex; }
+            .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <a href="index.html">LOL.ex</a>
-        </div>
-        <nav class="navbar">
-            <ul>
-                <li><a href="index.html" id="nav-home">ホーム</a></li>
-                <li><a href="file.html" id="nav-file">ファイル配布</a></li>
-                <li><a href="faq.html" id="nav-faq" class="active">よくある質問</a></li>
-                <li><a href="contact.html" id="nav-contact">お問い合わせ</a></li>
-                <li><a href="community.html" id="nav-community">コース一覧</a></li>
-            </ul>
-        </nav>
-        <div class="language-switcher-container">
-            <i class="fas fa-globe"></i>
-            <select id="language-switcher">
-                <option value="ja">日本語</option>
-                <option value="en">English</option>
-            </select>
-        </div>
-        <div class="hamburger-icon" id="hamburger-icon">
-            <i class="fas fa-bars"></i>
-        </div>
+
+    <header class="hero-section">
+        <h1 id="hero-title">よくある質問</h1>
+        <p id="hero-subtitle">疑問を解決し、LOL.exをさらに活用しましょう。</p>
     </header>
 
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title" id="hero-title">よくある質問</h1>
-            <p class="hero-subtitle" id="hero-subtitle">ファイル、導入、トラブルシューティングに関する質問にお答えします。</p>
-        </div>
-    </section>
+    <nav class="navbar">
+        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
+        <a id="nav-main-page" href="index.html">メインページ</a>
+        <a id="nav-community" href="community.html">コミュ一覧</a> <a id="nav-file-library" href="file.html">ファイルライブラリ</a>
+        <a id="nav-faq" href="faq.html">よくある質問</a>
+        <a id="nav-contact" href="contact.html">お問い合わせ</a>
+        <select id="language-switcher">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+        </select>
+    </nav>
 
-    <div class="faq-section">
-        <h2 class="faq-title" id="faq-section-title">FAQ</h2>
-        
-        <div class="faq-list">
+    <main class="container">
+        <section id="faq-list">
             
             <div class="faq-item">
-                <div class="faq-question" id="q1-title">
-                    質問1: LOL.exは安全ですか？
+                <div class="faq-question" data-faq-id="q1">
+                    <span class="question-text">LOL.exの導入方法が分かりません。何から始めれば良いですか？</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="faq-answer" id="q1-answer">
-                    はい、LOL.exは安全です。不正行為を目的としたものではなく、ゲーム体験をカスタマイズするためのファイルと機能を提供します。
+                <div class="faq-answer">
+                    <p class="answer-text">
+                        LOL.exは「ユーザースクリプト」というプログラムで動作します。まず、スクリプトを管理する拡張機能を先にインストールすると、その後の導入が非常に楽になります。
+                    </p>
+                    <p class="answer-text">
+                        **推奨手順:**<br>
+                        <ul>
+                            <li>Google ChromeまたはFirefoxに Tampermonkey 拡張機能をインストールしてください。</li>
+                            <li>その後、メインページの「今すぐダウンロード」ボタンから .user.js ファイルを取得します。</li>
+                            <li>ダウンロードしたファイルをクリックすると、Tampermonkeyのインストール画面が表示され、簡単に導入できます。</li>
+                        </ul>
+                    </p>
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" id="q2-title">
-                    質問2: ファイルの導入方法を教えてください。
+                <div class="faq-question" data-faq-id="q2">
+                    <span class="question-text">ダウンロードしたスクリプトがテキストで開いてしまい、インストール画面になりません。</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="faq-answer" id="q2-answer">
-                    ファイル配布ページでダウンロードしたファイルに同梱されているREADME.txtまたは、サイト内の手順を参照してください。
+                <div class="faq-answer">
+                    <p class="answer-text">
+                        これは、ファイルがパソコンの標準テキストエディタに関連付けられているために起こります。以下の方法で解決できます。
+                    </p>
+                    <p class="answer-text">
+                        - **解決策 1:** Tampermonkeyの管理画面を開き、ダウンロードした .user.js ファイルを画面内にドラッグ＆ドロップしてください。<br>
+                        - **解決策 2:** ファイルを右クリックし、「プログラムから開く」で利用中のブラウザを選択してから、再度開いてみてください。
+                    </p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" data-faq-id="q3">
+                    <span class="question-text">ファイルライブラリにある「.lolファイル」と「.glolファイル」の違いは何ですか？</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p class="answer-text">
+                        - .lolファイル：LOLBeansのエディターで読み込む「カスタムマップ」のデータファイルです。<br>
+                        - .glolファイル：主にテクスチャやカスタムオブジェクトなどの「グラフィック関連のカスタムリソース」のファイルです。<br>
+                        <br>どちらもLOL.exを通して、ゲームプレイを拡張するために利用できます。
+                    </p>
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" id="q3-title">
-                    質問3: カスタムマップを共有できますか？
+                <div class="faq-question" data-faq-id="q4">
+                    <span class="question-text">LOL.exが動作する環境（ブラウザ、拡張機能）を教えてください。</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="faq-answer" id="q3-answer">
-                    はい、コミュニティ連携機能を利用して、作成したマップを他のユーザーと簡単に共有できます。詳細はコミュニティページをご確認ください。
+                <div class="faq-answer">
+                    <p class="answer-text">
+                        推奨環境は以下の通りです。
+                    </p>
+                    <p class="answer-text">
+                        - **ブラウザ:** Google Chrome または Firefox の最新版<br>
+                        - **拡張機能:** Tampermonkey (推奨) または Greasemonkey<br>
+                        <br>基本となるLOLBeansはWebベースなので、一般的なスペックのPCであれば動作に問題はありません。
+                    </p>
                 </div>
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" id="q4-title">
-                    質問4: トラブルが発生しました。どうすればいいですか？
+                <div class="faq-question" data-faq-id="q5">
+                    <span class="question-text">不具合やバグを見つけました。どこに報告すればよいですか？</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="faq-answer" id="q4-answer">
-                    お問い合わせページからご連絡いただくか、Discordコミュニティでサポートを求めてください。
+                <div class="faq-answer">
+                    <p class="answer-text">
+                        お問い合わせページに記載されている連絡先をご利用ください。<br>
+                        - 公式Discord：不具合報告用の専用チャンネルがあります。最も早く対応できる場合があります。<br>
+                        - Twitter/X (DM)：管理者への個別のご連絡にご利用ください。
+                    </p>
                 </div>
             </div>
+            
+        </section>
+    </main>
 
+    <footer class="footer-section">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="https://discord.gg/Cpu8vFDmH3"><i class="fab fa-discord"></i></a>
+            <a href="https://github.com/tanabesan/"><i class="fab fa-github"></i></a>
         </div>
-    </div>
-
-    <footer>
-        <p>&copy; 2024 LOL.ex. All rights reserved.</p>
+        <p>2025 Yuki. </p>
     </footer>
 
     <script>
+        // 言語データ
         const translations = {
             ja: {
-                pageTitle: "LOL.ex - よくある質問",
-                heroTitle: "よくある質問",
-                heroSubtitle: "ファイル、導入、トラブルシューティングに関する質問にお答えします。",
-                navHome: "ホーム",
-                navFile: "ファイル配布",
-                navFaq: "よくある質問",
-                navContact: "お問い合わせ",
-                navCommunity: "コース一覧", // ★★★ JavaScriptに追加 ★★★
-                faqSectionTitle: "FAQ",
-                q1Title: "質問1: LOL.exは安全ですか？",
-                q1Answer: "はい、LOL.exは安全です。不正行為を目的としたものではなく、ゲーム体験をカスタマイズするためのファイルと機能を提供します。",
-                q2Title: "質問2: ファイルの導入方法を教えてください。",
-                q2Answer: "ファイル配布ページでダウンロードしたファイルに同梱されているREADME.txtまたは、サイト内の手順を参照してください。",
-                q3Title: "質問3: カスタムマップを共有できますか？",
-                q3Answer: "はい、コミュニティ連携機能を利用して、作成したマップを他のユーザーと簡単に共有できます。詳細はコミュニティページをご確認ください。",
-                q4Title: "質問4: トラブルが発生しました。どうすればいいですか？",
-                q4Answer: "お問い合わせページからご連絡いただくか、Discordコミュニティでサポートを求めてください。"
+                mainPage: "メインページ", 
+                community: "コミュ一覧", // ★ 新規追加 ★
+                fileLibrary: "ファイルライブラリ", faq: "よくある質問", contact: "お問い合わせ",
+                heroTitle: "よくある質問", heroSubtitle: "疑問を解決し、LOL.exをさらに活用しましょう。",
+                q1: "LOL.exの導入方法が分かりません。何から始めれば良いですか？", a1: "LOL.exは「ユーザースクリプト」というプログラムで動作します。まず、スクリプトを管理する拡張機能を先にインストールすると、その後の導入が非常に楽になります。",
+                a1_steps: "<ul><li>Google ChromeまたはFirefoxに Tampermonkey 拡張機能をインストールしてください。</li><li>その後、メインページの「今すぐダウンロード」ボタンから .user.js ファイルを取得します。</li><li>ダウンロードしたファイルをクリックすると、Tampermonkeyのインストール画面が表示され、簡単に導入できます。</li></ul>",
+                q2: "ダウンロードしたスクリプトがテキストで開いてしまい、インストール画面になりません。", a2: "これは、ファイルがパソコンの標準テキストエディタに関連付けられているために起こります。以下の方法で解決できます。<br><br>- **解決策 1:** Tampermonkeyの管理画面を開き、ダウンロードした .user.js ファイルを画面内にドラッグ＆ドロップしてください。<br>- **解決策 2:** ファイルを右クリックし、「プログラムから開く」で利用中のブラウザを選択してから、再度開いてみてください。",
+                q3: "ファイルライブラリにある「.lolファイル」と「.glolファイル」の違いは何ですか？", a3: "- .lolファイル：LOLBeansのエディターで読み込む「カスタムマップ」のデータファイルです。<br>- .glolファイル：主にテクスチャやカスタムオブジェクトなどの「グラフィック関連のカスタムリソース」のファイルです。<br><br>どちらもLOL.exを通して、ゲームプレイを拡張するために利用できます。",
+                q4: "LOL.exが動作する環境（ブラウザ、拡張機能）を教えてください。", a4: "推奨環境は以下の通りです。<br><br>- **ブラウザ:** Google Chrome または Firefox の最新版<br>- **拡張機能:** Tampermonkey (推奨) または Greasemonkey<br><br>基本となるLOLBeansはWebベースなので、一般的なスペックのPCであれば動作に問題はありません。",
+                q5: "不具合やバグを見つけました。どこに報告すればよいですか？", a5: "お問い合わせページに記載されている連絡先をご利用ください。<br><br>- 公式Discord：不具合報告用の専用チャンネルがあります。最も早く対応できる場合があります。<br>- Twitter/X (DM)：管理者への個別のご連絡にご利用ください。"
             },
             en: {
-                pageTitle: "LOL.ex - FAQ",
-                heroTitle: "Frequently Asked Questions",
-                heroSubtitle: "Find answers to questions about files, setup, and troubleshooting.",
-                navHome: "Home",
-                navFile: "File Library",
-                navFaq: "FAQ",
-                navContact: "Contact",
-                navCommunity: "Course List", // ★★★ JavaScriptに追加 ★★★
-                faqSectionTitle: "FAQ",
-                q1Title: "Question 1: Is LOL.ex safe?",
-                q1Answer: "Yes, LOL.ex is safe. It is not intended for cheating, but for files and features to customize your game experience.",
-                q2Title: "Question 2: How do I install the files?",
-                q2Answer: "Please refer to the README.txt included with the downloaded file from the File Library page, or follow the site instructions.",
-                q3Title: "Question 3: Can I share custom maps?",
-                q3Answer: "Yes, you can easily share your created maps with other users using the community integration feature. Check the community page for details.",
-                q4Title: "Question 4: I encountered a problem. What should I do?",
-                q4Answer: "Please contact us via the Contact page or seek support in the Discord community."
+                mainPage: "Main Page", 
+                community: "Community List", // ★ 新規追加 ★
+                fileLibrary: "File Library", faq: "FAQ", contact: "Contact",
+                heroTitle: "Frequently Asked Questions", heroSubtitle: "Solve your doubts and get more out of LOL.ex.",
+                q1: "How do I install LOL.ex? What should I start with?", a1: "LOL.ex runs as a userscript. It is much easier to install the extension that manages the script first, and then proceed with the installation.",
+                a1_steps: "<ul><li>Install the Tampermonkey extension on Google Chrome or Firefox.</li><li>Then, get the .user.js file from the Download Now button on the main page.</li><li>Click the downloaded file, and the Tampermonkey installation screen will appear, allowing for easy setup.</li></ul>",
+                q2: "When I download the script, it opens as text instead of going to the installation screen.", a2: "This happens because the file is associated with your computer's standard text editor. You can solve this with the following methods:<br><br>- **Solution 1:** Open the Tampermonkey dashboard and drag and drop the downloaded .user.js file onto the screen.<br>- **Solution 2:** Right-click the file and select 'Open with' to choose your browser, then try opening it again.",
+                q3: "What is the difference between .lol files and .glol files in the File Library?", a3: "- .lol file: This is a data file for custom maps to be loaded in the LOLBeans editor.<br>- .glol file: This is mainly a custom resource file for graphics, such as textures and custom objects.<br><br>Both can be used through LOL.ex to extend gameplay.",
+                q4: "What are the system requirements (browser, extension) for LOL.ex?", a4: "The recommended environment is as follows:<br><br>- **Browser:** Latest version of Google Chrome or Firefox<br>- **Extension:** Tampermonkey (recommended) or Greasemonkey<br><br>Since the base LOLBeans game is web-based, a standard PC should have no performance issues.",
+                q5: "I found a bug. Where should I report it?", a5: "Please use the contact information provided on the Contact page.<br><br>- Official Discord: There is a dedicated channel for bug reports, which may lead to the fastest response.<br>- Twitter/X (DM): Administrator."
             }
         };
 
+        // 言語設定の取得と適用
         const applyLanguage = (lang) => {
-            const langData = translations[lang] || translations.ja;
+            localStorage.setItem('language', lang);
+            const langData = translations[lang];
 
-            // ページタイトルの更新
-            document.getElementById('page-title').textContent = langData.pageTitle;
-            
-            // ヒーローセクションの更新
+            // ページタイトルとナビゲーション
+            document.getElementById('page-title').textContent = `LOL.ex - ${langData.faq}`;
+            document.getElementById('nav-main-page').textContent = langData.mainPage;
+            document.getElementById('nav-community').textContent = langData.community; // ★ 新規追加 ★
+            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
+            document.getElementById('nav-faq').textContent = langData.faq;
+            document.getElementById('nav-contact').textContent = langData.contact;
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
 
-            // ナビゲーションリンクの更新
-            document.getElementById('nav-home').textContent = langData.navHome;
-            document.getElementById('nav-file').textContent = langData.navFile;
-            document.getElementById('nav-faq').textContent = langData.navFaq;
-            document.getElementById('nav-contact').textContent = langData.navContact;
-            document.getElementById('nav-community').textContent = langData.navCommunity; // ★★★ JavaScriptに追加 ★★★
-
-            // FAQセクションの更新
-            document.getElementById('faq-section-title').textContent = langData.faqSectionTitle;
-            document.getElementById('q1-title').textContent = langData.q1Title;
-            document.getElementById('q1-answer').textContent = langData.q1Answer;
-            document.getElementById('q2-title').textContent = langData.q2Title;
-            document.getElementById('q2-answer').textContent = langData.q2Answer;
-            document.getElementById('q3-title').textContent = langData.q3Title;
-            document.getElementById('q3-answer').textContent = langData.q3Answer;
-            document.getElementById('q4-title').textContent = langData.q4Title;
-            document.getElementById('q4-answer').textContent = langData.q4Answer;
-
-            // 言語セレクターを更新
+            // FAQのテキストを動的に更新
+            for (let i = 1; i <= 5; i++) {
+                const qElement = document.querySelector(`.faq-question[data-faq-id="q${i}"] .question-text`);
+                const aElement = document.querySelector(`.faq-question[data-faq-id="q${i}"] + .faq-answer .answer-text`);
+                
+                if (qElement && langData[`q${i}`]) {
+                    qElement.innerHTML = langData[`q${i}`];
+                }
+                if (aElement && langData[`a${i}`]) {
+                    // Q1の回答は構成が特殊なので、個別処理
+                    if (i === 1) {
+                         aElement.innerHTML = langData.a1 + '<p class="answer-text">' + langData.a1_steps + '</p>';
+                    } else {
+                         aElement.innerHTML = langData[`a${i}`];
+                    }
+                }
+            }
             document.getElementById('language-switcher').value = lang;
         };
 

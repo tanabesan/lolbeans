@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">LOL.ex - コミュニティレベルレベル</title>
+    <title id="page-title">LOL.ex - カスタムコース一覧</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -35,7 +35,7 @@
         }
 
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/6845.png');
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/icon.png');
             background-size: cover; background-position: center; background-repeat: no-repeat;
             color: var(--text-color-light); padding: 120px 20px; text-align: center;
         }
@@ -466,9 +466,14 @@
             const loading = document.getElementById('loading-message');
             const langData = translations[currentLang];
             
-            loading.style.display = 'block';
-            container.innerHTML = ''; 
-            container.appendChild(loading);
+            // 修正箇所: loading要素が存在するか確認してから操作する
+            if (loading) {
+                loading.style.display = 'block';
+                container.innerHTML = ''; 
+                container.appendChild(loading);
+            } else {
+                container.innerHTML = `<div id="loading-message"><i class="fas fa-spinner fa-spin"></i> ${langData.loading}</div>`;
+            }
             document.getElementById('pagination').innerHTML = '';
             
             try {
@@ -499,7 +504,9 @@
                 container.innerHTML = `<div id="loading-message">${langData.dataError} (${error.message})</div>`;
                 document.getElementById('pagination').innerHTML = '';
             } finally {
-                loading.style.display = 'none';
+                if (loading) {
+                    loading.style.display = 'none';
+                }
             }
         };
 
@@ -541,11 +548,18 @@
             document.getElementById('nav-contact').textContent = langData.contact;
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
-            document.getElementById('loading-message').innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
+            
+            // ロードメッセージのテキストも更新
+            const loading = document.getElementById('loading-message');
+            if (loading) {
+                 loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
+            }
+
             document.getElementById('language-switcher').value = lang;
 
             updateFilterOptions(lang);
             
+            // ページングが変わるわけではないので、現在のページを再描画
             fetchAndRenderLevels(currentPage);
         };
 
@@ -554,10 +568,12 @@
             const savedLang = localStorage.getItem('language') || 'ja';
             applyLanguage(savedLang);
 
+            // 検索ボタンのイベント設定: ページを0に戻して検索
             document.getElementById('search-button').addEventListener('click', () => {
                 fetchAndRenderLevels(0);
             });
 
+            // エンターキーでの検索を許可 (テキストフィールドのみ)
             document.getElementById('search-text').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -565,10 +581,17 @@
                 }
             });
 
-            document.getElementById('sort-type').addEventListener('change', () => fetchAndRenderLevels(0));
-            document.getElementById('filter-type').addEventListener('change', () => fetchAndRenderLevels(0));
-            document.getElementById('filter-finish').addEventListener('change', () => fetchAndRenderLevels(0));
-
+            // フィルター/ソート変更時もページを0に戻して検索
+            document.getElementById('sort-type').addEventListener('change', () => {
+                fetchAndRenderLevels(0);
+            });
+            document.getElementById('filter-type').addEventListener('change', () => {
+                fetchAndRenderLevels(0);
+            });
+            document.getElementById('filter-finish').addEventListener('change', () => {
+                fetchAndRenderLevels(0);
+            });
+            
             const hamburgerIcon = document.getElementById('hamburger-icon');
             const navbar = document.querySelector('.navbar');
             hamburgerIcon.addEventListener('click', () => {

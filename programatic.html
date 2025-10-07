@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLBeans Programmatic Object Simulator V5 (動作保証版)</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+        .controls, .simulation {
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+        .controls {
+            flex: 1;
+            min-width: 350px;
+        }
+        .simulation {
+            flex: 2;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #5D54A4;
+            perspective: 800px; 
+        }
+        h1 { color: #5D54A4; }
+        h2 {
+            color: #5D54A4;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #444;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        #formula-output {
+            background-color: #eee;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 15px;
+            border-left: 5px solid #007bff;
+            word-break: break-all;
+            min-height: 100px;
+        }
+        #sim-object {
+            width: 80px; 
+            height: 80px;
+            background-color: #ff6f61;
+            border-radius: 8px; 
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-style: preserve-3d; 
+            /* 初期傾き: Y軸はCSSで固定し、3D回転の視認性を高める */
+            transform: translate(-50%, -50%) rotateX(-15deg) rotateY(15deg); 
+            will-change: transform;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            border: 3px solid #e91e63;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+        .param-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .axis-info {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        #axis-selector label {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>LOLBeans Programmatic Object シミュレーター (動作保証版)</h1>
+    <p>数式を設定したい**軸を複数選択**し、プリセットやパラメータを調整して動きを確認できます。</p>
+
+    <div class="container">
+        <div class="controls">
+            <h2>設定とパラメータ</h2>
+
+            <div class="param-group">
+                <label>適用する軸の選択 (複数選択可):</label>
+                <div id="axis-selector">
+                    <label><input type="checkbox" name="axis" value="positionX"> PositionX</label>
+                    <label><input type="checkbox" name="axis" value="positionY"> PositionY</label>
+                    <label><input type="checkbox" name="axis" value="positionZ" checked> PositionZ</label>
+                    <label><input type="checkbox" name="axis" value="rotationX"> RotationX</label>
+                    <label><input type="checkbox" name="axis" value="rotationY"> RotationY</label>
+                    <label><input type="checkbox" name="axis" value="rotationZ"> RotationZ</label>
+                </div>
+            </div>
+
+            <label for="preset">プリセットの選択:</label>
+            <select id="preset">
+                <option value="straight_line_ease">往復移動 (easeInOutQuad)</option>
+                <option value="circular_motion_xz">応用: 水平面 (X-Z) 円運動</option>
+                <option value="swing">スイング (sin波)</option>
+                <option value="rotation">一定速度の回転</option>
+                <option value="straight_line">直線移動 (ループ)</option>
+                <option value="linear_acceleration_cap">線形加速 (速度上限あり)</option>
+            </select>
+
+            <div class="param-group">
+                <label for="duration">Loop Duration (duration) / 周期 (秒):</label>
+                <input type="number" id="duration" value="5" min="0.1" step="0.1">
+            </div>
+            
+            <div id="movement-params" class="param-group">
+                <label for="distance">距離 / 半径 (Distance/Radius):</label>
+                <input type="number" id="distance" value="100" min="1" step="10">
+            </div>
+
+            <div id="rotation-params" class="param-group hidden">
+                <label for="amplitude">振幅 / 回転速度 (Amplitude/Speed):</label>
+                <input type="number" id="amplitude" value="45" min="1" step="1">
+                <small>スイング: 振幅(°) / 回転: 速度(°/s)</small>
+            </div>
+
+            <label>生成された数式 (選択された軸分):</label>
+            <pre id="formula-output"></pre>
+        </div>
+
+        <div class="simulation">
+            <h2>シミュレーションエリア</h2>
+            <div class="axis-info">PositionX: 左右 | PositionZ: 奥手前（奥行き）| Rotation: 3D回転</div>
+            <div id="sim-object">OBJ</div>
+        </div>
+    </div>
+
+    <script>
+        const PI = Math.PI;
+        
+        // シミュレーション内の初期座標（相対位置）
+        const START_POS_X = 0;
+        const START_POS_Y = 0;
+        const START_POS_Z = 0;
+        const START_ROT_X = 0;
+        const START_ROT_Y = 0;
+        const START_ROT_Z = 0;
+        
+        // 初期傾き (CSSと合わせて、3D回転の視認性を高める)
+        const INITIAL_ROT_X = -15; 
+        const INITIAL_ROT_Y = 15;
+
+        // DOM要素
+        const presetSelect = document.getElementById('preset');
+        const durationInput = document.getElementById('duration');
+        const distanceInput = document.getElementById('distance');
+        const amplitudeInput = document.getElementById('amplitude');
+        const formulaOutput = document.getElementById('formula-output');
+        const simObject = document.getElementById('sim-object');
+        const axisCheckboxes = document.querySelectorAll('#axis-selector input[type="checkbox"]');
+        
+        let startTime = null;
+        let animationFrameId;
+
+        /**
+         * LOLBeansの数式を評価する（強化版）
+         */
+        const safe_evaluate = (formula, context) => {
+            const { time, duration, startPositionX, startPositionY, startPositionZ, startRotationX, startRotationY, startRotationZ } = context;
+            const sin = Math.sin;
+            const cos = Math.cos;
+            const pow = Math.pow;
+            const abs = Math.abs;
+            const PI = Math.PI;
+            
+            // ユーザー定義変数をローカルスコープに宣言
+            let t, step1, step2, step3, a, v0, radius; 
+
+            try {
+                let code = formula.trim();
+                let lines = code.split(';').map(line => line.trim()).filter(line => line.length > 0);
+                if (lines.length === 0) return null; 
+                
+                let finalLine = lines.pop();
+                let fullCode = lines.join('; ') + (lines.length > 0 ? ';' : '') + ` return (${finalLine});`;
+
+                // evalを使って、数式内の変数定義と計算を同じスコープで実行
+                // 安全性のため、ユーザーからの入力（formula）にのみ使用
+                return eval(fullCode); 
+
+            } catch (e) {
+                // エラー時は初期値を返す
+                const axis = formula.includes("position") ? formula.match(/position[XYZ]/) : (formula.includes("rotation") ? formula.match(/rotation[XYZ]/) : null);
+                const axisStr = axis ? axis[0] : '';
+
+                if (axisStr === 'positionX') return startPositionX;
+                if (axisStr === 'positionY') return startPositionY;
+                if (axisStr === 'positionZ') return startPositionZ;
+                if (axisStr === 'rotationX') return startRotationX;
+                if (axisStr === 'rotationY') return startRotationY;
+                if (axisStr === 'rotationZ') return startRotationZ;
+                return 0; 
+            }
+        };
+
+
+        /**
+         * プリセットと軸の選択に基づいて数式を生成し、UIを更新する
+         */
+        function updateFormula() {
+            const selectedAxes = Array.from(axisCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+            const preset = presetSelect.value;
+            // duration, distance, amplitude はここでは再利用するため、const宣言
+            const duration = parseFloat(durationInput.value) || 1;
+            const valueA = parseFloat(distanceInput.value) || 100; // 移動量/半径
+            const valueB = parseFloat(amplitudeInput.value) || 45; // 振幅/速度
+
+            let outputFormula = '';
+            let targetProperties = [];
+
+            // プリセットによる軸の強制選択チェック
+            if (preset === 'circular_motion_xz' && (!selectedAxes.includes('positionX') || !selectedAxes.includes('positionZ'))) {
+                 outputFormula = "// 円運動には PositionX と PositionZ の両方の設定が必要です。軸を選択し直すか、他のプリセットを選んでください。";
+                 formulaOutput.textContent = outputFormula;
+                 // アニメーションを停止させる (または現在の設定で再描画する)
+                 startSimulation([]);
+                 return;
+            }
+
+
+            selectedAxes.forEach(axis => {
+                let formula = '';
+                let isRotation = axis.includes('rotation');
+                const startVar = isRotation ? `start${axis.substring(8)}` : `start${axis}`;
+                
+                // --- 数式生成ロジック ---
+                switch(preset) {
+                    case 'straight_line':
+                        formula = `${startVar} + (time / duration) % 1 * ${valueA}`;
+                        break;
+                    case 'straight_line_ease':
+                        formula = `t = (time / duration) % 1;
+t = (t < 0.5 ? t : 1 - t) * 2;
+t = t < 0.5 ? 2 * t * t : 1 - pow(-2 * t + 2, 2) / 2;
+${startVar} + t * ${valueA}`;
+                        break;
+                    case 'rotation':
+                        formula = `(${startVar} + time * ${valueB}) % 360`;
+                        break;
+                    case 'swing':
+                        formula = `${startVar} + sin(time / duration * 2 * PI) * ${valueB}`;
+                        break;
+                    case 'linear_acceleration_cap':
+                        const acc = 45; 
+                        const v0 = 45;  
+                        const capTime = 5; 
+                        const angleAtCap = v0 * capTime + acc * capTime * capTime / 2;
+                        const speedAtCap = v0 + acc * capTime;
+                        formula = `a = ${acc};
+v0 = ${v0};
+time < ${capTime} ?
+(${startVar} + v0 * time + a * time * time / 2) % 360
+:
+(${startVar} + ${angleAtCap} + ${speedAtCap} * (time - ${capTime}) ) % 360`;
+                        break;
+                    case 'circular_motion_xz':
+                        const radius = valueA;
+                        if (axis === 'positionX') {
+                            formula = `${startVar} + cos(time / duration * 2 * PI) * ${radius}`;
+                        } else if (axis === 'positionZ') {
+                            formula = `${startVar} + sin(time / duration * 2 * PI) * ${radius}`;
+                        } else {
+                            formula = `${startVar}`;
+                        }
+                        break;
+                    default:
+                        formula = `${startVar}`;
+                }
+                // --------------------------
+
+                if (formula) {
+                    outputFormula += `Set ${axis} to:\n${formula}\n\n`;
+                    targetProperties.push({ axis: axis, formula: formula });
+                }
+            });
+
+            formulaOutput.textContent = outputFormula.trim() || "// 軸を選択してください";
+            startSimulation(targetProperties); // 👈 重要な修正: 常にシミュレーションを開始/更新
+        }
+
+        /**
+         * アニメーションループを開始する (実行ロジック修正)
+         */
+        function startSimulation(targetProperties) {
+            // アニメーションが既に動いている場合は停止
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            
+            // 軸が選択されていない場合は、アニメーションを動かさず初期位置に戻す
+            if (targetProperties.length === 0) {
+                 simObject.style.transform = `translate(-50%, -50%) rotateX(${INITIAL_ROT_X}deg) rotateY(${INITIAL_ROT_Y}deg)`;
+                 simObject.style.backgroundColor = '#ff6f61';
+                 simObject.textContent = 'OBJ';
+                 return;
+            }
+
+
+            startTime = Date.now();
+            
+            const MAX_PIXEL_MOVEMENT = 150; 
+            const maxDistance = parseFloat(distanceInput.value) || 100;
+            const scaleFactor = maxDistance === 0 ? 0 : MAX_PIXEL_MOVEMENT / maxDistance;
+
+            simObject.style.backgroundColor = targetProperties.some(p => p.axis.includes('rotation')) ? '#4CAF50' : '#ff6f61';
+            simObject.textContent = targetProperties.some(p => p.axis.includes('rotation')) ? 'ROT' : 'POS';
+
+
+            const loop = (timestamp) => {
+                const elapsedTime = (timestamp - startTime) / 1000;
+
+                const context = {
+                    time: elapsedTime,
+                    duration: parseFloat(durationInput.value) || 1,
+                    startPositionX: START_POS_X,
+                    startPositionY: START_POS_Y,
+                    startPositionZ: START_POS_Z,
+                    startRotationX: START_ROT_X,
+                    startRotationY: START_ROT_Y,
+                    startRotationZ: START_ROT_Z,
+                    PI: PI,
+                };
+                
+                const results = { x: 0, y: 0, z: 0, rotX: 0, rotY: 0, rotZ: 0 };
+                
+                targetProperties.forEach(prop => {
+                    const newValue = safe_evaluate(prop.formula, context);
+
+                    if (prop.axis === 'positionX') results.x = newValue - START_POS_X;
+                    else if (prop.axis === 'positionY') results.y = newValue - START_POS_Y;
+                    else if (prop.axis === 'positionZ') results.z = newValue - START_POS_Z; // 奥行きの移動
+                    else if (prop.axis === 'rotationX') results.rotX = newValue;
+                    else if (prop.axis === 'rotationY') results.rotY = newValue;
+                    else if (prop.axis === 'rotationZ') results.rotZ = newValue;
+                });
+
+                // 座標マッピング (PositionX: 左右, PositionZ: 奥行き)
+                const pixelShiftX = results.x * scaleFactor; 
+                const pixelShiftY = results.y * scaleFactor * -1; // PositionYは通常「高さ」なので、CSSのY軸（上下）にマッピング
+                const pixelShiftZ = results.z * scaleFactor; // PositionZはCSSのZ軸（奥手前）にマッピング
+                
+                // CSS Transformの適用 (適用順序を改善)
+                simObject.style.transform = 
+                    // 1. 3D回転が分かるように、初期の傾きを適用 (原点を中心に)
+                    `rotateX(${INITIAL_ROT_X}deg) rotateY(${INITIAL_ROT_Y}deg)` + 
+                    // 2. 数式による回転を適用
+                    `rotateX(${results.rotX}deg)` + 
+                    `rotateY(${results.rotY}deg)` + 
+                    `rotateZ(${results.rotZ}deg)` +
+                    // 3. 移動を適用 (translate3dでX/Y/Zを一度に設定)
+                    `translate3d(calc(-50% + ${pixelShiftX}px), calc(-50% + ${pixelShiftY}px), ${pixelShiftZ}px)`;
+
+
+                animationFrameId = requestAnimationFrame(loop);
+            };
+
+            animationFrameId = requestAnimationFrame(loop);
+        }
+
+        // --- 起動ロジック ---
+        const inputs = [presetSelect, durationInput, distanceInput, amplitudeInput];
+        inputs.forEach(input => input.addEventListener('input', updateFormula));
+        axisCheckboxes.forEach(cb => cb.addEventListener('change', updateFormula));
+
+        // ページロード時に即座に実行を開始
+        // これがないと、入力やチェックボックスが変更されるまでアニメーションが開始されませんでした。
+        updateFormula(); 
+    </script>
+</body>
+</html>

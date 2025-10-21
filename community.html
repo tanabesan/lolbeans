@@ -16,11 +16,12 @@
             --secondary-color: #6A799E;
             --background-color: #F4F7FB;
             --card-color: #FFFFFF;
+            --detail-bg-color: #2c3e50; /* 詳細パネルの背景色 (Dark Blue) */
             --text-color-dark: #2C3E50;
             --text-color-light: #F4F7FB;
             --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.05);
             --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
-            --accent-color: #FF5733; 
+            --accent-color: #FFC107; /* 星の色 */
             --loading-color: #A9A9A9;
         }
 
@@ -41,6 +42,7 @@
         }
         .hero-section h1 { font-size: 3em; font-weight: 700; margin: 0 0 10px; }
         
+        /* --- ナビゲーションとハンバーガーメニューのスタイル (省略) --- */
         .navbar {
             position: fixed; top: 20px; right: 20px; background-color: rgba(255, 255, 255, 0.9);
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 10px 20px; border-radius: 30px;
@@ -100,8 +102,9 @@
         #search-button:hover {
             background-color: #4c4687;
         }
+        
         .container {
-            max-width: 900px;
+            max-width: 1200px; 
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -145,186 +148,280 @@
             color: var(--primary-color);
         }
         
-        /* ★★★ リスト形式のスタイル ★★★ */
+        /* ★★★ グリッド形式のスタイル ★★★ */
         
-        #level-list-container {
+        #level-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* デフォルト3列 */
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .level-grid-card {
+            background-color: var(--card-color);
             border-radius: 12px;
             overflow: hidden;
             box-shadow: var(--shadow-light);
-            background-color: var(--card-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            position: relative; /* 子要素のabsolute基準のため */
         }
-
-        .list-header {
-            display: grid;
-            grid-template-columns: 50px 1fr 100px 70px 70px 20px; /* Thum | Name/Author | Date | Rating | Finish | Toggle */
-            gap: 10px;
-            padding: 15px 20px;
-            background-color: var(--primary-color);
-            color: var(--text-color-light);
-            font-weight: 600;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            align-items: center;
-        }
-        .list-header > div:nth-child(2) { padding-left: 10px; }
-        .list-header .header-col.center { text-align: center; }
-
-
-        .level-card { 
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.2s ease;
-        }
-        .level-card:last-child { border-bottom: none; }
-        .level-card:hover { background-color: #f7f7ff; }
-
-        .card-header { 
-            display: grid;
-            grid-template-columns: 50px 1fr 100px 70px 70px 20px;
-            gap: 10px; 
-            padding: 10px 20px; 
-            align-items: center; 
-            cursor: pointer; 
-            min-height: 50px;
+        .level-grid-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
         }
         
-        .level-thumbnail { 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 4px; 
-            object-fit: cover; 
-            border: 1px solid #ddd; 
+        /* カードの表示エリア（画像とオーバーレイ） */
+        .card-display {
+            position: relative;
+            padding-top: 100%; /* アスペクト比 1:1 */
+            width: 100%;
             flex-shrink: 0;
+            /* card-detailsをこの中に含めるため、flex-grow: 1 は削除 */
         }
         
-        .level-info { 
-            flex-grow: 1; 
-            overflow: hidden;
-            padding-left: 10px;
+        /* 画像背景 */
+        .card-thumbnail-bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.9);
+            transition: filter 0.3s;
         }
-        .level-info h3 { 
-            margin: 0; 
-            font-size: 1em; 
-            font-weight: 600;
-            color: var(--text-color-dark); 
-            white-space: nowrap; 
-            overflow: hidden; 
+        .level-grid-card:hover .card-thumbnail-bg {
+             filter: brightness(1.1);
+        }
+
+        /* グラデーションオーバーレイと情報 (カードを閉じた状態) */
+        .card-info-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+            color: var(--text-color-light); 
+            z-index: 10;
+            transition: opacity 0.3s ease;
+            /* グラデーション: 透明 -> 半透明の濃い色 */
+            background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.85) 0%,
+                rgba(0, 0, 0, 0.7) 50%,
+                rgba(0, 0, 0, 0.0) 100%
+            );
+        }
+
+        /* カード展開時、通常の情報オーバーレイを非表示に */
+        .level-grid-card.open .card-info-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .overlay-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            margin: 0 0 5px;
+            white-space: nowrap;
+            overflow: hidden;
             text-overflow: ellipsis;
         }
-        .level-info p { 
-            margin: 0; 
-            color: var(--secondary-color); 
-            font-size: 0.8em; 
-        }
-        
-        .level-stat {
+        .overlay-author {
             font-size: 0.9em;
-            font-weight: 500;
-            text-align: center;
-            white-space: nowrap;
+            font-weight: 400;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
         }
-        .level-stat.rating { color: var(--accent-color); font-weight: 700; }
-        .level-stat.finish { color: var(--primary-color); font-weight: 700; }
+        .overlay-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .overlay-stat i {
+            margin-right: 5px;
+            color: var(--accent-color); 
+        }
+        .overlay-stat.finish {
+             color: var(--text-color-light);
+        }
+        .overlay-stat.finish i {
+             color: var(--primary-color);
+             margin-right: 5px;
+        }
         
-        .toggle-icon { transition: transform 0.3s ease; justify-self: center; }
-        .level-card.open .toggle-icon { transform: rotate(180deg); }
-        
-        /* 詳細セクション */
+        /* ★★★ 詳細セクションのスタイリッシュ化と上部表示への変更 ★★★ */
         .card-details { 
-            padding: 0 20px; 
-            max-height: 0; 
-            overflow: hidden; 
-            transition: max-height 0.4s ease-out, padding 0.4s ease-out; 
-            background-color: #fafafa;
-            border-top: 1px solid #f0f0f0; 
-            grid-column: 1 / -1; /* グリッド全体に広げる */
-        }
-        .level-card.open .card-details { 
-            max-height: 800px; 
+            position: absolute; /* card-display内に配置 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             padding: 20px; 
+            box-sizing: border-box;
+            opacity: 0; /* デフォルトで非表示 */
+            visibility: hidden; /* デフォルトで非表示 */
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            background-color: rgba(44, 62, 80, 0.95); /* 濃い背景色に半透明を適用 */
+            color: var(--text-color-light); /* 文字色を白に */
+            border-radius: 12px;
+            overflow: auto; /* 詳細が多い場合にスクロール可能に */
+            z-index: 15; /* overlayの上 */
         }
+
+        /* カード展開時、詳細セクションを表示に */
+        .level-grid-card.open .card-details { 
+            opacity: 1; 
+            visibility: visible;
+        }
+        
+        /* 説明ボックス */
         .description-box { 
-            background-color: #fff; 
-            padding: 10px; 
-            border-radius: 4px; 
-            margin-bottom: 15px; 
-            font-size: 0.85em; 
+            background-color: rgba(255, 255, 255, 0.05); /* 半透明の白 */
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; /* スペースを少し詰める */
+            font-size: 0.8em; 
             white-space: pre-wrap; 
-            color: var(--text-color-dark); 
-            border: 1px solid #eee;
+            color: var(--text-color-light); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .description-box strong { font-weight: 600; display: block; margin-bottom: 5px; color: var(--primary-color); }
+        .description-box strong { 
+            font-weight: 600; 
+            display: block; 
+            margin-bottom: 5px; 
+            color: var(--accent-color); 
+            font-size: 1em;
+        }
+        .description-box p { margin: 0; }
 
         .detail-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* 詳細アイテムを詰める */
             gap: 10px; 
-            margin-top: 10px;
+            margin-top: 5px;
         }
+        
+        /* 詳細アイテム */
         .detail-item { 
-            padding: 8px 10px; 
-            border: 1px solid #eee; 
-            border-radius: 4px; 
-            background-color: #fff; 
+            padding: 8px 10px; /* パディングを詰める */
+            border-radius: 6px; /* 角丸を詰める */
+            background-color: rgba(255, 255, 255, 0.1); 
+            border-left: 3px solid var(--primary-color); 
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .detail-item i {
+            margin-right: 5px;
+            color: var(--accent-color);
+            font-size: 0.9em;
         }
         .detail-item strong { 
-            color: var(--secondary-color); 
-            display: block; 
-            font-size: 0.75em; 
-            margin-bottom: 0; 
+            color: rgba(255, 255, 255, 0.6); 
+            display: flex; 
+            align-items: center;
+            font-size: 0.7em; 
+            margin-bottom: 2px; 
             text-transform: uppercase;
         }
         .detail-item span { 
             display: block; 
-            color: var(--text-color-dark); 
-            font-weight: 600; 
-            font-size: 0.95em; 
+            color: var(--text-color-light); 
+            font-weight: 700; 
+            font-size: 0.9em; /* フォントサイズを小さく */
+            margin-top: 3px;
         }
-        .detail-item span.wr-holder { color: var(--accent-color); }
+        .detail-item span.wr-holder { 
+            color: var(--accent-color); 
+        }
+        /* --- スタイリッシュ化ここまで --- */
         
-        .footer-section { background-color: var(--text-color-dark); color: var(--text-color-light); padding: 40px 20px; text-align: center; margin-top: 40px; }
-        .footer-section .social-icons a { color: var(--text-color-light); font-size: 1.3em; margin: 0 12px; transition: color 0.3s ease; }
-        .footer-section .social-icons a:hover { color: var(--primary-color); }
-        .footer-section p { margin-top: 15px; font-size: 0.85em; }
-
+        /* ★★★ フッタースタイルを追加 ★★★ */
+        .footer-section {
+            background-color: var(--text-color-dark); /* 濃い青を背景に */
+            color: var(--text-color-light); /* 文字色を白に */
+            padding: 30px 20px; /* 上下のパディングを増やす */
+            text-align: center;
+            border-top: 5px solid var(--primary-color); /* メインカラーの境界線 */
+        }
+        .footer-section p {
+            margin: 10px 0 0;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .social-icons {
+            margin-bottom: 15px;
+        }
+        .social-icons a {
+            color: var(--text-color-light);
+            font-size: 1.5em;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .social-icons a:hover {
+            color: var(--accent-color); /* ホバー時にアクセントカラーに */
+        }
+        /* --- フッタースタイル追加ここまで --- */
+        
+        /* --- モバイル対応の修正部分 --- */
+        @media (max-width: 1100px) {
+            #level-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2列表示 */
+            }
+        }
+        
         @media (max-width: 768px) {
+            /* ハンバーガーメニュー関連は省略 (前回の修正を維持) */
             .navbar a { display: none; }
-            /* ... (ナビゲーションのモバイル対応は前回と同じ) ... */
-            .list-header { 
-                grid-template-columns: 50px 1fr 60px 50px 20px; /* Date/Rating/Finishを非表示または縮小 */
-                padding: 10px 15px;
+            #language-switcher { margin-left: 0; }
+            .navbar {
+                background-color: transparent;
+                box-shadow: none;
+                padding: 10px;
+                flex-direction: column-reverse; 
+                align-items: flex-end;
             }
-            .list-header .header-col:nth-child(3),
-            .list-header .header-col:nth-child(4),
-            .list-header .header-col:nth-child(5) { display: none; }
+            .hamburger-menu {
+                display: block;
+                margin-bottom: 10px;
+                color: var(--text-color-dark); 
+            }
+            .navbar.open {
+                background-color: rgba(255, 255, 255, 0.9);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                padding: 20px;
+                border-radius: 12px;
+                display: flex;
+            }
+            .navbar.open a { display: block; margin: 10px 0; width: 100%; }
+            .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
 
-            .card-header { 
-                grid-template-columns: 50px 1fr 60px 50px 20px;
-                padding: 10px 15px;
+            .filter-row { flex-direction: column; gap: 10px; }
+            .filter-group { width: 100%; min-width: unset; }
+            #search-button { width: 100%; align-self: center; }
+            
+            #level-grid {
+                grid-template-columns: 1fr;
             }
-            .card-header > *:nth-child(3),
-            .card-header > *:nth-child(4),
-            .card-header > *:nth-child(5) { display: none; }
-            .level-stat.rating { text-align: left; }
-            .level-info h3 { font-size: 0.9em; }
-            .level-info p { font-size: 0.75em; }
+            .card-display {
+                padding-top: 66.66%; 
+            }
+            /* 詳細パネルをモバイルで見やすく調整 */
+            .card-details {
+                padding: 15px; 
+                overflow-y: scroll; /* モバイルではスクロールしやすく */
+            }
+            .detail-grid {
+                grid-template-columns: 1fr; /* モバイルでは1列にするか、2列程度に調整 */
+            }
         }
-
-        /* 500px以下で、リストヘッダーの列をさらに削減 */
-        @media (max-width: 500px) {
-            .list-header { 
-                grid-template-columns: 50px 1fr 20px; 
-            }
-            .list-header .header-col:nth-child(3),
-            .list-header .header-col:nth-child(4),
-            .list-header .header-col:nth-child(5) { display: none; }
-
-            .card-header { 
-                grid-template-columns: 50px 1fr 20px;
-            }
-            .card-header > *:nth-child(3),
-            .card-header > *:nth-child(4),
-            .card-header > *:nth-child(5) { display: none; }
-        }
+        /* --- 修正部分ここまで --- */
     </style>
 </head>
 <body>
@@ -385,10 +482,12 @@
             </div>
         </section>
 
-        <section id="level-list-container">
+        <section id="level-wrapper">
             <div id="loading-message">
                 <i class="fas fa-spinner fa-spin"></i> データをロード中です...
             </div>
+            <div id="level-grid">
+                </div>
         </section>
         
         <div class="pagination-container">
@@ -411,7 +510,6 @@
         const API_BASE_URL = 'https://s.lolbeans.io/level-list?';
         const THUMBNAIL_BASE_URL = 'https://lolbeans.io/ui/level-thumbnails/';
         
-        // ★★★ 取得コース数を12に変更 ★★★
         const LEVELS_PER_PAGE = 12;
 
         let currentLang = 'ja';
@@ -423,19 +521,16 @@
                 mainPage: "メインページ", fileLibrary: "ファイルライブラリ", levelList: "コミュ一覧", faq: "よくある質問", contact: "お問い合わせ",
                 heroTitle: "コミュ一覧", heroSubtitle: "ユーザーが作成したLOLBeansのカスタムマップ",
                 loading: "データをロード中です...",
-                searchTextLabel: "コース名検索", sortTypeLabel: "並び替え", filterTypeLabel: "コースの種類", filterFinishLabel: "クリア率", searchButton: "検索",
+                searchTextLabel: "コース。作者名検索", sortTypeLabel: "並び替え", filterTypeLabel: "コースの種類", filterFinishLabel: "クリア率", searchButton: "検索",
                 sort0: "ベスト評価", sort1: "新しい順", sort2: "トレンド",
                 filterTypeM1: "すべて", filterType0: "サンドボックス", filterType1: "タイムレース", filterType2: "競争レース", filterType3: "エリミネーション",
                 filterFinish0: "すべて", filterFinish1: "低い (<30%)", filterFinish2: "普通 (30%〜70%)", filterFinish3: "高い (>70%)",
-                
-                // リストヘッダー用のタイトル
-                headerName: "コース名 / 作者", headerDate: "公開日", headerRating: "評価", headerFinish: "クリア率",
                 
                 author: "作者", description: "説明", votes: "投票数", rating: "平均評価", finishPercent: "クリア率", starts: "プレイ回数", distinctPlayers: "総プレイヤー数",
                 averageFinishTime: "平均クリア時間", wr: "WR (世界記録)", wrHolder: "WR保持者", wrDate: "WR達成日", date: "公開日",
                 pageInfo: (current, max) => `${current + 1} / ${max}`,
                 prev: "前へ", next: "次へ",
-                dataError: "データの取得に失敗しました。", noDescription: "説明なし"
+                dataError: "データの取得に失敗しました。再試行してください。", noDescription: "説明なし"
             },
             en: {
                 mainPage: "Main Page", fileLibrary: "File Library", levelList: "Course List", faq: "FAQ", contact: "Contact",
@@ -446,14 +541,11 @@
                 filterTypeM1: "All", filterType0: "Sandbox", filterType1: "Timed Race", filterType2: "Competitive Race", filterType3: "Elimination",
                 filterFinish0: "All", filterFinish1: "Low (<30%)", filterFinish2: "Average (30% to 70%)", filterFinish3: "High (>70%)",
                 
-                // リストヘッダー用のタイトル
-                headerName: "Name / Author", headerDate: "Date", headerRating: "Rating", headerFinish: "Finish %",
-
                 author: "Author", description: "Description", votes: "Votes", rating: "Avg. Rating", finishPercent: "Finish %", starts: "Starts", distinctPlayers: "Distinct Players",
                 averageFinishTime: "Avg. Finish Time", wr: "WR (World Record)", wrHolder: "WR Holder", wrDate: "WR Date", date: "Publish Date",
                 pageInfo: (current, max) => `Page ${current + 1} of ${max}`,
                 prev: "Prev", next: "Next",
-                dataError: "Failed to fetch data.", noDescription: "No description"
+                dataError: "Failed to fetch data. Please try again.", noDescription: "No description"
             }
         };
 
@@ -492,7 +584,6 @@
             params.append('ft', filterType);
             params.append('ff', filterFinish);
             
-            // m パラメーターを追加
             params.append('m', LEVELS_PER_PAGE); 
 
             if (searchText) {
@@ -502,74 +593,114 @@
             return API_BASE_URL + params.toString();
         };
 
+        const getDetailIcon = (key) => {
+            const icons = {
+                wr: 'fas fa-trophy',
+                wrHolder: 'fas fa-user-tag',
+                averageFinishTime: 'fas fa-stopwatch',
+                starts: 'fas fa-play-circle',
+                votes: 'fas fa-heart',
+                distinctPlayers: 'fas fa-users',
+                date: 'fas fa-calendar-alt'
+            };
+            return icons[key] || 'fas fa-info-circle';
+        };
+
+        const createDetailItem = (key, value, isWrHolder) => {
+            const langData = translations[currentLang];
+            const item = document.createElement('div');
+            item.className = 'detail-item';
+            
+            const displayValue = isWrHolder ? value : (key === 'starts' || key === 'votes' || key === 'distinctPlayers' ? value.toLocaleString() : value);
+            
+            item.innerHTML = `
+                <strong><i class="${getDetailIcon(key)}"></i>${langData[key]}</strong>
+                <span class="${isWrHolder ? 'wr-holder' : ''}">${displayValue}</span>
+            `;
+            return item;
+        };
+
         const createLevelCard = (level) => {
             const langData = translations[currentLang];
             const card = document.createElement('div');
-            card.className = 'level-card';
+            card.className = 'level-grid-card';
             card.dataset.levelId = level.levelId;
             const description = level.description || langData.noDescription;
+            
+            const safeRating = level.rating === null || level.rating === undefined ? 0 : level.rating;
+            const finishPercentage = level.finishPercent === null || level.finishPercent === undefined ? 0 : (level.finishPercent * 100);
 
+            const thumbnailUrl = `${THUMBNAIL_BASE_URL}${level.levelId}.png`;
+            // ★ 構造変更: card-display 内に card-details を配置
             card.innerHTML = `
-                <div class="card-header">
-                    <img src="${THUMBNAIL_BASE_URL}${level.levelId}.png" alt="${level.name} Thumbnail" class="level-thumbnail" onerror="this.onerror=null;this.src='https://via.placeholder.com/40?text=';">
-                    
-                    <div class="level-info">
-                        <h3>${level.name}</h3>
-                        <p>${level.author || 'N/A'}</p>
+                <div class="card-display">
+                    <div class="card-thumbnail-bg" 
+                         style="background-image: url('${thumbnailUrl}');"
+                         onerror="this.style.backgroundImage='url(https://via.placeholder.com/300?text=LOLBeans+Thumbnail)';">
                     </div>
                     
-                    <span class="level-stat date">${formatDate(level.date, currentLang)}</span>
-                    <span class="level-stat rating">${level.rating.toFixed(2)} <i class="fas fa-star"></i></span>
-                    <span class="level-stat finish">${(level.finishPercent * 100).toFixed(0)}%</span>
-                    
-                    <i class="fas fa-chevron-down toggle-icon"></i>
-                </div>
-                
-                <div class="card-details">
-                    <div class="description-box">
-                        <strong>${langData.description}:</strong>
-                        <p>${description}</p>
-                    </div>
-                    <div class="detail-grid">
-                        <div class="detail-item">
-                            <strong>${langData.wr}</strong>
-                            <span class="wr-holder">${formatTime(level.wr)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>${langData.wrHolder}</strong>
-                            <span>${level.wrHolder || 'N/A'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>${langData.averageFinishTime}</strong>
-                            <span>${formatTime(level.averageFinishTime)}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>${langData.starts}</strong>
-                            <span>${level.starts.toLocaleString()}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>${langData.votes}</strong>
-                            <span>${level.votes.toLocaleString()}</span>
-                        </div>
-                        <div class="detail-item">
-                            <strong>${langData.distinctPlayers}</strong>
-                            <span>${level.distinctPlayers.toLocaleString()}</span>
+                    <div class="card-info-overlay">
+                        <h3 class="overlay-title">${level.name}</h3>
+                        <p class="overlay-author">${level.author || 'N/A'}</p>
+                        <div class="overlay-stats">
+                            <span class="overlay-stat rating">
+                                <i class="fas fa-star"></i> ${safeRating.toFixed(2)}
+                            </span>
+                            <span class="overlay-stat finish">
+                                <i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%
+                            </span>
                         </div>
                     </div>
+
+                    <div class="card-details">
+                        <div class="description-box">
+                            <strong><i class="fas fa-align-left"></i> ${langData.description}:</strong>
+                            <p>${description}</p>
+                        </div>
+                        <div class="detail-grid">
+                        </div>
+                    </div>
+
                 </div>
             `;
+            
+            // 詳細アイテムの追加
+            const detailGrid = card.querySelector('.detail-grid');
+            detailGrid.appendChild(createDetailItem('wr', formatTime(level.wr), true));
+            detailGrid.appendChild(createDetailItem('wrHolder', level.wrHolder || 'N/A', false));
+            detailGrid.appendChild(createDetailItem('averageFinishTime', formatTime(level.averageFinishTime), false));
+            detailGrid.appendChild(createDetailItem('starts', level.starts, false));
+            detailGrid.appendChild(createDetailItem('votes', level.votes, false));
+            detailGrid.appendChild(createDetailItem('distinctPlayers', level.distinctPlayers, false));
+            detailGrid.appendChild(createDetailItem('date', formatDate(level.date, currentLang), false));
 
-            card.querySelector('.card-header').addEventListener('click', () => {
-                document.querySelectorAll('.level-card.open').forEach(openCard => {
+
+            card.querySelector('.card-display').addEventListener('click', (e) => {
+                // 他の開いているカードを閉じる
+                document.querySelectorAll('.level-grid-card.open').forEach(openCard => {
                     if (openCard !== card) {
                         openCard.classList.remove('open');
                     }
                 });
+                
+                // クリックされたカードの開閉を切り替える
                 card.classList.toggle('open');
+                
+                // カード展開時にスクロール位置を調整する処理は、カードの高さが変わらないため不要になるか、調整が必要
+                // ただし、今回は詳細がカード領域内に収まるようにしたため、スクロール調整は省略します。
+                /*
+                if (card.classList.contains('open')) {
+                    setTimeout(() => {
+                        const cardTop = card.getBoundingClientRect().top + window.scrollY;
+                        window.scrollTo({ top: cardTop - 20, behavior: 'smooth' });
+                    }, 50);
+                }
+                */
             });
 
             return card;
         };
+
 
         const renderPagination = () => {
             const paginationContainer = document.getElementById('pagination');
@@ -609,35 +740,21 @@
             paginationContainer.appendChild(nextBtn);
         };
 
-        const renderListHeader = (lang) => {
-            const langData = translations[lang];
-            const header = document.createElement('div');
-            header.className = 'list-header';
-            header.innerHTML = `
-                <div>#</div>
-                <div class="header-col">${langData.headerName}</div>
-                <div class="header-col center">${langData.headerDate}</div>
-                <div class="header-col center">${langData.headerRating}</div>
-                <div class="header-col center">${langData.headerFinish}</div>
-                <div></div>
-            `;
-            return header;
-        };
 
         const fetchAndRenderLevels = async (pageIndex = 0) => {
-            const container = document.getElementById('level-list-container');
+            const container = document.getElementById('level-grid'); 
             let loading = document.getElementById('loading-message');
             const langData = translations[currentLang];
             
+            // 1. ロード開始: ロードメッセージを表示し、コンテナをクリア
             if (!loading) {
                 loading = document.createElement('div');
                 loading.id = 'loading-message';
-                container.appendChild(loading);
+                document.getElementById('level-wrapper').prepend(loading);
             }
             loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
             loading.style.display = 'block';
             container.innerHTML = ''; 
-            container.appendChild(loading);
             document.getElementById('pagination').innerHTML = '';
             
             try {
@@ -651,29 +768,29 @@
                 currentPage = pageIndex;
                 maxPages = data.m; 
                 
-                container.innerHTML = ''; 
-                
                 if (data && data.l && data.l.length > 0) {
-                    // ★ リストヘッダーの追加
-                    container.appendChild(renderListHeader(currentLang));
-                    
+                    // 2a. 成功時: カードをレンダリングし、ローディングメッセージを非表示にする
                     data.l.forEach(level => {
                         const card = createLevelCard(level);
                         container.appendChild(card);
                     });
                     renderPagination();
+                    loading.style.display = 'none'; 
+
                 } else {
-                    container.innerHTML = `<div id="loading-message" style="display:block; padding:20px;">${langData.dataError}: No levels found.</div>`;
+                    // 2b. データが空の場合: メッセージを更新し、表示したままにする
+                    container.innerHTML = ''; 
+                    loading.innerHTML = `${langData.dataError}: No levels found.`;
+                    loading.style.display = 'block';
                     document.getElementById('pagination').innerHTML = '';
                 }
 
             } catch (error) {
-                container.innerHTML = `<div id="loading-message" style="display:block; padding:20px;">${langData.dataError} (${error.message})</div>`;
+                // 3. エラー時: エラーメッセージを表示したままにする
+                container.innerHTML = '';
+                loading.innerHTML = `${langData.dataError} (${error.message})`;
+                loading.style.display = 'block';
                 document.getElementById('pagination').innerHTML = '';
-            } finally {
-                if (loading) {
-                    loading.style.display = 'none';
-                }
             }
         };
 
@@ -756,6 +873,7 @@
             
             const hamburgerIcon = document.getElementById('hamburger-icon');
             const navbar = document.querySelector('.navbar');
+            
             hamburgerIcon.addEventListener('click', () => {
                 navbar.classList.toggle('open');
             });

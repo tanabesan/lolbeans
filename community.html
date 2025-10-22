@@ -166,7 +166,7 @@
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            position: relative; /* 子要素のabsolute基準のため */
+            position: relative; 
         }
         .level-grid-card:hover {
             transform: translateY(-5px);
@@ -179,7 +179,6 @@
             padding-top: 100%; /* アスペクト比 1:1 */
             width: 100%;
             flex-shrink: 0;
-            /* card-detailsをこの中に含めるため、flex-grow: 1 は削除 */
         }
         
         /* 画像背景 */
@@ -218,12 +217,6 @@
             );
         }
 
-        /* カード展開時、通常の情報オーバーレイを非表示に */
-        .level-grid-card.open .card-info-overlay {
-            opacity: 0;
-            pointer-events: none;
-        }
-
         .overlay-title {
             font-size: 1.1em;
             font-weight: 700;
@@ -257,38 +250,108 @@
              margin-right: 5px;
         }
         
-        /* ★★★ 詳細セクションのスタイリッシュ化と上部表示への変更 ★★★ */
-        .card-details { 
-            position: absolute; /* card-display内に配置 */
+        /* ★★★ 詳細セクションのスタイリッシュ化とモーダル表示への変更 ★★★ */
+        #modal-backdrop {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            padding: 20px; 
-            box-sizing: border-box;
-            opacity: 0; /* デフォルトで非表示 */
-            visibility: hidden; /* デフォルトで非表示 */
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1999; 
+            opacity: 0;
+            visibility: hidden;
             transition: opacity 0.4s ease, visibility 0.4s ease;
-            background-color: rgba(44, 62, 80, 0.95); /* 濃い背景色に半透明を適用 */
-            color: var(--text-color-light); /* 文字色を白に */
-            border-radius: 12px;
-            overflow: auto; /* 詳細が多い場合にスクロール可能に */
-            z-index: 15; /* overlayの上 */
         }
-
-        /* カード展開時、詳細セクションを表示に */
-        .level-grid-card.open .card-details { 
-            opacity: 1; 
+        #modal-backdrop.active {
+            opacity: 1;
             visibility: visible;
         }
+
+        .card-details { 
+            position: fixed; /* 画面に固定 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9); /* 中央配置 + 登場アニメーションのための縮小 */
+            width: 90%; 
+            max-width: 800px; /* 最大幅を少し広げた */
+            height: auto; 
+            max-height: 90vh; /* 最大高さをビューポートの90%に制限 */
+            padding: 30px; 
+            box-sizing: border-box;
+            opacity: 0; 
+            visibility: hidden; 
+            transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s ease;
+            background-color: var(--detail-bg-color);
+            color: var(--text-color-light); 
+            border-radius: 12px;
+            overflow-y: auto; 
+            z-index: 2000; 
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5); 
+        }
         
+        /* モーダル表示時 */
+        .card-details.active-modal { 
+            opacity: 1; 
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1); /* 中央配置 */
+        }
+        
+        /* モーダルヘッダー */
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+        .modal-thumbnail {
+            width: 100px;
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            margin-right: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .modal-info h2 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-color-light);
+        }
+        .modal-info p {
+            font-size: 1em;
+            color: var(--primary-color);
+            font-weight: 500;
+            margin: 5px 0 0;
+        }
+        .modal-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .modal-stats span {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-color-light);
+        }
+        .modal-stats i {
+            margin-right: 5px;
+            color: var(--accent-color);
+        }
+
+
         /* 説明ボックス */
         .description-box { 
-            background-color: rgba(255, 255, 255, 0.05); /* 半透明の白 */
+            background-color: rgba(255, 255, 255, 0.05); 
             padding: 15px; 
             border-radius: 8px; 
-            margin-bottom: 15px; /* スペースを少し詰める */
-            font-size: 0.8em; 
+            margin-bottom: 15px; 
+            font-size: 0.9em; /* 少し大きくした */
             white-space: pre-wrap; 
             color: var(--text-color-light); 
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -304,15 +367,15 @@
 
         .detail-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* 詳細アイテムを詰める */
-            gap: 10px; 
-            margin-top: 5px;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* 最小幅を広げた */
+            gap: 15px; 
+            margin-top: 20px;
         }
         
         /* 詳細アイテム */
         .detail-item { 
-            padding: 8px 10px; /* パディングを詰める */
-            border-radius: 6px; /* 角丸を詰める */
+            padding: 12px 15px; /* パディングを増やした */
+            border-radius: 6px; 
             background-color: rgba(255, 255, 255, 0.1); 
             border-left: 3px solid var(--primary-color); 
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -334,7 +397,7 @@
             display: block; 
             color: var(--text-color-light); 
             font-weight: 700; 
-            font-size: 0.9em; /* フォントサイズを小さく */
+            font-size: 1em; /* フォントを少し大きくした */
             margin-top: 3px;
         }
         .detail-item span.wr-holder { 
@@ -344,11 +407,11 @@
         
         /* ★★★ フッタースタイルを追加 ★★★ */
         .footer-section {
-            background-color: var(--text-color-dark); /* 濃い青を背景に */
-            color: var(--text-color-light); /* 文字色を白に */
-            padding: 30px 20px; /* 上下のパディングを増やす */
+            background-color: var(--text-color-dark); 
+            color: var(--text-color-light); 
+            padding: 30px 20px; 
             text-align: center;
-            border-top: 5px solid var(--primary-color); /* メインカラーの境界線 */
+            border-top: 5px solid var(--primary-color); 
         }
         .footer-section p {
             margin: 10px 0 0;
@@ -365,19 +428,18 @@
             transition: color 0.3s ease;
         }
         .social-icons a:hover {
-            color: var(--accent-color); /* ホバー時にアクセントカラーに */
+            color: var(--accent-color); 
         }
         /* --- フッタースタイル追加ここまで --- */
         
         /* --- モバイル対応の修正部分 --- */
         @media (max-width: 1100px) {
             #level-grid {
-                grid-template-columns: repeat(2, 1fr); /* 2列表示 */
+                grid-template-columns: repeat(2, 1fr); 
             }
         }
         
         @media (max-width: 768px) {
-            /* ハンバーガーメニュー関連は省略 (前回の修正を維持) */
             .navbar a { display: none; }
             #language-switcher { margin-left: 0; }
             .navbar {
@@ -412,13 +474,19 @@
             .card-display {
                 padding-top: 66.66%; 
             }
-            /* 詳細パネルをモバイルで見やすく調整 */
             .card-details {
-                padding: 15px; 
-                overflow-y: scroll; /* モバイルではスクロールしやすく */
+                max-width: 95%;
+                padding: 20px; 
+            }
+            .modal-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .modal-thumbnail {
+                margin: 0 auto 15px;
             }
             .detail-grid {
-                grid-template-columns: 1fr; /* モバイルでは1列にするか、2列程度に調整 */
+                grid-template-columns: 1fr; 
             }
         }
         /* --- 修正部分ここまで --- */
@@ -516,6 +584,9 @@
         let currentPage = 0;
         let maxPages = 0;
 
+        // グローバル変数で現在開いている詳細要素を保持
+        let activeDetailsElement = null;
+
         const translations = {
             ja: {
                 mainPage: "メインページ", fileLibrary: "ファイルライブラリ", levelList: "コミュ一覧", faq: "よくある質問", contact: "お問い合わせ",
@@ -530,7 +601,7 @@
                 averageFinishTime: "平均クリア時間", wr: "WR (世界記録)", wrHolder: "WR保持者", wrDate: "WR達成日", date: "公開日",
                 pageInfo: (current, max) => `${current + 1} / ${max}`,
                 prev: "前へ", next: "次へ",
-                dataError: "データの取得に失敗しました。再試行してください。", noDescription: "説明なし"
+                dataError: "データの取得に失敗しました。再試行してください。", noDescription: "説明なし", noLevels: "該当するコースが見つかりませんでした。"
             },
             en: {
                 mainPage: "Main Page", fileLibrary: "File Library", levelList: "Course List", faq: "FAQ", contact: "Contact",
@@ -545,7 +616,7 @@
                 averageFinishTime: "Avg. Finish Time", wr: "WR (World Record)", wrHolder: "WR Holder", wrDate: "WR Date", date: "Publish Date",
                 pageInfo: (current, max) => `Page ${current + 1} of ${max}`,
                 prev: "Prev", next: "Next",
-                dataError: "Failed to fetch data. Please try again.", noDescription: "No description"
+                dataError: "Failed to fetch data. Please try again.", noDescription: "No description", noLevels: "No levels found matching the criteria."
             }
         };
 
@@ -620,18 +691,55 @@
             return item;
         };
 
-        const createLevelCard = (level) => {
+        // モーダルを閉じる関数
+        const closeModal = () => {
+            const backdrop = document.getElementById('modal-backdrop');
+            
+            if (activeDetailsElement) {
+                // 元のカード要素を見つける (data属性に格納されているIDを使用)
+                const cardId = activeDetailsElement.dataset.cardId;
+                const originalCard = document.querySelector(`.level-grid-card[data-card-id="${cardId}"]`);
+                const cardDisplay = originalCard ? originalCard.querySelector('.card-display') : null;
+
+                // 1. 詳細パネルの非表示クラスを削除
+                activeDetailsElement.classList.remove('active-modal');
+                
+                // 2. 詳細パネルを元のDOM位置に戻す (親要素が存在する場合)
+                if (cardDisplay) {
+                    // **ここで確実に元の場所に戻します**
+                    cardDisplay.appendChild(activeDetailsElement);
+                }
+                
+                // 3. activeDetailsElementをリセット
+                activeDetailsElement = null;
+
+                // 4. 開いているカードのクラスを削除
+                if (originalCard) {
+                    originalCard.classList.remove('open');
+                }
+            }
+
+            // 5. モーダル背景を非表示
+            if (backdrop) {
+                backdrop.classList.remove('active');
+            }
+            // 6. 背景のスクロール制限を解除
+            document.body.style.overflow = ''; 
+        };
+
+        const createLevelCard = (level, index) => {
             const langData = translations[currentLang];
             const card = document.createElement('div');
             card.className = 'level-grid-card';
-            card.dataset.levelId = level.levelId;
+            const cardId = `card-${level.levelId}-${index}`; // ユニークなIDを生成
+            card.dataset.cardId = cardId;
             const description = level.description || langData.noDescription;
             
             const safeRating = level.rating === null || level.rating === undefined ? 0 : level.rating;
             const finishPercentage = level.finishPercent === null || level.finishPercent === undefined ? 0 : (level.finishPercent * 100);
-
             const thumbnailUrl = `${THUMBNAIL_BASE_URL}${level.levelId}.png`;
-            // ★ 構造変更: card-display 内に card-details を配置
+
+            // HTML構造はそのまま維持し、CSSとJSでモーダル化
             card.innerHTML = `
                 <div class="card-display">
                     <div class="card-thumbnail-bg" 
@@ -652,7 +760,18 @@
                         </div>
                     </div>
 
-                    <div class="card-details">
+                    <div class="card-details" data-card-id="${cardId}">
+                        <div class="modal-header">
+                            <div class="modal-thumbnail" style="background-image: url('${thumbnailUrl}');"></div>
+                            <div class="modal-info">
+                                <h2>${level.name}</h2>
+                                <p><i class="fas fa-user"></i> ${level.author || 'N/A'}</p>
+                                <div class="modal-stats">
+                                    <span><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
+                                    <span><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="description-box">
                             <strong><i class="fas fa-align-left"></i> ${langData.description}:</strong>
                             <p>${description}</p>
@@ -676,26 +795,34 @@
 
 
             card.querySelector('.card-display').addEventListener('click', (e) => {
-                // 他の開いているカードを閉じる
-                document.querySelectorAll('.level-grid-card.open').forEach(openCard => {
-                    if (openCard !== card) {
-                        openCard.classList.remove('open');
-                    }
-                });
-                
-                // クリックされたカードの開閉を切り替える
-                card.classList.toggle('open');
-                
-                // カード展開時にスクロール位置を調整する処理は、カードの高さが変わらないため不要になるか、調整が必要
-                // ただし、今回は詳細がカード領域内に収まるようにしたため、スクロール調整は省略します。
-                /*
-                if (card.classList.contains('open')) {
-                    setTimeout(() => {
-                        const cardTop = card.getBoundingClientRect().top + window.scrollY;
-                        window.scrollTo({ top: cardTop - 20, behavior: 'smooth' });
-                    }, 50);
+                const detailsElement = card.querySelector('.card-details');
+                const backdrop = document.getElementById('modal-backdrop');
+
+                // 既に別のモーダルが開いている場合は閉じる
+                if (activeDetailsElement && activeDetailsElement !== detailsElement) {
+                    closeModal();
                 }
-                */
+
+                // モーダルが既に開いている場合は閉じる (トグル)
+                if (card.classList.contains('open')) {
+                    closeModal();
+                    return;
+                }
+                
+                // モーダルとして詳細を表示する処理
+                
+                // 1. 詳細要素をbody直下に移動 (fixedで画面中央に表示するため)
+                //    - detailsElementには、生成時にユニークなcardIdが設定済み
+                document.body.appendChild(detailsElement);
+                activeDetailsElement = detailsElement; // グローバル変数にセット
+                
+                // 2. クラスの追加
+                card.classList.add('open');
+                detailsElement.classList.add('active-modal');
+                backdrop.classList.add('active');
+                
+                // 3. 背景のスクロールを禁止
+                document.body.style.overflow = 'hidden';
             });
 
             return card;
@@ -757,6 +884,9 @@
             container.innerHTML = ''; 
             document.getElementById('pagination').innerHTML = '';
             
+            // モーダルがもし開いていたら閉じる
+            closeModal();
+            
             try {
                 const apiUrl = buildApiUrl(pageIndex);
                 const response = await fetch(apiUrl);
@@ -770,8 +900,8 @@
                 
                 if (data && data.l && data.l.length > 0) {
                     // 2a. 成功時: カードをレンダリングし、ローディングメッセージを非表示にする
-                    data.l.forEach(level => {
-                        const card = createLevelCard(level);
+                    data.l.forEach((level, index) => {
+                        const card = createLevelCard(level, index);
                         container.appendChild(card);
                     });
                     renderPagination();
@@ -780,7 +910,7 @@
                 } else {
                     // 2b. データが空の場合: メッセージを更新し、表示したままにする
                     container.innerHTML = ''; 
-                    loading.innerHTML = `${langData.dataError}: No levels found.`;
+                    loading.innerHTML = `${langData.noLevels}`;
                     loading.style.display = 'block';
                     document.getElementById('pagination').innerHTML = '';
                 }
@@ -847,6 +977,23 @@
 
 
         document.addEventListener('DOMContentLoaded', () => {
+            // モーダル背景要素の作成と追加
+            let modalBackdrop = document.getElementById('modal-backdrop');
+            if (!modalBackdrop) {
+                modalBackdrop = document.createElement('div');
+                modalBackdrop.id = 'modal-backdrop';
+                document.body.appendChild(modalBackdrop);
+            }
+            // モーダルを閉じるイベントリスナーをバックドロップに追加
+            modalBackdrop.addEventListener('click', closeModal);
+            
+            // ESCキーでモーダルを閉じる
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && activeDetailsElement) {
+                    closeModal();
+                }
+            });
+
             const savedLang = localStorage.getItem('language') || 'ja';
             applyLanguage(savedLang); 
 

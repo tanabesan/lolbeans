@@ -197,6 +197,33 @@
              filter: brightness(1.1);
         }
 
+        /* --- 追加: ゲームタイプアイコンのコンテナ --- */
+        .card-type-icon {
+            position: absolute; /* 親要素 .card-display に対して絶対配置 */
+            top: 10px; /* 右上 */
+            right: 10px;
+            z-index: 15; /* オーバーレイより上 */
+            width: 40px; /* アイコンの大きさ */
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color); /* 背景色 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .level-grid-card:hover .card-type-icon {
+            transform: scale(1.1);
+        }
+        /* 画像アイコン用のスタイル変更 */
+        .card-type-icon img {
+            width: 70%; /* アイコン画像がコンテナに収まるように */
+            height: 70%;
+            object-fit: contain; /* アスペクト比を維持して収める */
+        }
+        /* ------------------------------------------- */
+
         /* グラデーションオーバーレイと情報 (カードを閉じた状態) */
         .card-info-overlay {
             position: absolute;
@@ -249,6 +276,16 @@
              color: var(--primary-color);
              margin-right: 5px;
         }
+
+        /* --- 追加: 公開日のスタイル --- */
+        .overlay-date {
+            font-size: 0.8em;
+            font-weight: 500;
+            margin-top: 5px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: right;
+        }
+        /* --------------------------- */
         
         /* ★★★ 詳細セクションのスタイリッシュ化とモーダル表示への変更 ★★★ */
         #modal-backdrop {
@@ -339,9 +376,17 @@
             font-weight: 600;
             color: var(--text-color-light);
         }
+        /* モーダル内のアイコンにはFont Awesomeを使用するため、iタグのスタイルを維持 */
         .modal-stats i {
             margin-right: 5px;
             color: var(--accent-color);
+        }
+        /* モーダル内のゲームタイプ画像アイコン用 */
+        .modal-stats span.game-type-icon img {
+            width: 20px; /* モーダル内のアイコンサイズ調整 */
+            height: 20px;
+            margin-right: 5px;
+            object-fit: contain;
         }
 
 
@@ -579,6 +624,16 @@
         const THUMBNAIL_BASE_URL = 'https://lolbeans.io/ui/level-thumbnails/';
         
         const LEVELS_PER_PAGE = 12;
+        
+        // --- 修正: ゲームタイプと画像アイコンのマッピング ---
+        const LEVEL_TYPES = {
+            '-1': { ja: "すべて", en: "All", icon: "https://tanabesan.github.io/lolbeans/file/page/all.png" }, // 全体アイコンを追加
+            '0': { ja: "サンドボックス", en: "Sandbox", icon: "https://tanabesan.github.io/lolbeans/file/page/sandbox.png" },
+            '1': { ja: "タイムレース", en: "Timed Race", icon: "https://tanabesan.github.io/lolbeans/file/page/timed.png" },
+            '2': { ja: "競争レース", en: "Competitive Race", icon: "https://tanabesan.github.io/lolbeans/file/page/competitive.png" },
+            '3': { ja: "エリミネーション", en: "Elimination", icon: "https://tanabesan.github.io/lolbeans/file/page/elimination.png" }
+        };
+        // ------------------------------------------------
 
         let currentLang = 'ja';
         let currentPage = 0;
@@ -739,6 +794,13 @@
             const finishPercentage = level.finishPercent === null || level.finishPercent === undefined ? 0 : (level.finishPercent * 100);
             const thumbnailUrl = `${THUMBNAIL_BASE_URL}${level.levelId}.png`;
 
+            // --- 修正・追加: ゲームタイプと公開日を取得 ---
+            const levelType = LEVEL_TYPES[level.type] || LEVEL_TYPES['0']; // typeが不明な場合はSandbox
+            const typeName = levelType[currentLang];
+            const typeIconUrl = levelType.icon; // 画像URLとして取得
+            const publishDate = formatDate(level.date, currentLang);
+            // ------------------------------------------------
+
             // HTML構造はそのまま維持し、CSSとJSでモーダル化
             card.innerHTML = `
                 <div class="card-display">
@@ -747,6 +809,9 @@
                          onerror="this.style.backgroundImage='url(https://via.placeholder.com/300?text=LOLBeans+Thumbnail)';">
                     </div>
                     
+                    <div class="card-type-icon" title="${typeName}">
+                        <img src="${typeIconUrl}" alt="${typeName} icon">
+                    </div>
                     <div class="card-info-overlay">
                         <h3 class="overlay-title">${level.name}</h3>
                         <p class="overlay-author">${level.author || 'N/A'}</p>
@@ -758,7 +823,8 @@
                                 <i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%
                             </span>
                         </div>
-                    </div>
+                        <p class="overlay-date">${langData.date}: ${publishDate}</p>
+                        </div>
 
                     <div class="card-details" data-card-id="${cardId}">
                         <div class="modal-header">
@@ -769,7 +835,8 @@
                                 <div class="modal-stats">
                                     <span><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
                                     <span><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
-                                </div>
+                                    <span class="game-type-icon" title="${langData.filterTypeLabel}"><img src="${typeIconUrl}" alt="${typeName} icon"> ${typeName}</span>
+                                    </div>
                             </div>
                         </div>
                         <div class="description-box">
@@ -791,7 +858,9 @@
             detailGrid.appendChild(createDetailItem('starts', level.starts, false));
             detailGrid.appendChild(createDetailItem('votes', level.votes, false));
             detailGrid.appendChild(createDetailItem('distinctPlayers', level.distinctPlayers, false));
-            detailGrid.appendChild(createDetailItem('date', formatDate(level.date, currentLang), false));
+            // --- 修正・追加: 公開日表示の項目をdetail-gridに含める ---
+            detailGrid.appendChild(createDetailItem('date', publishDate, false)); 
+            // ---------------------------------------------------------
 
 
             card.querySelector('.card-display').addEventListener('click', (e) => {

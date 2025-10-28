@@ -295,6 +295,57 @@
             color: var(--secondary-color);
         }
         
+        /* --- 追加したCSS: 新しい開発者セクションスタイル --- */
+        .developer-section {
+            text-align: center;
+            padding: 80px 0;
+            background-color: var(--card-color); /* 目立たせるためにカード色を使用 */
+            border-radius: 12px;
+            margin-top: 40px;
+            box-shadow: var(--shadow-light);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .developer-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .developer-section h2 {
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        .dev-icon-container {
+            display: inline-block;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .dev-icon {
+            width: 150px; /* 大きなアイコン */
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid var(--secondary-color);
+            box-shadow: 0 0 30px rgba(3, 218, 198, 0.5); /* シアンの強い影 */
+            transition: transform 0.4s ease;
+        }
+        .dev-icon:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+        .dev-name-ja {
+            font-size: 2.5em; /* 大きな名前 */
+            font-weight: 700;
+            color: var(--text-color-dark);
+            margin: 0;
+        }
+        .dev-name-en {
+            font-size: 1.5em;
+            font-weight: 400;
+            color: var(--primary-color);
+            margin-top: -5px;
+        }
+        /* ------------------------------------------------ */
+
         /* Media Queries for Responsive Design */
         @media (max-width: 768px) {
             .hero-content h1 {
@@ -339,6 +390,16 @@
             .version-table td:nth-child(1) {
                 width: 40%;
                 font-size: 0.9em;
+            }
+            .dev-icon {
+                width: 100px;
+                height: 100px;
+            }
+            .dev-name-ja {
+                font-size: 2em;
+            }
+            .dev-name-en {
+                font-size: 1.2em;
             }
         }
     </style>
@@ -465,7 +526,16 @@
                 現在デモ動画は準備中です。
             </div>
         </section>
-    </main>
+        
+        <section id="developer-info" class="developer-section">
+            <h2 id="developer-title">開発者情報</h2>
+            <div class="dev-icon-container">
+                <img src="https://avatars.githubusercontent.com/u/152053837?v=4" alt="Developer Icon" class="dev-icon">
+            </div>
+            <p id="dev-name-ja" class="dev-name-ja">ユウキ</p>
+            <p id="dev-name-en" class="dev-name-en">Yuki</p>
+        </section>
+        </main>
 
     <footer class="footer-section">
         <div class="social-icons">
@@ -512,12 +582,15 @@
                 tableFeature3: "Youtubeプレイヤー",
                 tableFeature4: "バックグラウンドデザイナー",
                 tableFeatureSpeed: "処理速度 / 軽量性",
-                // **を削除 (日本語)
                 liteNote: "軽量版 (Lite) は、オートエアスイッチ機能とラウンドスコープ機能を除外することで、最高の動作速度と軽快な操作感を実現しています。",
                 // デモセクションの翻訳
                 demoTitle: "体験版デモ",
                 demoDesc: "LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。",
-                demoPlaceholder: "現在デモ動画は準備中です。"
+                demoPlaceholder: "現在デモ動画は準備中です。",
+                // 開発者情報 (新規追加)
+                developerTitle: "開発者情報",
+                devNameJa: "ユウキ",
+                devNameEn: "Yuki"
             },
             en: {
                 pageTitle: "LOL.ex Next Generation Gaming Experience",
@@ -552,12 +625,15 @@
                 tableFeature3: "Youtube Player",
                 tableFeature4: "Background Designer",
                 tableFeatureSpeed: "Processing Speed / Lightweight",
-                // **を削除 (英語)
                 liteNote: "The Lite Version achieves the best operating speed and a smooth feel by excluding the Auto Air Switch and Round Scope features.",
                 // デモセクションの翻訳
                 demoTitle: "Demo Video",
                 demoDesc: "Watch the demo video below to see the innovative experience LOL.ex offers.",
-                demoPlaceholder: "Demo video is currently being prepared."
+                demoPlaceholder: "Demo video is currently being prepared.",
+                // 開発者情報 (新規追加)
+                developerTitle: "Developer Information",
+                devNameJa: "Yuki",
+                devNameEn: "Creator"
             }
         };
 
@@ -609,6 +685,11 @@
             document.getElementById('demo-title').textContent = langData.demoTitle;
             document.getElementById('demo-desc').textContent = langData.demoDesc;
             document.getElementById('demo-placeholder').textContent = langData.demoPlaceholder;
+            
+            // 開発者情報 (新規追加)
+            document.getElementById('developer-title').textContent = langData.developerTitle;
+            document.getElementById('dev-name-ja').textContent = langData.devNameJa;
+            document.getElementById('dev-name-en').textContent = langData.devNameEn;
 
             // 言語セレクターを更新
             document.getElementById('language-switcher').value = lang;
@@ -619,6 +700,7 @@
             const navbar = document.querySelector('.navbar');
             const languageSwitcher = document.getElementById('language-switcher');
             const cards = document.querySelectorAll('.feature-card');
+            const developerSection = document.getElementById('developer-info'); // 開発者セクションを取得
             
             // 1. ページ読み込み時に言語設定を適用
             const savedLang = localStorage.getItem('language') || 'ja'; // デフォルトは日本語
@@ -642,8 +724,9 @@
                         observer.unobserve(entry.target);
                     }
                 });
-            }, { threshold: 0.5 });
+            }, { threshold: 0.3 }); // 閾値を調整
             cards.forEach(card => observer.observe(card));
+            observer.observe(developerSection); // 開発者セクションをアニメーション対象に追加
         });
     </script>
 </body>

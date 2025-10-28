@@ -9,15 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ダークモードのカラーパレット定義 */
         :root {
-            --primary-color: #5D54A4;
-            --secondary-color: #6A799E;
-            --background-color: #F4F7FB;
-            --card-color: #FFFFFF;
-            --text-color-dark: #2C3E50;
-            --text-color-light: #F4F7FB;
-            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --primary-color: #BB86FC; /* メインアクセント (紫) */
+            --secondary-color: #03DAC6; /* サブアクセント (シアン) */
+            --background-color: #121212; /* メイン背景 */
+            --card-color: #1F1F1F; /* カード/要素背景 */
+            --text-color-dark: #E0E0E0; /* 明るいテキスト */
+            --text-color-light: #E0E0E0; /* ヒーローセクション用テキスト */
+            --shadow-light: 0 0 10px rgba(0, 0, 0, 0.5); /* 影 */
+            --shadow-hover: 0 0 20px rgba(187, 134, 252, 0.3); /* ホバー時の影 */
         }
 
         body {
@@ -30,16 +31,55 @@
             scroll-behavior: smooth;
         }
 
-        /* Hero Section */
+        /* アニメーション用キーフレーム - ピクセル風の動き */
+        @keyframes pixel-glitch {
+            0% { 
+                background-position: 0 0, 0 0; 
+                opacity: 0.1;
+            }
+            25% { 
+                background-position: 5px 5px, -5px -5px; 
+                opacity: 0.15;
+            }
+            50% { 
+                background-position: 10px 10px, -10px -10px; 
+                opacity: 0.1;
+            }
+            75% { 
+                background-position: 5px 5px, -5px -5px; 
+                opacity: 0.15;
+            }
+            100% { 
+                background-position: 0 0, 0 0; 
+                opacity: 0.1;
+            }
+        }
+
+        /* Hero Section - ピクセルアニメーション背景の適用 */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://tanabesan.github.io/lolbeans/file/page/bg.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background: #121212;
             color: var(--text-color-light);
             padding: 120px 20px;
             text-align: center;
             position: relative;
+            overflow: hidden;
+        }
+        /* ピクセルグリッチアニメーションレイヤー */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* ピクセル/グリッドパターンを生成 */
+            background-image: 
+                repeating-linear-gradient(45deg, var(--primary-color) 0 2px, transparent 2px 4px),
+                repeating-linear-gradient(-45deg, var(--secondary-color) 0 2px, transparent 2px 4px);
+            background-size: 15px 15px, 15px 15px; /* ピクセルサイズ */
+            z-index: 1;
+            opacity: 0.1; /* 透明度を下げてノイズ感を出す */
+            animation: pixel-glitch 10s linear infinite alternate; /* 往復するアニメーション */
         }
         .hero-content {
             position: relative;
@@ -55,32 +95,65 @@
             font-weight: 300;
             margin: 0 0 40px;
         }
+        /* CTA Buttons Container */
+        .cta-buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        .cta-buttons-container > div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .cta-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
         .cta-button {
             display: inline-block;
             padding: 18px 40px;
-            background-color: #FFC107;
-            color: var(--text-color-dark);
-            font-weight: 600;
+            background-color: var(--primary-color);
+            color: #121212;
+            font-weight: 700;
             text-decoration: none;
             border-radius: 50px;
             transition: transform 0.3s ease, background-color 0.3s ease;
+            white-space: nowrap;
         }
         .cta-button:hover {
             transform: translateY(-5px);
-            background-color: #FFD54F;
+            background-color: #D6A4FF;
+        }
+        /* Lite Button Style */
+        .cta-button.lite {
+            background-color: #404040;
+            color: var(--text-color-light);
+        }
+        .cta-button.lite:hover {
+            background-color: #606060;
+            transform: translateY(-5px);
+        }
+        .button-group-title {
+            font-size: 1em;
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: block;
         }
 
         /* Navbar Section */
         .navbar {
+            background-color: rgba(31, 31, 31, 0.9);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             padding: 10px 20px;
             border-radius: 30px;
             z-index: 1000;
-            display: flex; /* 言語セレクタ対応 */
+            display: flex;
             align-items: center;
         }
         .navbar a {
@@ -105,7 +178,9 @@
         #language-switcher {
             padding: 8px 10px;
             border-radius: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
+            background-color: #2b2b2b;
+            color: var(--text-color-dark);
             margin-left: 15px;
             cursor: pointer;
             font-size: 14px;
@@ -154,19 +229,58 @@
         }
         .feature-card i {
             font-size: 3em;
-            color: var(--primary-color);
+            color: var(--secondary-color);
             margin-bottom: 20px;
         }
         .feature-card h3 {
             font-size: 1.5em;
             font-weight: 600;
-            color: var(--secondary-color);
+            color: var(--primary-color);
             margin: 0 0 10px;
         }
 
+        /* Version Info Table */
+        .version-table-container {
+            margin-top: 60px;
+            overflow-x: auto;
+        }
+        .version-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin: 20px 0;
+            box-shadow: var(--shadow-light);
+            background: var(--card-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .version-table th, .version-table td {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .version-table th {
+            background-color: var(--primary-color);
+            color: #121212;
+            font-weight: 600;
+            text-align: center;
+        }
+        .version-table td:nth-child(1) {
+            font-weight: 500;
+            color: var(--text-color-dark);
+            width: 30%;
+        }
+        .version-table td {
+            text-align: center;
+        }
+        .version-table tr:hover {
+            background-color: #2e2e2e;
+        }
+        .icon-check { color: var(--secondary-color); font-size: 1.2em; }
+        .icon-cross { color: #CF6679; font-size: 1.2em; }
+
         /* Footer */
         .footer-section {
-            background-color: var(--text-color-dark);
+            background-color: #000000;
             color: var(--text-color-light);
             padding: 60px 20px;
             text-align: center;
@@ -178,13 +292,21 @@
             transition: color 0.3s ease;
         }
         .footer-section .social-icons a:hover {
-            color: var(--primary-color);
+            color: var(--secondary-color);
         }
         
         /* Media Queries for Responsive Design */
         @media (max-width: 768px) {
             .hero-content h1 {
                 font-size: 3.5em;
+            }
+            .cta-buttons-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            .cta-logo {
+                width: 60px;
+                height: 60px;
             }
             .navbar a {
                 display: none;
@@ -196,8 +318,12 @@
                 background-color: transparent;
                 box-shadow: none;
                 padding: 10px;
-                flex-direction: column-reverse; /* 言語セレクタが上になるように調整 */
+                flex-direction: column-reverse;
                 align-items: flex-end;
+            }
+            .navbar.open {
+                background-color: rgba(31, 31, 31, 0.9);
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
             }
             .hamburger-menu {
                 display: block;
@@ -207,17 +333,12 @@
                 display: block;
                 margin: 10px 0;
             }
-            .navbar.open {
-                background-color: rgba(255, 255, 255, 0.9);
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                padding: 20px;
-                border-radius: 12px;
-                display: flex;
+            .version-table th, .version-table td {
+                padding: 10px 8px;
             }
-            .navbar.open #language-switcher {
-                 display: block;
-                 width: 100%;
-                 margin: 10px 0;
+            .version-table td:nth-child(1) {
+                width: 40%;
+                font-size: 0.9em;
             }
         }
     </style>
@@ -228,7 +349,19 @@
         <div class="hero-content">
             <h1 id="hero-title">LOL.ex</h1>
             <p id="hero-subtitle">ゲームの可能性を、どこまでも。</p>
-            <a href="lolex/main.user.js" class="cta-button" id="cta-button">今すぐダウンロード</a>
+
+            <div class="cta-buttons-container">
+                <div>
+                    <img src="https://tanabesan.github.io/lolbeans/file/page/favicon.png" alt="LOL.ex Standard Logo" class="cta-logo">
+                    <span class="button-group-title" id="cta-standard-title">標準版 (Full Features)</span>
+                    <a href="lolex/main.user.js" class="cta-button" id="cta-standard-button">今すぐダウンロード</a>
+                </div>
+                <div>
+                    <img src="https://tanabesan.github.io/lolbeans/file/page/lite.png" alt="LOL.ex Lite Logo" class="cta-logo">
+                    <span class="button-group-title" id="cta-lite-title">軽量版 (Lite)</span>
+                    <a href="https://tanabesan.github.io/lolbeans/lolex/lite.user.js" class="cta-button lite" id="cta-lite-button">軽量版をダウンロード</a>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -278,14 +411,57 @@
                     </p>
                 </div>
             </div>
-        </section>
+
+            <div class="version-table-container">
+                <h3 id="version-compare-title" style="font-size: 1.8em; margin-bottom: 20px; font-weight: 600;">バージョン別 機能比較</h3>
+                <table class="version-table">
+                    <thead>
+                        <tr>
+                            <th>機能</th>
+                            <th id="standard-version-name">標準版</th>
+                            <th id="lite-version-name">軽量版 (Lite)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="table-feature1">オートエアスイッチ</td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                            <td><i class="fas fa-times icon-cross"></i></td>
+                        </tr>
+                        <tr>
+                            <td id="table-feature2">ラウンドスコープ</td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                            <td><i class="fas fa-times icon-cross"></i></td>
+                        </tr>
+                        <tr>
+                            <td id="table-feature3">Youtubeプレイヤー</td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                        </tr>
+                        <tr>
+                            <td id="table-feature4">バックグラウンドデザイナー</td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                        </tr>
+                        <tr>
+                            <td id="table-feature-speed">処理速度 / 軽量性</td>
+                            <td>標準</td>
+                            <td>最軽量</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p id="lite-note" style="font-size: 0.9em; margin-top: 15px; color: #6A799E;">
+                    軽量版 (Lite) は、オートエアスイッチ機能とラウンドスコープ機能を除外することで、最高の動作速度と軽快な操作感を実現しています。
+                </p>
+            </div>
+            </section>
 
         <section class="content-section" style="text-align: center; padding: 60px 0;">
             <h2 id="demo-title">体験版デモ</h2>
             <p id="demo-desc">
                 LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。
             </p>
-            <div id="demo-placeholder" style="margin-top: 30px; background: #ddd; height: 400px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">
+            <div id="demo-placeholder" style="margin-top: 30px; background: #333; height: 400px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">
                 現在デモ動画は準備中です。
             </div>
         </section>
@@ -306,13 +482,18 @@
             ja: {
                 pageTitle: "LOL.ex 次世代のゲーム体験",
                 mainPage: "メインページ",
-                community: "コミュ一覧", // ★ 追加した翻訳データ ★
+                community: "コミュ一覧",
                 fileLibrary: "ファイルライブラリ",
                 faq: "よくある質問",
                 contact: "お問い合わせ",
                 heroTitle: "LOL.ex",
                 heroSubtitle: "ゲームの可能性を、どこまでも。",
-                downloadButton: "今すぐダウンロード",
+                // CTA ボタンの翻訳
+                ctaStandardTitle: "標準版 (Full Features)",
+                ctaStandardButton: "今すぐダウンロード",
+                ctaLiteTitle: "軽量版 (Lite)",
+                ctaLiteButton: "軽量版をダウンロード",
+                // 機能セクションの翻訳
                 featuresTitle: "強化された主な機能",
                 feature1Title: "オートエアスイッチ",
                 feature1Desc: "事前に設定された情報からエアムーブ設定を自動で切り替え。シームレスな操作体験を実現します。",
@@ -322,6 +503,18 @@
                 feature3Desc: "リアルタイムでYouTube動画を再生し、ゲームプレイを妨げることなくエンターテインメントを楽しめます。",
                 feature4Title: "バックグラウンドデザイナー",
                 feature4Desc: "ロビーの背景をカスタマイズし、個性的なゲーム環境を作り出します。",
+                // テーブルの翻訳
+                versionCompareTitle: "バージョン別 機能比較",
+                standardVersionName: "標準版",
+                liteVersionName: "軽量版 (Lite)",
+                tableFeature1: "オートエアスイッチ",
+                tableFeature2: "ラウンドスコープ",
+                tableFeature3: "Youtubeプレイヤー",
+                tableFeature4: "バックグラウンドデザイナー",
+                tableFeatureSpeed: "処理速度 / 軽量性",
+                // **を削除 (日本語)
+                liteNote: "軽量版 (Lite) は、オートエアスイッチ機能とラウンドスコープ機能を除外することで、最高の動作速度と軽快な操作感を実現しています。",
+                // デモセクションの翻訳
                 demoTitle: "体験版デモ",
                 demoDesc: "LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。",
                 demoPlaceholder: "現在デモ動画は準備中です。"
@@ -329,13 +522,18 @@
             en: {
                 pageTitle: "LOL.ex Next Generation Gaming Experience",
                 mainPage: "Main Page",
-                community: "Community List", // ★ 追加した翻訳データ ★
+                community: "Community List",
                 fileLibrary: "File Library",
                 faq: "FAQ",
                 contact: "Contact",
                 heroTitle: "LOL.ex",
                 heroSubtitle: "Unleash the full potential of gaming.",
-                downloadButton: "Download Now",
+                // CTA ボタンの翻訳
+                ctaStandardTitle: "Standard Version (Full Features)",
+                ctaStandardButton: "Download Now",
+                ctaLiteTitle: "Lite Version",
+                ctaLiteButton: "Download Lite",
+                // 機能セクションの翻訳
                 featuresTitle: "Key Enhanced Features",
                 feature1Title: "Auto Air Switch",
                 feature1Desc: "Automatically switches air move settings based on predefined information for a seamless operational experience.",
@@ -345,6 +543,18 @@
                 feature3Desc: "Play YouTube videos in real-time and enjoy entertainment without interrupting your gameplay.",
                 feature4Title: "Background Designer",
                 feature4Desc: "Customize your lobby background to create a unique gaming environment.",
+                // テーブルの翻訳
+                versionCompareTitle: "Feature Comparison by Version",
+                standardVersionName: "Standard",
+                liteVersionName: "Lite",
+                tableFeature1: "Auto Air Switch",
+                tableFeature2: "Round Scope",
+                tableFeature3: "Youtube Player",
+                tableFeature4: "Background Designer",
+                tableFeatureSpeed: "Processing Speed / Lightweight",
+                // **を削除 (英語)
+                liteNote: "The Lite Version achieves the best operating speed and a smooth feel by excluding the Auto Air Switch and Round Scope features.",
+                // デモセクションの翻訳
                 demoTitle: "Demo Video",
                 demoDesc: "Watch the demo video below to see the innovative experience LOL.ex offers.",
                 demoPlaceholder: "Demo video is currently being prepared."
@@ -360,14 +570,20 @@
             // HTML要素に翻訳を適用
             document.getElementById('page-title').textContent = langData.pageTitle;
             document.getElementById('nav-main-page').textContent = langData.mainPage;
-            document.getElementById('nav-community').textContent = langData.community; // ★ nav-communityに翻訳を適用 ★
+            document.getElementById('nav-community').textContent = langData.community;
             document.getElementById('nav-file-library').textContent = langData.fileLibrary;
             document.getElementById('nav-faq').textContent = langData.faq;
             document.getElementById('nav-contact').textContent = langData.contact;
             
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
-            document.getElementById('cta-button').textContent = langData.downloadButton;
+
+            // CTAボタン
+            document.getElementById('cta-standard-title').textContent = langData.ctaStandardTitle;
+            document.getElementById('cta-standard-button').textContent = langData.ctaStandardButton;
+            document.getElementById('cta-lite-title').textContent = langData.ctaLiteTitle;
+            document.getElementById('cta-lite-button').textContent = langData.ctaLiteButton;
+
 
             document.getElementById('features-title').textContent = langData.featuresTitle;
             document.getElementById('feature1-title').textContent = langData.feature1Title;
@@ -378,6 +594,17 @@
             document.getElementById('feature3-desc').textContent = langData.feature3Desc;
             document.getElementById('feature4-title').textContent = langData.feature4Title;
             document.getElementById('feature4-desc').textContent = langData.feature4Desc;
+
+            // テーブル
+            document.getElementById('version-compare-title').textContent = langData.versionCompareTitle;
+            document.getElementById('standard-version-name').textContent = langData.standardVersionName;
+            document.getElementById('lite-version-name').textContent = langData.liteVersionName;
+            document.getElementById('table-feature1').textContent = langData.tableFeature1;
+            document.getElementById('table-feature2').textContent = langData.tableFeature2;
+            document.getElementById('table-feature3').textContent = langData.tableFeature3;
+            document.getElementById('table-feature4').textContent = langData.tableFeature4;
+            document.getElementById('table-feature-speed').textContent = langData.tableFeatureSpeed;
+            document.getElementById('lite-note').innerHTML = langData.liteNote; // innerHTMLを使用
 
             document.getElementById('demo-title').textContent = langData.demoTitle;
             document.getElementById('demo-desc').textContent = langData.demoDesc;

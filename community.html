@@ -11,17 +11,18 @@
     <link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon.png">
     
     <style>
+        /* ★★★ ダークモードのカラーパレット定義 ★★★ */
         :root {
-            --primary-color: #5D54A4;
-            --secondary-color: #6A799E;
-            --background-color: #F4F7FB;
-            --card-color: #FFFFFF;
-            --detail-bg-color: #2c3e50; /* 詳細パネルの背景色 (Dark Blue) */
-            --text-color-dark: #2C3E50;
-            --text-color-light: #F4F7FB;
-            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
-            --accent-color: #FFC107; /* 星の色 */
+            --primary-color: #BB86FC; /* メインアクセント (紫) */
+            --secondary-color: #03DAC6; /* サブアクセント (シアン) */
+            --background-color: #121212; /* メイン背景 (濃いグレー) */
+            --card-color: #1F1F1F; /* カード/要素背景 (少し明るい濃いグレー) */
+            --detail-bg-color: #2D2D2D; /* 詳細パネルの背景色 (Dark Grey) */
+            --text-color-dark: #E0E0E0; /* 明るいテキスト */
+            --text-color-light: #F4F7FB; /* Heroセクション用 (白に近い) */
+            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.5); /* 濃い影 */
+            --shadow-hover: 0 8px 30px rgba(187, 134, 252, 0.4); /* ホバー時の影 */
+            --accent-color: #FFC107; /* 星の色 (Yellow) */
             --loading-color: #A9A9A9;
         }
 
@@ -35,6 +36,22 @@
             scroll-behavior: smooth;
         }
 
+        /* NEWバッジのスタイル */
+        .new-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #ff4757;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8em;
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
         .hero-section {
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/6845.png');
             background-size: cover; background-position: center; background-repeat: no-repeat;
@@ -42,17 +59,26 @@
         }
         .hero-section h1 { font-size: 3em; font-weight: 700; margin: 0 0 10px; }
         
-        /* --- ナビゲーションとハンバーガーメニューのスタイル (省略) --- */
         .navbar {
-            position: fixed; top: 20px; right: 20px; background-color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 10px 20px; border-radius: 30px;
+            position: fixed; top: 20px; right: 20px; 
+            background-color: rgba(31, 31, 31, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
+            padding: 10px 20px; border-radius: 30px;
             z-index: 1000; display: flex; align-items: center;
         }
-        .navbar a { color: var(--text-color-dark); text-decoration: none; margin: 0 15px; font-weight: 500; transition: color 0.3s ease; display: inline-block; }
+        .navbar a { 
+            color: var(--text-color-dark); 
+            text-decoration: none; margin: 0 15px; font-weight: 500; transition: color 0.3s ease; display: inline-block; 
+        }
         .navbar a:hover, .navbar a.active-nav { color: var(--primary-color); font-weight: 700; }
-        #language-switcher { padding: 8px 10px; border-radius: 20px; border: 1px solid #ddd; margin-left: 15px; cursor: pointer; font-size: 14px; }
+        #language-switcher { 
+            padding: 8px 10px; border-radius: 20px; 
+            border: 1px solid #444; 
+            background-color: #2b2b2b;
+            color: var(--text-color-dark);
+            margin-left: 15px; cursor: pointer; font-size: 14px; 
+        }
         .hamburger-menu { display: none; cursor: pointer; font-size: 1.5em; color: var(--text-color-dark); padding: 5px; }
-
 
         .filter-section {
             background-color: var(--card-color);
@@ -83,14 +109,15 @@
         }
         .filter-group select, .filter-group input[type="text"] {
             padding: 8px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             border-radius: 6px;
             font-size: 1em;
-            background-color: #f9f9f9;
+            background-color: #2b2b2b;
+            color: var(--text-color-dark);
         }
         #search-button {
             background-color: var(--primary-color);
-            color: white;
+            color: #121212;
             border: none;
             padding: 10px 20px;
             border-radius: 6px;
@@ -100,7 +127,7 @@
             align-self: flex-end;
         }
         #search-button:hover {
-            background-color: #4c4687;
+            background-color: #D6A4FF;
         }
         
         .container {
@@ -112,7 +139,6 @@
         #loading-message {
             text-align: center;
             padding: 50px;
-            font-size: 1.2em;
             color: var(--secondary-color);
         }
 
@@ -125,8 +151,8 @@
             flex-wrap: wrap;
         }
         .page-btn {
-            background-color: var(--card-color);
-            border: 1px solid #ddd;
+            background-color: #2b2b2b;
+            border: 1px solid #444;
             color: var(--text-color-dark);
             padding: 8px 15px;
             border-radius: 6px;
@@ -134,12 +160,16 @@
             transition: background-color 0.3s;
             font-weight: 500;
         }
-        .page-btn:hover:not(.active) {
-            background-color: #e9e9e9;
+        .page-btn:hover:not(.active):not(:disabled) {
+            background-color: #1F1F1F;
+        }
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
         }
         .page-btn.active {
             background-color: var(--primary-color);
-            color: white;
+            color: #121212;
             border-color: var(--primary-color);
             cursor: default;
         }
@@ -148,11 +178,9 @@
             color: var(--primary-color);
         }
         
-        /* ★★★ グリッド形式のスタイル ★★★ */
-        
         #level-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* デフォルト3列 */
+            grid-template-columns: repeat(3, 1fr);
             gap: 25px;
             margin-top: 20px;
         }
@@ -173,15 +201,13 @@
             box-shadow: var(--shadow-hover);
         }
         
-        /* カードの表示エリア（画像とオーバーレイ） */
         .card-display {
             position: relative;
-            padding-top: 100%; /* アスペクト比 1:1 */
+            padding-top: 100%;
             width: 100%;
             flex-shrink: 0;
         }
         
-        /* 画像背景 */
         .card-thumbnail-bg {
             width: 100%;
             height: 100%;
@@ -197,16 +223,15 @@
              filter: brightness(1.1);
         }
 
-        /* --- 追加: ゲームタイプアイコンのコンテナ --- */
         .card-type-icon {
-            position: absolute; /* 親要素 .card-display に対して絶対配置 */
-            top: 10px; /* 右上 */
+            position: absolute; 
+            top: 10px; 
             right: 10px;
-            z-index: 15; /* オーバーレイより上 */
-            width: 40px; /* アイコンの大きさ */
+            z-index: 15; 
+            width: 40px; 
             height: 40px;
             border-radius: 50%;
-            background-color: var(--primary-color); /* 背景色 */
+            background-color: var(--primary-color); 
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
@@ -216,15 +241,12 @@
         .level-grid-card:hover .card-type-icon {
             transform: scale(1.1);
         }
-        /* 画像アイコン用のスタイル変更 */
         .card-type-icon img {
-            width: 70%; /* アイコン画像がコンテナに収まるように */
+            width: 70%; 
             height: 70%;
-            object-fit: contain; /* アスペクト比を維持して収める */
+            object-fit: contain; 
         }
-        /* ------------------------------------------- */
 
-        /* グラデーションオーバーレイと情報 (カードを閉じた状態) */
         .card-info-overlay {
             position: absolute;
             bottom: 0;
@@ -235,7 +257,6 @@
             color: var(--text-color-light); 
             z-index: 10;
             transition: opacity 0.3s ease;
-            /* グラデーション: 透明 -> 半透明の濃い色 */
             background: linear-gradient(
                 to top,
                 rgba(0, 0, 0, 0.85) 0%,
@@ -277,7 +298,6 @@
              margin-right: 5px;
         }
 
-        /* --- 追加: 公開日のスタイル --- */
         .overlay-date {
             font-size: 0.8em;
             font-weight: 500;
@@ -285,9 +305,7 @@
             color: rgba(255, 255, 255, 0.7);
             text-align: right;
         }
-        /* --------------------------- */
         
-        /* ★★★ 詳細セクションのスタイリッシュ化とモーダル表示への変更 ★★★ */
         #modal-backdrop {
             position: fixed;
             top: 0;
@@ -306,35 +324,33 @@
         }
 
         .card-details { 
-            position: fixed; /* 画面に固定 */
+            position: fixed; 
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.9); /* 中央配置 + 登場アニメーションのための縮小 */
+            transform: translate(-50%, -50%) scale(0.9); 
             width: 90%; 
-            max-width: 800px; /* 最大幅を少し広げた */
+            max-width: 800px; 
             height: auto; 
-            max-height: 90vh; /* 最大高さをビューポートの90%に制限 */
+            max-height: 90vh; 
             padding: 30px; 
             box-sizing: border-box;
             opacity: 0; 
             visibility: hidden; 
             transition: opacity 0.4s ease, visibility 0.4s ease, transform 0.4s ease;
             background-color: var(--detail-bg-color);
-            color: var(--text-color-light); 
+            color: var(--text-color-dark); 
             border-radius: 12px;
             overflow-y: auto; 
             z-index: 2000; 
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5); 
         }
         
-        /* モーダル表示時 */
         .card-details.active-modal { 
             opacity: 1; 
             visibility: visible;
-            transform: translate(-50%, -50%) scale(1); /* 中央配置 */
+            transform: translate(-50%, -50%) scale(1); 
         }
         
-        /* モーダルヘッダー */
         .modal-header {
             display: flex;
             align-items: center;
@@ -356,7 +372,7 @@
             font-size: 1.8em;
             font-weight: 700;
             margin: 0;
-            color: var(--text-color-light);
+            color: var(--text-color-dark);
         }
         .modal-info p {
             font-size: 1em;
@@ -374,52 +390,47 @@
             display: flex;
             align-items: center;
             font-weight: 600;
-            color: var(--text-color-light);
+            color: var(--text-color-dark);
         }
-        /* モーダル内のアイコンにはFont Awesomeを使用するため、iタグのスタイルを維持 */
         .modal-stats i {
             margin-right: 5px;
             color: var(--accent-color);
         }
-        /* モーダル内のゲームタイプ画像アイコン用 */
         .modal-stats span.game-type-icon img {
-            width: 20px; /* モーダル内のアイコンサイズ調整 */
+            width: 20px; 
             height: 20px;
             margin-right: 5px;
             object-fit: contain;
         }
 
-
-        /* 説明ボックス */
         .description-box { 
             background-color: rgba(255, 255, 255, 0.05); 
             padding: 15px; 
             border-radius: 8px; 
             margin-bottom: 15px; 
-            font-size: 0.9em; /* 少し大きくした */
+            font-size: 0.9em; 
             white-space: pre-wrap; 
-            color: var(--text-color-light); 
+            color: var(--text-color-dark); 
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .description-box strong { 
             font-weight: 600; 
             display: block; 
             margin-bottom: 5px; 
-            color: var(--accent-color); 
+            color: var(--secondary-color);
             font-size: 1em;
         }
         .description-box p { margin: 0; }
 
         .detail-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* 最小幅を広げた */
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
             gap: 15px; 
             margin-top: 20px;
         }
         
-        /* 詳細アイテム */
         .detail-item { 
-            padding: 12px 15px; /* パディングを増やした */
+            padding: 12px 15px; 
             border-radius: 6px; 
             background-color: rgba(255, 255, 255, 0.1); 
             border-left: 3px solid var(--primary-color); 
@@ -440,19 +451,17 @@
         }
         .detail-item span { 
             display: block; 
-            color: var(--text-color-light); 
+            color: var(--text-color-dark); 
             font-weight: 700; 
-            font-size: 1em; /* フォントを少し大きくした */
+            font-size: 1em; 
             margin-top: 3px;
         }
         .detail-item span.wr-holder { 
-            color: var(--accent-color); 
+            color: var(--secondary-color);
         }
-        /* --- スタイリッシュ化ここまで --- */
         
-        /* ★★★ フッタースタイルを追加 ★★★ */
         .footer-section {
-            background-color: var(--text-color-dark); 
+            background-color: #000000; 
             color: var(--text-color-light); 
             padding: 30px 20px; 
             text-align: center;
@@ -475,9 +484,7 @@
         .social-icons a:hover {
             color: var(--accent-color); 
         }
-        /* --- フッタースタイル追加ここまで --- */
         
-        /* --- モバイル対応の修正部分 --- */
         @media (max-width: 1100px) {
             #level-grid {
                 grid-template-columns: repeat(2, 1fr); 
@@ -500,8 +507,8 @@
                 color: var(--text-color-dark); 
             }
             .navbar.open {
-                background-color: rgba(255, 255, 255, 0.9);
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                background-color: rgba(31, 31, 31, 0.95);
+                box-shadow: 0 2px 5px rgba(0,0,0,0.5);
                 padding: 20px;
                 border-radius: 12px;
                 display: flex;
@@ -534,7 +541,6 @@
                 grid-template-columns: 1fr; 
             }
         }
-        /* --- 修正部分ここまで --- */
     </style>
 </head>
 <body>
@@ -561,7 +567,7 @@
         <section class="filter-section">
             <div class="filter-row">
                 <div class="filter-group" style="flex-grow: 1;">
-                    <label for="search-text" id="label-search-text">コース。作者名検索</label>
+                    <label for="search-text" id="label-search-text">コース, 作者名検索</label>
                     <input type="text" id="search-text" placeholder="例: 猫ケーキ">
                 </div>
                 <div class="filter-group">
@@ -599,13 +605,11 @@
             <div id="loading-message">
                 <i class="fas fa-spinner fa-spin"></i> データをロード中です...
             </div>
-            <div id="level-grid">
-                </div>
+            <div id="level-grid"></div>
         </section>
         
         <div class="pagination-container">
-            <div class="pagination" id="pagination">
-            </div>
+            <div class="pagination" id="pagination"></div>
         </div>
 
     </main>
@@ -622,24 +626,19 @@
     <script>
         const API_BASE_URL = 'https://s.lolbeans.io/level-list?';
         const THUMBNAIL_BASE_URL = 'https://lolbeans.io/ui/level-thumbnails/';
-        
         const LEVELS_PER_PAGE = 12;
         
-        // --- 修正: ゲームタイプと画像アイコンのマッピング ---
         const LEVEL_TYPES = {
-            '-1': { ja: "すべて", en: "All", icon: "https://tanabesan.github.io/lolbeans/file/page/all.png" }, // 全体アイコンを追加
+            '-1': { ja: "すべて", en: "All", icon: "https://tanabesan.github.io/lolbeans/file/page/all.png" },
             '0': { ja: "サンドボックス", en: "Sandbox", icon: "https://tanabesan.github.io/lolbeans/file/page/sandbox.png" },
             '1': { ja: "タイムレース", en: "Timed Race", icon: "https://tanabesan.github.io/lolbeans/file/page/timed.png" },
             '2': { ja: "競争レース", en: "Competitive Race", icon: "https://tanabesan.github.io/lolbeans/file/page/competitive.png" },
             '3': { ja: "エリミネーション", en: "Elimination", icon: "https://tanabesan.github.io/lolbeans/file/page/elimination.png" }
         };
-        // ------------------------------------------------
 
         let currentLang = 'ja';
         let currentPage = 0;
         let maxPages = 0;
-
-        // グローバル変数で現在開いている詳細要素を保持
         let activeDetailsElement = null;
 
         const translations = {
@@ -647,11 +646,10 @@
                 mainPage: "メインページ", fileLibrary: "ファイルライブラリ", levelList: "コミュ一覧", faq: "よくある質問", contact: "お問い合わせ",
                 heroTitle: "コミュ一覧", heroSubtitle: "ユーザーが作成したLOLBeansのカスタムマップ",
                 loading: "データをロード中です...",
-                searchTextLabel: "コース。作者名検索", sortTypeLabel: "並び替え", filterTypeLabel: "コースの種類", filterFinishLabel: "クリア率", searchButton: "検索",
+                searchTextLabel: "コース, 作者名検索", sortTypeLabel: "並び替え", filterTypeLabel: "コースの種類", filterFinishLabel: "クリア率", searchButton: "検索",
                 sort0: "ベスト評価", sort1: "新しい順", sort2: "トレンド",
                 filterTypeM1: "すべて", filterType0: "サンドボックス", filterType1: "タイムレース", filterType2: "競争レース", filterType3: "エリミネーション",
                 filterFinish0: "すべて", filterFinish1: "低い (<30%)", filterFinish2: "普通 (30%〜70%)", filterFinish3: "高い (>70%)",
-                
                 author: "作者", description: "説明", votes: "投票数", rating: "平均評価", finishPercent: "クリア率", starts: "プレイ回数", distinctPlayers: "総プレイヤー数",
                 averageFinishTime: "平均クリア時間", wr: "WR (世界記録)", wrHolder: "WR保持者", wrDate: "WR達成日", date: "公開日",
                 pageInfo: (current, max) => `${current + 1} / ${max}`,
@@ -666,7 +664,6 @@
                 sort0: "Best Rated", sort1: "New", sort2: "Trending",
                 filterTypeM1: "All", filterType0: "Sandbox", filterType1: "Timed Race", filterType2: "Competitive Race", filterType3: "Elimination",
                 filterFinish0: "All", filterFinish1: "Low (<30%)", filterFinish2: "Average (30% to 70%)", filterFinish3: "High (>70%)",
-                
                 author: "Author", description: "Description", votes: "Votes", rating: "Avg. Rating", finishPercent: "Finish %", starts: "Starts", distinctPlayers: "Distinct Players",
                 averageFinishTime: "Avg. Finish Time", wr: "WR (World Record)", wrHolder: "WR Holder", wrDate: "WR Date", date: "Publish Date",
                 pageInfo: (current, max) => `Page ${current + 1} of ${max}`,
@@ -709,7 +706,6 @@
             params.append('t', sortType);
             params.append('ft', filterType);
             params.append('ff', filterFinish);
-            
             params.append('m', LEVELS_PER_PAGE); 
 
             if (searchText) {
@@ -736,9 +732,7 @@
             const langData = translations[currentLang];
             const item = document.createElement('div');
             item.className = 'detail-item';
-            
             const displayValue = isWrHolder ? value : (key === 'starts' || key === 'votes' || key === 'distinctPlayers' ? value.toLocaleString() : value);
-            
             item.innerHTML = `
                 <strong><i class="${getDetailIcon(key)}"></i>${langData[key]}</strong>
                 <span class="${isWrHolder ? 'wr-holder' : ''}">${displayValue}</span>
@@ -746,69 +740,54 @@
             return item;
         };
 
-        // モーダルを閉じる関数
         const closeModal = () => {
             const backdrop = document.getElementById('modal-backdrop');
-            
             if (activeDetailsElement) {
-                // 元のカード要素を見つける (data属性に格納されているIDを使用)
                 const cardId = activeDetailsElement.dataset.cardId;
                 const originalCard = document.querySelector(`.level-grid-card[data-card-id="${cardId}"]`);
                 const cardDisplay = originalCard ? originalCard.querySelector('.card-display') : null;
-
-                // 1. 詳細パネルの非表示クラスを削除
                 activeDetailsElement.classList.remove('active-modal');
-                
-                // 2. 詳細パネルを元のDOM位置に戻す (親要素が存在する場合)
                 if (cardDisplay) {
-                    // **ここで確実に元の場所に戻します**
                     cardDisplay.appendChild(activeDetailsElement);
                 }
-                
-                // 3. activeDetailsElementをリセット
                 activeDetailsElement = null;
-
-                // 4. 開いているカードのクラスを削除
                 if (originalCard) {
                     originalCard.classList.remove('open');
                 }
             }
-
-            // 5. モーダル背景を非表示
             if (backdrop) {
                 backdrop.classList.remove('active');
             }
-            // 6. 背景のスクロール制限を解除
             document.body.style.overflow = ''; 
         };
 
         const createLevelCard = (level, index) => {
             const langData = translations[currentLang];
+            
+            // --- NEWバッジ判定: 30日以内かどうか ---
+            const publishDateObj = new Date(level.date);
+            const now = new Date();
+            const diffTime = Math.abs(now - publishDateObj);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const isNew = diffDays <= 30;
+
             const card = document.createElement('div');
             card.className = 'level-grid-card';
-            const cardId = `card-${level.levelId}-${index}`; // ユニークなIDを生成
+            const cardId = `card-${level.levelId}-${index}`;
             card.dataset.cardId = cardId;
             const description = level.description || langData.noDescription;
-            
             const safeRating = level.rating === null || level.rating === undefined ? 0 : level.rating;
             const finishPercentage = level.finishPercent === null || level.finishPercent === undefined ? 0 : (level.finishPercent * 100);
             const thumbnailUrl = `${THUMBNAIL_BASE_URL}${level.levelId}.png`;
-
-            // --- 修正・追加: ゲームタイプと公開日を取得 ---
-            const levelType = LEVEL_TYPES[level.type] || LEVEL_TYPES['0']; // typeが不明な場合はSandbox
+            const levelType = LEVEL_TYPES[level.type] || LEVEL_TYPES['0'];
             const typeName = levelType[currentLang];
-            const typeIconUrl = levelType.icon; // 画像URLとして取得
+            const typeIconUrl = levelType.icon;
             const publishDate = formatDate(level.date, currentLang);
-            // ------------------------------------------------
 
-            // HTML構造はそのまま維持し、CSSとJSでモーダル化
             card.innerHTML = `
                 <div class="card-display">
-                    <div class="card-thumbnail-bg" 
-                         style="background-image: url('${thumbnailUrl}');"
-                         onerror="this.style.backgroundImage='url(https://via.placeholder.com/300?text=LOLBeans+Thumbnail)';">
-                    </div>
-                    
+                    ${isNew ? '<div class="new-badge">NEW</div>' : ''}
+                    <div class="card-thumbnail-bg" style="background-image: url('${thumbnailUrl}');" onerror="this.style.backgroundImage='url(https://via.placeholder.com/300?text=LOLBeans+Thumbnail)';"></div>
                     <div class="card-type-icon" title="${typeName}">
                         <img src="${typeIconUrl}" alt="${typeName} icon">
                     </div>
@@ -816,16 +795,11 @@
                         <h3 class="overlay-title">${level.name}</h3>
                         <p class="overlay-author">${level.author || 'N/A'}</p>
                         <div class="overlay-stats">
-                            <span class="overlay-stat rating">
-                                <i class="fas fa-star"></i> ${safeRating.toFixed(2)}
-                            </span>
-                            <span class="overlay-stat finish">
-                                <i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%
-                            </span>
+                            <span class="overlay-stat rating"><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
+                            <span class="overlay-stat finish"><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
                         </div>
                         <p class="overlay-date">${langData.date}: ${publishDate}</p>
-                        </div>
-
+                    </div>
                     <div class="card-details" data-card-id="${cardId}">
                         <div class="modal-header">
                             <div class="modal-thumbnail" style="background-image: url('${thumbnailUrl}');"></div>
@@ -835,22 +809,19 @@
                                 <div class="modal-stats">
                                     <span><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
                                     <span><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
-                                    <span class="game-type-icon" title="${langData.filterTypeLabel}"><img src="${typeIconUrl}" alt="${typeName} icon"> ${typeName}</span>
-                                    </div>
+                                    <span class="game-type-icon"><img src="${typeIconUrl}" alt="icon"> ${typeName}</span>
+                                </div>
                             </div>
                         </div>
                         <div class="description-box">
                             <strong><i class="fas fa-align-left"></i> ${langData.description}:</strong>
                             <p>${description}</p>
                         </div>
-                        <div class="detail-grid">
-                        </div>
+                        <div class="detail-grid"></div>
                     </div>
-
                 </div>
             `;
             
-            // 詳細アイテムの追加
             const detailGrid = card.querySelector('.detail-grid');
             detailGrid.appendChild(createDetailItem('wr', formatTime(level.wr), true));
             detailGrid.appendChild(createDetailItem('wrHolder', level.wrHolder || 'N/A', false));
@@ -858,91 +829,76 @@
             detailGrid.appendChild(createDetailItem('starts', level.starts, false));
             detailGrid.appendChild(createDetailItem('votes', level.votes, false));
             detailGrid.appendChild(createDetailItem('distinctPlayers', level.distinctPlayers, false));
-            // --- 修正・追加: 公開日表示の項目をdetail-gridに含める ---
-            detailGrid.appendChild(createDetailItem('date', publishDate, false)); 
-            // ---------------------------------------------------------
-
+            detailGrid.appendChild(createDetailItem('date', publishDate, false));
 
             card.querySelector('.card-display').addEventListener('click', (e) => {
                 const detailsElement = card.querySelector('.card-details');
                 const backdrop = document.getElementById('modal-backdrop');
-
-                // 既に別のモーダルが開いている場合は閉じる
-                if (activeDetailsElement && activeDetailsElement !== detailsElement) {
-                    closeModal();
-                }
-
-                // モーダルが既に開いている場合は閉じる (トグル)
+                if (activeDetailsElement && activeDetailsElement !== detailsElement) closeModal();
                 if (card.classList.contains('open')) {
                     closeModal();
                     return;
                 }
-                
-                // モーダルとして詳細を表示する処理
-                
-                // 1. 詳細要素をbody直下に移動 (fixedで画面中央に表示するため)
-                //    - detailsElementには、生成時にユニークなcardIdが設定済み
                 document.body.appendChild(detailsElement);
-                activeDetailsElement = detailsElement; // グローバル変数にセット
-                
-                // 2. クラスの追加
+                activeDetailsElement = detailsElement;
                 card.classList.add('open');
                 detailsElement.classList.add('active-modal');
                 backdrop.classList.add('active');
-                
-                // 3. 背景のスクロールを禁止
                 document.body.style.overflow = 'hidden';
             });
-
             return card;
         };
-
 
         const renderPagination = () => {
             const paginationContainer = document.getElementById('pagination');
             paginationContainer.innerHTML = '';
             const langData = translations[currentLang];
+            const safeMaxPages = isNaN(maxPages) || maxPages === null ? 1 : maxPages;
+            if (safeMaxPages <= 1) return;
 
-            if (maxPages <= 1) return;
+            // 最初へ
+            const firstBtn = document.createElement('button');
+            firstBtn.className = 'page-btn';
+            firstBtn.innerHTML = '<i class="fas fa-angle-double-left"></i>';
+            firstBtn.disabled = currentPage === 0;
+            firstBtn.onclick = () => { fetchAndRenderLevels(0); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+            paginationContainer.appendChild(firstBtn);
 
+            // 前へ
             const prevBtn = document.createElement('button');
             prevBtn.className = 'page-btn';
             prevBtn.textContent = langData.prev;
             prevBtn.disabled = currentPage === 0;
-            prevBtn.addEventListener('click', () => {
-                if (currentPage > 0) {
-                    fetchAndRenderLevels(currentPage - 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            });
+            prevBtn.onclick = () => { fetchAndRenderLevels(currentPage - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); };
             paginationContainer.appendChild(prevBtn);
 
+            // ページ情報
             const pageInfo = document.createElement('span');
             pageInfo.className = 'page-info';
-            const safeMaxPages = isNaN(maxPages) || maxPages === null ? 1 : maxPages;
             pageInfo.textContent = langData.pageInfo(currentPage, safeMaxPages);
             paginationContainer.appendChild(pageInfo);
 
+            // 次へ
             const nextBtn = document.createElement('button');
             nextBtn.className = 'page-btn';
             nextBtn.textContent = langData.next;
             nextBtn.disabled = currentPage >= safeMaxPages - 1;
-            nextBtn.addEventListener('click', () => {
-                if (currentPage < safeMaxPages - 1) {
-                    fetchAndRenderLevels(currentPage + 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            });
+            nextBtn.onclick = () => { fetchAndRenderLevels(currentPage + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); };
             paginationContainer.appendChild(nextBtn);
-        };
 
+            // 最後へ
+            const lastBtn = document.createElement('button');
+            lastBtn.className = 'page-btn';
+            lastBtn.innerHTML = '<i class="fas fa-angle-double-right"></i>';
+            lastBtn.disabled = currentPage >= safeMaxPages - 1;
+            lastBtn.onclick = () => { fetchAndRenderLevels(safeMaxPages - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+            paginationContainer.appendChild(lastBtn);
+        };
 
         const fetchAndRenderLevels = async (pageIndex = 0) => {
             const container = document.getElementById('level-grid'); 
             let loading = document.getElementById('loading-message');
             const langData = translations[currentLang];
-            
-            // 1. ロード開始: ロードメッセージを表示し、コンテナをクリア
             if (!loading) {
                 loading = document.createElement('div');
                 loading.id = 'loading-message';
@@ -952,77 +908,50 @@
             loading.style.display = 'block';
             container.innerHTML = ''; 
             document.getElementById('pagination').innerHTML = '';
-            
-            // モーダルがもし開いていたら閉じる
             closeModal();
-            
             try {
                 const apiUrl = buildApiUrl(pageIndex);
                 const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
-                
                 currentPage = pageIndex;
                 maxPages = data.m; 
-                
                 if (data && data.l && data.l.length > 0) {
-                    // 2a. 成功時: カードをレンダリングし、ローディングメッセージを非表示にする
                     data.l.forEach((level, index) => {
-                        const card = createLevelCard(level, index);
-                        container.appendChild(card);
+                        container.appendChild(createLevelCard(level, index));
                     });
                     renderPagination();
                     loading.style.display = 'none'; 
-
                 } else {
-                    // 2b. データが空の場合: メッセージを更新し、表示したままにする
-                    container.innerHTML = ''; 
                     loading.innerHTML = `${langData.noLevels}`;
-                    loading.style.display = 'block';
-                    document.getElementById('pagination').innerHTML = '';
                 }
-
             } catch (error) {
-                // 3. エラー時: エラーメッセージを表示したままにする
-                container.innerHTML = '';
                 loading.innerHTML = `${langData.dataError} (${error.message})`;
-                loading.style.display = 'block';
-                document.getElementById('pagination').innerHTML = '';
             }
         };
 
         const updateFilterOptions = (lang) => {
             const langData = translations[lang];
-            
             document.getElementById('label-search-text').textContent = langData.searchTextLabel;
             document.getElementById('label-sort-type').textContent = langData.sortTypeLabel;
             document.getElementById('label-filter-type').textContent = langData.filterTypeLabel;
             document.getElementById('label-filter-finish').textContent = langData.filterFinishLabel;
             document.getElementById('search-button').innerHTML = `<i class="fas fa-search"></i> ${langData.searchButton}`;
-            
-            document.querySelector('#sort-type option[value="0"]').textContent = langData.sort0;
-            document.querySelector('#sort-type option[value="1"]').textContent = langData.sort1;
-            document.querySelector('#sort-type option[value="2"]').textContent = langData.sort2;
-
-            document.querySelector('#filter-type option[value="-1"]').textContent = langData.filterTypeM1;
-            document.querySelector('#filter-type option[value="0"]').textContent = langData.filterType0;
-            document.querySelector('#filter-type option[value="1"]').textContent = langData.filterType1;
-            document.querySelector('#filter-type option[value="2"]').textContent = langData.filterType2;
-            document.querySelector('#filter-type option[value="3"]').textContent = langData.filterType3;
-
-            document.querySelector('#filter-finish option[value="0"]').textContent = langData.filterFinish0;
-            document.querySelector('#filter-finish option[value="1"]').textContent = langData.filterFinish1;
-            document.querySelector('#filter-finish option[value="2"]').textContent = langData.filterFinish2;
-            document.querySelector('#filter-finish option[value="3"]').textContent = langData.filterFinish3;
+            ['sort-type', 'filter-type', 'filter-finish'].forEach(id => {
+                const select = document.getElementById(id);
+                for (let opt of select.options) {
+                    const key = id === 'sort-type' ? `sort${opt.value}` : 
+                                id === 'filter-type' ? `filterType${opt.value === '-1' ? 'M1' : opt.value}` : 
+                                `filterFinish${opt.value}`;
+                    if (langData[key]) opt.textContent = langData[key];
+                }
+            });
         };
 
         const applyLanguage = (lang) => {
             currentLang = lang;
             localStorage.setItem('language', lang);
             const langData = translations[lang];
-
             document.getElementById('page-title').textContent = `LOL.ex - ${langData.levelList}`;
             document.getElementById('nav-main-page').textContent = langData.mainPage;
             document.getElementById('nav-file-library').textContent = langData.fileLibrary;
@@ -1031,73 +960,28 @@
             document.getElementById('nav-contact').textContent = langData.contact;
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
-            
-            const loading = document.getElementById('loading-message');
-            if (loading) {
-                 loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
-            }
-
             document.getElementById('language-switcher').value = lang;
-
             updateFilterOptions(lang);
-            
             fetchAndRenderLevels(currentPage);
         };
 
-
         document.addEventListener('DOMContentLoaded', () => {
-            // モーダル背景要素の作成と追加
             let modalBackdrop = document.getElementById('modal-backdrop');
             if (!modalBackdrop) {
                 modalBackdrop = document.createElement('div');
                 modalBackdrop.id = 'modal-backdrop';
                 document.body.appendChild(modalBackdrop);
             }
-            // モーダルを閉じるイベントリスナーをバックドロップに追加
             modalBackdrop.addEventListener('click', closeModal);
-            
-            // ESCキーでモーダルを閉じる
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && activeDetailsElement) {
-                    closeModal();
-                }
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && activeDetailsElement) closeModal(); });
+            applyLanguage(localStorage.getItem('language') || 'ja'); 
+            document.getElementById('search-button').addEventListener('click', () => fetchAndRenderLevels(0));
+            document.getElementById('search-text').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchAndRenderLevels(0); });
+            ['sort-type', 'filter-type', 'filter-finish'].forEach(id => {
+                document.getElementById(id).addEventListener('change', () => fetchAndRenderLevels(0));
             });
-
-            const savedLang = localStorage.getItem('language') || 'ja';
-            applyLanguage(savedLang); 
-
-            document.getElementById('search-button').addEventListener('click', () => {
-                fetchAndRenderLevels(0);
-            });
-
-            document.getElementById('search-text').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    fetchAndRenderLevels(0);
-                }
-            });
-
-            document.getElementById('sort-type').addEventListener('change', () => {
-                fetchAndRenderLevels(0);
-            });
-            document.getElementById('filter-type').addEventListener('change', () => {
-                fetchAndRenderLevels(0);
-            });
-            document.getElementById('filter-finish').addEventListener('change', () => {
-                fetchAndRenderLevels(0);
-            });
-            
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            const navbar = document.querySelector('.navbar');
-            
-            hamburgerIcon.addEventListener('click', () => {
-                navbar.classList.toggle('open');
-            });
-            
-            const languageSwitcher = document.getElementById('language-switcher');
-            languageSwitcher.addEventListener('change', (event) => {
-                applyLanguage(event.target.value);
-            });
+            document.getElementById('hamburger-icon').addEventListener('click', () => document.querySelector('.navbar').classList.toggle('open'));
+            document.getElementById('language-switcher').addEventListener('change', (e) => applyLanguage(e.target.value));
         });
     </script>
 </body>

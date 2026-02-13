@@ -130,6 +130,24 @@
             background-color: #D6A4FF;
         }
         
+        /* スコア表示切替ボタン */
+        #toggle-raw-btn {
+            background-color: #2b2b2b;
+            color: var(--text-color-dark);
+            border: 1px solid #444;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            align-self: flex-end;
+        }
+        #toggle-raw-btn:hover, #toggle-raw-btn.active {
+            background-color: var(--secondary-color);
+            color: #121212;
+            border-color: var(--secondary-color);
+        }
+
         .container {
             max-width: 1200px; 
             margin: 0 auto;
@@ -146,7 +164,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
             margin-top: 30px;
             flex-wrap: wrap;
         }
@@ -154,11 +172,16 @@
             background-color: #2b2b2b;
             border: 1px solid #444;
             color: var(--text-color-dark);
-            padding: 8px 15px;
+            min-width: 35px;
+            height: 35px;
+            padding: 0 10px;
             border-radius: 6px;
             cursor: pointer;
             transition: background-color 0.3s;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .page-btn:hover:not(.active):not(:disabled) {
             background-color: #1F1F1F;
@@ -172,10 +195,6 @@
             color: #121212;
             border-color: var(--primary-color);
             cursor: default;
-        }
-        .page-info {
-            font-weight: 600;
-            color: var(--primary-color);
         }
         
         #level-grid {
@@ -231,7 +250,8 @@
             width: 40px; 
             height: 40px;
             border-radius: 50%;
-            background-color: var(--primary-color); 
+            /* 紫が見づらいため、Secondary (Cyan) に変更 */
+            background-color: var(--secondary-color); 
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
@@ -519,6 +539,7 @@
             .filter-row { flex-direction: column; gap: 10px; }
             .filter-group { width: 100%; min-width: unset; }
             #search-button { width: 100%; align-self: center; }
+            #toggle-raw-btn { width: 100%; align-self: center; margin-left: 0; }
             
             #level-grid {
                 grid-template-columns: 1fr;
@@ -598,6 +619,7 @@
                     </select>
                 </div>
                 <button id="search-button"><i class="fas fa-search"></i> 検索</button>
+                <button id="toggle-raw-btn"><i class="fas fa-calculator"></i> <span id="raw-btn-text">詳細スコア</span></button>
             </div>
         </section>
 
@@ -640,6 +662,8 @@
         let currentPage = 0;
         let maxPages = 0;
         let activeDetailsElement = null;
+        let showRawRating = false; // 詳細スコア表示用フラグ
+        let currentLevelData = []; // 現在のページデータを保持
 
         const translations = {
             ja: {
@@ -647,6 +671,7 @@
                 heroTitle: "コミュ一覧", heroSubtitle: "ユーザーが作成したLOLBeansのカスタムマップ",
                 loading: "データをロード中です...",
                 searchTextLabel: "コース, 作者名検索", sortTypeLabel: "並び替え", filterTypeLabel: "コースの種類", filterFinishLabel: "クリア率", searchButton: "検索",
+                rawScoreBtn: "詳細スコア",
                 sort0: "ベスト評価", sort1: "新しい順", sort2: "トレンド",
                 filterTypeM1: "すべて", filterType0: "サンドボックス", filterType1: "タイムレース", filterType2: "競争レース", filterType3: "エリミネーション",
                 filterFinish0: "すべて", filterFinish1: "低い (<30%)", filterFinish2: "普通 (30%〜70%)", filterFinish3: "高い (>70%)",
@@ -661,6 +686,7 @@
                 heroTitle: "Custom Course List", heroSubtitle: "Latest custom maps for LOLBeans created and published by users.",
                 loading: "Loading data...",
                 searchTextLabel: "Search by Name", sortTypeLabel: "Sort By", filterTypeLabel: "Course Type", filterFinishLabel: "Finish %", searchButton: "Search",
+                rawScoreBtn: "Raw Score",
                 sort0: "Best Rated", sort1: "New", sort2: "Trending",
                 filterTypeM1: "All", filterType0: "Sandbox", filterType1: "Timed Race", filterType2: "Competitive Race", filterType3: "Elimination",
                 filterFinish0: "All", filterFinish1: "Low (<30%)", filterFinish2: "Average (30% to 70%)", filterFinish3: "High (>70%)",
@@ -777,6 +803,9 @@
             card.dataset.cardId = cardId;
             const description = level.description || langData.noDescription;
             const safeRating = level.rating === null || level.rating === undefined ? 0 : level.rating;
+            // 詳細スコア表示ロジック
+            const displayRating = showRawRating ? safeRating : safeRating.toFixed(2);
+            
             const finishPercentage = level.finishPercent === null || level.finishPercent === undefined ? 0 : (level.finishPercent * 100);
             const thumbnailUrl = `${THUMBNAIL_BASE_URL}${level.levelId}.png`;
             const levelType = LEVEL_TYPES[level.type] || LEVEL_TYPES['0'];
@@ -795,7 +824,7 @@
                         <h3 class="overlay-title">${level.name}</h3>
                         <p class="overlay-author">${level.author || 'N/A'}</p>
                         <div class="overlay-stats">
-                            <span class="overlay-stat rating"><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
+                            <span class="overlay-stat rating"><i class="fas fa-star"></i> ${displayRating}</span>
                             <span class="overlay-stat finish"><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
                         </div>
                         <p class="overlay-date">${langData.date}: ${publishDate}</p>
@@ -807,7 +836,7 @@
                                 <h2>${level.name}</h2>
                                 <p><i class="fas fa-user"></i> ${level.author || 'N/A'}</p>
                                 <div class="modal-stats">
-                                    <span><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
+                                    <span><i class="fas fa-star"></i> ${displayRating}</span>
                                     <span><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
                                     <span class="game-type-icon"><img src="${typeIconUrl}" alt="icon"> ${typeName}</span>
                                 </div>
@@ -872,11 +901,20 @@
             prevBtn.onclick = () => { fetchAndRenderLevels(currentPage - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); };
             paginationContainer.appendChild(prevBtn);
 
-            // ページ情報
-            const pageInfo = document.createElement('span');
-            pageInfo.className = 'page-info';
-            pageInfo.textContent = langData.pageInfo(currentPage, safeMaxPages);
-            paginationContainer.appendChild(pageInfo);
+            // 数字ボタン (Current +/- 3)
+            let startPage = Math.max(0, currentPage - 3);
+            let endPage = Math.min(safeMaxPages - 1, currentPage + 3);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'page-btn';
+                pageBtn.textContent = i + 1;
+                if (i === currentPage) {
+                    pageBtn.classList.add('active');
+                }
+                pageBtn.onclick = () => { fetchAndRenderLevels(i); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+                paginationContainer.appendChild(pageBtn);
+            }
 
             // 次へ
             const nextBtn = document.createElement('button');
@@ -895,10 +933,24 @@
             paginationContainer.appendChild(lastBtn);
         };
 
+        const renderGrid = () => {
+            const container = document.getElementById('level-grid');
+            const langData = translations[currentLang];
+            container.innerHTML = '';
+            if (currentLevelData && currentLevelData.length > 0) {
+                currentLevelData.forEach((level, index) => {
+                    container.appendChild(createLevelCard(level, index));
+                });
+            } else {
+                container.innerHTML = `<div style="text-align:center; width:100%; grid-column: 1/-1;">${langData.noLevels}</div>`;
+            }
+        };
+
         const fetchAndRenderLevels = async (pageIndex = 0) => {
-            const container = document.getElementById('level-grid'); 
             let loading = document.getElementById('loading-message');
             const langData = translations[currentLang];
+            const container = document.getElementById('level-grid');
+            
             if (!loading) {
                 loading = document.createElement('div');
                 loading.id = 'loading-message';
@@ -909,17 +961,19 @@
             container.innerHTML = ''; 
             document.getElementById('pagination').innerHTML = '';
             closeModal();
+            
             try {
                 const apiUrl = buildApiUrl(pageIndex);
                 const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
+                
                 currentPage = pageIndex;
                 maxPages = data.m; 
-                if (data && data.l && data.l.length > 0) {
-                    data.l.forEach((level, index) => {
-                        container.appendChild(createLevelCard(level, index));
-                    });
+                currentLevelData = data.l || []; // データを保存
+
+                if (currentLevelData.length > 0) {
+                    renderGrid(); // 保存したデータを使って描画
                     renderPagination();
                     loading.style.display = 'none'; 
                 } else {
@@ -937,6 +991,8 @@
             document.getElementById('label-filter-type').textContent = langData.filterTypeLabel;
             document.getElementById('label-filter-finish').textContent = langData.filterFinishLabel;
             document.getElementById('search-button').innerHTML = `<i class="fas fa-search"></i> ${langData.searchButton}`;
+            document.getElementById('raw-btn-text').textContent = langData.rawScoreBtn;
+
             ['sort-type', 'filter-type', 'filter-finish'].forEach(id => {
                 const select = document.getElementById(id);
                 for (let opt of select.options) {
@@ -962,6 +1018,7 @@
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
             document.getElementById('language-switcher').value = lang;
             updateFilterOptions(lang);
+            // 言語切り替え時に再取得
             fetchAndRenderLevels(currentPage);
         };
 
@@ -975,8 +1032,18 @@
             modalBackdrop.addEventListener('click', closeModal);
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && activeDetailsElement) closeModal(); });
             applyLanguage(localStorage.getItem('language') || 'ja'); 
+            
             document.getElementById('search-button').addEventListener('click', () => fetchAndRenderLevels(0));
             document.getElementById('search-text').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchAndRenderLevels(0); });
+            
+            // 詳細スコアボタンのイベントリスナー
+            document.getElementById('toggle-raw-btn').addEventListener('click', function() {
+                showRawRating = !showRawRating;
+                this.classList.toggle('active', showRawRating);
+                // 再フェッチせず、既存データで再描画
+                renderGrid();
+            });
+
             ['sort-type', 'filter-type', 'filter-finish'].forEach(id => {
                 document.getElementById(id).addEventListener('change', () => fetchAndRenderLevels(0));
             });

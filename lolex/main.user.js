@@ -92,7 +92,7 @@
         { id: 'silly-slide', keyword: "SillySlide", message: "🛝 Silly Slide 🛝", displayName: "Silly Slide" },
         { id: 'spiky-slopes', keyword: "SpikySlopes", message: "🔨 Spiky Slopes 🔨", displayName: "Spiky Slopes" },
         { id: 'splash-dash', keyword: "SplashDash", message: "🏊 Splash Dash 🏊", displayName: "Splash Dash" },
-        { id: 'tumble-town', keyword: "TumbleTown", message: "✋ Tunble Town ✋", displayName: "Tumble Town" },
+        { id: 'tumble-town', keyword: "TumbleTown", message: "✋ Tumble Town ✋", displayName: "Tumble Town" },
         { id: 'tricky-traps', keyword: "TrickyTraps", message: "🎁 Tricky Traps 🎁", displayName: "Tricky Traps" },
         { id: 'ufo-attack', keyword: 'UFOAttack', message: '🛸 UFO Attack 🛸', displayName: 'UFO Attack' }
     ];

@@ -796,7 +796,7 @@
                         <h3 class="overlay-title">${level.name}</h3>
                         <p class="overlay-author">${level.author || 'N/A'}</p>
                         <div class="overlay-stats">
-                            <span class="overlay-stat rating"><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
+                            <span class="overlay-stat rating"><i class="fas fa-star"></i> ${safeRating}</span>
                             <span class="overlay-stat finish"><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
                         </div>
                         <p class="overlay-date">${langData.date}: ${publishDate}</p>
@@ -808,7 +808,7 @@
                                 <h2>${level.name}</h2>
                                 <p><i class="fas fa-user"></i> ${level.author || 'N/A'}</p>
                                 <div class="modal-stats">
-                                    <span><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
+                                    <span><i class="fas fa-star"></i> ${safeRating}</span>
                                     <span><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
                                     <span class="game-type-icon"><img src="${typeIconUrl}" alt="icon"> ${typeName}</span>
                                 </div>

@@ -455,6 +455,7 @@
             font-weight: 700; 
             font-size: 1em; 
             margin-top: 3px;
+            word-break: break-all; /* 長い数値がはみ出さないように */
         }
         .detail-item span.wr-holder { 
             color: var(--secondary-color);
@@ -718,6 +719,7 @@
 
         const getDetailIcon = (key) => {
             const icons = {
+                rating: 'fas fa-star', // アイコンの追加
                 wr: 'fas fa-trophy',
                 wrHolder: 'fas fa-user-tag',
                 averageFinishTime: 'fas fa-stopwatch',
@@ -785,6 +787,7 @@
             const typeIconUrl = levelType.icon;
             const publishDate = formatDate(level.date, currentLang);
 
+            // 星の評価(rating)部分に title 属性を追加しています
             card.innerHTML = `
                 <div class="card-display">
                     ${isNew ? '<div class="new-badge">NEW</div>' : ''}
@@ -796,7 +799,7 @@
                         <h3 class="overlay-title">${level.name}</h3>
                         <p class="overlay-author">${level.author || 'N/A'}</p>
                         <div class="overlay-stats">
-                            <span class="overlay-stat rating"><i class="fas fa-star"></i> ${safeRating}</span>
+                            <span class="overlay-stat rating" title="${safeRating}"><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
                             <span class="overlay-stat finish"><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
                         </div>
                         <p class="overlay-date">${langData.date}: ${publishDate}</p>
@@ -808,7 +811,7 @@
                                 <h2>${level.name}</h2>
                                 <p><i class="fas fa-user"></i> ${level.author || 'N/A'}</p>
                                 <div class="modal-stats">
-                                    <span><i class="fas fa-star"></i> ${safeRating}</span>
+                                    <span title="${safeRating}"><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
                                     <span><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
                                     <span class="game-type-icon"><img src="${typeIconUrl}" alt="icon"> ${typeName}</span>
                                 </div>
@@ -824,6 +827,8 @@
             `;
             
             const detailGrid = card.querySelector('.detail-grid');
+            // 詳細グリッドにも、そのままの評価値を表示する項目を追加
+            detailGrid.appendChild(createDetailItem('rating', safeRating, false));
             detailGrid.appendChild(createDetailItem('wr', formatTime(level.wr), true));
             detailGrid.appendChild(createDetailItem('wrHolder', level.wrHolder || 'N/A', false));
             detailGrid.appendChild(createDetailItem('averageFinishTime', formatTime(level.averageFinishTime), false));

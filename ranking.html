@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LOLBeans — WR ランキング</title>
 <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -33,7 +34,7 @@ body.jp{font-family:var(--ffj)}
   0%{opacity:0;transform:translateY(0) scale(.5)}
   15%{opacity:.8}
   85%{opacity:.5}
-  100%{opacity:0;transform:translateY(-130px) scale(1.3)}
+  100%{opacity:0;transform:translateY(-95vh) scale(1.3)}
 }
 
 /* ── LANG TOGGLE ── */
@@ -65,11 +66,12 @@ header{position:relative;z-index:10;text-align:center;padding:3.2rem 1rem 1.4rem
 .s-pill .v{color:var(--acc);font-size:.9rem;font-weight:900}
 
 /* ── RANK LEGEND ── */
-.rank-legend-wrap{position:relative;z-index:10;max-width:920px;margin:0 auto 2rem;padding:0 1rem}
+.rank-legend-wrap{position:relative;z-index:10;max-width:100%;margin:0 auto 2rem;padding:0 1rem}
 .rl-head{font-family:var(--ffh);font-size:.72rem;letter-spacing:.4rem;color:var(--t3);text-align:center;text-transform:uppercase;margin-bottom:.8rem}
-.rank-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:.45rem}
+.rank-legend{display:flex;justify-content:flex-start;flex-wrap:nowrap;gap:.45rem;overflow-x:auto;padding-bottom:.4rem;scrollbar-width:thin;scrollbar-color:var(--line) transparent;justify-content:center}
+.rank-legend::-webkit-scrollbar{height:3px}.rank-legend::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
 .rl-item{display:flex;align-items:center;gap:.5rem;background:var(--card);border:1.5px solid var(--line);
-  border-radius:10px;padding:.35rem .8rem .35rem .4rem;cursor:default;transition:transform .18s,box-shadow .18s}
+  border-radius:10px;padding:.35rem .8rem .35rem .4rem;cursor:default;transition:transform .18s,box-shadow .18s;flex-shrink:0}
 .rl-item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .rl-icon{width:36px;height:44px;flex-shrink:0;object-fit:contain}
 .rl-name{display:block;font-weight:800;font-size:.73rem}
@@ -135,8 +137,9 @@ header{position:relative;z-index:10;text-align:center;padding:3.2rem 1rem 1.4rem
 .stpip{width:7px;height:7px;border-radius:50%;transition:transform .15s}
 .stpip.filled{box-shadow:0 0 4px var(--pc)}
 .stpip.empty{opacity:.2}
-.crown{font-size:.9rem;animation:cw 2.5s ease-in-out infinite}
-@keyframes cw{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg) scale(1.12)}}
+/* material icons */
+.ms{font-family:'Material Symbols Rounded';font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;
+  white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
 
 /* chips */
 .cats{display:flex;flex-wrap:wrap;gap:.28rem}
@@ -247,7 +250,62 @@ details[open] .calc-summary::after{transform:rotate(90deg)}
 .ct-desc{flex:1;color:var(--t1);font-size:.73rem}
 .ct-pts{font-family:var(--ffh);font-size:.82rem;color:var(--acc);font-weight:900;flex-shrink:0}
 .calc-note{font-size:.7rem;color:var(--t2);margin-top:.6rem;line-height:1.5;background:rgba(255,255,255,.03);border-radius:6px;padding:.5rem .7rem}
-@media(max-width:640px){.cc,.rt thead th.cc{display:none}.sbox input{width:155px}}
+
+/* ── MOBILE RANK LEGEND accordion ── */
+.rl-accordion{display:none} /* hidden on desktop */
+.rl-acc-summary{padding:.55rem 1rem;font-size:.8rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;
+  display:flex;align-items:center;gap:.5rem;user-select:none;background:var(--card);border:1.5px solid var(--line);border-radius:10px}
+.rl-acc-summary::-webkit-details-marker{display:none}
+.rl-acc-summary::after{content:'▶';margin-left:auto;font-size:.65rem;color:var(--t3);transition:transform .2s}
+details[open] .rl-acc-summary::after{transform:rotate(90deg)}
+.rl-acc-body{margin-top:.5rem;display:flex;flex-direction:column;gap:.35rem}
+.rl-acc-item{display:flex;align-items:center;gap:.6rem;background:var(--card);border:1.5px solid var(--line);
+  border-radius:10px;padding:.4rem .85rem .4rem .45rem}
+.rl-acc-icon{width:32px;height:38px;object-fit:contain;flex-shrink:0}
+.rl-acc-info{flex:1}
+.rl-acc-name{font-weight:800;font-size:.8rem}
+.rl-acc-range{font-size:.65rem;opacity:.5;font-weight:700}
+.rl-acc-sub{font-size:.62rem;color:var(--t2);margin-top:2px}
+
+/* ── MOBILE PT accordion ── */
+.pt-accordion{display:none}
+.pt-acc-summary{padding:.55rem 1rem;font-size:.8rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;
+  display:flex;align-items:center;gap:.5rem;user-select:none;background:var(--card);border:1.5px solid var(--line);border-radius:10px}
+.pt-acc-summary::-webkit-details-marker{display:none}
+.pt-acc-summary::after{content:'▶';margin-left:auto;font-size:.65rem;color:var(--t3);transition:transform .2s}
+details[open] .pt-acc-summary::after{transform:rotate(90deg)}
+.pt-acc-body{margin-top:.5rem;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:.6rem .9rem;display:flex;flex-direction:column;gap:.4rem}
+.pt-acc-row{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:700;color:var(--t1)}
+.pt-acc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.pt-acc-pts{font-family:var(--ffh);color:var(--acc);margin-left:auto;font-size:.82rem}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .cc,.rt thead th.cc{display:none}
+  .sbox input{width:150px}
+  /* hide desktop legend/pt, show accordion */
+  .rank-legend-wrap .rank-legend,.rank-legend-wrap .rl-head{display:none}
+  .rl-accordion{display:block}
+  .pt-legend{display:none}
+  .pt-accordion{display:block}
+  /* tighter controls */
+  .controls{gap:.45rem;padding:0 .75rem 1.4rem}
+  .cbtn{padding:.5rem .8rem;font-size:.75rem}
+  .rbtn{padding:.5rem 1rem;font-size:.8rem}
+  /* table row compact */
+  .rrow td{padding:.6rem .6rem}
+  .shi{width:36px;height:42px}
+  .shw{width:36px;height:42px}
+  .pname{font-size:.85rem}
+  .prank-lbl{font-size:.58rem}
+  .wrc{font-size:1rem}
+  .ptv{font-size:1.1rem}
+  /* stats bar */
+  .stats-bar{gap:.45rem;padding:.3rem .75rem 1.4rem}
+  .s-pill{padding:.35rem .85rem;font-size:.72rem}
+  /* header */
+  .logo-icon{font-size:2.2rem}
+}
 </style>
 </head>
 <body>
@@ -275,35 +333,46 @@ details[open] .calc-summary::after{transform:rotate(90deg)}
 
 <!-- STATS -->
 <div class="stats-bar">
-  <div class="s-pill"><span class="i18n" data-en="👑 Holders" data-jp="👑 ホルダー数">👑 ホルダー数</span><span class="v" id="sH">—</span></div>
-  <div class="s-pill"><span class="i18n" data-en="🎮 Total WRs" data-jp="🎮 WR 総数">🎮 WR 総数</span><span class="v" id="sL">—</span></div>
-  <div class="s-pill"><span class="i18n" data-en="🕒 Updated" data-jp="🕒 更新">🕒 更新</span><span class="v" id="sT">—</span></div>
+  <div class="s-pill"><span class="ms" style="font-size:1rem;color:var(--acc)">groups</span><span class="i18n" data-en="Holders" data-jp="ホルダー数">ホルダー数</span><span class="v" id="sH">—</span></div>
+  <div class="s-pill"><span class="ms" style="font-size:1rem;color:var(--acc)">emoji_events</span><span class="i18n" data-en="Total WRs" data-jp="WR 総数">WR 総数</span><span class="v" id="sL">—</span></div>
+  <div class="s-pill"><span class="ms" style="font-size:1rem;color:var(--acc)">schedule</span><span class="i18n" data-en="Updated" data-jp="更新">更新</span><span class="v" id="sT">—</span></div>
 </div>
 
-<!-- RANK LEGEND -->
+<!-- RANK LEGEND (desktop: pills / mobile: accordion) -->
 <div class="rank-legend-wrap">
   <div class="rl-head i18n" data-en="— Rank Tiers —" data-jp="— ランク一覧 —">— ランク一覧 —</div>
   <div class="rank-legend" id="rankLegend"></div>
+  <!-- mobile accordion -->
+  <details class="rl-accordion" id="rlAccordion">
+    <summary class="rl-acc-summary">
+      <span class="ms" style="font-size:1.1rem;color:var(--acc)">shield</span>
+      <span class="i18n" data-en="Rank Tiers" data-jp="ランク一覧">ランク一覧</span>
+    </summary>
+    <div class="rl-acc-body" id="rlAccBody"></div>
+  </details>
 </div>
 
 <!-- CONTROLS -->
 <div class="controls">
   <div class="sbox">
-    <span class="si">🔍</span>
+    <span class="ms si" style="font-size:1rem">search</span>
     <input type="text" id="si" placeholder="プレイヤーを検索…" oninput="onSearch()">
   </div>
   <button class="cbtn on" id="bPts" onclick="setSort('pts')">
-    <span class="i18n" data-en="⚡ Points" data-jp="⚡ ポイント順">⚡ ポイント順</span>
+    <span class="ms" style="font-size:.95rem;vertical-align:middle">bolt</span>
+    <span class="i18n" data-en="Points" data-jp="ポイント順">ポイント順</span>
   </button>
   <button class="cbtn" id="bWr" onclick="setSort('wr')">
-    <span class="i18n" data-en="🏅 WR Count" data-jp="🏅 WR 数順">🏅 WR 数順</span>
+    <span class="ms" style="font-size:.95rem;vertical-align:middle">workspace_premium</span>
+    <span class="i18n" data-en="WR Count" data-jp="WR 数順">WR 数順</span>
   </button>
   <button class="rbtn" id="rBtn" onclick="loadData()">
-    <span class="i18n" data-en="↻ Refresh" data-jp="↻ 更新">↻ 更新</span>
+    <span class="ms" style="font-size:.95rem;vertical-align:middle">refresh</span>
+    <span class="i18n" data-en="Refresh" data-jp="更新">更新</span>
   </button>
 </div>
 
-<!-- PT LEGEND -->
+<!-- PT LEGEND (desktop: pills / mobile: accordion) -->
 <div class="pt-legend">
   <div class="ptl"><div class="ptd" style="background:#ff5070"></div><span class="i18n" data-en="avg 1000+→15pt" data-jp="平均1000+→15pt">平均1000+→15pt</span></div>
   <div class="ptl"><div class="ptd" style="background:#ffc832"></div><span class="i18n" data-en="avg 750+→10pt" data-jp="平均750+→10pt">平均750+→10pt</span></div>
@@ -311,11 +380,27 @@ details[open] .calc-summary::after{transform:rotate(90deg)}
   <div class="ptl"><div class="ptd" style="background:#a564ff"></div><span class="i18n" data-en="avg 100+→2pt" data-jp="平均100+→2pt">平均100+→2pt</span></div>
   <div class="ptl"><div class="ptd" style="background:#3ce68c"></div><span class="i18n" data-en="under100→1pt" data-jp="100未満→1pt">100未満→1pt</span></div>
 </div>
+<!-- mobile PT accordion -->
+<div class="pt-accordion" style="position:relative;z-index:10;max-width:980px;margin:0 auto .8rem;padding:0 1rem">
+  <details>
+    <summary class="pt-acc-summary">
+      <span class="ms" style="font-size:1.1rem;color:var(--acc)">calculate</span>
+      <span class="i18n" data-en="Point System" data-jp="ポイント計算">ポイント計算</span>
+    </summary>
+    <div class="pt-acc-body">
+      <div class="pt-acc-row"><div class="pt-acc-dot" style="background:#ff5070"></div><span class="i18n" data-en="avg 1000+" data-jp="平均 1000+">平均 1000+</span><span class="pt-acc-pts">15pt</span></div>
+      <div class="pt-acc-row"><div class="pt-acc-dot" style="background:#ffc832"></div><span class="i18n" data-en="avg 750+" data-jp="平均 750+">平均 750+</span><span class="pt-acc-pts">10pt</span></div>
+      <div class="pt-acc-row"><div class="pt-acc-dot" style="background:#32dce8"></div><span class="i18n" data-en="avg 500+" data-jp="平均 500+">平均 500+</span><span class="pt-acc-pts">5pt</span></div>
+      <div class="pt-acc-row"><div class="pt-acc-dot" style="background:#a564ff"></div><span class="i18n" data-en="avg 100+" data-jp="平均 100+">平均 100+</span><span class="pt-acc-pts">2pt</span></div>
+      <div class="pt-acc-row"><div class="pt-acc-dot" style="background:#3ce68c"></div><span class="i18n" data-en="under 100" data-jp="100未満">100未満</span><span class="pt-acc-pts">1pt</span></div>
+    </div>
+  </details>
+</div>
 
 <!-- TABLE -->
 <div class="tw">
-  <div class="slbl i18n" data-en="✦ Champions Board ✦" data-jp="✦ チャンピオンボード ✦">✦ チャンピオンボード ✦</div>
-  <div id="tc"><div class="smsg"><span class="big">⏳</span><span class="i18n" data-en="Loading…" data-jp="読み込み中…">読み込み中…</span></div></div>
+  <div class="slbl i18n" data-en="— Champions Board —" data-jp="— チャンピオンボード —">— チャンピオンボード —</div>
+  <div id="tc"><div class="smsg"><span class="ms" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--t2)">progress_activity</span>読み込み中…</div></div>
   <div class="pager" id="pg"></div>
 </div>
 
@@ -350,30 +435,33 @@ function setLang(l){
 const RANKS=[
   {id:'gm',   jp:'グランドマスター',en:'Grand Master',minPts:150,maxPts:Infinity,
    col:'#ff2d55',bg:'#1a000a',b1:'#ff2d55',b2:'#ff8c00',b3:'#ffd700',glow:'rgba(255,45,85,.8)',icon:'crown',
-   subs:[{jp:'I',en:'I',min:200},{jp:'II',en:'II',min:175},{jp:'III',en:'III',min:150}]},
+   subs:[{jp:'I',en:'I',min:150},{jp:'II',en:'II',min:175},{jp:'III',en:'III',min:200}]},
   {id:'mst',  jp:'マスター',        en:'Master',      minPts:75, maxPts:149,
    col:'#d946ef',bg:'#150020',b1:'#7c3aed',b2:'#c026d3',b3:'#e879f9',glow:'rgba(192,38,211,.75)',icon:'gem',
-   subs:[{jp:'I',en:'I',min:120},{jp:'II',en:'II',min:95},{jp:'III',en:'III',min:75}]},
+   subs:[{jp:'I',en:'I',min:75},{jp:'II',en:'II',min:95},{jp:'III',en:'III',min:120}]},
   {id:'dia',  jp:'ダイヤモンド',    en:'Diamond',     minPts:30, maxPts:74,
    col:'#22d3ee',bg:'#001520',b1:'#0891b2',b2:'#06b6d4',b3:'#67e8f9',glow:'rgba(6,182,212,.7)',icon:'diamond',
-   subs:[{jp:'I',en:'I',min:55},{jp:'II',en:'II',min:42},{jp:'III',en:'III',min:30}]},
+   subs:[{jp:'I',en:'I',min:30},{jp:'II',en:'II',min:42},{jp:'III',en:'III',min:55}]},
   {id:'plat', jp:'プラチナ',        en:'Platinum',    minPts:10, maxPts:29,
    col:'#34d399',bg:'#001a10',b1:'#059669',b2:'#10b981',b3:'#6ee7b7',glow:'rgba(16,185,129,.65)',icon:'star6',
-   subs:[{jp:'I',en:'I',min:22},{jp:'II',en:'II',min:16},{jp:'III',en:'III',min:10}]},
+   subs:[{jp:'I',en:'I',min:10},{jp:'II',en:'II',min:16},{jp:'III',en:'III',min:22}]},
   {id:'gold', jp:'ゴールド',        en:'Gold',        minPts:5,  maxPts:9,
    col:'#fbbf24',bg:'#1a0e00',b1:'#b45309',b2:'#d97706',b3:'#fde68a',glow:'rgba(251,191,36,.7)',icon:'star5',
-   subs:[{jp:'I',en:'I',min:8},{jp:'II',en:'II',min:6},{jp:'III',en:'III',min:5}]},
+   subs:[{jp:'I',en:'I',min:5},{jp:'II',en:'II',min:6},{jp:'III',en:'III',min:8}]},
   {id:'sil',  jp:'シルバー',        en:'Silver',      minPts:2,  maxPts:4,
    col:'#94a3b8',bg:'#0e1018',b1:'#475569',b2:'#64748b',b3:'#cbd5e1',glow:'rgba(100,116,139,.6)',icon:'shield',
-   subs:[{jp:'I',en:'I',min:4},{jp:'II',en:'II',min:3},{jp:'III',en:'III',min:2}]},
+   subs:[{jp:'I',en:'I',min:2},{jp:'II',en:'II',min:3},{jp:'III',en:'III',min:4}]},
   {id:'brz',  jp:'ブロンズ',        en:'Bronze',      minPts:0,  maxPts:1,
    col:'#fb923c',bg:'#1a0800',b1:'#9a3412',b2:'#ea580c',b3:'#fed7aa',glow:'rgba(234,88,12,.6)',icon:'bean',
-   subs:[{jp:'I',en:'I',min:1},{jp:'II',en:'II',min:1},{jp:'III',en:'III',min:0}]},
+   subs:[{jp:'I',en:'I',min:0},{jp:'II',en:'II',min:1},{jp:'III',en:'III',min:1}]},
 ];
 const getRank=p=>RANKS.find(r=>p>=r.minPts)||RANKS[6];
+// subs[0]=I(最低,min最小), subs[1]=II, subs[2]=III(最高,min最大)
+// ポイントが高いほど大きいindexを返す → index2=III=星3個=最高
 function getSubTier(rk,pts){
-  for(let i=0;i<rk.subs.length;i++){if(pts>=rk.subs[i].min)return i;}
-  return rk.subs.length-1;
+  let result=0;
+  for(let i=0;i<rk.subs.length;i++){if(pts>=rk.subs[i].min)result=i;}
+  return result;
 }
 
 /* ══════ SHIELD SVG ══════ */
@@ -421,17 +509,17 @@ function mkShield(r,sz=44,subIdx=null){
       <ellipse cx="0" cy="0" rx="4" ry="5.5" fill="${r.b3}" opacity=".35"/>
     </g>`,
   };
-  // maxPips per rank; subIdx 0=I(top)=all filled, 1=II=2 filled, 2=III=1 filled
-  const maxPips=r.id==='gm'?3:r.id==='mst'?3:r.id==='dia'?2:r.id==='plat'?2:r.id==='gold'?1:r.id==='sil'?1:0;
-  const filledPips=subIdx===null?maxPips:Math.max(1,maxPips-subIdx);
+  // 全ランク星3つ固定。subIdx: 0=I(最低)→1個点灯, 1=II→2個点灯, 2=III(最高)→3個点灯。null=全灯
+  const maxPips=3;
+  const filledPips=subIdx===null?3:subIdx+1;
   let pips='';
-  if(maxPips>0){
+  {
     const sp=9,ox=22-(maxPips-1)*sp/2;
     for(let i=0;i<maxPips;i++){
       const cx=ox+i*sp;
       const filled=i<filledPips;
-      const fillCol=filled?r.b3:'rgba(255,255,255,0.15)';
-      const strokeCol=filled?r.b1:'rgba(255,255,255,0.2)';
+      const fillCol=filled?r.b3:'rgba(255,255,255,0.12)';
+      const strokeCol=filled?r.b1:'rgba(255,255,255,0.18)';
       pips+=`<polygon points="${cx},40 ${cx+1.6},43.2 ${cx+5.5},43.2 ${cx+2.5},45.2 ${cx+3.4},48.5 ${cx},46.3 ${cx-3.4},48.5 ${cx-2.5},45.2 ${cx-5.5},43.2 ${cx-1.6},43.2" fill="${fillCol}" stroke="${strokeCol}" stroke-width=".6"/>`;
     }
   }
@@ -474,8 +562,9 @@ const s2u=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
 
 /* ══════ LEGEND ══════ */
 function buildLegend(){
+  // desktop pills — subIdx=2でI(最高=星3個)を表示
   document.getElementById('rankLegend').innerHTML=RANKS.map(r=>{
-    const url=s2u(mkShield(r,34));
+    const url=s2u(mkShield(r,34,2));
     const next=RANKS[RANKS.indexOf(r)-1];
     const lbl=next?`${r.minPts}–${next.minPts-1} pt`:`${r.minPts}+ pt`;
     const name=lang==='jp'?r.jp:r.en;
@@ -484,12 +573,38 @@ function buildLegend(){
       <div><span class="rl-name" style="color:${r.col}">${name}</span><span class="rl-pts">${lbl}</span></div>
     </div>`;
   }).join('');
+
+  // mobile accordion — show each rank with all 3 sub-tiers (shields I/II/III)
+  document.getElementById('rlAccBody').innerHTML=RANKS.map(r=>{
+    const next=RANKS[RANKS.indexOf(r)-1];
+    const lbl=next?`${r.minPts}–${next.minPts-1} pt`:`${r.minPts}+ pt`;
+    const name=lang==='jp'?r.jp:r.en;
+    // 3 mini shields: 左からIII(星1)→II(星2)→I(星3)
+    const miniShields=[2,1,0].map(si=>{
+      const u=s2u(mkShield(r,22,si));
+      // subs[0]=I, subs[1]=II, subs[2]=III → si=2→IIIラベル
+      const sn=r.subs[si][lang];
+      const stars=3-si; // si=2→1個, si=1→2個, si=0→3個
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <img src="${u}" width="22" style="height:26px;object-fit:contain">
+        <span style="font-size:.55rem;color:${r.col};font-weight:800;opacity:.8">${sn}</span>
+      </div>`;
+    }).join('');
+    return `<div class="rl-acc-item" style="border-color:${r.col}30">
+      <img class="rl-acc-icon" src="${s2u(mkShield(r,32,2))}" alt="${name}">
+      <div class="rl-acc-info">
+        <div class="rl-acc-name" style="color:${r.col}">${name}</div>
+        <div class="rl-acc-range">${lbl}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:flex-end">${miniShields}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ══════ DATA ══════ */
 async function loadData(){
   const btn=document.getElementById('rBtn');btn.classList.add('spin');
-  document.getElementById('tc').innerHTML=`<div class="smsg"><span class="big">⏳</span>${lang==='jp'?'読み込み中…':'Loading…'}</div>`;
+  document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--t2)">progress_activity</span>${lang==='jp'?'読み込み中…':'Loading…'}</div>`;
   document.getElementById('pg').innerHTML='';
   try{
     const res=await fetch(GAS);
@@ -509,10 +624,10 @@ async function loadData(){
     document.getElementById('sL').textContent=all.reduce((s,d)=>s+d.wrCount,0).toLocaleString();
     document.getElementById('sT').textContent=new Date().toLocaleTimeString('ja-JP');
     applyFil();
-    toast(lang==='jp'?'✅ 読み込み完了！':'✅ Loaded!');
+    toast(lang==='jp'?'読み込み完了':'Loaded');
   }catch(e){
-    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="big">😵</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.75rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
-    toast('❌ '+(lang==='jp'?'失敗':'Failed'));
+    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms big" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--acc2)">error</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.75rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
+    toast(lang==='jp'?'失敗':'Failed');
   }
   btn.classList.remove('spin');
 }
@@ -536,22 +651,21 @@ function applyFil(){
 /* ══════ RENDER TABLE ══════ */
 function renderTable(){
   if(!fil.length){
-    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="big">🔍</span>${lang==='jp'?'見つかりませんでした':'No players found.'}</div>`;
+    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--t2)">manage_search</span>${lang==='jp'?'見つかりませんでした':'No players found.'}</div>`;
     return;
   }
   const start=(pg-1)*PG;
   const rows=fil.slice(start,start+PG).map((d,li)=>{
     const gr=start+li+1;
     const tc=gr===1?'top1':gr===2?'top2':gr===3?'top3':'topN';
-    const medal=gr===1?'👑':gr===2?'🥈':gr===3?'🥉':'';
     const rk=getRank(d.totalPoints);
     const subIdx=getSubTier(rk,d.totalPoints);
     const url=s2u(mkShield(rk,44,subIdx));
-    // sub-tier pips (3 total, filled up to subIdx+1 from left)
-    const pipCount=3;
+    // sub-tier pips: I=1個, II=2個, III=3個 (subIdx 0=I=最低)
+    const filledPips=subIdx+1;
     let pips='';
-    for(let i=0;i<pipCount;i++){
-      const filled=i<=subIdx;
+    for(let i=0;i<3;i++){
+      const filled=i<filledPips;
       pips+=`<div class="stpip ${filled?'filled':'empty'}" style="background:${filled?rk.col:'var(--t3)'};${filled?`--pc:${rk.col}`:''}"></div>`;
     }
     const chips=[
@@ -575,7 +689,7 @@ function renderTable(){
             <img class="shi" src="${url}" alt="${rkName}">
           </div>
           <div>
-            <div class="pname">${medal?`<span class="crown">${medal}</span>`:''}${esc(d.name)}</div>
+            <div class="pname">${esc(d.name)}</div>
             <span class="prank-lbl" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}28">${rkName} ${subName}</span>
             <div class="subtier">${pips}</div>
           </div>
@@ -628,11 +742,11 @@ function openModal(idx){
     ?Math.min(100,Math.round(((d.totalPoints-prevMin)/(nextMin-prevMin))*100))
     :100;
 
-  // sub-tier cards
+  // sub-tier cards: subs[0]=I(最低), subs[1]=II, subs[2]=III(最高) → 左からI・II・IIIの順で表示
   const stCards=rk.subs.map((s,i)=>{
     const isCurrent=i===subIdx;
-    const range=i===0?(nextRank?`${s.min}–${nextMin-1}pt`:`${s.min}pt+`):
-                i===rk.subs.length-1?`${prevMin}–${rk.subs[i-1].min-1}pt`:`${s.min}–${rk.subs[i-1].min-1}pt`;
+    const hi = i<rk.subs.length-1 ? rk.subs[i+1].min-1 : (nextRank?nextMin-1:999);
+    const range=`${s.min}–${hi}pt`;
     return `<div class="stier-card${isCurrent?' current':''}" style="--pc:${rk.col}">
       <div class="stier-card-name" style="color:${isCurrent?rk.col:'var(--t2)'}">${lang==='jp'?rk.jp:rk.en} ${s[lang]}</div>
       <div class="stier-card-range">${range}</div>
@@ -650,14 +764,12 @@ function openModal(idx){
 
   const t=lang==='jp';
 
-  // ── 3-section progress bar for "next rank" ──
-  // subs order: [0]=I(highest), [1]=II, [2]=III(lowest) → III boundary = minPts, I boundary = nextRank.minPts
+  // ── 3-section progress bar: 左=I(最低), 中=II, 右=III(最高) ──
+  // subs[0]=I(min最小), subs[1]=II, subs[2]=III(min最大)
   const seg3 = nextRank ? (() => {
-    // divide rank range into 3 equal segments matching sub-tiers III→II→I
     const rangeTotal = nextMin - prevMin;
-    // sub boundaries from right to left: subs[0].min, subs[1].min, subs[2].min(=prevMin)
-    const b1 = rk.subs[1].min; // III→II boundary
-    const b2 = rk.subs[0].min; // II→I boundary
+    const b1 = rk.subs[1].min; // I→II 境界
+    const b2 = rk.subs[2].min; // II→III 境界
     const p1 = Math.round((b1 - prevMin) / rangeTotal * 100);
     const p2 = Math.round((b2 - prevMin) / rangeTotal * 100);
     return { p1, p2, b1, b2 };
@@ -670,15 +782,14 @@ function openModal(idx){
     <div class="rp-div" style="left:${seg3.p2}%"></div>` : '';
   const segLblHtml = seg3 ? `
     <div class="rp-seg-labels">
-      <div class="rp-seg-lbl" style="flex:${seg3.p1}">${lang==='jp'?rk.jp+' III':rk.en+' III'}<br>${prevMin}–${seg3.b1-1}pt</div>
+      <div class="rp-seg-lbl" style="flex:${seg3.p1}">${lang==='jp'?rk.jp+' I':rk.en+' I'}<br>${prevMin}–${seg3.b1-1}pt</div>
       <div class="rp-seg-lbl" style="flex:${seg3.p2-seg3.p1}">${lang==='jp'?rk.jp+' II':rk.en+' II'}<br>${seg3.b1}–${seg3.b2-1}pt</div>
-      <div class="rp-seg-lbl" style="flex:${100-seg3.p2}">${lang==='jp'?rk.jp+' I':rk.en+' I'}<br>${seg3.b2}–${nextMin-1}pt</div>
+      <div class="rp-seg-lbl" style="flex:${100-seg3.p2}">${lang==='jp'?rk.jp+' III':rk.en+' III'}<br>${seg3.b2}–${nextMin-1}pt</div>
     </div>` : '';
 
-  // ── point calculation explanation ──
   const calcHtml = `
     <details class="calc-wrap" style="margin-bottom:1.2rem">
-      <summary class="calc-summary">${t?'📐 ポイント計算方法':'📐 How Points Work'}</summary>
+      <summary class="calc-summary"><span class="ms" style="font-size:1rem;vertical-align:middle;color:var(--acc)">calculate</span>${t?'ポイント計算方法':'How Points Work'}</summary>
       <div class="calc-body">
         <div class="calc-section-title">${t?'WR カテゴリポイント':'WR Category Points'}</div>
         <div class="calc-table">
@@ -688,7 +799,7 @@ function openModal(idx){
           <div class="ct-row"><span class="ct-tag c100">100+</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒以上':'avg finish time ≥ 100s'}</span><span class="ct-pts">+2 pt</span></div>
           <div class="ct-row"><span class="ct-tag cu100">&lt;100</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒未満':'avg finish time &lt; 100s'}</span><span class="ct-pts">+1 pt</span></div>
         </div>
-        <div class="calc-note">${t?'💡 WR を 1 つ取得するごとに、そのコースの平均フィニッシュタイムに応じたポイントが加算されます。':'💡 Each WR grants points based on that level\'s average finish time.'}</div>
+        <div class="calc-note">${t?'WR を 1 つ取得するごとに、そのコースの平均フィニッシュタイムに応じたポイントが加算されます。':'Each WR grants points based on that level\'s average finish time.'}</div>
         <div class="calc-section-title" style="margin-top:.9rem">${t?'ランク昇格条件':'Rank Thresholds'}</div>
         <div class="calc-table">${RANKS.slice().reverse().map(r=>{
           const nm=t?r.jp:r.en;
@@ -703,7 +814,7 @@ function openModal(idx){
     <div class="mh">
       <img class="mh-shield" src="${url}" alt="${rkName}" style="--mg:${rk.glow}">
       <div class="mh-info">
-        <div class="mh-name" style="color:${rk.col}">🫘 ${esc(d.name)}</div>
+        <div class="mh-name" style="color:${rk.col}">${esc(d.name)}</div>
         <span class="mh-rank" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}30">${rkName} ${subName}</span>
       </div>
     </div>
@@ -728,7 +839,7 @@ function openModal(idx){
         ${tipHtml}
       </div>
       ${segLblHtml}
-      <div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'🎉 最高ランク到達！':'🎉 Max Rank Achieved!')}</div>
+      <div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'最高ランク到達！':'Max Rank Achieved!')}</div>
     </div>
 
     <div class="stier-wrap">

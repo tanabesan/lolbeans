@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOLBeans — WR ランキング</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#08071a;--panel:#111028;--card:#181630;--edge:#241f48;--line:#2d2860;
+  --t0:#f0eaff;--t1:#a89ed0;--t2:#5f5890;--t3:#322e60;
+  --acc:#ffd23f;--acc2:#ff5f7e;--acc3:#3de8f7;
+  --ff:'Nunito',sans-serif;--ffj:'M PLUS Rounded 1c',sans-serif;--ffh:'Boogaloo',cursive;
+}
+body{font-family:var(--ff);background:var(--bg);color:var(--t0);min-height:100vh;overflow-x:hidden}
+body.jp{font-family:var(--ffj)}
+
+/* BG */
+.bg-atm{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 70% 45% at 20% 0%,rgba(100,60,255,.12) 0%,transparent 60%),
+             radial-gradient(ellipse 55% 40% at 80% 10%,rgba(255,60,120,.09) 0%,transparent 55%),
+             radial-gradient(ellipse 60% 45% at 50% 100%,rgba(60,220,247,.07) 0%,transparent 55%)}
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.035;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:50px 50px}
+
+/* ── PARTICLES ── */
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.pt{position:absolute;border-radius:50%;animation:ptFloat var(--dur) ease-in-out infinite var(--del);opacity:0}
+@keyframes ptFloat{
+  0%{opacity:0;transform:translateY(0) scale(.5)}
+  15%{opacity:.8}
+  85%{opacity:.5}
+  100%{opacity:0;transform:translateY(-130px) scale(1.3)}
+}
+
+/* ── LANG TOGGLE ── */
+.lang-toggle{position:fixed;top:1rem;right:1rem;z-index:100;display:flex;gap:.3rem}
+.lang-btn{background:var(--card);border:1.5px solid var(--line);border-radius:6px;
+  padding:.3rem .7rem;font-size:.75rem;font-weight:800;color:var(--t2);cursor:pointer;transition:all .2s}
+.lang-btn.active{border-color:var(--acc);color:var(--acc);background:rgba(255,210,63,.08)}
+
+/* ── HEADER ── */
+header{position:relative;z-index:10;text-align:center;padding:3.2rem 1rem 1.4rem}
+.logo-line{display:flex;align-items:center;justify-content:center;gap:.5rem}
+.logo-icon{font-size:2.8rem;display:inline-block;animation:iconBob 2s ease-in-out infinite}
+.logo-icon:nth-child(3){animation-delay:-.7s;animation-direction:alternate-reverse}
+@keyframes iconBob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-13px) rotate(6deg)}}
+.logo-text{font-family:var(--ffh);font-size:clamp(2.4rem,7vw,4.2rem);
+  background:linear-gradient(130deg,#ffe066 0%,#ff9f43 45%,#ff6b9d 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 28px rgba(255,180,50,.35));
+  animation:logoP 5s ease-in-out infinite}
+@keyframes logoP{0%,100%{filter:drop-shadow(0 0 28px rgba(255,180,50,.35))}50%{filter:drop-shadow(0 0 44px rgba(255,100,157,.45))}}
+.logo-sub{font-family:var(--ffh);font-size:clamp(.85rem,2.2vw,1.15rem);letter-spacing:5px;color:var(--acc3);text-transform:uppercase;margin-top:2px;opacity:.85}
+.deco{display:flex;align-items:center;justify-content:center;gap:1.2rem;margin-top:1rem}
+.deco-l{width:120px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,200,80,.35),transparent)}
+
+/* ── STATS ── */
+.stats-bar{position:relative;z-index:10;display:flex;justify-content:center;flex-wrap:wrap;gap:.7rem;padding:.4rem 1rem 2rem}
+.s-pill{background:var(--card);border:1.5px solid var(--line);border-radius:50px;
+  padding:.42rem 1.15rem;font-size:.8rem;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:.4rem}
+.s-pill .v{color:var(--acc);font-size:.9rem;font-weight:900}
+
+/* ── RANK LEGEND ── */
+.rank-legend-wrap{position:relative;z-index:10;max-width:920px;margin:0 auto 2rem;padding:0 1rem}
+.rl-head{font-family:var(--ffh);font-size:.72rem;letter-spacing:.4rem;color:var(--t3);text-align:center;text-transform:uppercase;margin-bottom:.8rem}
+.rank-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:.45rem}
+.rl-item{display:flex;align-items:center;gap:.5rem;background:var(--card);border:1.5px solid var(--line);
+  border-radius:10px;padding:.35rem .8rem .35rem .4rem;cursor:default;transition:transform .18s,box-shadow .18s}
+.rl-item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.rl-icon{width:36px;height:44px;flex-shrink:0;object-fit:contain}
+.rl-name{display:block;font-weight:800;font-size:.73rem}
+.rl-pts{display:block;font-size:.62rem;opacity:.5;font-weight:700}
+
+/* ── CONTROLS ── */
+.controls{position:relative;z-index:10;display:flex;justify-content:center;align-items:center;gap:.65rem;flex-wrap:wrap;padding:0 1rem 1.8rem}
+.sbox{position:relative}
+.sbox input{background:var(--card);border:1.5px solid var(--line);border-radius:50px;
+  padding:.58rem 1.1rem .58rem 2.4rem;color:var(--t0);font-family:inherit;
+  font-size:.85rem;font-weight:700;width:210px;outline:none;transition:border-color .25s,box-shadow .25s}
+.sbox input:focus{border-color:rgba(255,210,63,.5);box-shadow:0 0 0 3px rgba(255,210,63,.1)}
+.sbox input::placeholder{color:var(--t3)}
+.si{position:absolute;left:.82rem;top:50%;transform:translateY(-50%);color:var(--t2);font-size:.85rem;pointer-events:none}
+.cbtn{background:var(--card);border:1.5px solid var(--line);border-radius:50px;
+  padding:.58rem 1.1rem;color:var(--t2);font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;transition:all .2s}
+.cbtn:hover,.cbtn.on{border-color:rgba(255,210,63,.5);color:var(--acc);background:rgba(255,210,63,.07)}
+.rbtn{background:linear-gradient(135deg,var(--acc2),#c026d3);border:none;border-radius:50px;
+  padding:.58rem 1.4rem;color:#fff;font-family:inherit;font-size:.85rem;font-weight:900;
+  cursor:pointer;box-shadow:0 4px 18px rgba(255,80,126,.3);transition:transform .18s,box-shadow .18s}
+.rbtn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,80,126,.45)}
+.rbtn.spin{animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── PT LEGEND ── */
+.pt-legend{position:relative;z-index:10;max-width:880px;margin:0 auto 2.2rem;padding:0 1rem;display:flex;justify-content:center;flex-wrap:wrap;gap:.5rem}
+.ptl{display:flex;align-items:center;gap:.32rem;background:var(--card);border:1px solid var(--line);border-radius:7px;padding:.27rem .65rem;font-size:.72rem;font-weight:700;color:var(--t2)}
+.ptd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── TABLE ── */
+.tw{position:relative;z-index:10;max-width:980px;margin:0 auto;padding:0 1rem 5rem}
+.slbl{font-family:var(--ffh);font-size:.72rem;letter-spacing:.4rem;color:var(--t3);text-transform:uppercase;text-align:center;margin-bottom:1rem}
+.rt{width:100%;border-collapse:separate;border-spacing:0 5px}
+.rt thead th{font-family:var(--ffh);font-size:.72rem;letter-spacing:.18rem;color:var(--t3);text-transform:uppercase;padding:.38rem 1rem;text-align:left}
+.rt thead th.c{text-align:center}
+
+/* ROW */
+.rrow{background:var(--card);border-radius:14px;transition:transform .18s,box-shadow .18s;animation:rIn .35s ease-out both;cursor:pointer}
+@keyframes rIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+.rrow:hover{transform:translateY(-2px) scale(1.004);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.rrow td{padding:.78rem 1rem;vertical-align:middle}
+.rrow td:first-child{border-radius:14px 0 0 14px;text-align:center;width:54px}
+.rrow td:last-child{border-radius:0 14px 14px 0}
+.top1{box-shadow:inset 3px 0 0 #ffd700}
+.top2{box-shadow:inset 3px 0 0 #c8c8d4}
+.top3{box-shadow:inset 3px 0 0 #e8874a}
+
+.rnum{font-family:var(--ffh);font-size:.95rem;color:var(--t3);display:inline-block;min-width:28px;text-align:center}
+.top1 .rnum{color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.6)}
+.top2 .rnum{color:#c8c8d4}
+.top3 .rnum{color:#e8874a}
+
+/* player cell */
+.pcell{display:flex;align-items:center;gap:.65rem}
+.shw{width:44px;height:52px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center}
+.shi{width:44px;height:52px;object-fit:contain;transition:transform .22s,filter .22s;filter:drop-shadow(0 3px 7px var(--sg,rgba(0,0,0,.5)))}
+.rrow:hover .shi{transform:scale(1.18) rotate(-5deg);filter:drop-shadow(0 4px 14px var(--sg,rgba(0,0,0,.5))) brightness(1.12)}
+.pname{font-weight:900;font-size:.95rem;line-height:1.2;display:flex;align-items:center;gap:.3rem}
+.top1 .pname{color:#ffe066}.top2 .pname{color:#dde}.top3 .pname{color:#e8874a}.topN .pname{color:var(--t0)}
+.prank-lbl{font-size:.62rem;font-weight:800;padding:1px 7px;border-radius:4px;letter-spacing:.06em;text-transform:uppercase;margin-top:3px;display:inline-block}
+/* sub-tier pip dots */
+.subtier{display:flex;gap:3px;margin-top:4px;align-items:center}
+.stpip{width:7px;height:7px;border-radius:50%;transition:transform .15s}
+.stpip.filled{box-shadow:0 0 4px var(--pc)}
+.stpip.empty{opacity:.2}
+.crown{font-size:.9rem;animation:cw 2.5s ease-in-out infinite}
+@keyframes cw{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg) scale(1.12)}}
+
+/* chips */
+.cats{display:flex;flex-wrap:wrap;gap:.28rem}
+.chip{font-size:.68rem;font-weight:800;padding:2px 6px;border-radius:5px;white-space:nowrap}
+.c1000{background:rgba(255,80,110,.15);color:#ff5070;border:1px solid rgba(255,80,110,.28)}
+.c750{background:rgba(255,205,50,.13);color:#ffc832;border:1px solid rgba(255,205,50,.28)}
+.c500{background:rgba(50,220,240,.1);color:#32dce8;border:1px solid rgba(50,220,240,.22)}
+.c100{background:rgba(165,100,255,.13);color:#a564ff;border:1px solid rgba(165,100,255,.28)}
+.cu100{background:rgba(60,230,140,.1);color:#3ce68c;border:1px solid rgba(60,230,140,.22)}
+
+.wrc{font-family:var(--ffh);font-size:1.18rem;color:var(--acc3);text-align:center}
+.ptv{font-family:var(--ffh);font-size:1.35rem;text-align:center;font-weight:900}
+.top1 .ptv{color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.5)}
+.top2 .ptv{color:#c8c8d4}
+.top3 .ptv{color:#e8874a}
+
+/* state/pager/toast */
+.smsg{text-align:center;padding:5rem 2rem;color:var(--t2);font-size:.95rem;font-weight:700}
+.smsg .big{font-size:3rem;display:block;margin-bottom:1rem}
+.pager{display:flex;justify-content:center;align-items:center;gap:.38rem;margin-top:1.5rem;flex-wrap:wrap}
+.pgb{background:var(--card);border:1.5px solid var(--line);border-radius:9px;width:34px;height:34px;
+  color:var(--t2);font-family:var(--ffh);font-weight:700;font-size:.82rem;cursor:pointer;
+  transition:all .18s;display:flex;align-items:center;justify-content:center}
+.pgb:hover{border-color:rgba(255,210,63,.45);color:var(--acc)}
+.pgb.on{background:rgba(255,210,63,.14);border-color:var(--acc);color:var(--acc)}
+.pgb:disabled{opacity:.25;cursor:not-allowed}
+#toast{position:fixed;bottom:2rem;right:1.5rem;background:var(--card);border:1.5px solid var(--line);border-left:3px solid var(--acc);
+  border-radius:10px;padding:.8rem 1.3rem;color:var(--t0);font-weight:700;font-size:.82rem;z-index:9999;
+  transform:translateY(70px);opacity:0;transition:all .38s cubic-bezier(.175,.885,.32,1.275);max-width:260px}
+#toast.show{transform:translateY(0);opacity:1}
+
+/* ══════════════════════════════
+   MODAL
+══════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--panel);border:1.5px solid var(--line);border-radius:20px;
+  width:100%;max-width:480px;padding:2rem 1.8rem;position:relative;
+  transform:translateY(30px) scale(.96);transition:transform .28s cubic-bezier(.175,.885,.32,1.275);max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:none}
+.modal-close{position:absolute;top:.9rem;right:.9rem;background:var(--edge);border:none;border-radius:50%;
+  width:32px;height:32px;color:var(--t1);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background .18s}
+.modal-close:hover{background:var(--acc2);color:#fff}
+
+/* modal header */
+.mh{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--line)}
+.mh-shield{width:64px;height:76px;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
+.mh-info{}
+.mh-name{font-family:var(--ffh);font-size:1.35rem;line-height:1.2}
+.mh-rank{font-size:.72rem;font-weight:800;padding:2px 9px;border-radius:5px;letter-spacing:.08em;text-transform:uppercase;margin-top:.3rem;display:inline-block}
+
+/* rank position bar */
+.rank-pos-wrap{margin-bottom:1.5rem}
+.rp-label{font-size:.72rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem}
+.rp-bar-bg{background:var(--edge);border-radius:50px;height:14px;overflow:visible;position:relative;margin-bottom:1.6rem}
+.rp-bar-track{position:absolute;inset:0;border-radius:50px;overflow:hidden}
+.rp-bar-fill{height:14px;border-radius:50px 0 0 50px;transition:width .8s cubic-bezier(.22,1,.36,1);position:relative;min-width:4px}
+.rp-bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.18),transparent);border-radius:50px 0 0 50px}
+/* 3-section dividers inside track */
+.rp-div{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.5);z-index:2}
+/* score tooltip on bar tip */
+.rp-tip{position:absolute;top:-28px;transform:translateX(-50%);background:var(--panel);border:1.5px solid var(--tipcolor,#fff);border-radius:6px;
+  padding:2px 8px;font-size:.7rem;font-weight:800;color:var(--t0);white-space:nowrap;
+  transition:left .8s cubic-bezier(.22,1,.36,1);pointer-events:none;z-index:10}
+.rp-tip::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  border:3px solid transparent;border-top-color:var(--tipcolor,#fff)}
+/* segment labels under bar */
+.rp-seg-labels{display:flex;margin-top:.25rem}
+.rp-seg-lbl{flex:1;font-size:.6rem;font-weight:800;color:var(--t3);text-align:center;letter-spacing:.03em}
+.rp-pct{font-family:var(--ffh);font-size:.82rem;color:var(--t1);margin-top:.2rem;text-align:right}
+
+/* sub-tier display in modal */
+.stier-wrap{margin-bottom:1.5rem}
+.stier-title{font-size:.72rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.8rem}
+.stier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.stier-card{background:var(--edge);border-radius:10px;padding:.6rem .5rem;text-align:center;border:1.5px solid transparent;transition:border-color .2s}
+.stier-card.current{border-color:var(--pc,#fff)}
+.stier-card-name{font-size:.7rem;font-weight:800;letter-spacing:.05em}
+.stier-card-range{font-size:.6rem;opacity:.5;margin-top:2px}
+.stier-card-you{font-size:.6rem;font-weight:800;margin-top:4px;color:var(--acc)}
+
+/* stats grid in modal */
+.mstats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.5rem}
+.mstat{background:var(--edge);border-radius:10px;padding:.7rem .9rem}
+.mstat-lbl{font-size:.65rem;font-weight:800;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem}
+.mstat-val{font-family:var(--ffh);font-size:1.2rem}
+
+/* chips in modal */
+.mchips{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+
+/* ── CALC SECTION ── */
+.calc-wrap{background:var(--edge);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.calc-summary{padding:.7rem 1rem;font-size:.8rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:.4rem;user-select:none}
+.calc-summary::-webkit-details-marker{display:none}
+.calc-summary::after{content:'▶';margin-left:auto;font-size:.65rem;color:var(--t3);transition:transform .2s}
+details[open] .calc-summary::after{transform:rotate(90deg)}
+.calc-body{padding:.2rem 1rem 1rem;border-top:1px solid var(--line)}
+.calc-section-title{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin:.8rem 0 .45rem}
+.calc-table{display:flex;flex-direction:column;gap:.28rem}
+.ct-row{display:flex;align-items:center;gap:.5rem;font-size:.75rem}
+.ct-tag{font-size:.65rem;font-weight:800;padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.ct-rank-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ct-desc{flex:1;color:var(--t1);font-size:.73rem}
+.ct-pts{font-family:var(--ffh);font-size:.82rem;color:var(--acc);font-weight:900;flex-shrink:0}
+.calc-note{font-size:.7rem;color:var(--t2);margin-top:.6rem;line-height:1.5;background:rgba(255,255,255,.03);border-radius:6px;padding:.5rem .7rem}
+@media(max-width:640px){.cc,.rt thead th.cc{display:none}.sbox input{width:155px}}
+</style>
+</head>
+<body>
+
+<div class="bg-atm"></div>
+<div class="bg-grid"></div>
+<div id="particles"></div>
+
+<!-- LANG -->
+<div class="lang-toggle">
+  <button class="lang-btn" id="lbEn" onclick="setLang('en')">EN</button>
+  <button class="lang-btn active" id="lbJp" onclick="setLang('jp')">JP</button>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-line">
+    <span class="logo-icon">🫘</span>
+    <span class="logo-text">LOLBeans</span>
+    <span class="logo-icon">🏆</span>
+  </div>
+  <div class="logo-sub" id="hSub">WR ランキング</div>
+  <div class="deco"><div class="deco-l"></div><span>✦</span><div class="deco-l"></div></div>
+</header>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="s-pill"><span class="i18n" data-en="👑 Holders" data-jp="👑 ホルダー数">👑 ホルダー数</span><span class="v" id="sH">—</span></div>
+  <div class="s-pill"><span class="i18n" data-en="🎮 Total WRs" data-jp="🎮 WR 総数">🎮 WR 総数</span><span class="v" id="sL">—</span></div>
+  <div class="s-pill"><span class="i18n" data-en="🕒 Updated" data-jp="🕒 更新">🕒 更新</span><span class="v" id="sT">—</span></div>
+</div>
+
+<!-- RANK LEGEND -->
+<div class="rank-legend-wrap">
+  <div class="rl-head i18n" data-en="— Rank Tiers —" data-jp="— ランク一覧 —">— ランク一覧 —</div>
+  <div class="rank-legend" id="rankLegend"></div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="sbox">
+    <span class="si">🔍</span>
+    <input type="text" id="si" placeholder="プレイヤーを検索…" oninput="onSearch()">
+  </div>
+  <button class="cbtn on" id="bPts" onclick="setSort('pts')">
+    <span class="i18n" data-en="⚡ Points" data-jp="⚡ ポイント順">⚡ ポイント順</span>
+  </button>
+  <button class="cbtn" id="bWr" onclick="setSort('wr')">
+    <span class="i18n" data-en="🏅 WR Count" data-jp="🏅 WR 数順">🏅 WR 数順</span>
+  </button>
+  <button class="rbtn" id="rBtn" onclick="loadData()">
+    <span class="i18n" data-en="↻ Refresh" data-jp="↻ 更新">↻ 更新</span>
+  </button>
+</div>
+
+<!-- PT LEGEND -->
+<div class="pt-legend">
+  <div class="ptl"><div class="ptd" style="background:#ff5070"></div><span class="i18n" data-en="avg 1000+→15pt" data-jp="平均1000+→15pt">平均1000+→15pt</span></div>
+  <div class="ptl"><div class="ptd" style="background:#ffc832"></div><span class="i18n" data-en="avg 750+→10pt" data-jp="平均750+→10pt">平均750+→10pt</span></div>
+  <div class="ptl"><div class="ptd" style="background:#32dce8"></div><span class="i18n" data-en="avg 500+→5pt" data-jp="平均500+→5pt">平均500+→5pt</span></div>
+  <div class="ptl"><div class="ptd" style="background:#a564ff"></div><span class="i18n" data-en="avg 100+→2pt" data-jp="平均100+→2pt">平均100+→2pt</span></div>
+  <div class="ptl"><div class="ptd" style="background:#3ce68c"></div><span class="i18n" data-en="under100→1pt" data-jp="100未満→1pt">100未満→1pt</span></div>
+</div>
+
+<!-- TABLE -->
+<div class="tw">
+  <div class="slbl i18n" data-en="✦ Champions Board ✦" data-jp="✦ チャンピオンボード ✦">✦ チャンピオンボード ✦</div>
+  <div id="tc"><div class="smsg"><span class="big">⏳</span><span class="i18n" data-en="Loading…" data-jp="読み込み中…">読み込み中…</span></div></div>
+  <div class="pager" id="pg"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const GAS='https://script.google.com/macros/s/AKfycbxdO6Xv8VFLkjc5vrX1hy3u4DQWEP28Ht8sX8Rc1kKb9sGBap0RdqAF1TXHPEBrIAA8vA/exec';
+const PG=30;
+let all=[],fil=[],sort='pts',pg=1,lang='jp';
+
+/* ══════ i18n ══════ */
+function setLang(l){
+  lang=l;
+  document.body.classList.toggle('jp',l==='jp');
+  document.getElementById('lbEn').classList.toggle('active',l==='en');
+  document.getElementById('lbJp').classList.toggle('active',l==='jp');
+  document.getElementById('hSub').textContent=l==='jp'?'WR ランキング':'WR Ranking Board';
+  document.querySelectorAll('.i18n').forEach(el=>{const v=el.dataset[l];if(v)el.textContent=v});
+  document.getElementById('si').placeholder=l==='jp'?'プレイヤーを検索…':'Search player…';
+  buildLegend();renderTable();
+}
+
+/* ══════ RANKS with sub-tiers (3 divisions each: I, II, III) ══════ */
+const RANKS=[
+  {id:'gm',   jp:'グランドマスター',en:'Grand Master',minPts:150,maxPts:Infinity,
+   col:'#ff2d55',bg:'#1a000a',b1:'#ff2d55',b2:'#ff8c00',b3:'#ffd700',glow:'rgba(255,45,85,.8)',icon:'crown',
+   subs:[{jp:'I',en:'I',min:200},{jp:'II',en:'II',min:175},{jp:'III',en:'III',min:150}]},
+  {id:'mst',  jp:'マスター',        en:'Master',      minPts:75, maxPts:149,
+   col:'#d946ef',bg:'#150020',b1:'#7c3aed',b2:'#c026d3',b3:'#e879f9',glow:'rgba(192,38,211,.75)',icon:'gem',
+   subs:[{jp:'I',en:'I',min:120},{jp:'II',en:'II',min:95},{jp:'III',en:'III',min:75}]},
+  {id:'dia',  jp:'ダイヤモンド',    en:'Diamond',     minPts:30, maxPts:74,
+   col:'#22d3ee',bg:'#001520',b1:'#0891b2',b2:'#06b6d4',b3:'#67e8f9',glow:'rgba(6,182,212,.7)',icon:'diamond',
+   subs:[{jp:'I',en:'I',min:55},{jp:'II',en:'II',min:42},{jp:'III',en:'III',min:30}]},
+  {id:'plat', jp:'プラチナ',        en:'Platinum',    minPts:10, maxPts:29,
+   col:'#34d399',bg:'#001a10',b1:'#059669',b2:'#10b981',b3:'#6ee7b7',glow:'rgba(16,185,129,.65)',icon:'star6',
+   subs:[{jp:'I',en:'I',min:22},{jp:'II',en:'II',min:16},{jp:'III',en:'III',min:10}]},
+  {id:'gold', jp:'ゴールド',        en:'Gold',        minPts:5,  maxPts:9,
+   col:'#fbbf24',bg:'#1a0e00',b1:'#b45309',b2:'#d97706',b3:'#fde68a',glow:'rgba(251,191,36,.7)',icon:'star5',
+   subs:[{jp:'I',en:'I',min:8},{jp:'II',en:'II',min:6},{jp:'III',en:'III',min:5}]},
+  {id:'sil',  jp:'シルバー',        en:'Silver',      minPts:2,  maxPts:4,
+   col:'#94a3b8',bg:'#0e1018',b1:'#475569',b2:'#64748b',b3:'#cbd5e1',glow:'rgba(100,116,139,.6)',icon:'shield',
+   subs:[{jp:'I',en:'I',min:4},{jp:'II',en:'II',min:3},{jp:'III',en:'III',min:2}]},
+  {id:'brz',  jp:'ブロンズ',        en:'Bronze',      minPts:0,  maxPts:1,
+   col:'#fb923c',bg:'#1a0800',b1:'#9a3412',b2:'#ea580c',b3:'#fed7aa',glow:'rgba(234,88,12,.6)',icon:'bean',
+   subs:[{jp:'I',en:'I',min:1},{jp:'II',en:'II',min:1},{jp:'III',en:'III',min:0}]},
+];
+const getRank=p=>RANKS.find(r=>p>=r.minPts)||RANKS[6];
+function getSubTier(rk,pts){
+  for(let i=0;i<rk.subs.length;i++){if(pts>=rk.subs[i].min)return i;}
+  return rk.subs.length-1;
+}
+
+/* ══════ SHIELD SVG ══════ */
+// subIdx: 0=I(最高), 1=II, 2=III(最低)  filledStars = maxPips - subIdx
+function mkShield(r,sz=44,subIdx=null){
+  const id=`${r.id}_${Math.random().toString(36).slice(2,7)}`;
+  const icons={
+    crown:`<g transform="translate(22,19)">
+      <path d="M-9,7 L-9,-1 L-5.5,3 L0,-7 L5.5,3 L9,-1 L9,7 Z" fill="${r.b3}" stroke="${r.b1}" stroke-width="1.2" stroke-linejoin="round"/>
+      <rect x="-9" y="7" width="18" height="4" rx="2" fill="${r.b3}" stroke="${r.b1}" stroke-width="1"/>
+      <circle cx="-9" cy="-1" r="2" fill="${r.b2}"/><circle cx="0" cy="-7" r="2.4" fill="${r.b2}"/><circle cx="9" cy="-1" r="2" fill="${r.b2}"/>
+      <rect x="-6" y="8.2" width="12" height="1.4" rx=".7" fill="white" opacity=".3"/>
+    </g>`,
+    gem:`<g transform="translate(22,20)">
+      <polygon points="0,-10 7,-3 7,4 0,9 -7,4 -7,-3" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.5" stroke-linejoin="round"/>
+      <polygon points="0,-6 4,-2 4,2 0,5 -4,2 -4,-2" fill="${r.b3}" opacity=".55"/>
+      <polygon points="-7,-3 0,-10 7,-3" fill="${r.b3}" opacity=".4"/>
+      <line x1="-7" y1="-3" x2="7" y2="-3" stroke="white" stroke-width=".7" opacity=".25"/>
+    </g>`,
+    diamond:`<g transform="translate(22,20)">
+      <polygon points="0,-11 8,0 0,11 -8,0" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.5" stroke-linejoin="round"/>
+      <polygon points="0,-6 5,0 0,6 -5,0" fill="${r.b3}" opacity=".5"/>
+      <polygon points="0,-11 8,0 0,-3 -8,0" fill="${r.b3}" opacity=".4"/>
+      <polygon points="0,-2.5 3,0 0,2.5 -3,0" fill="white" opacity=".55"/>
+    </g>`,
+    star6:`<g transform="translate(22,20)">
+      <polygon points="0,-10 2.6,-3.5 9,-3.5 4,1 6,8 0,4.5 -6,8 -4,1 -9,-3.5 -2.6,-3.5" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.3" stroke-linejoin="round"/>
+      <polygon points="0,-6 1.6,-2.1 5.5,-2.1 2.4,0.6 3.6,4.8 0,2.7 -3.6,4.8 -2.4,0.6 -5.5,-2.1 -1.6,-2.1" fill="${r.b3}" opacity=".55"/>
+      <circle cx="0" cy="0" r="2.2" fill="white" opacity=".5"/>
+    </g>`,
+    star5:`<g transform="translate(22,20)">
+      <polygon points="0,-11 3.2,-3.8 11,-3.5 5.2,1.5 7.2,9.5 0,5.5 -7.2,9.5 -5.2,1.5 -11,-3.5 -3.2,-3.8" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.3" stroke-linejoin="round"/>
+      <polygon points="0,-7 2,-2.4 7,-2.2 3.2,1 4.5,6 0,3.5 -4.5,6 -3.2,1 -7,-2.2 -2,-2.4" fill="${r.b3}" opacity=".5"/>
+      <circle cx="0" cy="1" r="2" fill="white" opacity=".45"/>
+    </g>`,
+    shield:`<g transform="translate(22,20)">
+      <path d="M0,-10 L8,-6 L8,2 Q8,9 0,12 Q-8,9 -8,2 L-8,-6 Z" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.4" stroke-linejoin="round"/>
+      <path d="M0,-6 L5,-3 L5,2 Q5,6.5 0,8.5 Q-5,6.5 -5,2 L-5,-3 Z" fill="${r.b3}" opacity=".4"/>
+      <line x1="-5" y1="-1" x2="5" y2="-1" stroke="${r.b3}" stroke-width="1" opacity=".5"/>
+      <line x1="0" y1="-6" x2="0" y2="8" stroke="${r.b3}" stroke-width=".8" opacity=".35"/>
+    </g>`,
+    bean:`<g transform="translate(22,20)">
+      <ellipse cx="0" cy="0" rx="7" ry="9.5" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.4"/>
+      <path d="M-3,-8 Q7,-2 2,8" stroke="${r.b3}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+      <ellipse cx="0" cy="0" rx="4" ry="5.5" fill="${r.b3}" opacity=".35"/>
+    </g>`,
+  };
+  // maxPips per rank; subIdx 0=I(top)=all filled, 1=II=2 filled, 2=III=1 filled
+  const maxPips=r.id==='gm'?3:r.id==='mst'?3:r.id==='dia'?2:r.id==='plat'?2:r.id==='gold'?1:r.id==='sil'?1:0;
+  const filledPips=subIdx===null?maxPips:Math.max(1,maxPips-subIdx);
+  let pips='';
+  if(maxPips>0){
+    const sp=9,ox=22-(maxPips-1)*sp/2;
+    for(let i=0;i<maxPips;i++){
+      const cx=ox+i*sp;
+      const filled=i<filledPips;
+      const fillCol=filled?r.b3:'rgba(255,255,255,0.15)';
+      const strokeCol=filled?r.b1:'rgba(255,255,255,0.2)';
+      pips+=`<polygon points="${cx},40 ${cx+1.6},43.2 ${cx+5.5},43.2 ${cx+2.5},45.2 ${cx+3.4},48.5 ${cx},46.3 ${cx-3.4},48.5 ${cx-2.5},45.2 ${cx-5.5},43.2 ${cx-1.6},43.2" fill="${fillCol}" stroke="${strokeCol}" stroke-width=".6"/>`;
+    }
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sz}" height="${Math.round(sz*1.18)}" viewBox="0 0 44 52">
+  <defs>
+    <linearGradient id="bg_${id}" x1="0%" y1="0%" x2="60%" y2="100%">
+      <stop offset="0%" stop-color="${r.b1}"/><stop offset="55%" stop-color="${r.b2}"/><stop offset="100%" stop-color="${r.bg}"/>
+    </linearGradient>
+    <linearGradient id="sh_${id}" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="white" stop-opacity=".28"/><stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="gf_${id}" x="-35%" y="-25%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="cl_${id}"><path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z"/></clipPath>
+  </defs>
+  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="${r.b2}" opacity=".22" filter="url(#gf_${id})" transform="translate(0,3) scale(1.06,1.04) translate(-1.3,-1.3)"/>
+  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b3}" stroke-width="3.5" stroke-linejoin="round" opacity=".9"/>
+  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b1}" stroke-width="5.5" stroke-linejoin="round" opacity=".35"/>
+  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#bg_${id})"/>
+  <path d="M22,5.5 L37,11.5 L37,24 Q37,36 22,45 Q7,36 7,24 L7,11.5 Z" fill="none" stroke="${r.b3}" stroke-width="1" opacity=".3"/>
+  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#sh_${id})" clip-path="url(#cl_${id})"/>
+  ${icons[r.icon]||''}${pips}
+  <path d="M14,7 Q22,4 30,7" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".28"/>
+</svg>`;
+}
+const s2u=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+
+/* ══════ PARTICLES ══════ */
+(function(){
+  const c=document.getElementById('particles');
+  const cols=['#ff5f7e','#ffd23f','#3de8f7','#b16fff','#4dffa6','#ff9f43','#67e8f9'];
+  for(let i=0;i<70;i++){
+    const d=document.createElement('div');d.className='pt';
+    const sz=2+Math.random()*5,col=cols[i%cols.length];
+    d.style.cssText=`left:${Math.random()*100}%;bottom:${-10+Math.random()*10}%;width:${sz}px;height:${sz}px;background:${col};box-shadow:0 0 ${sz*2}px ${col};--dur:${6+Math.random()*9}s;--del:${Math.random()*8}s;`;
+    c.appendChild(d);
+  }
+})();
+
+/* ══════ LEGEND ══════ */
+function buildLegend(){
+  document.getElementById('rankLegend').innerHTML=RANKS.map(r=>{
+    const url=s2u(mkShield(r,34));
+    const next=RANKS[RANKS.indexOf(r)-1];
+    const lbl=next?`${r.minPts}–${next.minPts-1} pt`:`${r.minPts}+ pt`;
+    const name=lang==='jp'?r.jp:r.en;
+    return `<div class="rl-item" style="border-color:${r.col}30">
+      <img class="rl-icon" src="${url}" alt="${name}">
+      <div><span class="rl-name" style="color:${r.col}">${name}</span><span class="rl-pts">${lbl}</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════ DATA ══════ */
+async function loadData(){
+  const btn=document.getElementById('rBtn');btn.classList.add('spin');
+  document.getElementById('tc').innerHTML=`<div class="smsg"><span class="big">⏳</span>${lang==='jp'?'読み込み中…':'Loading…'}</div>`;
+  document.getElementById('pg').innerHTML='';
+  try{
+    const res=await fetch(GAS);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const raw=await res.json();
+    if(!Array.isArray(raw)||!raw.length)throw new Error(lang==='jp'?'データが空です':'Empty data');
+    all=raw.map(r=>({
+      name:String(r.name||''),
+      under100:+r.under100||0,p100:+r.p100||0,
+      p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,
+      wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0
+    }));
+    // assign global rank index
+    all.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
+    all.forEach((d,i)=>d.globalRank=i+1);
+    document.getElementById('sH').textContent=all.length.toLocaleString();
+    document.getElementById('sL').textContent=all.reduce((s,d)=>s+d.wrCount,0).toLocaleString();
+    document.getElementById('sT').textContent=new Date().toLocaleTimeString('ja-JP');
+    applyFil();
+    toast(lang==='jp'?'✅ 読み込み完了！':'✅ Loaded!');
+  }catch(e){
+    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="big">😵</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.75rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
+    toast('❌ '+(lang==='jp'?'失敗':'Failed'));
+  }
+  btn.classList.remove('spin');
+}
+
+function setSort(m){
+  sort=m;pg=1;
+  document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById(m==='pts'?'bPts':'bWr').classList.add('on');
+  applyFil();
+}
+function onSearch(){pg=1;applyFil();}
+
+function applyFil(){
+  const q=document.getElementById('si').value.trim().toLowerCase();
+  fil=all.filter(d=>d.name.toLowerCase().includes(q));
+  if(sort==='pts') fil.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
+  else             fil.sort((a,b)=>b.wrCount-a.wrCount||b.totalPoints-a.totalPoints);
+  renderTable();renderPager();
+}
+
+/* ══════ RENDER TABLE ══════ */
+function renderTable(){
+  if(!fil.length){
+    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="big">🔍</span>${lang==='jp'?'見つかりませんでした':'No players found.'}</div>`;
+    return;
+  }
+  const start=(pg-1)*PG;
+  const rows=fil.slice(start,start+PG).map((d,li)=>{
+    const gr=start+li+1;
+    const tc=gr===1?'top1':gr===2?'top2':gr===3?'top3':'topN';
+    const medal=gr===1?'👑':gr===2?'🥈':gr===3?'🥉':'';
+    const rk=getRank(d.totalPoints);
+    const subIdx=getSubTier(rk,d.totalPoints);
+    const url=s2u(mkShield(rk,44,subIdx));
+    // sub-tier pips (3 total, filled up to subIdx+1 from left)
+    const pipCount=3;
+    let pips='';
+    for(let i=0;i<pipCount;i++){
+      const filled=i<=subIdx;
+      pips+=`<div class="stpip ${filled?'filled':'empty'}" style="background:${filled?rk.col:'var(--t3)'};${filled?`--pc:${rk.col}`:''}"></div>`;
+    }
+    const chips=[
+      d.p1000?`<span class="chip c1000">1000+×${d.p1000}</span>`:'',
+      d.p750?`<span class="chip c750">750+×${d.p750}</span>`:'',
+      d.p500?`<span class="chip c500">500+×${d.p500}</span>`:'',
+      d.p100?`<span class="chip c100">100+×${d.p100}</span>`:'',
+      d.under100?`<span class="chip cu100">&lt;100×${d.under100}</span>`:'',
+    ].join('');
+    const rkName=lang==='jp'?rk.jp:rk.en;
+    const subName=rk.subs[subIdx][lang];
+    const ptsStyle=gr>3?`color:${rk.col};text-shadow:0 0 10px ${rk.col}55`:
+      gr===1?'color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.55)':
+      gr===2?'color:#c8c8d4':'color:#e8874a';
+    return `
+    <tr class="rrow ${tc}" style="animation-delay:${li*.028}s" onclick="openModal(${d.globalRank-1})">
+      <td><span class="rnum">${gr}</span></td>
+      <td>
+        <div class="pcell">
+          <div class="shw" style="--sg:${rk.glow}">
+            <img class="shi" src="${url}" alt="${rkName}">
+          </div>
+          <div>
+            <div class="pname">${medal?`<span class="crown">${medal}</span>`:''}${esc(d.name)}</div>
+            <span class="prank-lbl" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}28">${rkName} ${subName}</span>
+            <div class="subtier">${pips}</div>
+          </div>
+        </div>
+      </td>
+      <td class="cc"><div class="cats">${chips||`<span style="color:var(--t3);font-size:.7rem">—</span>`}</div></td>
+      <td><div class="wrc">${d.wrCount}</div></td>
+      <td><div class="ptv" style="${ptsStyle}">${d.totalPoints}</div></td>
+    </tr>`;
+  }).join('');
+
+  const thPl=lang==='jp'?'プレイヤー':'Player';
+  const thCa=lang==='jp'?'カテゴリ':'WR Breakdown';
+  const thWr=lang==='jp'?'WR数':'WRs';
+  const thPt=lang==='jp'?'ポイント':'Points';
+  document.getElementById('tc').innerHTML=`
+  <table class="rt">
+    <thead><tr>
+      <th class="c" style="width:48px">#</th><th>${thPl}</th>
+      <th class="c cc">${thCa}</th><th class="c">${thWr}</th><th class="c">${thPt}</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+/* ══════ MODAL ══════ */
+function openModal(idx){
+  const d=all[idx];if(!d)return;
+  const rk=getRank(d.totalPoints);
+  const subIdx=getSubTier(rk,d.totalPoints);
+  const rkName=lang==='jp'?rk.jp:rk.en;
+  const subName=rk.subs[subIdx][lang];
+  const url=s2u(mkShield(rk,64,subIdx));
+
+  // position in all players (points-sorted)
+  const pos=d.globalRank;
+  const total=all.length;
+  const pct=Math.round((1-(pos-1)/total)*100);
+
+  // rank range players (same rank)
+  const sameRank=all.filter(x=>getRank(x.totalPoints).id===rk.id);
+  const posInRank=sameRank.findIndex(x=>x.name===d.name)+1;
+  const totalInRank=sameRank.length;
+
+  // progress within rank (how far to next rank)
+  const nextRank=RANKS[RANKS.indexOf(rk)-1];
+  const prevMin=rk.minPts;
+  const nextMin=nextRank?nextRank.minPts:rk.minPts+50;
+  const progressPct=nextRank
+    ?Math.min(100,Math.round(((d.totalPoints-prevMin)/(nextMin-prevMin))*100))
+    :100;
+
+  // sub-tier cards
+  const stCards=rk.subs.map((s,i)=>{
+    const isCurrent=i===subIdx;
+    const range=i===0?(nextRank?`${s.min}–${nextMin-1}pt`:`${s.min}pt+`):
+                i===rk.subs.length-1?`${prevMin}–${rk.subs[i-1].min-1}pt`:`${s.min}–${rk.subs[i-1].min-1}pt`;
+    return `<div class="stier-card${isCurrent?' current':''}" style="--pc:${rk.col}">
+      <div class="stier-card-name" style="color:${isCurrent?rk.col:'var(--t2)'}">${lang==='jp'?rk.jp:rk.en} ${s[lang]}</div>
+      <div class="stier-card-range">${range}</div>
+      ${isCurrent?`<div class="stier-card-you">▶ ${esc(d.name)}</div>`:''}
+    </div>`;
+  }).join('');
+
+  const chips=[
+    d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',
+    d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',
+    d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',
+    d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',
+    d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:'',
+  ].join('');
+
+  const t=lang==='jp';
+
+  // ── 3-section progress bar for "next rank" ──
+  // subs order: [0]=I(highest), [1]=II, [2]=III(lowest) → III boundary = minPts, I boundary = nextRank.minPts
+  const seg3 = nextRank ? (() => {
+    // divide rank range into 3 equal segments matching sub-tiers III→II→I
+    const rangeTotal = nextMin - prevMin;
+    // sub boundaries from right to left: subs[0].min, subs[1].min, subs[2].min(=prevMin)
+    const b1 = rk.subs[1].min; // III→II boundary
+    const b2 = rk.subs[0].min; // II→I boundary
+    const p1 = Math.round((b1 - prevMin) / rangeTotal * 100);
+    const p2 = Math.round((b2 - prevMin) / rangeTotal * 100);
+    return { p1, p2, b1, b2 };
+  })() : null;
+
+  const tipLeft = Math.min(98, Math.max(2, progressPct));
+  const tipHtml = nextRank ? `<div class="rp-tip" id="rpTip" style="left:${tipLeft}%;--tipcolor:${rk.col}">${d.totalPoints}pt</div>` : '';
+  const divHtml = seg3 ? `
+    <div class="rp-div" style="left:${seg3.p1}%"></div>
+    <div class="rp-div" style="left:${seg3.p2}%"></div>` : '';
+  const segLblHtml = seg3 ? `
+    <div class="rp-seg-labels">
+      <div class="rp-seg-lbl" style="flex:${seg3.p1}">${lang==='jp'?rk.jp+' III':rk.en+' III'}<br>${prevMin}–${seg3.b1-1}pt</div>
+      <div class="rp-seg-lbl" style="flex:${seg3.p2-seg3.p1}">${lang==='jp'?rk.jp+' II':rk.en+' II'}<br>${seg3.b1}–${seg3.b2-1}pt</div>
+      <div class="rp-seg-lbl" style="flex:${100-seg3.p2}">${lang==='jp'?rk.jp+' I':rk.en+' I'}<br>${seg3.b2}–${nextMin-1}pt</div>
+    </div>` : '';
+
+  // ── point calculation explanation ──
+  const calcHtml = `
+    <details class="calc-wrap" style="margin-bottom:1.2rem">
+      <summary class="calc-summary">${t?'📐 ポイント計算方法':'📐 How Points Work'}</summary>
+      <div class="calc-body">
+        <div class="calc-section-title">${t?'WR カテゴリポイント':'WR Category Points'}</div>
+        <div class="calc-table">
+          <div class="ct-row"><span class="ct-tag c1000">1000+</span><span class="ct-desc">${t?'平均フィニッシュタイム 1000秒以上':'avg finish time ≥ 1000s'}</span><span class="ct-pts">+15 pt</span></div>
+          <div class="ct-row"><span class="ct-tag c750">750+</span><span class="ct-desc">${t?'平均フィニッシュタイム 750秒以上':'avg finish time ≥ 750s'}</span><span class="ct-pts">+10 pt</span></div>
+          <div class="ct-row"><span class="ct-tag c500">500+</span><span class="ct-desc">${t?'平均フィニッシュタイム 500秒以上':'avg finish time ≥ 500s'}</span><span class="ct-pts">+5 pt</span></div>
+          <div class="ct-row"><span class="ct-tag c100">100+</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒以上':'avg finish time ≥ 100s'}</span><span class="ct-pts">+2 pt</span></div>
+          <div class="ct-row"><span class="ct-tag cu100">&lt;100</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒未満':'avg finish time &lt; 100s'}</span><span class="ct-pts">+1 pt</span></div>
+        </div>
+        <div class="calc-note">${t?'💡 WR を 1 つ取得するごとに、そのコースの平均フィニッシュタイムに応じたポイントが加算されます。':'💡 Each WR grants points based on that level\'s average finish time.'}</div>
+        <div class="calc-section-title" style="margin-top:.9rem">${t?'ランク昇格条件':'Rank Thresholds'}</div>
+        <div class="calc-table">${RANKS.slice().reverse().map(r=>{
+          const nm=t?r.jp:r.en;
+          const nxt=RANKS[RANKS.indexOf(r)-1];
+          const rng=nxt?`${r.minPts}–${nxt.minPts-1} pt`:`${r.minPts}+ pt`;
+          return `<div class="ct-row"><span class="ct-rank-dot" style="background:${r.col}"></span><span class="ct-desc" style="color:${r.col};font-weight:800">${nm}</span><span class="ct-pts">${rng}</span></div>`;
+        }).join('')}</div>
+      </div>
+    </details>`;
+
+  document.getElementById('modalContent').innerHTML=`
+    <div class="mh">
+      <img class="mh-shield" src="${url}" alt="${rkName}" style="--mg:${rk.glow}">
+      <div class="mh-info">
+        <div class="mh-name" style="color:${rk.col}">🫘 ${esc(d.name)}</div>
+        <span class="mh-rank" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}30">${rkName} ${subName}</span>
+      </div>
+    </div>
+
+    <div class="rank-pos-wrap">
+      <div class="rp-label">${t?'全体順位':'Overall Ranking'}</div>
+      <div class="rp-bar-bg">
+        <div class="rp-bar-track" style="background:var(--edge)">
+          <div class="rp-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div>
+        </div>
+      </div>
+      <div class="rp-pct">${t?`全${total}人中 ${pos}位 (上位${100-pct}%)`:`#${pos} of ${total} players (Top ${100-pct}%)`}</div>
+    </div>
+
+    <div class="rank-pos-wrap">
+      <div class="rp-label">${t?'次のランクまで':'Progress to Next Rank'}</div>
+      <div class="rp-bar-bg">
+        <div class="rp-bar-track" style="background:var(--edge)">
+          <div class="rp-bar-fill" style="width:${progressPct}%;background:linear-gradient(90deg,${rk.b2},${rk.b3})"></div>
+          ${divHtml}
+        </div>
+        ${tipHtml}
+      </div>
+      ${segLblHtml}
+      <div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'🎉 最高ランク到達！':'🎉 Max Rank Achieved!')}</div>
+    </div>
+
+    <div class="stier-wrap">
+      <div class="stier-title">${t?'ランク内の階級':'Rank Divisions'}</div>
+      <div class="stier-grid">${stCards}</div>
+    </div>
+
+    <div class="mstats">
+      <div class="mstat"><div class="mstat-lbl">${t?'ポイント':'Points'}</div><div class="mstat-val" style="color:${rk.col}">${d.totalPoints}</div></div>
+      <div class="mstat"><div class="mstat-lbl">${t?'WR数':'WR Count'}</div><div class="mstat-val" style="color:var(--acc3)">${d.wrCount}</div></div>
+      <div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div>
+      <div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div>
+    </div>
+
+    ${chips?`<div class="mchips">${chips}</div>`:''}
+    ${calcHtml}
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect();}
+function closeModalDirect(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ══════ PAGER ══════ */
+function renderPager(){
+  const tot=Math.ceil(fil.length/PG);
+  if(tot<=1){document.getElementById('pg').innerHTML='';return;}
+  const ns=[];
+  for(let i=1;i<=tot;i++){
+    if(i===1||i===tot||Math.abs(i-pg)<=2)ns.push(i);
+    else if(ns[ns.length-1]!=='…')ns.push('…');
+  }
+  let h=`<button class="pgb" onclick="goP(${pg-1})" ${pg===1?'disabled':''}>◀</button>`;
+  ns.forEach(n=>{
+    if(n==='…')h+=`<span style="color:var(--t3);padding:0 4px;font-size:.8rem">…</span>`;
+    else h+=`<button class="pgb ${n===pg?'on':''}" onclick="goP(${n})">${n}</button>`;
+  });
+  h+=`<button class="pgb" onclick="goP(${pg+1})" ${pg===tot?'disabled':''}>▶</button>`;
+  document.getElementById('pg').innerHTML=h;
+}
+function goP(n){
+  const t=Math.ceil(fil.length/PG);if(n<1||n>t)return;
+  pg=n;renderTable();renderPager();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+let tt;
+function toast(m){
+  const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ESC to close modal
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModalDirect()});
+
+buildLegend();
+loadData();
+</script>
+</body>
+</html>

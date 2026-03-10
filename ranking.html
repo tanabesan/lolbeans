@@ -96,7 +96,7 @@ header{position:relative;z-index:10;text-align:center;padding:3.2rem 1rem 1.4rem
 .rl-item{display:flex;align-items:center;gap:.5rem;background:var(--card);border:1.5px solid var(--line);
   border-radius:10px;padding:.35rem .8rem .35rem .4rem;cursor:default;transition:transform .18s,box-shadow .18s;flex-shrink:0}
 .rl-item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
-.rl-icon{width:36px;height:44px;flex-shrink:0;object-fit:contain}
+.rl-icon{height:44px;width:auto;flex-shrink:0;object-fit:contain}
 .rl-name{display:block;font-weight:800;font-size:.73rem}
 .rl-pts{display:block;font-size:.62rem;opacity:.5;font-weight:700}
 
@@ -149,8 +149,8 @@ header{position:relative;z-index:10;text-align:center;padding:3.2rem 1rem 1.4rem
 
 /* player cell */
 .pcell{display:flex;align-items:center;gap:.65rem}
-.shw{width:44px;height:52px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center}
-.shi{width:44px;height:52px;object-fit:contain;transition:transform .22s,filter .22s;filter:drop-shadow(0 3px 7px var(--sg,rgba(0,0,0,.5)))}
+.shw{width:44px;height:52px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center;overflow:visible}
+.shi{width:auto;height:52px;object-fit:contain;transition:transform .22s,filter .22s;filter:drop-shadow(0 3px 7px var(--sg,rgba(0,0,0,.5)))}
 .rrow:hover .shi{transform:scale(1.18) rotate(-5deg);filter:drop-shadow(0 4px 14px var(--sg,rgba(0,0,0,.5))) brightness(1.12)}
 .pname{font-weight:900;font-size:.95rem;line-height:1.2;display:flex;align-items:center;gap:.3rem}
 .top1 .pname{color:#ffe066}.top2 .pname{color:#dde}.top3 .pname{color:#e8874a}.topN .pname{color:var(--t0)}
@@ -212,7 +212,7 @@ header{position:relative;z-index:10;text-align:center;padding:3.2rem 1rem 1.4rem
 
 /* modal header */
 .mh{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--line)}
-.mh-shield{width:64px;height:76px;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
+.mh-shield{height:76px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
 .mh-info{}
 .mh-name{font-family:var(--ffh);font-size:1.35rem;line-height:1.2}
 .mh-rank{font-size:.72rem;font-weight:800;padding:2px 9px;border-radius:5px;letter-spacing:.08em;text-transform:uppercase;margin-top:.3rem;display:inline-block}
@@ -317,8 +317,8 @@ details[open] .pt-acc-summary::after{transform:rotate(90deg)}
   .rbtn{padding:.5rem 1rem;font-size:.8rem}
   /* table row compact */
   .rrow td{padding:.6rem .6rem}
-  .shi{width:36px;height:42px}
-  .shw{width:36px;height:42px}
+  .shi{width:auto;height:42px}
+  .shw{width:36px;height:42px;overflow:visible}
   .pname{font-size:.85rem}
   .prank-lbl{font-size:.58rem}
   .wrc{font-size:1rem}
@@ -488,7 +488,6 @@ function getSubTier(rk,pts){
 }
 
 /* ══════ SHIELD SVG ══════ */
-// subIdx: 0=I(最高), 1=II, 2=III(最低)  filledStars = maxPips - subIdx
 function mkShield(r,sz=44,subIdx=null){
   const id=`${r.id}_${Math.random().toString(36).slice(2,7)}`;
   const icons={
@@ -532,21 +531,222 @@ function mkShield(r,sz=44,subIdx=null){
       <ellipse cx="0" cy="0" rx="4" ry="5.5" fill="${r.b3}" opacity=".35"/>
     </g>`,
   };
-  // 全ランク星3つ固定。subIdx: 0=I(最低)→1個点灯, 1=II→2個点灯, 2=III(最高)→3個点灯。null=全灯
+
+  // 盾中心は (22, 25) / viewBox 0 0 44 52 固定 / overflow:visible で装飾をはみ出させる
+  const si = subIdx===null ? 2 : subIdx; // 0=I 1=II 2=III
+  const cx=22, cy=25; // 盾中心
+
+  // ── 装飾（座標は 0 0 44 52 基準） ──
+  let deco='';
+
+  if(r.id==='brz'){
+    // ブロンズ: I=なし II=細いふちどり光 III=光るふちどり+粒子2個
+    if(si>=1){
+      deco+=`<path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z"
+        fill="none" stroke="${r.b3}" stroke-width="${si===1?1.2:2}" stroke-linejoin="round" opacity="${si===1?0.25:0.4}"/>`;
+    }
+    if(si>=2){
+      for(let i=0;i<3;i++){
+        const angle=[-30,0,30][i]*Math.PI/180;
+        const px=cx+Math.cos(angle-Math.PI/2)*26, py=cy+Math.sin(angle-Math.PI/2)*26;
+        deco+=`<circle cx="${px}" cy="${py}" r="1" fill="${r.b3}" opacity="0.7">
+          <animate attributeName="opacity" values="0.2;0.9;0.2" dur="${1.2+i*0.4}s" repeatCount="indefinite"/>
+        </circle>`;
+      }
+    }
+
+  }else if(r.id==='sil'){
+    // シルバー: I=きらめき3粒 II=7粒+細リング III=12粒+リング+光軸
+    const count=[3,7,12][si];
+    const pts=[[3,8],[41,7],[1,26],[43,25],[5,44],[39,43],[22,-2],[10,16],[34,16],[6,35],[38,35],[22,54],[14,-1]];
+    for(let i=0;i<count;i++){
+      const [px,py]=pts[i];
+      deco+=`<circle cx="${px}" cy="${py}" r="${0.8+i%2*0.4}" fill="${r.b3}" opacity="0.7">
+        <animate attributeName="opacity" values="0.1;0.9;0.1" dur="${1+i*0.28}s" repeatCount="indefinite"/>
+      </circle>`;
+    }
+    if(si>=1){
+      deco+=`<ellipse cx="${cx}" cy="${cy}" rx="21" ry="24.5" fill="none" stroke="${r.b3}" stroke-width="0.6" opacity="0.2">
+        <animate attributeName="opacity" values="0.08;0.28;0.08" dur="3s" repeatCount="indefinite"/>
+      </ellipse>`;
+    }
+    if(si>=2){
+      // 上下に光の線
+      deco+=`<line x1="${cx}" y1="-6" x2="${cx}" y2="2" stroke="${r.b3}" stroke-width="0.8" stroke-linecap="round" opacity="0.5">
+        <animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.8s" repeatCount="indefinite"/>
+      </line>`;
+    }
+
+  }else if(r.id==='gold'){
+    // ゴールド: I=リング1重 II=リング2重+コーナー輝き II=リング3重+コーナー輝き+脈動
+    const rings=si+1;
+    for(let i=0;i<rings;i++){
+      const rx2=20+i*3.5, ry2=23+i*4;
+      deco+=`<ellipse cx="${cx}" cy="${cy}" rx="${rx2}" ry="${ry2}" fill="none" stroke="${r.b3}" stroke-width="${0.9-i*0.15}" opacity="${0.35-i*0.05}">
+        <animate attributeName="opacity" values="0.08;${0.38-i*0.06};0.08" dur="${2.2+i*0.8}s" repeatCount="indefinite"/>
+        <animate attributeName="rx" values="${rx2};${rx2+1.2};${rx2}" dur="${2.2+i*0.8}s" repeatCount="indefinite"/>
+        <animate attributeName="ry" values="${ry2};${ry2+1.4};${ry2}" dur="${2.2+i*0.8}s" repeatCount="indefinite"/>
+      </ellipse>`;
+    }
+    if(si>=1){
+      // 四隅に小さな輝き
+      [[4,4],[40,4],[4,46],[40,46]].forEach(([px,py],i)=>{
+        deco+=`<circle cx="${px}" cy="${py}" r="1.2" fill="${r.b3}" opacity="0.6">
+          <animate attributeName="opacity" values="0.1;0.8;0.1" dur="${1.4+i*0.3}s" repeatCount="indefinite"/>
+          <animate attributeName="r" values="0.7;1.6;0.7" dur="${1.4+i*0.3}s" repeatCount="indefinite"/>
+        </circle>`;
+      });
+    }
+    if(si>=2){
+      // 上部に光の弧
+      deco+=`<path d="M10,0 Q22,-5 34,0" fill="none" stroke="${r.b3}" stroke-width="1" stroke-linecap="round" opacity="0.45">
+        <animate attributeName="opacity" values="0.15;0.6;0.15" dur="2s" repeatCount="indefinite"/>
+      </path>`;
+    }
+
+  }else if(r.id==='plat'||r.id==='dia'||r.id==='mst'||r.id==='gm'){
+    // 天使の翼：siに応じて羽根数・サイズ・輝きを増やす
+    const drawWing=(wx,wy,side,n,len,glowAlpha)=>{
+      let g='';
+      for(let i=0;i<n;i++){
+        const t=i/(n-1);
+        const deg=-90+t*80;
+        const rad=deg*Math.PI/180;
+        const l=len*(0.5+Math.sin((t*0.9+0.05)*Math.PI)*0.6);
+        const ex=-side*Math.cos(rad)*l*0.55 + Math.sin(rad)*(-l*0.1);
+        const ey=-Math.abs(Math.sin(rad))*l;
+        const hw=l*0.07;
+        const mx=ex*0.45 + side*hw*0.6;
+        const my=ey*0.45 - hw*0.4;
+        g+=`<path d="M0,${-hw*0.2} Q${mx},${my-hw*0.8} ${ex},${ey} Q${mx+side*hw*0.3},${my+hw*0.5} 0,${hw*0.2} Z"
+          fill="${r.b2}" stroke="${r.b3}" stroke-width="0.28" stroke-opacity="0.45" opacity="0.85"/>`;
+        g+=`<line x1="0" y1="0" x2="${ex*0.82}" y2="${ey*0.82}"
+          stroke="${r.b3}" stroke-width="0.45" stroke-linecap="round" opacity="0.6"/>`;
+        // IIIは各羽根の先端に輝き
+        if(glowAlpha>0){
+          g+=`<circle cx="${ex*0.88}" cy="${ey*0.88}" r="0.7" fill="${r.b3}" opacity="${glowAlpha}">
+            <animate attributeName="opacity" values="${glowAlpha*0.2};${glowAlpha};${glowAlpha*0.2}" dur="${1+i*0.18}s" repeatCount="indefinite"/>
+          </circle>`;
+        }
+      }
+      return `<g transform="translate(${wx},${wy})">${g}</g>`;
+    };
+
+    // siによって羽根数・サイズを変える
+    const baseCfgs={
+      plat:{n:[4,5,7], len:[8,10,13],  fy:30},
+      dia: {n:[5,6,8], len:[10,13,16], fy:29},
+      mst: {n:[6,7,9], len:[12,16,19], fy:28},
+      gm:  {n:[7,8,10],len:[14,19,22], fy:27},
+    };
+    const bc=baseCfgs[r.id];
+    const wn=bc.n[si], wlen=bc.len[si], fy=bc.fy;
+    const glowAlpha=si===0?0:si===1?0.35:0.7;
+
+    // IIIは2段（上下）、IIは上段のみ追加、Iは1段
+    const rowYOffsets=[0,-wlen*0.3, wlen*0.25];
+    const rows=si+1;
+    for(let row=0;row<rows;row++){
+      const ly=fy+rowYOffsets[row];
+      const rowLen=row===0?wlen:wlen*0.72;
+      const rowN=row===0?wn:Math.max(3,wn-2);
+      deco+=drawWing(4,  ly,  1, rowN, rowLen, row===0?glowAlpha:glowAlpha*0.6);
+      deco+=drawWing(40, ly, -1, rowN, rowLen, row===0?glowAlpha:glowAlpha*0.6);
+    }
+
+    // ランク固有の追加装飾（siで豪華さ変化）
+    if(r.id==='plat'){
+      // IIIは上部に光輪
+      if(si>=2){
+        deco+=`<ellipse cx="${cx}" cy="${cy-4}" rx="18" ry="5" fill="none" stroke="${r.b3}" stroke-width="0.5" opacity="0.2">
+          <animate attributeName="opacity" values="0.05;0.3;0.05" dur="2.5s" repeatCount="indefinite"/>
+        </ellipse>`;
+      }
+
+    }else if(r.id==='dia'){
+      // II以上：上部宝石
+      if(si>=1) deco+=`<polygon points="${cx},-3 ${cx+2.5},0 ${cx},5 ${cx-2.5},0" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.5" opacity="0.9">
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+      </polygon>`;
+      // III：側面にも宝石
+      if(si>=2){
+        deco+=`<polygon points="-3,20 0,24 -3,28 -6,24" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.4" opacity="0.8"/>`;
+        deco+=`<polygon points="47,20 50,24 47,28 44,24" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.4" opacity="0.8"/>`;
+      }
+
+    }else if(r.id==='mst'){
+      // I: 小魔法陣、II: 中、III: 大+二重
+      const hr=19+si*3;
+      const hp=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i-Math.PI/6;return `${cx+Math.cos(a)*hr},${cy+Math.sin(a)*hr}`;}).join(' ');
+      deco=`<polygon points="${hp}" fill="none" stroke="${r.b2}" stroke-width="${0.4+si*0.15}" opacity="${0.15+si*0.08}">
+        <animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="${10-si*2}s" repeatCount="indefinite"/>
+      </polygon>`+deco;
+      if(si>=2){
+        const hr2=hr+6;
+        const hp2=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i;return `${cx+Math.cos(a)*hr2},${cy+Math.sin(a)*hr2}`;}).join(' ');
+        deco=`<polygon points="${hp2}" fill="none" stroke="${r.b3}" stroke-width="0.35" opacity="0.18">
+          <animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="-360 ${cx} ${cy}" dur="6s" repeatCount="indefinite"/>
+        </polygon>`+deco;
+      }
+
+    }else if(r.id==='gm'){
+      // 炎: I=3本 II=5本 III=7本
+      const fc=si===0?3:si===1?5:7;
+      for(let i=0;i<fc;i++){
+        const fx=10+i*(24/(fc-1)), fh=4+Math.sin(i*1.1)*2;
+        deco+=`<path d="M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52" fill="${i%2?r.b2:r.b1}" opacity="${0.35+si*0.1}">
+          <animate attributeName="d" values="M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52;M${fx},52 Q${fx-2},${48-fh} ${fx},${45-fh} Q${fx+2},${48-fh} ${fx},52;M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52" dur="${0.7+i*0.12}s" repeatCount="indefinite"/>
+        </path>`;
+      }
+      // 光輪: II以上
+      if(si>=1){
+        deco+=`<circle cx="${cx}" cy="${cy}" r="${21+si*2}" fill="none" stroke="${r.b1}" stroke-width="${0.6+si*0.3}" opacity="0.15">
+          <animate attributeName="opacity" values="0.05;0.25;0.05" dur="2.2s" repeatCount="indefinite"/>
+          <animate attributeName="r" values="${20+si*2};${23+si*2};${20+si*2}" dur="2.2s" repeatCount="indefinite"/>
+        </circle>`;
+      }
+      // 輝き粒子: I=2個 II=4個 III=6個
+      const sc=si===0?2:si===1?4:6;
+      for(let i=0;i<sc;i++){
+        const sx=8+i*(28/(sc-1)), sy=-3+i%2*4;
+        deco+=`<circle cx="${sx}" cy="${sy}" r="${0.7+si*0.15}" fill="${r.b3}">
+          <animate attributeName="opacity" values="0.1;1;0.1" dur="${0.8+i*0.25}s" repeatCount="indefinite"/>
+          <animate attributeName="r" values="${0.4+si*0.1};${1.2+si*0.2};${0.4+si*0.1}" dur="${0.8+i*0.25}s" repeatCount="indefinite"/>
+        </circle>`;
+      }
+    }
+  } // end if(r.id===...)
+
+  // 星ピップ
   const maxPips=3;
   const filledPips=subIdx===null?3:subIdx+1;
   let pips='';
   {
     const sp=9,ox=22-(maxPips-1)*sp/2;
     for(let i=0;i<maxPips;i++){
-      const cx=ox+i*sp;
+      const pcx=ox+i*sp;
       const filled=i<filledPips;
       const fillCol=filled?r.b3:'rgba(255,255,255,0.12)';
       const strokeCol=filled?r.b1:'rgba(255,255,255,0.18)';
-      pips+=`<polygon points="${cx},40 ${cx+1.6},43.2 ${cx+5.5},43.2 ${cx+2.5},45.2 ${cx+3.4},48.5 ${cx},46.3 ${cx-3.4},48.5 ${cx-2.5},45.2 ${cx-5.5},43.2 ${cx-1.6},43.2" fill="${fillCol}" stroke="${strokeCol}" stroke-width=".6"/>`;
+      pips+=`<polygon points="${pcx},40 ${pcx+1.6},43.2 ${pcx+5.5},43.2 ${pcx+2.5},45.2 ${pcx+3.4},48.5 ${pcx},46.3 ${pcx-3.4},48.5 ${pcx-2.5},45.2 ${pcx-5.5},43.2 ${pcx-1.6},43.2" fill="${fillCol}" stroke="${strokeCol}" stroke-width=".6"/>`;
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${sz}" height="${Math.round(sz*1.18)}" viewBox="0 0 44 52">
+
+  // ランクに応じた余白（装飾がはみ出す分）
+  // pad = [left, right, top, bottom]
+  const padMap = {
+    brz:[0,0,0,0], sil:[4,4,5,2], gold:[6,6,6,4],
+    plat:[12,12,5,4], dia:[14,14,8,4],
+    mst:[16,16,8,6], gm:[18,18,12,10]
+  };
+  const [pl,pr,pt,pb] = padMap[r.id]||[0,0,0,0];
+  const vbW=44+pl+pr, vbH=52+pt+pb;
+  const ox=pl, oy=pt;
+  // szは盾本体(44px幅)の表示サイズ → SVG全体はその比率で拡大
+  const scale=sz/44;
+  const svgW=Math.round(vbW*scale), svgH=Math.round(vbH*scale);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${vbW} ${vbH}">
   <defs>
     <linearGradient id="bg_${id}" x1="0%" y1="0%" x2="60%" y2="100%">
       <stop offset="0%" stop-color="${r.b1}"/><stop offset="55%" stop-color="${r.b2}"/><stop offset="100%" stop-color="${r.bg}"/>
@@ -554,19 +754,22 @@ function mkShield(r,sz=44,subIdx=null){
     <linearGradient id="sh_${id}" x1="10%" y1="0%" x2="90%" y2="100%">
       <stop offset="0%" stop-color="white" stop-opacity=".28"/><stop offset="100%" stop-color="white" stop-opacity="0"/>
     </linearGradient>
-    <filter id="gf_${id}" x="-35%" y="-25%" width="170%" height="170%">
+    <filter id="gf_${id}" x="-50%" y="-40%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <clipPath id="cl_${id}"><path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z"/></clipPath>
+    <clipPath id="cl_${id}"><path d="M${22+ox},${2+oy} L${40+ox},${9+oy} L${40+ox},${24+oy} Q${40+ox},${38+oy} ${22+ox},${48+oy} Q${4+ox},${38+oy} ${4+ox},${24+oy} L${4+ox},${9+oy} Z"/></clipPath>
   </defs>
-  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="${r.b2}" opacity=".22" filter="url(#gf_${id})" transform="translate(0,3) scale(1.06,1.04) translate(-1.3,-1.3)"/>
-  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b3}" stroke-width="3.5" stroke-linejoin="round" opacity=".9"/>
-  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b1}" stroke-width="5.5" stroke-linejoin="round" opacity=".35"/>
-  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#bg_${id})"/>
-  <path d="M22,5.5 L37,11.5 L37,24 Q37,36 22,45 Q7,36 7,24 L7,11.5 Z" fill="none" stroke="${r.b3}" stroke-width="1" opacity=".3"/>
-  <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#sh_${id})" clip-path="url(#cl_${id})"/>
-  ${icons[r.icon]||''}${pips}
-  <path d="M14,7 Q22,4 30,7" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".28"/>
+  ${deco ? `<g transform="translate(${ox},${oy})">${deco}</g>` : ''}
+  <g transform="translate(${ox},${oy})">
+    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="${r.b2}" opacity=".22" filter="url(#gf_${id})" transform="translate(0,3) scale(1.06,1.04) translate(-1.3,-1.3)"/>
+    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b3}" stroke-width="3.5" stroke-linejoin="round" opacity=".9"/>
+    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b1}" stroke-width="5.5" stroke-linejoin="round" opacity=".35"/>
+    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#bg_${id})"/>
+    <path d="M22,5.5 L37,11.5 L37,24 Q37,36 22,45 Q7,36 7,24 L7,11.5 Z" fill="none" stroke="${r.b3}" stroke-width="1" opacity=".3"/>
+    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#sh_${id})" clip-path="url(#cl_${id})"/>
+    ${icons[r.icon]||''}${pips}
+    <path d="M14,7 Q22,4 30,7" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".28"/>
+  </g>
 </svg>`;
 }
 const s2u=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);

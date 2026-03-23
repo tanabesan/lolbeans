@@ -21,12 +21,13 @@
   --tm-ffj:   'M PLUS Rounded 1c', sans-serif;
 }
 
-/* ── バー本体（画面下部固定） ── */
+/* ── バー本体（右上固定） ── */
 #tool-menu {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 16px;
+  right: 16px;
+  left: auto;
+  transform: none;
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -134,13 +135,14 @@
   color: var(--tm-t0);
 }
 
-/* ── ページ下部余白（メニューに隠れないよう） ── */
-body { padding-bottom: 72px !important; }
+/* ── ページ上部余白（メニューに隠れないよう） ── */
+body { padding-top: 72px !important; }
 
 /* ── モバイル ── */
 @media (max-width: 600px) {
   #tool-menu {
-    bottom: 12px;
+    top: 10px;
+    right: 10px;
     padding: 5px 6px;
     gap: 2px;
     border-radius: 14px;

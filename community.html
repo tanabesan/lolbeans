@@ -63,17 +63,35 @@
     .ov-stat.fin i{color:var(--acc3)}
     .ov-date{font-size:.72rem;color:var(--t2);text-align:right;margin-top:6px}
     #level-grid.list-view{display:flex;flex-direction:column;gap:12px}
-    #level-grid.list-view .level-grid-card{flex-direction:row;align-items:stretch}
-    #level-grid.list-view .card-display{padding-top:0;width:190px;height:120px;flex-shrink:0}
-    #level-grid.list-view .card-thumb{position:relative;width:100%;height:100%;filter:brightness(.9)}
-    #level-grid.list-view .card-type-icon{top:50%;left:170px;right:auto;transform:translateY(-50%);width:30px;height:30px}
-    #level-grid.list-view .level-grid-card:hover .card-type-icon{transform:translateY(-50%) scale(1.1)}
-    #level-grid.list-view .card-overlay{position:relative;background:none;padding:16px 20px;flex:1;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-content:center;gap:6px 20px;color:var(--t0)}
-    #level-grid.list-view .ov-title{grid-column:1;grid-row:1;font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #level-grid.list-view .ov-author{grid-column:1;grid-row:2;margin:0}
+    /* カード全体を横並びに */
+    #level-grid.list-view .level-grid-card{flex-direction:row;align-items:stretch;overflow:visible}
+    /* card-display = サムネイル部分のラッパー（固定サイズ） */
+    #level-grid.list-view .card-display{
+      padding-top:0;width:200px;height:130px;flex-shrink:0;
+      position:relative;overflow:hidden;border-radius:12px 0 0 12px;
+    }
+    /* サムネイル: absolute で card-display を埋める */
+    #level-grid.list-view .card-thumb{
+      position:absolute;inset:0;width:100%;height:100%;
+      background-size:cover;background-position:center;filter:brightness(.9);
+    }
+    /* オーバーレイ（テキスト部分）: card-display の外に出して横に並べる */
+    #level-grid.list-view .card-overlay{
+      position:static;background:none;padding:16px 20px;flex:1;
+      display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;
+      align-content:center;gap:6px 20px;color:var(--t0);
+    }
+    #level-grid.list-view .ov-title{grid-column:1;grid-row:1;font-size:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t0)}
+    #level-grid.list-view .ov-author{grid-column:1;grid-row:2;margin:0;color:var(--t1)}
     #level-grid.list-view .ov-stats{grid-column:2;grid-row:1;justify-content:flex-end;gap:16px}
     #level-grid.list-view .ov-date{grid-column:2;grid-row:2;text-align:right;margin:0}
-    #level-grid.list-view .new-badge{top:5px;left:5px;font-size:.65rem}
+    #level-grid.list-view .new-badge{top:6px;left:6px;font-size:.65rem}
+    /* type icon: サムネイル右端中央 */
+    #level-grid.list-view .card-type-icon{
+      position:absolute;top:50%;right:8px;left:auto;
+      transform:translateY(-50%);width:28px;height:28px;z-index:15;
+    }
+    #level-grid.list-view .level-grid-card:hover .card-type-icon{transform:translateY(-50%) scale(1.1)}
     .pagination{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:36px;flex-wrap:wrap}
     .page-btn{background:var(--panel);border:1px solid var(--line);color:var(--t1);padding:7px 14px;border-radius:9px;cursor:pointer;font-family:var(--ff);font-size:.82rem;font-weight:800;transition:all .2s}
     .page-btn:hover:not(:disabled):not(.active){background:var(--edge);border-color:var(--acc3);color:var(--t0)}
@@ -109,16 +127,43 @@
     .detail-item strong i{margin-right:5px;color:var(--acc3);opacity:.8}
     .detail-item span{color:var(--t0);font-weight:800;font-size:.95rem;word-break:break-all}
     .detail-item span.wr-holder{color:var(--acc3)}
+    /* ── DEV MODE ── */
+    .dev-toggle{background:var(--edge);border:1px solid var(--line);border-radius:10px;color:var(--t2);font-family:var(--ff);font-size:.76rem;font-weight:800;padding:7px 13px;cursor:pointer;height:40px;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+    .dev-toggle:hover{color:var(--t0);border-color:var(--acc)}
+    .dev-toggle.dev-on{background:rgba(255,210,63,.12);border-color:var(--acc);color:var(--acc)}
+    .dev-section{margin-top:16px;border:1px solid rgba(255,210,63,.25);border-radius:12px;overflow:hidden}
+    .dev-section-hdr{background:rgba(255,210,63,.08);padding:9px 14px;font-family:var(--ffh);font-size:.9rem;color:var(--acc);letter-spacing:.06em;display:flex;align-items:center;gap:7px}
+    .dev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px}
+    .dev-item{background:var(--card);border-radius:8px;padding:7px 10px;border-left:2px solid var(--acc)}
+    .dev-item strong{display:block;font-size:.62rem;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+    .dev-item span{font-size:.82rem;font-weight:800;color:var(--acc);word-break:break-all;font-family:monospace}
+    .dev-json{padding:0 12px 12px}
+    .dev-json pre{background:var(--card);border-radius:8px;padding:10px 12px;font-size:.72rem;color:var(--t1);overflow-x:auto;line-height:1.5;font-family:monospace;border:1px solid var(--line)}
+    .dev-copy{background:var(--edge);border:1px solid var(--line);color:var(--t1);border-radius:6px;padding:4px 10px;font-size:.72rem;cursor:pointer;font-family:var(--ff);font-weight:800;float:right;margin-bottom:6px;transition:all .2s}
+    .dev-copy:hover{border-color:var(--acc3);color:var(--acc3)}
+    .dev-copy.copied{border-color:var(--acc);color:var(--acc)}
+    @media(max-width:640px){.dev-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:1000px){#level-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:640px){
       #level-grid{grid-template-columns:1fr}
+      /* スマホはリストも縦積みに戻す */
       #level-grid.list-view .level-grid-card{flex-direction:column}
-      #level-grid.list-view .card-display{width:100%;height:auto;padding-top:56.25%}
+      #level-grid.list-view .card-display{
+        width:100%;height:auto;padding-top:52%;border-radius:12px 12px 0 0;
+      }
       #level-grid.list-view .card-thumb{position:absolute;inset:0}
-      #level-grid.list-view .card-type-icon{top:12px;left:auto;right:12px;transform:none;width:34px;height:34px}
+      #level-grid.list-view .card-type-icon{
+        position:absolute;top:10px;right:10px;left:auto;
+        transform:none;width:32px;height:32px;
+      }
       #level-grid.list-view .level-grid-card:hover .card-type-icon{transform:scale(1.1)}
-      #level-grid.list-view .card-overlay{display:flex;flex-direction:column;padding:14px;gap:4px}
-      #level-grid.list-view .ov-stats{justify-content:flex-start}
+      #level-grid.list-view .card-overlay{
+        position:static;display:flex;flex-direction:column;
+        padding:12px 14px;gap:4px;background:none;color:var(--t0);
+      }
+      #level-grid.list-view .ov-title{font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      #level-grid.list-view .ov-stats{justify-content:flex-start;margin-top:2px}
+      #level-grid.list-view .ov-date{text-align:left;margin-top:2px}
       .card-details{width:100%;max-width:100%;height:100vh;max-height:100vh;border-radius:0}
       .modal-cw{max-height:calc(100vh - 130px);padding:0 16px 16px}
       .modal-hdr{flex-direction:column;align-items:flex-start}
@@ -191,6 +236,7 @@
             </div>
         </div>
         <button class="search-btn" id="search-button"><i class="fas fa-search"></i> 検索</button>
+        <button class="dev-toggle" id="devToggle">🛠 Dev</button>
     </div>
 
     <section id="level-wrapper">
@@ -206,15 +252,33 @@ const THUMB_URL='https://lolbeans.io/ui/level-thumbnails/';
 const GAS_URL='https://script.google.com/macros/s/AKfycbxdO6Xv8VFLkjc5vrX1hy3u4DQWEP28Ht8sX8Rc1kKb9sGBap0RdqAF1TXHPEBrIAA8vA/exec';
 const PER_PAGE=12;
 const LT={'-1':{ja:'すべて',en:'All',icon:'https://tanabesan.github.io/lolbeans/file/page/all.png'},'0':{ja:'サンドボックス',en:'Sandbox',icon:'https://tanabesan.github.io/lolbeans/file/page/sandbox.png'},'1':{ja:'タイムレース',en:'Timed Race',icon:'https://tanabesan.github.io/lolbeans/file/page/timed.png'},'2':{ja:'競争レース',en:'Competitive Race',icon:'https://tanabesan.github.io/lolbeans/file/page/competitive.png'},'3':{ja:'エリミネーション',en:'Elimination',icon:'https://tanabesan.github.io/lolbeans/file/page/elimination.png'}};
-let lang='ja',page=0,maxP=0,activeEl=null,listView=localStorage.getItem('viewMode')==='list',pMode=false,pName='';
+let lang='ja',page=0,maxP=0,activeEl=null,listView=localStorage.getItem('viewMode')==='list',pMode=false,pName='',devMode=false;
 const T={ja:{title:'LOLBeans コース一覧',h1:'🗺️ コース一覧',sub:'ユーザーが作成したLOLBeansのカスタムマップ',loading:'データをロード中...',lSearch:'コース・作者名検索',lSort:'並び替え',lType:'コース種別',lFin:'クリア率',lView:'表示',btnS:'検索',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',tM1:'すべて',t0:'サンドボックス',t1:'タイムレース',t2:'競争レース',t3:'エリミネーション',f0:'すべて',f1:'低い (<30%)',f2:'普通 (30〜70%)',f3:'高い (>70%)',author:'作者',desc:'概要',votes:'投票数',rating:'平均評価',finPct:'クリア率',starts:'プレイ回数',players:'総プレイヤー数',avgTime:'平均クリア時間',wr:'世界記録 (WR)',wrHolder:'WR保持者',date:'公開日',pi:(c,m)=>`${c+1} / ${m}`,prev:'前へ',next:'次へ',noD:'説明がありません。',noL:'該当するコースが見つかりませんでした。',err:'データの取得に失敗しました。',pbSfx:' のWR保持コース',pbCnt:n=>`WR ${n} コース`,pbLoad:n=>`${n} のWRコースを取得中...`,pbNone:'WR保持コースが見つかりませんでした。',pbBack:'✕ 通常表示に戻る'},en:{title:'LOLBeans Course List',h1:'🗺️ Course List',sub:'Custom maps for LOLBeans created by the community',loading:'Loading data...',lSearch:'Search courses / authors',lSort:'Sort By',lType:'Course Type',lFin:'Finish %',lView:'View',btnS:'Search',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',tM1:'All',t0:'Sandbox',t1:'Timed Race',t2:'Competitive Race',t3:'Elimination',f0:'All',f1:'Low (<30%)',f2:'Average (30–70%)',f3:'High (>70%)',author:'Author',desc:'Description',votes:'Votes',rating:'Avg. Rating',finPct:'Finish %',starts:'Starts',players:'Players',avgTime:'Avg. Finish Time',wr:'World Record',wrHolder:'WR Holder',date:'Publish Date',pi:(c,m)=>`Page ${c+1} of ${m}`,prev:'Prev',next:'Next',noD:'No description.',noL:'No courses found.',err:'Failed to fetch data.',pbSfx:"'s WR Courses",pbCnt:n=>`${n} WR courses`,pbLoad:n=>`Loading ${n}'s WR courses...`,pbNone:'No WR courses found.',pbBack:'✕ Back'}};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function mkDevSection(lv){
+  if(!devMode)return'';
+  const fields=[
+    ['levelId',lv.levelId],['type (raw)',lv.type],['votes',lv.votes],
+    ['rating (raw)',lv.rating],['finishPercent',lv.finishPercent],
+    ['avgFinishTime',lv.averageFinishTime],['wr (raw)',lv.wr],
+    ['wrDate',lv.wrDate||'N/A'],['date (raw)',lv.date],['starts',lv.starts],
+    ['distinctPlayers',lv.distinctPlayers],
+  ];
+  const items=fields.map(([k,v])=>`<div class="dev-item"><strong>${k}</strong><span>${v}</span></div>`).join('');
+  const json=JSON.stringify(lv,null,2).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `<div class="dev-section"><div class="dev-section-hdr">🛠 Dev Info — levelId: ${lv.levelId}</div><div class="dev-grid">${items}</div><div class="dev-json"><button class="dev-copy" onclick="copyDevJson(this,${lv.levelId})">📋 Copy JSON</button><pre id="devjson-${lv.levelId}">${json}</pre></div></div>`;
+}
+function copyDevJson(btn,id){
+  const pre=document.getElementById('devjson-'+id);
+  if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{btn.textContent='✅ Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='📋 Copy JSON';btn.classList.remove('copied')},1500)});
+}
 const fDate=(d,l)=>{try{return new Date(d).toLocaleString(l==='ja'?'ja-JP':'en-US',{year:'numeric',month:'2-digit',day:'2-digit'})}catch{return String(d).slice(0,10)}};
 const fTime=s=>{if(s==null)return'N/A';const ms=Math.floor((s*1000)%1000).toString().padStart(3,'0');return`${Math.floor(s/60)}:${(Math.floor(s)%60).toString().padStart(2,'0')}.${ms}`};
 const DI={rating:'fas fa-star',wr:'fas fa-trophy',wrHolder:'fas fa-crown',avgTime:'fas fa-stopwatch',starts:'fas fa-gamepad',votes:'fas fa-heart',players:'fas fa-users',date:'fas fa-calendar-alt'};
 function mkDI(key,val,isWr){const t=T[lang];const lbl={rating:t.rating,wr:t.wr,wrHolder:t.wrHolder,avgTime:t.avgTime,starts:t.starts,votes:t.votes,players:t.players,date:t.date}[key]||key;const dv=['starts','votes','players'].includes(key)?Number(val).toLocaleString():val;return`<div class="detail-item"><strong><i class="${DI[key]||'fas fa-info-circle'}"></i>${lbl}</strong><span class="${isWr?'wr-holder':''}">${dv}</span></div>`}
 function closeModal(){const bd=document.getElementById('modal-backdrop');if(activeEl){const id=activeEl.dataset.cardId;const orig=document.querySelector(`.level-grid-card[data-card-id="${id}"]`);activeEl.classList.remove('active-modal');if(orig){orig.querySelector('.card-display').appendChild(activeEl);orig.classList.remove('open')}activeEl=null}if(bd)bd.classList.remove('active');document.body.style.overflow=''}
-function mkCard(lv,idx){const t=T[lang];const isNew=Math.ceil(Math.abs(Date.now()-new Date(lv.date))/86400000)<=30;const cid=`card-${lv.levelId}-${idx}`;const r=lv.rating??0;const fp=((lv.finishPercent??0)*100).toFixed(0);const th=`${THUMB_URL}${lv.levelId}.png`;const lt2=LT[lv.type]||LT['0'];const tn=lt2[lang];const pd=fDate(lv.date,lang);const desc=esc(lv.description||t.noD);const card=document.createElement('div');card.className='level-grid-card';card.dataset.cardId=cid;card.innerHTML=`<div class="card-display">${isNew?'<div class="new-badge">NEW</div>':''}<div class="card-thumb" style="background-image:url('${th}')"></div><div class="card-type-icon" title="${tn}"><img src="${lt2.icon}" alt="${tn}"></div><div class="card-overlay"><div class="ov-title" title="${esc(lv.name)}">${esc(lv.name)}</div><div class="ov-author"><i class="fas fa-pen-nib"></i> ${esc(lv.author||'N/A')}</div><div class="ov-stats"><span class="ov-stat"><i class="fas fa-star"></i>${r.toFixed(2)}</span><span class="ov-stat fin"><i class="fas fa-chart-bar"></i>${fp}%</span></div><div class="ov-date">${pd}</div></div><div class="card-details" data-card-id="${cid}"><div class="modal-banner" style="background-image:url('${th}')"><div class="modal-banner-overlay"></div><button class="modal-close-btn"><i class="fas fa-times"></i></button></div><div class="modal-cw"><div class="modal-hdr"><div class="modal-info"><h2>${esc(lv.name)}</h2><p><i class="fas fa-user-circle"></i> ${esc(lv.author||'N/A')}</p><div class="modal-stats"><span><i class="fas fa-star"></i>${r.toFixed(2)}</span><span><i class="fas fa-chart-bar"></i>${fp}%</span><span class="gt-icon"><img src="${lt2.icon}" alt=""> ${tn}</span></div></div></div><div class="modal-body"><div class="modal-left"><div class="desc-box"><strong><i class="fas fa-align-left"></i> ${t.desc}</strong><p>${desc}</p></div></div><div class="modal-right"><div class="detail-grid">${mkDI('rating',r,false)}${mkDI('wr',fTime(lv.wr),true)}${mkDI('wrHolder',esc(lv.wrHolder||'N/A'),false)}${mkDI('avgTime',fTime(lv.averageFinishTime),false)}${mkDI('starts',lv.starts,false)}${mkDI('votes',lv.votes,false)}${mkDI('players',lv.distinctPlayers,false)}${mkDI('date',pd,false)}</div></div></div></div></div></div>`;
+function mkCard(lv,idx){const t=T[lang];const isNew=Math.ceil(Math.abs(Date.now()-new Date(lv.date))/86400000)<=30;const cid=`card-${lv.levelId}-${idx}`;const r=lv.rating??0;const fp=((lv.finishPercent??0)*100).toFixed(0);const th=`${THUMB_URL}${lv.levelId}.png`;const lt2=LT[lv.type]||LT['0'];const tn=lt2[lang];const pd=fDate(lv.date,lang);const desc=esc(lv.description||t.noD);const card=document.createElement('div');card.className='level-grid-card';card.dataset.cardId=cid;card.innerHTML=`<div class="card-display">${isNew?'<div class="new-badge">NEW</div>':''}<div class="card-thumb" style="background-image:url('${th}')"></div><div class="card-type-icon" title="${tn}"><img src="${lt2.icon}" alt="${tn}"></div><div class="card-details" data-card-id="${cid}"><div class="modal-banner" style="background-image:url('${th}')"><div class="modal-banner-overlay"></div><button class="modal-close-btn"><i class="fas fa-times"></i></button></div><div class="modal-cw"><div class="modal-hdr"><div class="modal-info"><h2>${esc(lv.name)}</h2><p><i class="fas fa-user-circle"></i> ${esc(lv.author||'N/A')}</p><div class="modal-stats"><span><i class="fas fa-star"></i>${r.toFixed(2)}</span><span><i class="fas fa-chart-bar"></i>${fp}%</span><span class="gt-icon"><img src="${lt2.icon}" alt=""> ${tn}</span></div></div></div><div class="modal-body"><div class="modal-left"><div class="desc-box"><strong><i class="fas fa-align-left"></i> ${t.desc}</strong><p>${desc}</p></div></div><div class="modal-right"><div class="detail-grid">${mkDI('rating',r,false)}${mkDI('wr',fTime(lv.wr),true)}${mkDI('wrHolder',esc(lv.wrHolder||'N/A'),false)}${mkDI('avgTime',fTime(lv.averageFinishTime),false)}${mkDI('starts',lv.starts,false)}${mkDI('votes',lv.votes,false)}${mkDI('players',lv.distinctPlayers,false)}${mkDI('date',pd,false)}</div></div></div></div></div></div><div class=\"card-overlay\"><div class=\"ov-title\" title=\"${esc(lv.name)}\">${esc(lv.name)}</div><div class=\"ov-author\"><i class=\"fas fa-pen-nib\"></i> ${esc(lv.author||'N/A')}</div><div class=\"ov-stats\"><span class=\"ov-stat\"><i class=\"fas fa-star\"></i>${r.toFixed(2)}</span><span class=\"ov-stat fin\"><i class=\"fas fa-chart-bar\"></i>${fp}%</span></div><div class=\"ov-date\">${pd}</div></div>`;
 const cd=card.querySelector('.card-display'),de=card.querySelector('.card-details');
 card.querySelector('.modal-close-btn').addEventListener('click',e=>{e.stopPropagation();closeModal()});
 cd.addEventListener('click',e=>{if(e.target.closest('.card-details'))return;const bd=document.getElementById('modal-backdrop');if(activeEl&&activeEl!==de)closeModal();if(card.classList.contains('open')){closeModal();return}document.body.appendChild(de);activeEl=de;card.classList.add('open');requestAnimationFrame(()=>{de.classList.add('active-modal');bd.classList.add('active')});document.body.style.overflow='hidden'});
@@ -227,7 +291,18 @@ function applyView(){const g=document.getElementById('level-grid');const gb=docu
 function applyLang(l){lang=l;localStorage.setItem('language',l);document.documentElement.lang=l;document.body.classList.toggle('jp',l==='ja');const t=T[l];document.getElementById('page-title').textContent=t.title;document.getElementById('hero-title').textContent=t.h1;document.getElementById('hero-subtitle').textContent=t.sub;document.getElementById('label-search-text').textContent=t.lSearch;document.getElementById('label-sort-type').textContent=t.lSort;document.getElementById('label-filter-type').textContent=t.lType;document.getElementById('label-filter-finish').textContent=t.lFin;document.getElementById('label-view-mode').textContent=t.lView;document.getElementById('search-button').innerHTML=`<i class="fas fa-search"></i> ${t.btnS}`;const so=document.getElementById('sort-type').options;[[0,'s0'],[1,'s1'],[2,'s2'],[3,'s4']].forEach(([i,k])=>{if(so[i])so[i].textContent=t[k]});const to=document.getElementById('filter-type').options;[[0,'tM1'],[1,'t0'],[2,'t1'],[3,'t2'],[4,'t3']].forEach(([i,k])=>{if(to[i])to[i].textContent=t[k]});const fo=document.getElementById('filter-finish').options;[[0,'f0'],[1,'f1'],[2,'f2'],[3,'f3']].forEach(([i,k])=>{if(fo[i])fo[i].textContent=t[k]});if(pMode){document.getElementById('playerBannerName').textContent=pName+t.pbSfx;document.getElementById('playerBannerClose').textContent=t.pbBack}else{fetchL(page)}}
 window.TM_LANG_HOOK=l=>applyLang(l);
 (function(){const colors=['#c084fc','#f472b6','#38bdf8','#34d399','#fbbf24','#f87171','#a78bfa'];const c=document.getElementById('particles');for(let i=0;i<28;i++){const p=document.createElement('div');p.className='pt';const sz=Math.random()*4+2;p.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;bottom:-10px;background:${colors[i%colors.length]};box-shadow:0 0 ${sz*2}px ${colors[i%colors.length]};--dur:${6+Math.random()*10}s;--del:${-Math.random()*12}s`;c.appendChild(p)}})();
-document.addEventListener('DOMContentLoaded',()=>{let bd=document.getElementById('modal-backdrop');if(!bd){bd=document.createElement('div');bd.id='modal-backdrop';document.body.appendChild(bd)}bd.addEventListener('click',closeModal);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeEl)closeModal()});document.getElementById('playerBannerClose').addEventListener('click',clearPF);document.getElementById('search-button').addEventListener('click',()=>fetchL(0));document.getElementById('search-text').addEventListener('keydown',e=>{if(e.key==='Enter')fetchL(0)});['sort-type','filter-type','filter-finish'].forEach(id=>document.getElementById(id).addEventListener('change',()=>fetchL(0)));document.getElementById('btn-grid-view').addEventListener('click',()=>{listView=false;localStorage.setItem('viewMode','grid');applyView()});document.getElementById('btn-list-view').addEventListener('click',()=>{listView=true;localStorage.setItem('viewMode','list');applyView()});applyView();const up=new URLSearchParams(location.search).get('player');if(up){pMode=true;pName=decodeURIComponent(up);applyLang(localStorage.getItem('language')||'ja');fetchPC(pName)}else{applyLang(localStorage.getItem('language')||'ja')}});
+document.addEventListener('DOMContentLoaded',()=>{let bd=document.getElementById('modal-backdrop');if(!bd){bd=document.createElement('div');bd.id='modal-backdrop';document.body.appendChild(bd)}bd.addEventListener('click',closeModal);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeEl)closeModal()});document.getElementById('playerBannerClose').addEventListener('click',clearPF);
+    document.getElementById('devToggle').addEventListener('click',()=>{
+      devMode=!devMode;
+      document.getElementById('devToggle').classList.toggle('dev-on',devMode);
+      document.getElementById('devToggle').textContent=devMode?'🛠 Dev ON':'🛠 Dev';
+      // 開いているモーダルを再描画
+      if(activeEl){
+        const cid=activeEl.dataset.cardId;
+        const lvidx=parseInt(cid.split('-')[1]);
+        closeModal();
+      }
+    });document.getElementById('search-button').addEventListener('click',()=>fetchL(0));document.getElementById('search-text').addEventListener('keydown',e=>{if(e.key==='Enter')fetchL(0)});['sort-type','filter-type','filter-finish'].forEach(id=>document.getElementById(id).addEventListener('change',()=>fetchL(0)));document.getElementById('btn-grid-view').addEventListener('click',()=>{listView=false;localStorage.setItem('viewMode','grid');applyView()});document.getElementById('btn-list-view').addEventListener('click',()=>{listView=true;localStorage.setItem('viewMode','list');applyView()});applyView();const up=new URLSearchParams(location.search).get('player');if(up){pMode=true;pName=decodeURIComponent(up);applyLang(localStorage.getItem('language')||'ja');fetchPC(pName)}else{applyLang(localStorage.getItem('language')||'ja')}});
 </script>
 <script src="https://tanabesan.github.io/lolbeans/tool-menu.js"></script>
 </body>

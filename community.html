@@ -11,7 +11,6 @@
     <link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon.png">
     
     <style>
-        /* ★★★ ダークモードのカラーパレット定義 ★★★ */
         :root {
             --primary-color: #BB86FC;
             --secondary-color: #03DAC6;
@@ -26,125 +25,59 @@
             --border-color: rgba(255, 255, 255, 0.08);
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--background-color);
-            color: var(--text-color-dark);
-            line-height: 1.6;
-            scroll-behavior: smooth;
-        }
+        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background-color: var(--background-color); color: var(--text-color-dark); line-height: 1.6; scroll-behavior: smooth; }
 
-        /* NEWバッジ */
-        .new-badge {
-            position: absolute; top: 10px; left: 10px;
-            background-color: #ff4757; color: white;
-            padding: 4px 10px; border-radius: 4px;
-            font-weight: bold; font-size: 0.8em;
-            z-index: 20; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            pointer-events: none;
-        }
+        .new-badge { position: absolute; top: 10px; left: 10px; background-color: #ff4757; color: white; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8em; z-index: 20; box-shadow: 0 2px 5px rgba(0,0,0,0.3); pointer-events: none; }
 
-        .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/6845.png');
-            background-size: cover; background-position: center; background-repeat: no-repeat;
-            color: var(--text-color-light); padding: 120px 20px; text-align: center;
-        }
+        .hero-section { background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://tanabesan.github.io/lolbeans/file/page/6845.png'); background-size: cover; background-position: center; background-repeat: no-repeat; color: var(--text-color-light); padding: 120px 20px; text-align: center; }
         .hero-section h1 { font-size: 3em; font-weight: 700; margin: 0 0 10px; }
         
-        /* ナビゲーション */
-        .navbar {
-            position: fixed; top: 20px; right: 20px; 
-            background-color: rgba(30, 30, 30, 0.85);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            padding: 10px 20px; border-radius: 30px;
-            z-index: 1000; display: flex; align-items: center;
-            border: 1px solid var(--border-color);
-        }
-        .navbar a { 
-            color: var(--text-color-dark); text-decoration: none; margin: 0 15px; 
-            font-weight: 500; transition: color 0.3s ease; display: inline-block; 
-        }
+        .navbar { position: fixed; top: 20px; right: 20px; background-color: rgba(30, 30, 30, 0.85); backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 30px; z-index: 1000; display: flex; align-items: center; border: 1px solid var(--border-color); }
+        .navbar a { color: var(--text-color-dark); text-decoration: none; margin: 0 15px; font-weight: 500; transition: color 0.3s ease; display: inline-block; }
         .navbar a:hover, .navbar a.active-nav { color: var(--primary-color); font-weight: 700; }
-        #language-switcher { 
-            padding: 8px 10px; border-radius: 20px; border: 1px solid #444; 
-            background-color: #2b2b2b; color: var(--text-color-dark);
-            margin-left: 15px; cursor: pointer; font-size: 14px; outline: none;
-        }
+        #language-switcher { padding: 8px 10px; border-radius: 20px; border: 1px solid #444; background-color: #2b2b2b; color: var(--text-color-dark); margin-left: 15px; cursor: pointer; font-size: 14px; outline: none; }
         .hamburger-menu { display: none; cursor: pointer; font-size: 1.5em; color: var(--text-color-dark); padding: 5px; }
 
-        /* 検索・フィルター領域 */
-        .filter-section {
-            background-color: var(--card-color); padding: 20px;
-            border-radius: 12px; box-shadow: var(--shadow-light);
-            margin-bottom: 30px; display: flex; flex-direction: column; gap: 15px;
-            border: 1px solid var(--border-color);
-        }
+        /* ★ プレイヤーバナー */
+        .player-banner { display: flex; align-items: center; gap: 14px; background: linear-gradient(135deg, rgba(187,134,252,0.12), rgba(3,218,198,0.08)); border: 1px solid rgba(187,134,252,0.35); border-radius: 12px; padding: 14px 20px; margin-bottom: 20px; }
+        .player-banner-icon { font-size: 1.6em; flex-shrink: 0; }
+        .player-banner-text { flex: 1; }
+        .player-banner-text strong { font-size: 1.1em; color: var(--primary-color); display: block; }
+        .player-banner-text span { font-size: 0.85em; color: #aaa; }
+        .player-banner-close { background: none; border: 1px solid rgba(255,255,255,0.15); color: #aaa; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 0.85em; transition: all 0.2s; flex-shrink: 0; }
+        .player-banner-close:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+        .filter-section { background-color: var(--card-color); padding: 20px; border-radius: 12px; box-shadow: var(--shadow-light); margin-bottom: 30px; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--border-color); }
         .filter-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; }
         .filter-group { display: flex; flex-direction: column; min-width: 140px; }
         .filter-group label { font-size: 0.85em; font-weight: 600; color: var(--secondary-color); margin-bottom: 8px; }
-        .filter-group select, .filter-group input[type="text"] {
-            padding: 10px 14px; border: 1px solid #444; border-radius: 8px;
-            font-size: 0.95em; background-color: #2b2b2b; color: var(--text-color-dark); outline: none; transition: border-color 0.3s;
-        }
+        .filter-group select, .filter-group input[type="text"] { padding: 10px 14px; border: 1px solid #444; border-radius: 8px; font-size: 0.95em; background-color: #2b2b2b; color: var(--text-color-dark); outline: none; transition: border-color 0.3s; }
         .filter-group select:focus, .filter-group input[type="text"]:focus { border-color: var(--primary-color); }
         
-        /* 表示切り替えトグル */
-        .view-toggle {
-            display: flex; background-color: #2b2b2b; border-radius: 8px; border: 1px solid #444; overflow: hidden;
-            height: 43px; min-width: 120px;
-        }
-        .view-btn {
-            flex: 1;
-            background: none; border: none; color: #888; padding: 10px 15px;
-            cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-size: 1.1em;
-        }
+        .view-toggle { display: flex; background-color: #2b2b2b; border-radius: 8px; border: 1px solid #444; overflow: hidden; height: 43px; min-width: 120px; }
+        .view-btn { flex: 1; background: none; border: none; color: #888; padding: 10px 15px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; font-size: 1.1em; }
         .view-btn:hover { color: var(--text-color-dark); }
         .view-btn.active { background-color: var(--primary-color); color: #121212; }
         
-        #search-button {
-            background-color: var(--primary-color); color: #121212; border: none;
-            padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;
-            transition: all 0.3s; font-size: 1em; height: 43px;
-        }
+        #search-button { background-color: var(--primary-color); color: #121212; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 1em; height: 43px; }
         #search-button:hover { background-color: #D6A4FF; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(187, 134, 252, 0.3); }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
         #loading-message { text-align: center; padding: 50px; color: var(--secondary-color); }
 
-        /* カードレイアウト */
-        #level-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-top: 20px;
-        }
-        .level-grid-card {
-            background-color: var(--card-color); border-radius: 12px; overflow: hidden;
-            box-shadow: var(--shadow-light); transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer; display: flex; flex-direction: column; position: relative; border: 1px solid var(--border-color);
-        }
+        #level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-top: 20px; }
+        .level-grid-card { background-color: var(--card-color); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-light); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; display: flex; flex-direction: column; position: relative; border: 1px solid var(--border-color); }
         .level-grid-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
         
         .card-display { position: relative; padding-top: 100%; width: 100%; flex-shrink: 0; overflow: hidden; }
-        .card-thumbnail-bg {
-            width: 100%; height: 100%; position: absolute; top: 0; left: 0;
-            background-size: cover; background-position: center; filter: brightness(0.85); transition: filter 0.4s, transform 0.4s;
-        }
+        .card-thumbnail-bg { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background-size: cover; background-position: center; filter: brightness(0.85); transition: filter 0.4s, transform 0.4s; }
         .level-grid-card:hover .card-thumbnail-bg { filter: brightness(1.1); transform: scale(1.05); }
 
-        .card-type-icon {
-            position: absolute; top: 15px; right: 15px; z-index: 15; width: 40px; height: 40px;
-            border-radius: 50%; background-color: var(--primary-color); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease;
-        }
+        .card-type-icon { position: absolute; top: 15px; right: 15px; z-index: 15; width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary-color); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease; }
         .level-grid-card:hover .card-type-icon { transform: scale(1.1) rotate(5deg); }
         .card-type-icon img { width: 65%; height: 65%; object-fit: contain; }
 
-        .card-info-overlay {
-            position: absolute; bottom: 0; left: 0; width: 100%; padding: 25px 20px 15px; box-sizing: border-box;
-            color: var(--text-color-light); z-index: 10;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 60%, transparent 100%);
-        }
+        .card-info-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 25px 20px 15px; box-sizing: border-box; color: var(--text-color-light); z-index: 10; background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.7) 60%, transparent 100%); }
         .overlay-title { font-size: 1.2em; font-weight: 700; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         .overlay-author { font-size: 0.85em; font-weight: 400; color: #bbb; margin-bottom: 12px; }
         .overlay-stats { display: flex; justify-content: space-between; font-size: 0.9em; font-weight: 600; }
@@ -152,79 +85,39 @@
         .overlay-stat.finish i { color: var(--primary-color); }
         .overlay-date { font-size: 0.8em; font-weight: 500; margin-top: 8px; color: rgba(255, 255, 255, 0.6); text-align: right; }
 
-        /* リスト表示スタイル */
         #level-grid.list-view { display: flex; flex-direction: column; gap: 15px; }
         #level-grid.list-view .level-grid-card { flex-direction: row; align-items: stretch; }
         #level-grid.list-view .card-display { padding-top: 0; display: flex; flex-direction: row; width: 100%; height: 130px; }
         #level-grid.list-view .card-thumbnail-bg { position: relative; width: 220px; height: 100%; flex-shrink: 0; filter: brightness(1); border-right: 1px solid var(--border-color); }
-        
-        #level-grid.list-view .card-info-overlay {
-            position: relative; background: none; color: var(--text-color-dark); padding: 20px 30px;
-            display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; align-content: center; gap: 8px 30px; flex-grow: 1;
-        }
+        #level-grid.list-view .card-info-overlay { position: relative; background: none; color: var(--text-color-dark); padding: 20px 30px; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; align-content: center; gap: 8px 30px; flex-grow: 1; }
         #level-grid.list-view .overlay-title { grid-column: 1; grid-row: 1; color: var(--text-color-light); text-shadow: none; font-size: 1.4em; margin: 0; align-self: end; }
         #level-grid.list-view .overlay-author { grid-column: 1; grid-row: 2; margin: 0; align-self: start; }
         #level-grid.list-view .overlay-stats { grid-column: 2; grid-row: 1; justify-content: flex-end; gap: 20px; margin: 0; align-self: end; }
         #level-grid.list-view .overlay-date { grid-column: 2; grid-row: 2; text-align: right; margin: 0; align-self: start; }
-        
         #level-grid.list-view .card-type-icon { top: 50%; transform: translateY(-50%); left: 200px; right: auto; width: 35px; height: 35px; }
         #level-grid.list-view .level-grid-card:hover .card-type-icon { transform: translateY(-50%) scale(1.1); }
         #level-grid.list-view .new-badge { top: 5px; left: 5px; font-size: 0.7em; }
 
-        /* ページネーション */
         .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
-        .page-btn {
-            background-color: var(--card-color); border: 1px solid var(--border-color); color: var(--text-color-dark);
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-weight: 500;
-        }
+        .page-btn { background-color: var(--card-color); border: 1px solid var(--border-color); color: var(--text-color-dark); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-weight: 500; }
         .page-btn:hover:not(.active):not(:disabled) { background-color: #2b2b2b; border-color: var(--primary-color); }
         .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .page-btn.active { background-color: var(--primary-color); color: #121212; border-color: var(--primary-color); cursor: default; }
         .page-info { font-weight: 600; color: var(--text-color-light); padding: 0 10px; }
 
-        /* モーダル表示（全体を見やすくコンパクトに修正） */
-        #modal-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
-            z-index: 1999; opacity: 0; visibility: hidden; transition: all 0.4s ease;
-        }
+        #modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 1999; opacity: 0; visibility: hidden; transition: all 0.4s ease; }
         #modal-backdrop.active { opacity: 1; visibility: visible; }
 
-        .card-details { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); 
-            width: 90%; max-width: 850px; background-color: var(--detail-bg-color);
-            border-radius: 16px; overflow: hidden; z-index: 2000; 
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
-            opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .card-details.active-modal { 
-            opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); 
-        }
+        .card-details { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.95); width: 90%; max-width: 850px; background-color: var(--detail-bg-color); border-radius: 16px; overflow: hidden; z-index: 2000; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card-details.active-modal { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
 
-        /* モーダル上部の大きなバナー画像（高さを抑える） */
-        .modal-banner {
-            width: 100%; height: 140px; background-size: cover; background-position: center; position: relative;
-        }
-        .modal-banner-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(26, 26, 26, 0.1) 0%, rgba(26, 26, 26, 1) 100%);
-        }
-        .modal-close-btn {
-            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
-            color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;
-            width: 35px; height: 35px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s ease; font-size: 1.1em;
-        }
+        .modal-banner { width: 100%; height: 140px; background-size: cover; background-position: center; position: relative; }
+        .modal-banner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(26, 26, 26, 0.1) 0%, rgba(26, 26, 26, 1) 100%); }
+        .modal-close-btn { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 35px; height: 35px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 1.1em; }
         .modal-close-btn:hover { background: var(--primary-color); color: #000; transform: rotate(90deg); }
 
-        .modal-content-wrapper {
-            padding: 0 30px 25px; max-height: calc(95vh - 140px); overflow-y: auto;
-        }
-        
-        /* モーダルヘッダー */
-        .modal-header {
-            position: relative; z-index: 5; margin-top: 15px; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
-        }
+        .modal-content-wrapper { padding: 0 30px 25px; max-height: calc(95vh - 140px); overflow-y: auto; }
+        .modal-header { position: relative; z-index: 5; margin-top: 15px; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         .modal-info h2 { font-size: 1.8em; font-weight: 700; margin: 0; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); line-height: 1.2; }
         .modal-info p { font-size: 1em; color: var(--secondary-color); font-weight: 500; margin: 4px 0 8px; }
         .modal-stats { display: flex; gap: 20px; font-size: 0.9em; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
@@ -232,27 +125,16 @@
         .modal-stats i { margin-right: 6px; color: var(--accent-color); }
         .modal-stats span.game-type-icon img { width: 20px; height: 20px; margin-right: 6px; object-fit: contain; }
 
-        /* モーダル内部の2カラム構成（詳細エリアを広く） */
         .modal-body-layout { display: flex; gap: 25px; }
         .modal-left { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         .modal-right { flex: 1.4; }
 
-        .description-box { 
-            background-color: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; 
-            font-size: 0.9em; white-space: pre-wrap; color: #ccc; 
-            border: 1px solid rgba(255, 255, 255, 0.06); line-height: 1.6;
-        }
+        .description-box { background-color: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; font-size: 0.9em; white-space: pre-wrap; color: #ccc; border: 1px solid rgba(255, 255, 255, 0.06); line-height: 1.6; }
         .description-box strong { font-weight: 600; display: block; margin-bottom: 8px; color: #fff; font-size: 1.05em; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
         .description-box p { margin: 0; }
 
-        /* 詳細情報を2カラム表示にしてスクロールを回避 */
         .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        
-        .detail-item { 
-            padding: 8px 12px; border-radius: 8px; background-color: rgba(255, 255, 255, 0.04); 
-            border-left: 4px solid var(--primary-color); display: flex; flex-direction: column;
-            transition: background 0.3s;
-        }
+        .detail-item { padding: 8px 12px; border-radius: 8px; background-color: rgba(255, 255, 255, 0.04); border-left: 4px solid var(--primary-color); display: flex; flex-direction: column; transition: background 0.3s; }
         .detail-item:hover { background-color: rgba(255, 255, 255, 0.08); }
         .detail-item i { margin-right: 6px; color: var(--primary-color); opacity: 0.8; }
         .detail-item strong { color: #aaa; display: flex; align-items: center; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
@@ -264,27 +146,20 @@
         .social-icons a { color: #888; font-size: 1.5em; margin: 0 10px; transition: color 0.3s; }
         .social-icons a:hover { color: var(--primary-color); }
         
-        /* レスポンシブ対応 */
-        @media (max-width: 1100px) {
-            #level-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        
+        @media (max-width: 1100px) { #level-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) {
             .navbar a { display: none; }
             #language-switcher { margin-left: 0; }
             .navbar { background-color: transparent; box-shadow: none; padding: 10px; flex-direction: column-reverse; align-items: flex-end; border: none; backdrop-filter: none; }
-            .hamburger-menu { display: block; margin-bottom: 10px; color: var(--text-color-dark); }
+            .hamburger-menu { display: block; margin-bottom: 10px; }
             .navbar.open { background-color: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 20px; border-radius: 16px; display: flex; border: 1px solid var(--border-color); }
             .navbar.open a { display: block; margin: 10px 0; width: 100%; text-align: center; }
             .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
-
             .filter-row { flex-direction: column; gap: 15px; align-items: stretch; }
             .filter-group { width: 100%; }
             #search-button { width: 100%; }
             .view-toggle { justify-content: center; }
-            
             #level-grid { grid-template-columns: 1fr; }
-            
             #level-grid.list-view .level-grid-card { flex-direction: column; }
             #level-grid.list-view .card-display { height: auto; flex-direction: column; }
             #level-grid.list-view .card-thumbnail-bg { width: 100%; padding-top: 56.25%; border-right: none; border-bottom: 1px solid var(--border-color); }
@@ -294,19 +169,15 @@
             #level-grid.list-view .overlay-title { font-size: 1.3em; margin-bottom: 4px; }
             #level-grid.list-view .overlay-stats { justify-content: flex-start; margin-bottom: 5px; }
             #level-grid.list-view .overlay-date { text-align: left; margin-top: 0; }
-
-            .card-details { width: 100%; max-width: 100%; height: 100vh; max-height: 100vh; border-radius: 0; transform: translate(-50%, -45%) scale(0.95); }
-            .card-details.active-modal { transform: translate(-50%, -50%) scale(1); }
+            .card-details { width: 100%; max-width: 100%; height: 100vh; max-height: 100vh; border-radius: 0; }
             .modal-content-wrapper { max-height: calc(100vh - 140px); padding: 0 20px 20px; }
             .modal-header { flex-direction: column; align-items: flex-start; margin-top: 15px; }
             .modal-stats { flex-wrap: wrap; }
             .modal-body-layout { flex-direction: column; gap: 20px; }
-            /* スマホの場合は情報量次第で1カラムか2カラムか維持する（ここでは2カラム維持でコンパクトに） */
             .detail-grid { grid-template-columns: repeat(2, 1fr); }
+            .player-banner { flex-wrap: wrap; }
         }
-        @media (max-width: 480px) {
-            .detail-grid { grid-template-columns: 1fr; } /* 極端に狭い画面のみ1カラムに戻す */
-        }
+        @media (max-width: 480px) { .detail-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -330,7 +201,18 @@
     </nav>
 
     <main class="container">
-        <section class="filter-section">
+
+        <!-- ★ プレイヤーバナー -->
+        <div class="player-banner" id="playerBanner" style="display:none">
+            <div class="player-banner-icon">🏆</div>
+            <div class="player-banner-text">
+                <strong id="playerBannerName"></strong>
+                <span id="playerBannerCount"></span>
+            </div>
+            <button class="player-banner-close" id="playerBannerClose">✕ 通常表示に戻る</button>
+        </div>
+
+        <section class="filter-section" id="filterSection">
             <div class="filter-row">
                 <div class="filter-group" style="flex-grow: 1;">
                     <label for="search-text" id="label-search-text">コース, 作者名検索</label>
@@ -359,9 +241,9 @@
                     <label for="filter-finish" id="label-filter-finish">クリア率</label>
                     <select id="filter-finish">
                         <option value="0">すべて (All)</option>
-                        <option value="1">低い (<30%)</option>
+                        <option value="1">低い (&lt;30%)</option>
                         <option value="2">普通 (30%〜70%)</option>
-                        <option value="3">高い (>70%)</option>
+                        <option value="3">高い (&gt;70%)</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -376,9 +258,7 @@
         </section>
 
         <section id="level-wrapper">
-            <div id="loading-message">
-                <i class="fas fa-spinner fa-spin"></i> データをロード中です...
-            </div>
+            <div id="loading-message"><i class="fas fa-spinner fa-spin"></i> データをロード中です...</div>
             <div id="level-grid"></div>
         </section>
         
@@ -400,14 +280,15 @@
     <script>
         const API_BASE_URL = 'https://s.lolbeans.io/level-list?';
         const THUMBNAIL_BASE_URL = 'https://lolbeans.io/ui/level-thumbnails/';
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxdO6Xv8VFLkjc5vrX1hy3u4DQWEP28Ht8sX8Rc1kKb9sGBap0RdqAF1TXHPEBrIAA8vA/exec';
         const LEVELS_PER_PAGE = 12;
         
         const LEVEL_TYPES = {
             '-1': { ja: "すべて", en: "All", icon: "https://tanabesan.github.io/lolbeans/file/page/all.png" },
-            '0': { ja: "サンドボックス", en: "Sandbox", icon: "https://tanabesan.github.io/lolbeans/file/page/sandbox.png" },
-            '1': { ja: "タイムレース", en: "Timed Race", icon: "https://tanabesan.github.io/lolbeans/file/page/timed.png" },
-            '2': { ja: "競争レース", en: "Competitive Race", icon: "https://tanabesan.github.io/lolbeans/file/page/competitive.png" },
-            '3': { ja: "エリミネーション", en: "Elimination", icon: "https://tanabesan.github.io/lolbeans/file/page/elimination.png" }
+            '0':  { ja: "サンドボックス", en: "Sandbox", icon: "https://tanabesan.github.io/lolbeans/file/page/sandbox.png" },
+            '1':  { ja: "タイムレース", en: "Timed Race", icon: "https://tanabesan.github.io/lolbeans/file/page/timed.png" },
+            '2':  { ja: "競争レース", en: "Competitive Race", icon: "https://tanabesan.github.io/lolbeans/file/page/competitive.png" },
+            '3':  { ja: "エリミネーション", en: "Elimination", icon: "https://tanabesan.github.io/lolbeans/file/page/elimination.png" }
         };
 
         let currentLang = 'ja';
@@ -415,6 +296,8 @@
         let maxPages = 0;
         let activeDetailsElement = null;
         let isListView = localStorage.getItem('viewMode') === 'list';
+        let playerMode = false;
+        let playerName = '';
 
         const translations = {
             ja: {
@@ -427,9 +310,14 @@
                 filterFinish0: "すべて", filterFinish1: "低い (<30%)", filterFinish2: "普通 (30%〜70%)", filterFinish3: "高い (>70%)",
                 author: "作者", description: "概要", votes: "投票数", rating: "平均評価", finishPercent: "クリア率", starts: "プレイ回数", distinctPlayers: "総プレイヤー数",
                 averageFinishTime: "平均クリア時間", wr: "世界記録 (WR)", wrHolder: "WR保持者", wrDate: "WR達成日", date: "公開日",
-                pageInfo: (current, max) => `${current + 1} / ${max}`,
+                pageInfo: (cur, max) => `${cur + 1} / ${max}`,
                 prev: "前へ", next: "次へ",
-                dataError: "データの取得に失敗しました。再試行してください。", noDescription: "説明がありません。", noLevels: "該当するコースが見つかりませんでした。"
+                dataError: "データの取得に失敗しました。再試行してください。", noDescription: "説明がありません。", noLevels: "該当するコースが見つかりませんでした。",
+                playerBannerSuffix: " のWR保持コース",
+                playerBannerCount: (n) => `WR ${n} コース`,
+                playerLoading: (name) => `${name} のWRコースを取得中...`,
+                playerNotFound: "WR保持コースが見つかりませんでした。",
+                backToNormal: "✕ 通常表示に戻る",
             },
             en: {
                 mainPage: "Main Page", fileLibrary: "File Library", levelList: "Course List", faq: "FAQ", contact: "Contact",
@@ -441,9 +329,14 @@
                 filterFinish0: "All", filterFinish1: "Low (<30%)", filterFinish2: "Average (30% to 70%)", filterFinish3: "High (>70%)",
                 author: "Author", description: "Description", votes: "Votes", rating: "Avg. Rating", finishPercent: "Finish %", starts: "Starts", distinctPlayers: "Players",
                 averageFinishTime: "Avg. Finish Time", wr: "World Record (WR)", wrHolder: "WR Holder", wrDate: "WR Date", date: "Publish Date",
-                pageInfo: (current, max) => `Page ${current + 1} of ${max}`,
+                pageInfo: (cur, max) => `Page ${cur + 1} of ${max}`,
                 prev: "Prev", next: "Next",
-                dataError: "Failed to fetch data. Please try again.", noDescription: "No description available.", noLevels: "No levels found matching the criteria."
+                dataError: "Failed to fetch data. Please try again.", noDescription: "No description available.", noLevels: "No levels found matching the criteria.",
+                playerBannerSuffix: "'s WR Courses",
+                playerBannerCount: (n) => `${n} WR courses`,
+                playerLoading: (name) => `Loading ${name}'s WR courses...`,
+                playerNotFound: "No WR courses found.",
+                backToNormal: "✕ Back to normal",
             }
         };
 
@@ -451,68 +344,39 @@
             if (!dateString) return 'N/A';
             try {
                 const date = new Date(dateString);
-                return date.toLocaleString(lang === 'ja' ? 'ja-JP' : 'en-US', {
-                    year: 'numeric', month: '2-digit', day: '2-digit'
-                });
-            } catch (e) {
-                return dateString.substring(0, 10); 
-            }
+                return date.toLocaleString(lang === 'ja' ? 'ja-JP' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            } catch (e) { return dateString.substring(0, 10); }
         };
         
         const formatTime = (seconds) => {
             if (seconds === null || seconds === undefined) return 'N/A';
-            const totalMilliseconds = seconds * 1000;
-            const ms = Math.floor(totalMilliseconds % 1000).toString().padStart(3, '0');
-            const totalSeconds = Math.floor(seconds);
-            const s = (totalSeconds % 60).toString().padStart(2, '0');
-            const m = Math.floor(totalSeconds / 60);
+            const ms = Math.floor((seconds * 1000) % 1000).toString().padStart(3, '0');
+            const s = (Math.floor(seconds) % 60).toString().padStart(2, '0');
+            const m = Math.floor(seconds / 60);
             return `${m}:${s}.${ms}`;
         };
 
         const buildApiUrl = (pageIndex) => {
-            const searchText = document.getElementById('search-text').value.trim();
-            const sortType = document.getElementById('sort-type').value;
-            const filterType = document.getElementById('filter-type').value;
-            const filterFinish = document.getElementById('filter-finish').value;
-
             const params = new URLSearchParams();
             params.append('i', pageIndex);
             params.append('n', LEVELS_PER_PAGE);
-            params.append('t', sortType);
-            params.append('ft', filterType);
-            params.append('ff', filterFinish);
-            params.append('m', LEVELS_PER_PAGE); 
-
-            if (searchText) {
-                params.append('ts', searchText);
-            }
-
+            params.append('t', document.getElementById('sort-type').value);
+            params.append('ft', document.getElementById('filter-type').value);
+            params.append('ff', document.getElementById('filter-finish').value);
+            params.append('m', LEVELS_PER_PAGE);
+            const searchText = document.getElementById('search-text').value.trim();
+            if (searchText) params.append('ts', searchText);
             return API_BASE_URL + params.toString();
         };
 
-        const getDetailIcon = (key) => {
-            const icons = {
-                rating: 'fas fa-star',
-                wr: 'fas fa-trophy',
-                wrHolder: 'fas fa-crown',
-                averageFinishTime: 'fas fa-stopwatch',
-                starts: 'fas fa-gamepad',
-                votes: 'fas fa-heart',
-                distinctPlayers: 'fas fa-users',
-                date: 'fas fa-calendar-alt'
-            };
-            return icons[key] || 'fas fa-info-circle';
-        };
+        const getDetailIcon = (key) => ({ rating:'fas fa-star', wr:'fas fa-trophy', wrHolder:'fas fa-crown', averageFinishTime:'fas fa-stopwatch', starts:'fas fa-gamepad', votes:'fas fa-heart', distinctPlayers:'fas fa-users', date:'fas fa-calendar-alt' }[key] || 'fas fa-info-circle');
 
         const createDetailItem = (key, value, isWrHolder) => {
             const langData = translations[currentLang];
             const item = document.createElement('div');
             item.className = 'detail-item';
-            const displayValue = isWrHolder ? value : (key === 'starts' || key === 'votes' || key === 'distinctPlayers' ? value.toLocaleString() : value);
-            item.innerHTML = `
-                <strong><i class="${getDetailIcon(key)}"></i>${langData[key]}</strong>
-                <span class="${isWrHolder ? 'wr-holder' : ''}">${displayValue}</span>
-            `;
+            const displayValue = isWrHolder ? value : (['starts','votes','distinctPlayers'].includes(key) ? value.toLocaleString() : value);
+            item.innerHTML = `<strong><i class="${getDetailIcon(key)}"></i>${langData[key]}</strong><span class="${isWrHolder ? 'wr-holder' : ''}">${displayValue}</span>`;
             return item;
         };
 
@@ -523,62 +387,46 @@
                 const originalCard = document.querySelector(`.level-grid-card[data-card-id="${cardId}"]`);
                 const cardDisplay = originalCard ? originalCard.querySelector('.card-display') : null;
                 activeDetailsElement.classList.remove('active-modal');
-                // DOMツリーに戻す
-                if (cardDisplay) {
-                    cardDisplay.appendChild(activeDetailsElement);
-                }
+                if (cardDisplay) cardDisplay.appendChild(activeDetailsElement);
                 activeDetailsElement = null;
-                if (originalCard) {
-                    originalCard.classList.remove('open');
-                }
+                if (originalCard) originalCard.classList.remove('open');
             }
-            if (backdrop) {
-                backdrop.classList.remove('active');
-            }
-            document.body.style.overflow = ''; 
+            if (backdrop) backdrop.classList.remove('active');
+            document.body.style.overflow = '';
         };
 
         const createLevelCard = (level, index) => {
             const langData = translations[currentLang];
-            
-            const publishDateObj = new Date(level.date);
-            const now = new Date();
-            const diffTime = Math.abs(now - publishDateObj);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const isNew = diffDays <= 30;
-
+            const isNew = Math.ceil(Math.abs(new Date() - new Date(level.date)) / 86400000) <= 30;
             const card = document.createElement('div');
             card.className = 'level-grid-card';
             const cardId = `card-${level.levelId}-${index}`;
             card.dataset.cardId = cardId;
-            const description = level.description || langData.noDescription;
-            const safeRating = level.rating === null || level.rating === undefined ? 0 : level.rating;
-            const finishPercentage = level.finishPercent === null || level.finishPercent === undefined ? 0 : (level.finishPercent * 100);
+            const safeRating = level.rating ?? 0;
+            const finishPct = (level.finishPercent ?? 0) * 100;
             const thumbnailUrl = `${THUMBNAIL_BASE_URL}${level.levelId}.png`;
             const levelType = LEVEL_TYPES[level.type] || LEVEL_TYPES['0'];
             const typeName = levelType[currentLang];
             const typeIconUrl = levelType.icon;
             const publishDate = formatDate(level.date, currentLang);
+            const description = level.description || langData.noDescription;
 
             card.innerHTML = `
                 <div class="card-display">
                     ${isNew ? '<div class="new-badge">NEW</div>' : ''}
-                    <div class="card-thumbnail-bg" style="background-image: url('${thumbnailUrl}');" onerror="this.style.backgroundImage='url(https://via.placeholder.com/300?text=LOLBeans+Thumbnail)';"></div>
-                    <div class="card-type-icon" title="${typeName}">
-                        <img src="${typeIconUrl}" alt="${typeName} icon">
-                    </div>
+                    <div class="card-thumbnail-bg" style="background-image:url('${thumbnailUrl}')"></div>
+                    <div class="card-type-icon" title="${typeName}"><img src="${typeIconUrl}" alt="${typeName}"></div>
                     <div class="card-info-overlay">
                         <h3 class="overlay-title" title="${level.name}">${level.name}</h3>
                         <p class="overlay-author"><i class="fas fa-pen-nib"></i> ${level.author || 'N/A'}</p>
                         <div class="overlay-stats">
-                            <span class="overlay-stat rating" title="${safeRating}"><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
-                            <span class="overlay-stat finish"><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
+                            <span class="overlay-stat"><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
+                            <span class="overlay-stat finish"><i class="fas fa-chart-bar"></i> ${finishPct.toFixed(0)}%</span>
                         </div>
                         <p class="overlay-date">${publishDate}</p>
                     </div>
-
                     <div class="card-details" data-card-id="${cardId}">
-                        <div class="modal-banner" style="background-image: url('${thumbnailUrl}');">
+                        <div class="modal-banner" style="background-image:url('${thumbnailUrl}');">
                             <div class="modal-banner-overlay"></div>
                             <button class="modal-close-btn"><i class="fas fa-times"></i></button>
                         </div>
@@ -588,8 +436,8 @@
                                     <h2>${level.name}</h2>
                                     <p><i class="fas fa-user-circle"></i> ${level.author || 'N/A'}</p>
                                     <div class="modal-stats">
-                                        <span title="${safeRating}"><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
-                                        <span><i class="fas fa-chart-bar"></i> ${finishPercentage.toFixed(0)}%</span>
+                                        <span><i class="fas fa-star"></i> ${safeRating.toFixed(2)}</span>
+                                        <span><i class="fas fa-chart-bar"></i> ${finishPct.toFixed(0)}%</span>
                                         <span class="game-type-icon"><img src="${typeIconUrl}" alt="icon"> ${typeName}</span>
                                     </div>
                                 </div>
@@ -601,15 +449,12 @@
                                         <p>${description}</p>
                                     </div>
                                 </div>
-                                <div class="modal-right">
-                                    <div class="detail-grid"></div>
-                                </div>
+                                <div class="modal-right"><div class="detail-grid"></div></div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-            
+                </div>`;
+
             const detailGrid = card.querySelector('.detail-grid');
             detailGrid.appendChild(createDetailItem('rating', safeRating, false));
             detailGrid.appendChild(createDetailItem('wr', formatTime(level.wr), true));
@@ -620,31 +465,18 @@
             detailGrid.appendChild(createDetailItem('distinctPlayers', level.distinctPlayers, false));
             detailGrid.appendChild(createDetailItem('date', publishDate, false));
 
-            // イベントリスナー設定
             const cardDisplay = card.querySelector('.card-display');
             const detailsElement = card.querySelector('.card-details');
-            const closeBtn = card.querySelector('.modal-close-btn');
-
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                closeModal();
-            });
-
+            card.querySelector('.modal-close-btn').addEventListener('click', (e) => { e.stopPropagation(); closeModal(); });
             cardDisplay.addEventListener('click', (e) => {
-                if (e.target.closest('.card-details')) return; 
+                if (e.target.closest('.card-details')) return;
                 const backdrop = document.getElementById('modal-backdrop');
                 if (activeDetailsElement && activeDetailsElement !== detailsElement) closeModal();
-                if (card.classList.contains('open')) {
-                    closeModal();
-                    return;
-                }
-                document.body.appendChild(detailsElement); 
+                if (card.classList.contains('open')) { closeModal(); return; }
+                document.body.appendChild(detailsElement);
                 activeDetailsElement = detailsElement;
                 card.classList.add('open');
-                requestAnimationFrame(() => {
-                    detailsElement.classList.add('active-modal');
-                    backdrop.classList.add('active');
-                });
+                requestAnimationFrame(() => { detailsElement.classList.add('active-modal'); backdrop.classList.add('active'); });
                 document.body.style.overflow = 'hidden';
             });
             return card;
@@ -654,96 +486,105 @@
             const paginationContainer = document.getElementById('pagination');
             paginationContainer.innerHTML = '';
             const langData = translations[currentLang];
-            const safeMaxPages = isNaN(maxPages) || maxPages === null ? 1 : maxPages;
-            if (safeMaxPages <= 1) return;
-
-            const createBtn = (html, disabled, onClick) => {
-                const btn = document.createElement('button');
-                btn.className = 'page-btn';
-                btn.innerHTML = html;
-                btn.disabled = disabled;
-                btn.onclick = onClick;
-                return btn;
+            const safeMax = isNaN(maxPages) || !maxPages ? 1 : maxPages;
+            if (safeMax <= 1) return;
+            const btn = (html, disabled, onClick) => {
+                const b = document.createElement('button');
+                b.className = 'page-btn'; b.innerHTML = html; b.disabled = disabled; b.onclick = onClick; return b;
             };
-
-            paginationContainer.appendChild(createBtn('<i class="fas fa-angle-double-left"></i>', currentPage === 0, () => { fetchAndRenderLevels(0); window.scrollTo({ top: 0, behavior: 'smooth' }); }));
-            paginationContainer.appendChild(createBtn(langData.prev, currentPage === 0, () => { fetchAndRenderLevels(currentPage - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }));
-            
-            const pageInfo = document.createElement('span');
-            pageInfo.className = 'page-info';
-            pageInfo.textContent = langData.pageInfo(currentPage, safeMaxPages);
-            paginationContainer.appendChild(pageInfo);
-
-            paginationContainer.appendChild(createBtn(langData.next, currentPage >= safeMaxPages - 1, () => { fetchAndRenderLevels(currentPage + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }));
-            paginationContainer.appendChild(createBtn('<i class="fas fa-angle-double-right"></i>', currentPage >= safeMaxPages - 1, () => { fetchAndRenderLevels(safeMaxPages - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }));
+            const scroll = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+            paginationContainer.appendChild(btn('<i class="fas fa-angle-double-left"></i>', currentPage===0, () => { fetchAndRenderLevels(0); scroll(); }));
+            paginationContainer.appendChild(btn(langData.prev, currentPage===0, () => { fetchAndRenderLevels(currentPage-1); scroll(); }));
+            const info = document.createElement('span');
+            info.className = 'page-info'; info.textContent = langData.pageInfo(currentPage, safeMax);
+            paginationContainer.appendChild(info);
+            paginationContainer.appendChild(btn(langData.next, currentPage>=safeMax-1, () => { fetchAndRenderLevels(currentPage+1); scroll(); }));
+            paginationContainer.appendChild(btn('<i class="fas fa-angle-double-right"></i>', currentPage>=safeMax-1, () => { fetchAndRenderLevels(safeMax-1); scroll(); }));
         };
 
         const fetchAndRenderLevels = async (pageIndex = 0) => {
-            const container = document.getElementById('level-grid'); 
-            let loading = document.getElementById('loading-message');
+            const container = document.getElementById('level-grid');
             const langData = translations[currentLang];
-            if (!loading) {
-                loading = document.createElement('div');
-                loading.id = 'loading-message';
-                document.getElementById('level-wrapper').prepend(loading);
-            }
+            let loading = document.getElementById('loading-message');
+            if (!loading) { loading = document.createElement('div'); loading.id = 'loading-message'; document.getElementById('level-wrapper').prepend(loading); }
             loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.loading}`;
             loading.style.display = 'block';
-            container.innerHTML = ''; 
+            container.innerHTML = '';
             document.getElementById('pagination').innerHTML = '';
             closeModal();
             try {
-                const apiUrl = buildApiUrl(pageIndex);
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const response = await fetch(buildApiUrl(pageIndex));
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
                 currentPage = pageIndex;
-                maxPages = data.m; 
+                maxPages = data.m;
                 if (data && data.l && data.l.length > 0) {
-                    data.l.forEach((level, index) => {
-                        container.appendChild(createLevelCard(level, index));
-                    });
-                    renderPagination();
-                    applyViewMode(); 
-                    loading.style.display = 'none'; 
-                } else {
-                    loading.innerHTML = `${langData.noLevels}`;
-                }
-            } catch (error) {
-                loading.innerHTML = `${langData.dataError} (${error.message})`;
-            }
+                    data.l.forEach((level, i) => container.appendChild(createLevelCard(level, i)));
+                    renderPagination(); applyViewMode(); loading.style.display = 'none';
+                } else { loading.innerHTML = langData.noLevels; }
+            } catch (err) { loading.innerHTML = `${langData.dataError} (${err.message})`; }
         };
+
+        /* ══════ プレイヤーモード ══════ */
+        function clearPlayerFilter() {
+            playerMode = false; playerName = '';
+            const url = new URL(window.location.href);
+            url.searchParams.delete('player');
+            window.history.pushState({}, '', url);
+            document.getElementById('playerBanner').style.display = 'none';
+            document.getElementById('filterSection').style.display = '';
+            fetchAndRenderLevels(0);
+        }
+
+        async function fetchAndRenderPlayerCourses(name) {
+            const langData = translations[currentLang];
+            const container = document.getElementById('level-grid');
+            let loading = document.getElementById('loading-message');
+            if (!loading) { loading = document.createElement('div'); loading.id = 'loading-message'; document.getElementById('level-wrapper').prepend(loading); }
+            loading.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${langData.playerLoading(name)}`;
+            loading.style.display = 'block';
+            container.innerHTML = '';
+            document.getElementById('pagination').innerHTML = '';
+
+            document.getElementById('playerBanner').style.display = 'flex';
+            document.getElementById('playerBannerName').textContent = name + langData.playerBannerSuffix;
+            document.getElementById('playerBannerCount').textContent = '...';
+            document.getElementById('playerBannerClose').textContent = langData.backToNormal;
+            document.getElementById('filterSection').style.display = 'none';
+
+            try {
+                const res = await fetch(GAS_URL + '?action=player&name=' + encodeURIComponent(name));
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                const courses = data.courses || [];
+                document.getElementById('playerBannerCount').textContent = langData.playerBannerCount(courses.length);
+                if (courses.length === 0) { loading.innerHTML = langData.playerNotFound; return; }
+                loading.style.display = 'none';
+                courses.forEach((level, i) => container.appendChild(createLevelCard(level, i)));
+                applyViewMode();
+            } catch(err) { loading.innerHTML = `${langData.dataError} (${err.message})`; }
+        }
 
         const applyViewMode = () => {
             const grid = document.getElementById('level-grid');
             const btnGrid = document.getElementById('btn-grid-view');
             const btnList = document.getElementById('btn-list-view');
-            
-            if (isListView) {
-                grid.classList.add('list-view');
-                btnList.classList.add('active');
-                btnGrid.classList.remove('active');
-            } else {
-                grid.classList.remove('list-view');
-                btnGrid.classList.add('active');
-                btnList.classList.remove('active');
-            }
+            if (isListView) { grid.classList.add('list-view'); btnList.classList.add('active'); btnGrid.classList.remove('active'); }
+            else { grid.classList.remove('list-view'); btnGrid.classList.add('active'); btnList.classList.remove('active'); }
         };
 
         const updateFilterOptions = (lang) => {
             const langData = translations[lang];
-            document.getElementById('label-search-text').textContent = langData.searchTextLabel;
-            document.getElementById('label-sort-type').textContent = langData.sortTypeLabel;
-            document.getElementById('label-filter-type').textContent = langData.filterTypeLabel;
-            document.getElementById('label-filter-finish').textContent = langData.filterFinishLabel;
-            document.getElementById('label-view-mode').textContent = langData.viewModeLabel;
+            ['label-search-text','label-sort-type','label-filter-type','label-filter-finish','label-view-mode'].forEach(id => {
+                const el = document.getElementById(id);
+                const key = { 'label-search-text':'searchTextLabel','label-sort-type':'sortTypeLabel','label-filter-type':'filterTypeLabel','label-filter-finish':'filterFinishLabel','label-view-mode':'viewModeLabel' }[id];
+                if (el) el.textContent = langData[key];
+            });
             document.getElementById('search-button').innerHTML = `<i class="fas fa-search"></i> ${langData.searchButton}`;
-            ['sort-type', 'filter-type', 'filter-finish'].forEach(id => {
-                const select = document.getElementById(id);
-                for (let opt of select.options) {
-                    const key = id === 'sort-type' ? `sort${opt.value}` : 
-                                id === 'filter-type' ? `filterType${opt.value === '-1' ? 'M1' : opt.value}` : 
-                                `filterFinish${opt.value}`;
+            ['sort-type','filter-type','filter-finish'].forEach(id => {
+                for (let opt of document.getElementById(id).options) {
+                    const key = id==='sort-type' ? `sort${opt.value}` : id==='filter-type' ? `filterType${opt.value==='-1'?'M1':opt.value}` : `filterFinish${opt.value}`;
                     if (langData[key]) opt.textContent = langData[key];
                 }
             });
@@ -763,39 +604,42 @@
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
             document.getElementById('language-switcher').value = lang;
             updateFilterOptions(lang);
-            fetchAndRenderLevels(currentPage);
+            if (playerMode) {
+                // プレイヤーモード中は言語テキストのみ更新（再取得しない）
+                document.getElementById('playerBannerName').textContent = playerName + langData.playerBannerSuffix;
+                document.getElementById('playerBannerClose').textContent = langData.backToNormal;
+            } else {
+                fetchAndRenderLevels(currentPage);
+            }
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            let modalBackdrop = document.getElementById('modal-backdrop');
-            if (!modalBackdrop) {
-                modalBackdrop = document.createElement('div');
-                modalBackdrop.id = 'modal-backdrop';
-                document.body.appendChild(modalBackdrop);
-            }
-            modalBackdrop.addEventListener('click', closeModal);
+            let backdrop = document.getElementById('modal-backdrop');
+            if (!backdrop) { backdrop = document.createElement('div'); backdrop.id = 'modal-backdrop'; document.body.appendChild(backdrop); }
+            backdrop.addEventListener('click', closeModal);
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && activeDetailsElement) closeModal(); });
-            applyLanguage(localStorage.getItem('language') || 'ja'); 
-            
+
+            document.getElementById('playerBannerClose').addEventListener('click', clearPlayerFilter);
+
+            // URLパラメータでプレイヤーモード判定
+            const urlPlayer = new URLSearchParams(window.location.search).get('player');
+            if (urlPlayer) {
+                playerMode = true;
+                playerName = decodeURIComponent(urlPlayer);
+                applyLanguage(localStorage.getItem('language') || 'ja');
+                fetchAndRenderPlayerCourses(playerName);
+            } else {
+                applyLanguage(localStorage.getItem('language') || 'ja');
+            }
+
             document.getElementById('search-button').addEventListener('click', () => fetchAndRenderLevels(0));
             document.getElementById('search-text').addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchAndRenderLevels(0); });
-            ['sort-type', 'filter-type', 'filter-finish'].forEach(id => {
-                document.getElementById(id).addEventListener('change', () => fetchAndRenderLevels(0));
-            });
+            ['sort-type','filter-type','filter-finish'].forEach(id => document.getElementById(id).addEventListener('change', () => fetchAndRenderLevels(0)));
             document.getElementById('hamburger-icon').addEventListener('click', () => document.querySelector('.navbar').classList.toggle('open'));
             document.getElementById('language-switcher').addEventListener('change', (e) => applyLanguage(e.target.value));
-
-            document.getElementById('btn-grid-view').addEventListener('click', () => {
-                isListView = false;
-                localStorage.setItem('viewMode', 'grid');
-                applyViewMode();
-            });
-            document.getElementById('btn-list-view').addEventListener('click', () => {
-                isListView = true;
-                localStorage.setItem('viewMode', 'list');
-                applyViewMode();
-            });
-            applyViewMode(); 
+            document.getElementById('btn-grid-view').addEventListener('click', () => { isListView = false; localStorage.setItem('viewMode','grid'); applyViewMode(); });
+            document.getElementById('btn-list-view').addEventListener('click', () => { isListView = true; localStorage.setItem('viewMode','list'); applyViewMode(); });
+            applyViewMode();
         });
     </script>
 </body>

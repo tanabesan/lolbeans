@@ -63,9 +63,7 @@ body.jp{font-family:var(--ffj)}
 
 /* ── LANG TOGGLE ── */
 .lang-toggle{position:fixed;top:1rem;right:1rem;z-index:100;display:flex;gap:.3rem}
-.lang-btn{background:var(--card);border:1.5px solid var(--line);border-radius:6px;
   padding:.3rem .7rem;font-size:.75rem;font-weight:800;color:var(--t2);cursor:pointer;transition:all .2s}
-.lang-btn.active{border-color:var(--acc);color:var(--acc);background:rgba(255,210,63,.08)}
 
 /* ── HEADER ── */
 header{position:relative;z-index:10;text-align:center;padding:3.2rem 1rem 1.4rem}
@@ -340,12 +338,6 @@ details[open] .pt-acc-summary::after{transform:rotate(90deg)}
 <div class="bg-grid"></div>
 <div id="particles"></div>
 
-<!-- LANG -->
-<div class="lang-toggle">
-  <button class="lang-btn" id="lbEn" onclick="setLang('en')">EN</button>
-  <button class="lang-btn active" id="lbJp" onclick="setLang('jp')">JP</button>
-</div>
-
 <!-- HEADER -->
 <header>
   <div class="logo-line">
@@ -449,8 +441,6 @@ let all=[],fil=[],sort='pts',pg=1,lang='jp';
 function setLang(l){
   lang=l;
   document.body.classList.toggle('jp',l==='jp');
-  document.getElementById('lbEn').classList.toggle('active',l==='en');
-  document.getElementById('lbJp').classList.toggle('active',l==='jp');
   document.getElementById('hSub').textContent=l==='jp'?'WR ランキング':'WR Ranking Board';
   document.querySelectorAll('.i18n').forEach(el=>{const v=el.dataset[l];if(v)el.textContent=v});
   document.getElementById('si').placeholder=l==='jp'?'プレイヤーを検索…':'Search player…';

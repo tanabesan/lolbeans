@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LOL.ex ver0.80
+// @name         LOL.ex ver0.81
 // @namespace    http://tampermonkey.net/
-// @version      0.80
+// @version      0.81
 // @description  LOLBeans extension - Fully refactored: XSS fixes, perf improvements, clean architecture
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
@@ -20,7 +20,7 @@
     //                                  定数・設定
     // ------------------------------------------------------------------------------------------------
 
-    const SCRIPT_VERSION = '0.80';
+    const SCRIPT_VERSION = '0.81';
 
     // --- ストレージキー ---
     const STORAGE = {
@@ -47,17 +47,11 @@
         PRIMARY:   '#BB86FC',
         SECONDARY: '#03DAC6',
         BG_URLS: [
-            // 宇宙・星空
             'https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?w=1280&q=80',
-            // 幾何学・抽象
             'https://images.unsplash.com/photo-1550859492-d5da9d8e45f3?w=1280&q=80',
-            // ネオン都市夜景
             'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1280&q=80',
-            // 暗い森
             'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1280&q=80',
-            // 銀河
             'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1280&q=80',
-            // 抽象的な光
             'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1280&q=80',
         ],
     };
@@ -236,7 +230,6 @@
         },
     };
 
-
     // ================================================================
     //  ミニ DOM ユーティリティ（el / on / append / $）
     // ================================================================
@@ -313,19 +306,16 @@
                 box-shadow: 4px 4px 14px ${alpha(primary, 0.55)} !important;
             }
             #btn-play:hover { filter: brightness(1.1); }
-
             #select-gamemode-value {
                 background-color: ${secondary} !important;
                 color: #000 !important;
                 box-shadow: 2px 2px 8px ${alpha(secondary, 0.45)} !important;
             }
-
             #btn-community-level {
                 background: ${alpha(secondary, 0.8)} !important;
                 color: #000 !important;
                 box-shadow: 2px 2px 6px ${alpha(secondary, 0.35)} !important;
             }
-
             html body .primary-btn {
                 background-color: rgba(255,255,255,0.70) !important;
                 backdrop-filter: blur(6px) !important;
@@ -339,7 +329,6 @@
                 border-color: ${secondary} !important;
                 box-shadow: 0 0 8px ${alpha(secondary, 0.4)} !important;
             }
-
             html body .secondary-btn {
                 background-color: rgba(255,255,255,0.62) !important;
                 backdrop-filter: blur(6px) !important;
@@ -352,7 +341,6 @@
                 color: #000 !important;
                 border-color: ${secondary} !important;
             }
-
             #party-mode-button {
                 background-color: rgba(255,255,255,0.70) !important;
                 backdrop-filter: blur(6px) !important;
@@ -364,7 +352,6 @@
                 border-color: ${secondary} !important;
                 box-shadow: 0 0 8px ${alpha(secondary, 0.4)} !important;
             }
-
             #coins-balance-button {
                 background-color: transparent !important;
                 border: 1px solid ${alpha(secondary, 0.5)} !important;
@@ -377,7 +364,6 @@
             #coins-plus-button:hover {
                 background-color: ${alpha(secondary, 0.35)} !important;
             }
-
             #settings-screen .center-panel .mid-section #tab1:checked ~ nav .tab1 label,
             #settings-screen .center-panel .mid-section #tab2:checked ~ nav .tab2 label,
             #settings-screen .center-panel .mid-section #tab3:checked ~ nav .tab3 label,
@@ -393,7 +379,6 @@
             #settings-screen .center-panel .mid-section ul li label:hover {
                 background: #ddd !important;
             }
-
             #settings-screen .radio-toolbar label {
                 background: #888 !important;
                 color: #eee !important;
@@ -406,7 +391,6 @@
                 background: ${secondary} !important;
                 color: #000 !important;
             }
-
             #settings-screen-done-btn {
                 background: rgba(0,0,0,0.42) !important;
                 backdrop-filter: blur(6px) !important;
@@ -419,7 +403,6 @@
                 border-color: ${secondary} !important;
                 box-shadow: 0 0 10px ${alpha(secondary, 0.45)} !important;
             }
-
             .center-panel .mid-section .footer .ready-btn,
             .center-panel .mid-section .footer .new-game-btn,
             .center-panel .mid-section .footer .continue-btn {
@@ -434,7 +417,6 @@
                 background: #b8a716 !important;
                 border-color: ${secondary} !important;
             }
-
             .secondary-btns .quit-btn,
             .secondary-btns .settings-btn {
                 background: rgba(255,255,255,0.62) !important;
@@ -448,13 +430,11 @@
                 background: rgba(255,255,255,0.88) !important;
                 border-color: ${secondary} !important;
             }
-
             .scoreboard .score-rows-wrapper .row.local-player {
                 background: rgba(0, 0, 0, 0.88) !important;
                 color: #e8e8e8 !important;
                 border-left: 3px solid ${primary} !important;
             }
-
             ::-webkit-scrollbar-thumb {
                 background: ${alpha(secondary, 0.45)} !important;
                 border-radius: 4px;
@@ -471,10 +451,10 @@
     function saveTime() {
         if (!player) return;
         try {
-            const t = player.getCurrentTime?.();
-            if (typeof t === 'number' && !isNaN(t)) {
-                localStorage.setItem(STORAGE.TIME, t);
-                lastTime = t;
+            const time = player.getCurrentTime?.();
+            if (typeof time === 'number' && !isNaN(time)) {
+                localStorage.setItem(STORAGE.TIME, time);
+                lastTime = time;
             }
         } catch (_) {}
     }
@@ -539,7 +519,6 @@
     function updateBarPlayButton(isPlaying) {
         const btn = document.getElementById('yt-card-play');
         if (btn) btn.textContent = isPlaying ? '⏸' : '▶';
-
         if (isPlaying) {
             startEqAnimation();
         } else {
@@ -606,7 +585,6 @@
     function parseYouTubeInput(val) {
         let videoId    = null;
         let playlistId = null;
-
         try {
             const url = new URL(val);
             videoId    = url.searchParams.get('v') || null;
@@ -615,14 +593,12 @@
                 videoId = url.pathname.slice(1) || null;
             }
         } catch (_) {
-            // URLでなければIDとして扱う
             if (/^[A-Za-z0-9_-]{11}$/.test(val)) {
                 videoId = val;
             } else if (/^PL[A-Za-z0-9_-]+$/.test(val)) {
                 playlistId = val;
             }
         }
-
         return { videoId, playlistId };
     }
 
@@ -832,9 +808,7 @@
                 overflow: hidden;
                 transition: border-color 0.2s;
             }
-            .lolex-settings fieldset:hover {
-                border-color: var(--primary-color);
-            }
+            .lolex-settings fieldset:hover { border-color: var(--primary-color); }
 
             .lolex-settings legend {
                 display: flex;
@@ -855,230 +829,113 @@
                 user-select: none;
                 transition: background 0.15s;
             }
-            .lolex-settings legend:hover {
-                background: rgba(255,255,255,0.04);
-            }
-            .lolex-settings legend .legend-left {
-                display: flex; align-items: center; gap: 6px;
-            }
+            .lolex-settings legend:hover { background: rgba(255,255,255,0.04); }
+            .lolex-settings legend .legend-left { display: flex; align-items: center; gap: 6px; }
             .lolex-settings legend .legend-arrow {
-                font-size: 0.70em;
-                opacity: 0.6;
-                transition: transform 0.25s;
-                margin-left: 4px;
+                font-size: 0.70em; opacity: 0.6;
+                transition: transform 0.25s; margin-left: 4px;
             }
-            .lolex-settings fieldset.lolex-collapsed legend .legend-arrow {
-                transform: rotate(-90deg);
-            }
+            .lolex-settings fieldset.lolex-collapsed legend .legend-arrow { transform: rotate(-90deg); }
 
             .lolex-fs-body {
-                max-height: 2000px;
-                overflow: hidden;
+                max-height: 2000px; overflow: hidden;
                 transition: max-height 0.28s ease, opacity 0.2s ease;
                 opacity: 1;
             }
-            .lolex-settings fieldset.lolex-collapsed .lolex-fs-body {
-                max-height: 0 !important;
-                opacity: 0;
-            }
+            .lolex-settings fieldset.lolex-collapsed .lolex-fs-body { max-height: 0 !important; opacity: 0; }
 
             .lolex-setting-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 7px 10px;
-                border-bottom: 1px solid rgba(255,255,255,0.04);
-                gap: 8px;
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); gap: 8px;
             }
             .lolex-setting-row:last-child { border-bottom: none; }
 
             .lolex-setting-row .setting-name {
-                display: flex;
-                align-items: center;
-                gap: 7px;
-                font-size: 0.86em;
-                color: var(--col-text);
-                font-weight: 500;
-                flex-grow: 1;
-                line-height: 1.4;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                display: flex; align-items: center; gap: 7px;
+                font-size: 0.86em; color: var(--col-text); font-weight: 500;
+                flex-grow: 1; line-height: 1.4;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
             }
-            .lolex-setting-row .setting-name i {
-                color: var(--primary-color);
-                font-size: 0.88em;
-                flex-shrink: 0;
-            }
-
-            .lolex-course-row .setting-name {
-                white-space: normal;
-                font-size: 0.84em;
-            }
+            .lolex-setting-row .setting-name i { color: var(--primary-color); font-size: 0.88em; flex-shrink: 0; }
+            .lolex-course-row .setting-name { white-space: normal; font-size: 0.84em; }
 
             .lolex-setting-row select,
             .lolex-setting-row input[type="text"] {
-                padding: 4px 8px;
-                border: 1px solid var(--col-border);
-                border-radius: 4px;
-                background: var(--input-bg);
-                color: var(--col-text);
-                font-size: 0.84em;
-                transition: border-color 0.2s;
-                box-sizing: border-box;
-                flex-shrink: 0;
+                padding: 4px 8px; border: 1px solid var(--col-border); border-radius: 4px;
+                background: var(--input-bg); color: var(--col-text); font-size: 0.84em;
+                transition: border-color 0.2s; box-sizing: border-box; flex-shrink: 0;
             }
             .lolex-setting-row select { min-width: 120px; }
             .lolex-setting-row select:focus,
-            .lolex-setting-row input[type="text"]:focus {
-                outline: none;
-                border-color: var(--primary-color);
-            }
+            .lolex-setting-row input[type="text"]:focus { outline: none; border-color: var(--primary-color); }
 
             .lolex-setting-row input[type="color"] {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 28px; height: 28px;
-                padding: 0; border: none; background: none;
+                -webkit-appearance: none; appearance: none;
+                width: 28px; height: 28px; padding: 0; border: none; background: none;
                 cursor: pointer; flex-shrink: 0;
             }
             .lolex-setting-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
             .lolex-setting-row input[type="color"]::-webkit-color-swatch {
-                border: 2px solid var(--col-border);
-                border-radius: 4px;
+                border: 2px solid var(--col-border); border-radius: 4px;
             }
 
-            .switch {
-                position: relative; display: inline-block;
-                width: 38px; height: 22px; min-width: 38px;
-                flex-shrink: 0;
-            }
+            .switch { position: relative; display: inline-block; width: 38px; height: 22px; min-width: 38px; flex-shrink: 0; }
             .switch input { opacity: 0; width: 0; height: 0; }
             .slider-toggle {
                 position: absolute; cursor: pointer; inset: 0;
-                background: #3a3a50;
-                transition: background 0.25s;
-                border-radius: 22px;
+                background: #3a3a50; transition: background 0.25s; border-radius: 22px;
             }
             .slider-toggle:before {
-                content: "";
-                position: absolute;
-                width: 15px; height: 15px;
-                left: 3px; bottom: 3px;
-                background: #888;
-                transition: transform 0.25s, background 0.25s;
-                border-radius: 50%;
+                content: ""; position: absolute; width: 15px; height: 15px;
+                left: 3px; bottom: 3px; background: #888;
+                transition: transform 0.25s, background 0.25s; border-radius: 50%;
             }
-            input:checked + .slider-toggle {
-                background: var(--secondary-color);
-            }
-            input:checked + .slider-toggle:before {
-                transform: translateX(16px);
-                background: #fff;
-            }
+            input:checked + .slider-toggle { background: var(--secondary-color); }
+            input:checked + .slider-toggle:before { transform: translateX(16px); background: #fff; }
 
             .lolex-setting-row button {
-                background: var(--primary-color);
-                color: #0d0d14;
-                border: none;
-                padding: 5px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.82em;
-                font-weight: 700;
-                transition: background 0.2s, transform 0.1s;
-                white-space: nowrap;
-                flex-shrink: 0;
+                background: var(--primary-color); color: #0d0d14; border: none;
+                padding: 5px 10px; border-radius: 4px; cursor: pointer;
+                font-size: 0.82em; font-weight: 700;
+                transition: background 0.2s, transform 0.1s; white-space: nowrap; flex-shrink: 0;
             }
             .lolex-setting-row button:hover  { background: var(--secondary-color); }
             .lolex-setting-row button:active { transform: translateY(1px); }
 
-            .lolex-update-text {
-                font-size: 0.83em;
-                color: var(--col-text);
-                line-height: 1.7;
-                padding: 8px 10px 6px;
-            }
+            .lolex-update-text { font-size: 0.83em; color: var(--col-text); line-height: 1.7; padding: 8px 10px 6px; }
             .lolex-update-text p { margin: 0 0 2px; }
             .lolex-discord-banner {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin: 2px 10px 10px;
-                padding: 9px 14px;
-                background: rgba(88, 101, 242, 0.15);
-                border: 1px solid rgba(88, 101, 242, 0.45);
-                border-radius: 8px;
-                color: #c9ccff;
-                font-size: 0.83em;
-                font-weight: 600;
-                cursor: pointer;
-                text-decoration: none;
-                transition: background 0.2s, border-color 0.2s;
-                letter-spacing: 0.02em;
+                display: flex; align-items: center; gap: 10px;
+                margin: 2px 10px 10px; padding: 9px 14px;
+                background: rgba(88, 101, 242, 0.15); border: 1px solid rgba(88, 101, 242, 0.45);
+                border-radius: 8px; color: #c9ccff; font-size: 0.83em; font-weight: 600;
+                cursor: pointer; text-decoration: none;
+                transition: background 0.2s, border-color 0.2s; letter-spacing: 0.02em;
             }
             .lolex-discord-banner:hover {
-                background: rgba(88, 101, 242, 0.30);
-                border-color: rgba(88, 101, 242, 0.75);
-                color: #fff;
+                background: rgba(88, 101, 242, 0.30); border-color: rgba(88, 101, 242, 0.75); color: #fff;
             }
-            .lolex-discord-banner svg {
-                flex-shrink: 0;
-                opacity: 0.9;
-            }
+            .lolex-discord-banner svg { flex-shrink: 0; opacity: 0.9; }
             .lolex-version-badge {
-                display: inline-block;
-                background: rgba(255,255,255,0.05);
-                border: 1px solid var(--col-border);
-                border-radius: 3px;
-                font-size: 0.78em;
-                color: var(--col-sub);
-                padding: 1px 7px;
-                margin-top: 5px;
+                display: inline-block; background: rgba(255,255,255,0.05);
+                border: 1px solid var(--col-border); border-radius: 3px;
+                font-size: 0.78em; color: var(--col-sub); padding: 1px 7px; margin-top: 5px;
             }
 
-            .lolex-note {
-                font-size: 0.79em;
-                color: var(--col-sub);
-                padding: 5px 10px 7px;
-                line-height: 1.6;
-            }
-            .lolex-note span {
-                color: var(--secondary-color);
-                font-weight: 700;
-            }
+            .lolex-note { font-size: 0.79em; color: var(--col-sub); padding: 5px 10px 7px; line-height: 1.6; }
+            .lolex-note span { color: var(--secondary-color); font-weight: 700; }
 
-            .lolex-btn-group {
-                display: flex;
-                gap: 5px;
-                padding: 6px 10px;
-            }
+            .lolex-btn-group { display: flex; gap: 5px; padding: 6px 10px; }
             .lolex-btn-group button {
-                flex: 1;
-                background: var(--primary-color);
-                color: #0d0d14;
-                border: none;
-                padding: 5px 6px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 0.80em;
-                font-weight: 700;
-                transition: background 0.2s;
-                white-space: nowrap;
+                flex: 1; background: var(--primary-color); color: #0d0d14; border: none;
+                padding: 5px 6px; border-radius: 4px; cursor: pointer;
+                font-size: 0.80em; font-weight: 700; transition: background 0.2s; white-space: nowrap;
             }
             .lolex-btn-group button:hover  { background: var(--secondary-color); }
-            .lolex-btn-group button.muted  {
-                background: #23232f;
-                color: var(--col-text);
-                border: 1px solid var(--col-border);
-            }
+            .lolex-btn-group button.muted  { background: #23232f; color: var(--col-text); border: 1px solid var(--col-border); }
             .lolex-btn-group button.muted:hover { background: #2e2e40; }
             .lolex-btn-group button.accent { background: var(--secondary-color); color: #0d0d14; }
-            .lolex-btn-group button.danger {
-                background: #2a1212;
-                color: #ff7070;
-                border: 1px solid #4a2020;
-            }
+            .lolex-btn-group button.danger { background: #2a1212; color: #ff7070; border: 1px solid #4a2020; }
             .lolex-btn-group button.danger:hover { background: #3e1818; }
 
             #yt-card       { border-color: var(--primary-color); }
@@ -1089,103 +946,62 @@
             #yt-load-button { background: var(--secondary-color) !important; color: #0d0d14 !important; }
 
             #lolex-bg-modal-overlay {
-                position: fixed; inset: 0;
-                background: rgba(0,0,0,0.78);
-                z-index: 10000; display: none;
+                position: fixed; inset: 0; background: rgba(0,0,0,0.78); z-index: 10000; display: none;
             }
             #lolex-bg-modal {
-                position: fixed; top: 50%; left: 50%;
-                transform: translate(-50%, -50%);
-                width: 90%; max-width: 560px;
-                height: 76vh; max-height: 660px;
-                background: var(--col-surface);
-                color: var(--col-text);
-                border: 1px solid var(--primary-color);
-                border-radius: 8px;
-                box-shadow: 0 12px 40px rgba(0,0,0,0.65);
-                z-index: 10001; display: none;
-                flex-direction: column;
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                width: 90%; max-width: 560px; height: 76vh; max-height: 660px;
+                background: var(--col-surface); color: var(--col-text);
+                border: 1px solid var(--primary-color); border-radius: 8px;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.65); z-index: 10001; display: none; flex-direction: column;
             }
             #lolex-bg-modal-header {
-                padding: 9px 13px;
-                border-bottom: 1px solid var(--col-border);
+                padding: 9px 13px; border-bottom: 1px solid var(--col-border);
                 display: flex; justify-content: space-between; align-items: center;
-                background: rgba(0,0,0,0.25);
-                flex-shrink: 0;
+                background: rgba(0,0,0,0.25); flex-shrink: 0;
             }
             #lolex-bg-modal-header h4 {
-                margin: 0;
-                color: var(--secondary-color);
-                font-size: 0.88em;
-                font-weight: 700;
-                letter-spacing: 0.05em;
+                margin: 0; color: var(--secondary-color); font-size: 0.88em; font-weight: 700; letter-spacing: 0.05em;
             }
             #lolex-bg-modal-close {
-                background: none; border: none;
-                color: var(--col-sub); font-size: 1.3em;
-                cursor: pointer; padding: 0; line-height: 1;
-                transition: color 0.2s;
+                background: none; border: none; color: var(--col-sub); font-size: 1.3em;
+                cursor: pointer; padding: 0; line-height: 1; transition: color 0.2s;
             }
             #lolex-bg-modal-close:hover { color: #fff; }
-            #lolex-bg-modal-body {
-                padding: 9px 11px; overflow-y: auto; flex-grow: 1;
-            }
+            #lolex-bg-modal-body { padding: 9px 11px; overflow-y: auto; flex-grow: 1; }
             .lolex-bg-item {
-                display: flex; align-items: center; gap: 7px;
-                padding: 5px 7px;
-                border: 1px solid var(--col-border);
-                border-radius: 4px; margin-bottom: 5px;
-                background: rgba(0,0,0,0.2);
-                transition: border-color 0.2s;
+                display: flex; align-items: center; gap: 7px; padding: 5px 7px;
+                border: 1px solid var(--col-border); border-radius: 4px; margin-bottom: 5px;
+                background: rgba(0,0,0,0.2); transition: border-color 0.2s;
             }
             .lolex-bg-item:hover { border-color: var(--primary-color); }
             .lolex-bg-preview {
-                width: 60px; height: 38px; flex-shrink: 0;
-                border-radius: 3px; background: #000;
+                width: 60px; height: 38px; flex-shrink: 0; border-radius: 3px; background: #000;
                 display: flex; align-items: center; justify-content: center;
                 font-size: 9px; color: var(--col-sub); overflow: hidden;
             }
             .lolex-bg-preview img { width: 100%; height: 100%; object-fit: cover; }
-            .lolex-bg-url {
-                flex-grow: 1; word-break: break-all;
-                font-size: 0.74em; color: var(--col-sub);
-                max-height: 34px; overflow: hidden;
-            }
+            .lolex-bg-url { flex-grow: 1; word-break: break-all; font-size: 0.74em; color: var(--col-sub); max-height: 34px; overflow: hidden; }
             .lolex-bg-delete {
-                background: rgba(180,0,30,0.65); color: #fff;
-                border: none; border-radius: 50%;
-                width: 20px; height: 20px; flex-shrink: 0;
-                cursor: pointer; font-size: 0.82em;
-                line-height: 20px; text-align: center;
-                transition: background 0.2s;
+                background: rgba(180,0,30,0.65); color: #fff; border: none; border-radius: 50%;
+                width: 20px; height: 20px; flex-shrink: 0; cursor: pointer; font-size: 0.82em;
+                line-height: 20px; text-align: center; transition: background 0.2s;
             }
             .lolex-bg-delete:hover { background: #b0001e; }
             #lolex-bg-modal-footer {
-                padding: 9px 11px;
-                border-top: 1px solid var(--col-border);
-                background: rgba(0,0,0,0.2);
-                flex-shrink: 0;
+                padding: 9px 11px; border-top: 1px solid var(--col-border); background: rgba(0,0,0,0.2); flex-shrink: 0;
             }
             #lolex-bg-add-area { display: flex; gap: 7px; margin-bottom: 7px; }
             #lolex-bg-new-url {
-                flex-grow: 1;
-                padding: 5px 9px;
-                border: 1px solid var(--col-border);
-                border-radius: 4px;
-                background: var(--input-bg);
-                color: var(--col-text);
-                font-size: 0.82em;
+                flex-grow: 1; padding: 5px 9px; border: 1px solid var(--col-border);
+                border-radius: 4px; background: var(--input-bg); color: var(--col-text); font-size: 0.82em;
             }
             #lolex-bg-new-url:focus { outline: none; border-color: var(--primary-color); }
             #lolex-bg-add-button, #lolex-bg-save-button {
-                background: var(--primary-color); color: #0d0d14;
-                border: none; padding: 5px 11px; border-radius: 4px;
-                cursor: pointer; font-size: 0.82em; font-weight: 700;
-                transition: background 0.2s;
+                background: var(--primary-color); color: #0d0d14; border: none;
+                padding: 5px 11px; border-radius: 4px; cursor: pointer; font-size: 0.82em; font-weight: 700; transition: background 0.2s;
             }
-            #lolex-bg-add-button:hover, #lolex-bg-save-button:hover {
-                background: var(--secondary-color);
-            }
+            #lolex-bg-add-button:hover, #lolex-bg-save-button:hover { background: var(--secondary-color); }
             #lolex-bg-save-button { width: 100%; margin-top: 2px; }
 
             @media (max-width: 768px) {
@@ -1211,95 +1027,41 @@
         style.id    = 'lolex-yt-style';
         style.textContent = `
             #yt-hidden-player {
-                position: fixed;
-                width: 1px; height: 1px;
-                bottom: 0; left: 0;
-                opacity: 0; pointer-events: none; z-index: -1;
+                position: fixed; width: 1px; height: 1px;
+                bottom: 0; left: 0; opacity: 0; pointer-events: none; z-index: -1;
             }
-
             #yt-card {
-                position: fixed;
-                bottom: -240px;
-                right: 18px;
-                width: 200px;
-                height: 200px;
-                border-radius: 12px;
-                overflow: hidden;
-                z-index: 9999;
-                background: #0d0d14 center/cover no-repeat;
+                position: fixed; bottom: -240px; right: 18px;
+                width: 200px; height: 200px; border-radius: 12px; overflow: hidden;
+                z-index: 9999; background: #0d0d14 center/cover no-repeat;
                 border: 1.5px solid var(--primary-color, #BB86FC);
-                box-shadow: 0 8px 32px rgba(0,0,0,0.7);
-                cursor: default;
-                transition: bottom 0.38s cubic-bezier(.4,0,.2,1),
-                            box-shadow 0.2s;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.7); cursor: default;
+                transition: bottom 0.38s cubic-bezier(.4,0,.2,1), box-shadow 0.2s;
                 user-select: none;
             }
             #yt-card.yt-card-visible { bottom: 18px; }
-            #yt-card:hover {
-                box-shadow: 0 12px 40px rgba(0,0,0,0.85);
-            }
+            #yt-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.85); }
 
             #yt-card-overlay {
-                position: absolute;
-                inset: 0;
-                background: linear-gradient(
-                    to bottom,
-                    transparent 0%,
-                    transparent 30%,
-                    rgba(5,5,12,0.55) 55%,
-                    rgba(5,5,12,0.92) 100%
-                );
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-end;
-                padding: 0 0 6px 0;
+                position: absolute; inset: 0;
+                background: linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(5,5,12,0.55) 55%, rgba(5,5,12,0.92) 100%);
+                display: flex; flex-direction: column; justify-content: flex-end; padding: 0 0 6px 0;
             }
 
             #yt-eq-row {
-                display: flex;
-                align-items: flex-end;
-                justify-content: center;
-                gap: 3px;
-                height: 56px;
-                padding: 0 8px;
-                margin-bottom: 4px;
-                overflow: hidden;
+                display: flex; align-items: flex-end; justify-content: center;
+                gap: 3px; height: 56px; padding: 0 8px; margin-bottom: 4px; overflow: hidden;
             }
-
             .yt-eq-col {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-end;
-                gap: 2px;
-                height: 100%;
-                width: 10px;
-                flex-shrink: 0;
-                position: relative;
+                display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+                gap: 2px; height: 100%; width: 10px; flex-shrink: 0; position: relative;
             }
-
-            .yt-eq-seg {
-                width: 100%;
-                height: 5px;
-                border-radius: 1px;
-                flex-shrink: 0;
-                opacity: 0;
-                transition: opacity 0.1s;
-            }
-
+            .yt-eq-seg { width: 100%; height: 5px; border-radius: 1px; flex-shrink: 0; opacity: 0; transition: opacity 0.1s; }
             .yt-eq-seg[data-level="0"] { background: var(--secondary-color, #03DAC6); }
             .yt-eq-seg[data-level="1"] { background: var(--secondary-color, #03DAC6); }
             .yt-eq-seg[data-level="2"] { background: var(--secondary-color, #03DAC6); }
-            .yt-eq-seg[data-level="3"] {
-                background: color-mix(in srgb,
-                    var(--secondary-color, #03DAC6) 60%,
-                    var(--primary-color, #BB86FC) 40%);
-            }
-            .yt-eq-seg[data-level="4"] {
-                background: color-mix(in srgb,
-                    var(--secondary-color, #03DAC6) 30%,
-                    var(--primary-color, #BB86FC) 70%);
-            }
+            .yt-eq-seg[data-level="3"] { background: color-mix(in srgb, var(--secondary-color, #03DAC6) 60%, var(--primary-color, #BB86FC) 40%); }
+            .yt-eq-seg[data-level="4"] { background: color-mix(in srgb, var(--secondary-color, #03DAC6) 30%, var(--primary-color, #BB86FC) 70%); }
             .yt-eq-seg[data-level="5"] { background: var(--primary-color, #BB86FC); }
             .yt-eq-seg[data-level="6"] { background: var(--primary-color, #BB86FC); }
             @supports not (color: color-mix(in srgb, red, blue)) {
@@ -1308,172 +1070,74 @@
             }
 
             #yt-card-title {
-                font-size: 0.72em;
-                color: rgba(255,255,255,0.92);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                padding: 0 10px;
-                margin-bottom: 5px;
-                letter-spacing: 0.02em;
+                font-size: 0.72em; color: rgba(255,255,255,0.92);
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                padding: 0 10px; margin-bottom: 5px; letter-spacing: 0.02em;
                 text-shadow: 0 1px 4px rgba(0,0,0,0.8);
             }
-
             #yt-card-controls {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 8px;
-                gap: 2px;
+                display: flex; align-items: center; justify-content: space-between; padding: 0 8px; gap: 2px;
             }
-
             .yt-card-btn {
-                background: none;
-                border: none;
-                color: rgba(255,255,255,0.82);
-                font-size: 14px;
-                cursor: pointer;
-                padding: 3px 5px;
-                border-radius: 4px;
-                flex-shrink: 0;
-                line-height: 1;
+                background: none; border: none; color: rgba(255,255,255,0.82); font-size: 14px;
+                cursor: pointer; padding: 3px 5px; border-radius: 4px; flex-shrink: 0; line-height: 1;
                 transition: color 0.12s, background 0.12s;
             }
-            .yt-card-btn:hover {
-                color: #fff;
-                background: rgba(255,255,255,0.1);
-            }
-
-            #yt-card-play {
-                font-size: 18px;
-                padding: 3px 6px;
-            }
+            .yt-card-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+            #yt-card-play { font-size: 18px; padding: 3px 6px; }
 
             #yt-card-volume {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 52px;
-                height: 3px;
-                background: rgba(255,255,255,0.22);
-                border-radius: 2px;
-                outline: none;
-                cursor: pointer;
-                flex-shrink: 0;
+                -webkit-appearance: none; appearance: none; width: 52px; height: 3px;
+                background: rgba(255,255,255,0.22); border-radius: 2px; outline: none; cursor: pointer; flex-shrink: 0;
             }
             #yt-card-volume::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                width: 10px; height: 10px;
-                background: var(--secondary-color, #03DAC6);
-                border-radius: 50%;
+                -webkit-appearance: none; width: 10px; height: 10px;
+                background: var(--secondary-color, #03DAC6); border-radius: 50%;
             }
             #yt-card-volume::-moz-range-thumb {
-                width: 10px; height: 10px;
-                background: var(--secondary-color, #03DAC6);
-                border-radius: 50%;
-                border: none;
+                width: 10px; height: 10px; background: var(--secondary-color, #03DAC6); border-radius: 50%; border: none;
             }
 
             #yt-url-panel {
-                position: fixed;
-                right: 18px;
-                bottom: 238px;
-                width: 200px;
-                background: rgba(8,8,16,0.96);
-                border: 1.5px solid var(--primary-color, #BB86FC);
-                border-radius: 10px;
-                padding: 8px;
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-                z-index: 10001;
-                box-shadow: 0 -2px 16px rgba(0,0,0,0.5);
-                transition: opacity 0.2s, transform 0.2s;
+                position: fixed; right: 18px; bottom: 238px; width: 200px;
+                background: rgba(8,8,16,0.96); border: 1.5px solid var(--primary-color, #BB86FC);
+                border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 5px;
+                z-index: 10001; box-shadow: 0 -2px 16px rgba(0,0,0,0.5); transition: opacity 0.2s, transform 0.2s;
             }
-            #yt-url-panel.yt-url-hidden {
-                opacity: 0;
-                pointer-events: none;
-                transform: translateY(8px);
-            }
+            #yt-url-panel.yt-url-hidden { opacity: 0; pointer-events: none; transform: translateY(8px); }
             #yt-url-panel input {
-                width: 100%;
-                background: rgba(255,255,255,0.07);
-                border: 1px solid rgba(255,255,255,0.14);
-                border-radius: 4px;
-                color: #fff;
-                font-size: 0.78em;
-                padding: 5px 7px;
-                outline: none;
-                box-sizing: border-box;
+                width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
+                border-radius: 4px; color: #fff; font-size: 0.78em; padding: 5px 7px; outline: none; box-sizing: border-box;
             }
-            #yt-url-panel input:focus {
-                border-color: var(--primary-color, #BB86FC);
-            }
+            #yt-url-panel input:focus { border-color: var(--primary-color, #BB86FC); }
             #yt-url-panel button {
-                width: 100%;
-                background: var(--secondary-color, #03DAC6);
-                color: #08080f;
-                border: none;
-                border-radius: 4px;
-                padding: 5px;
-                font-size: 0.78em;
-                font-weight: 700;
-                cursor: pointer;
-                transition: opacity 0.15s;
+                width: 100%; background: var(--secondary-color, #03DAC6); color: #08080f; border: none;
+                border-radius: 4px; padding: 5px; font-size: 0.78em; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
             }
             #yt-url-panel button:hover { opacity: 0.82; }
 
             #yt-mobile-toggle-btn { display: none !important; }
 
             #yt-float-btn {
-                position: fixed;
-                right: 18px;
-                bottom: 228px;
-                width: 36px;
-                height: 36px;
-                border-radius: 50%;
+                position: fixed; right: 18px; bottom: 228px;
+                width: 36px; height: 36px; border-radius: 50%;
                 border: 1.5px solid var(--primary-color, #BB86FC);
-                background: rgba(10,10,18,0.85);
-                color: rgba(255,255,255,0.9);
-                font-size: 16px;
-                cursor: pointer;
-                z-index: 9997;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                background: rgba(10,10,18,0.85); color: rgba(255,255,255,0.9); font-size: 16px;
+                cursor: pointer; z-index: 9997; display: flex; align-items: center; justify-content: center;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.5);
                 transition: background 0.2s, transform 0.1s, opacity 0.2s;
-                backdrop-filter: blur(4px);
-                line-height: 1;
-                padding: 0;
-                opacity: 1;
+                backdrop-filter: blur(4px); line-height: 1; padding: 0; opacity: 1;
             }
-            #yt-float-btn.lolex-float-faint {
-                opacity: 0.18;
-            }
-            #yt-float-btn.lolex-float-faint:hover {
-                opacity: 0.85;
-            }
-            #yt-float-btn.lolex-float-hidden {
-                display: none !important;
-            }
-            #yt-float-btn:hover {
-                background: var(--primary-color, #BB86FC);
-                color: #000;
-                transform: scale(1.1);
-            }
-            @media (max-width: 600px) {
-                #yt-float-btn { right: 10px; bottom: 188px; }
-            }
+            #yt-float-btn.lolex-float-faint { opacity: 0.18; }
+            #yt-float-btn.lolex-float-faint:hover { opacity: 0.85; }
+            #yt-float-btn.lolex-float-hidden { display: none !important; }
+            #yt-float-btn:hover { background: var(--primary-color, #BB86FC); color: #000; transform: scale(1.1); }
 
             @media (max-width: 600px) {
-                #yt-card {
-                    width: 160px; height: 160px;
-                    right: 10px;
-                }
+                #yt-float-btn { right: 10px; bottom: 188px; }
+                #yt-card { width: 160px; height: 160px; right: 10px; }
                 #yt-card.yt-card-visible { bottom: 10px; }
-                #yt-url-panel {
-                    width: 160px; right: 10px; bottom: 180px;
-                }
+                #yt-url-panel { width: 160px; right: 10px; bottom: 180px; }
             }
         `;
         document.head.appendChild(style);
@@ -1518,11 +1182,11 @@
         append(overlay, titleEl, controls);
 
         append(controls,
-            el('button', { className: 'yt-card-btn', id: 'yt-bar-prev',     textContent: '⏮', title: 'Previous'     }),
-            el('button', { className: 'yt-card-btn', id: 'yt-card-play',    textContent: '▶', title: 'Play / Pause' }),
-            el('button', { className: 'yt-card-btn', id: 'yt-bar-next',     textContent: '⏭', title: 'Next'         }),
+            el('button', { className: 'yt-card-btn', id: 'yt-bar-prev',       textContent: '⏮', title: 'Previous'     }),
+            el('button', { className: 'yt-card-btn', id: 'yt-card-play',      textContent: '▶', title: 'Play / Pause' }),
+            el('button', { className: 'yt-card-btn', id: 'yt-bar-next',       textContent: '⏭', title: 'Next'         }),
             el('input',  { type: 'range', id: 'yt-card-volume', min: '0', max: '100', value: String(volume), title: t('ytVolume') }),
-            el('button', { className: 'yt-card-btn', id: 'yt-bar-url-toggle', textContent: '🔗', title: 'Set URL'   })
+            el('button', { className: 'yt-card-btn', id: 'yt-bar-url-toggle', textContent: '🔗', title: 'Set URL'      })
         );
 
         const urlPanel = el('div', { id: 'yt-url-panel' });
@@ -1553,13 +1217,8 @@
                 width: '1',
                 videoId: currentVideoId || '',
                 playerVars: {
-                    autoplay: 1,
-                    controls: 0,
-                    disablekb: 1,
-                    fs: 0,
-                    iv_load_policy: 3,
-                    modestbranding: 1,
-                    rel: 0,
+                    autoplay: 1, controls: 0, disablekb: 1,
+                    fs: 0, iv_load_policy: 3, modestbranding: 1, rel: 0,
                 },
                 events: {
                     onReady: onPlayerReady,
@@ -1572,12 +1231,6 @@
             document.head.appendChild(el('script', { src: 'https://www.youtube.com/iframe_api' }));
         } else if (unsafeWindow.YT.Player) {
             unsafeWindow.onYouTubeIframeAPIReady();
-        } else {
-            const orig = unsafeWindow.onYouTubeIframeAPIReady;
-            unsafeWindow.onYouTubeIframeAPIReady = function () {
-                if (orig) orig();
-                else unsafeWindow.onYouTubeIframeAPIReady();
-            };
         }
     }
 
@@ -1614,8 +1267,8 @@
                     ? player.pauseVideo() : player.playVideo();
             } catch (_) {}
         }});
-        on($('yt-bar-prev'),  { click: () => { try { player?.previousVideo?.(); } catch (_) {} }});
-        on($('yt-bar-next'),  { click: () => { try { player?.nextVideo?.();     } catch (_) {} }});
+        on($('yt-bar-prev'), { click: () => { try { player?.previousVideo?.(); } catch (_) {} }});
+        on($('yt-bar-next'), { click: () => { try { player?.nextVideo?.();     } catch (_) {} }});
         on($('yt-card-volume'), { input: e => {
             const vol = parseInt(e.target.value, 10);
             localStorage.setItem(STORAGE.VOLUME, vol);
@@ -1626,14 +1279,11 @@
         on($('yt-bar-url-toggle'), { click: () => {
             const panel = $('yt-url-panel');
             if (!panel) return;
-
-            // カードが非表示なら先に表示する
             const card = $('yt-card');
             if (card && !card.classList.contains('yt-card-visible')) {
                 card.classList.add('yt-card-visible');
                 setStoredBool(STORAGE.BAR_VISIBLE, true);
             }
-
             const isNowHidden = panel.classList.toggle('yt-url-hidden');
             if (!isNowHidden) {
                 setTimeout(() => $('yt-video-id-input')?.focus(), 50);
@@ -1700,7 +1350,7 @@
             errSpan.style.display = 'none';
             errSpan.textContent   = t('previewError');
             img.addEventListener('error', () => {
-                img.style.display  = 'none';
+                img.style.display     = 'none';
                 errSpan.style.display = 'block';
             });
             preview.appendChild(img);
@@ -1714,9 +1364,7 @@
             delBtn.className    = 'lolex-bg-delete';
             delBtn.textContent  = '×';
             delBtn.title        = 'Delete';
-            delBtn.addEventListener('click', () => {
-                item.remove();
-            });
+            delBtn.addEventListener('click', () => { item.remove(); });
 
             item.appendChild(preview);
             item.appendChild(urlSpan);
@@ -1769,8 +1417,8 @@
         const btn = $('yt-float-btn');
         if (!btn) return;
         btn.classList.remove('lolex-float-faint', 'lolex-float-hidden');
-        if (mode === 'faint')  btn.classList.add('lolex-float-faint');
-        if (mode === 'hide')   btn.classList.add('lolex-float-hidden');
+        if (mode === 'faint') btn.classList.add('lolex-float-faint');
+        if (mode === 'hide')  btn.classList.add('lolex-float-hidden');
     }
 
     function toggleYouTubeVisibility() {
@@ -1783,16 +1431,16 @@
     function showBackgroundModal() {
         if (!$('lolex-bg-modal')) createBackgroundModal();
 
-        const title   = $('lolex-bg-modal-title');
-        const newUrl  = $('lolex-bg-new-url');
-        const addBtn  = $('lolex-bg-add-button');
-        const saveBtn = $('lolex-bg-save-button');
-        const closeBtn= $('lolex-bg-modal-close');
-        if (title)    title.textContent       = t('modalTitle');
-        if (newUrl)   newUrl.placeholder      = t('addUrl');
-        if (addBtn)   addBtn.textContent      = t('add');
-        if (saveBtn)  saveBtn.textContent     = t('save');
-        if (closeBtn) closeBtn.title          = t('close');
+        const title    = $('lolex-bg-modal-title');
+        const newUrl   = $('lolex-bg-new-url');
+        const addBtn   = $('lolex-bg-add-button');
+        const saveBtn  = $('lolex-bg-save-button');
+        const closeBtn = $('lolex-bg-modal-close');
+        if (title)    title.textContent    = t('modalTitle');
+        if (newUrl)   newUrl.placeholder   = t('addUrl');
+        if (addBtn)   addBtn.textContent   = t('add');
+        if (saveBtn)  saveBtn.textContent  = t('save');
+        if (closeBtn) closeBtn.title       = t('close');
 
         renderBackgroundList();
         const overlay = $('lolex-bg-modal-overlay');
@@ -1809,11 +1457,10 @@
     }
 
     function saveBackgroundListFromModal() {
-        const body  = $('lolex-bg-modal-body');
+        const body = $('lolex-bg-modal-body');
         if (!body) return;
-        const urls  = Array.from(body.querySelectorAll('.lolex-bg-item')).map(el => el.dataset.url);
-        const str   = urls.join('\n');
-        localStorage.setItem(STORAGE.BG_LIST, str);
+        const urls = Array.from(body.querySelectorAll('.lolex-bg-item')).map(el => el.dataset.url);
+        localStorage.setItem(STORAGE.BG_LIST, urls.join('\n'));
         applyCustomBackground(true);
     }
 
@@ -1842,8 +1489,8 @@
 
         const body = document.createElement('div');
         body.className = 'lolex-fs-body';
-        const children = Array.from(fs.children).filter(el => el.tagName !== 'LEGEND');
-        children.forEach(el => body.appendChild(el));
+        const children = Array.from(fs.children).filter(e => e.tagName !== 'LEGEND');
+        children.forEach(e => body.appendChild(e));
         fs.appendChild(body);
 
         if (isCollapsed) fs.classList.add('lolex-collapsed');
@@ -1855,22 +1502,22 @@
     }
 
     function makeToggleRow(inputId, labelHtml, checked) {
-        const row       = document.createElement('div');
-        row.className   = 'lolex-setting-row';
+        const row   = document.createElement('div');
+        row.className = 'lolex-setting-row';
 
-        const label     = document.createElement('label');
+        const label = document.createElement('label');
         label.htmlFor   = inputId;
         label.className = 'setting-name';
         label.innerHTML = labelHtml;
 
-        const sw        = document.createElement('label');
-        sw.className    = 'switch';
-        const input     = document.createElement('input');
-        input.type      = 'checkbox';
-        input.id        = inputId;
+        const sw    = document.createElement('label');
+        sw.className = 'switch';
+        const input = document.createElement('input');
+        input.type  = 'checkbox';
+        input.id    = inputId;
         if (checked) input.checked = true;
-        const span      = document.createElement('span');
-        span.className  = 'slider-toggle';
+        const span  = document.createElement('span');
+        span.className = 'slider-toggle';
         sw.appendChild(input);
         sw.appendChild(span);
 
@@ -1901,8 +1548,8 @@
             tabContainer.querySelector('nav ul').appendChild(li);
         }
         li.innerHTML = '';
-        const tabLabel    = document.createElement('label');
-        tabLabel.htmlFor  = 'tab5';
+        const tabLabel   = document.createElement('label');
+        tabLabel.htmlFor = 'tab5';
         tabLabel.textContent = t('tabTitle');
         li.appendChild(tabLabel);
 
@@ -1937,9 +1584,9 @@
         container.appendChild(updateFs);
 
         // ── 1. 言語設定 ──
-        const langFs      = document.createElement('fieldset');
+        const langFs     = document.createElement('fieldset');
         const currentLang = getLang();
-        langFs.innerHTML  = `
+        langFs.innerHTML = `
             <legend><i class="fas fa-language"></i> ${t('language')}</legend>
             <div class="lolex-setting-row">
                 <label for="language-switcher" class="setting-name">
@@ -2008,9 +1655,7 @@
                 <input type="color" id="secondary-color-picker" value="${getSecondaryColor()}">
             </div>
             <div class="lolex-setting-row" style="border-bottom:none;">
-                <span class="setting-name">
-                    <i class="fas fa-image"></i>${t('backgroundColor')}
-                </span>
+                <span class="setting-name"><i class="fas fa-image"></i>${t('backgroundColor')}</span>
             </div>
             <div class="lolex-btn-group">
                 <button id="background-shuffle-button" class="accent">
@@ -2034,50 +1679,44 @@
         ytLegend.innerHTML = `<i class="fab fa-youtube"></i> ${t('ytSettings')}`;
         ytFs.appendChild(ytLegend);
 
-        const hotkeyRow  = document.createElement('div');
+        // ホットキー設定行
+        const hotkeyRow = document.createElement('div');
         hotkeyRow.className = 'lolex-setting-row';
         const hotkeyLabel_el = document.createElement('label');
         hotkeyLabel_el.className = 'setting-name';
         hotkeyLabel_el.innerHTML = `<i class="fas fa-keyboard"></i>${t('ytHotkeyLabel')}`;
 
         const hotkeyBtn = document.createElement('button');
-        hotkeyBtn.id        = 'yt-hotkey-btn';
-        hotkeyBtn.textContent = hotkeyLabel();
+        hotkeyBtn.id            = 'yt-hotkey-btn';
+        hotkeyBtn.textContent   = hotkeyLabel();
         hotkeyBtn.style.cssText = 'min-width:90px; font-size:0.80em;';
 
         let _waitingHotkey = false;
         on(hotkeyBtn, { click: () => {
             if (_waitingHotkey) return;
             _waitingHotkey = true;
-            hotkeyBtn.textContent = t('ytHotkeyHint');
+            hotkeyBtn.textContent      = t('ytHotkeyHint');
             hotkeyBtn.style.background = 'var(--secondary-color)';
-            hotkeyBtn.style.color = '#000';
+            hotkeyBtn.style.color      = '#000';
 
             const onKey = (e) => {
                 if (e.key === 'Escape') {
-                    hotkeyBtn.textContent = hotkeyLabel();
+                    hotkeyBtn.textContent      = hotkeyLabel();
                     hotkeyBtn.style.background = '';
-                    hotkeyBtn.style.color = '';
+                    hotkeyBtn.style.color      = '';
                     _waitingHotkey = false;
                     document.removeEventListener('keydown', onKey, { capture: true });
                     return;
                 }
                 if (['Control','Alt','Shift','Meta'].includes(e.key)) return;
-
                 e.preventDefault();
                 e.stopImmediatePropagation();
-
-                const cfg = {
-                    key:       e.key,
-                    ctrlKey:   e.ctrlKey,
-                    altKey:    e.altKey,
-                    shiftKey:  e.shiftKey,
-                };
+                const cfg = { key: e.key, ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey };
                 localStorage.setItem(STORAGE.YT_HOTKEY, JSON.stringify(cfg));
                 applyHotkey();
-                hotkeyBtn.textContent = hotkeyLabel();
+                hotkeyBtn.textContent      = hotkeyLabel();
                 hotkeyBtn.style.background = '';
-                hotkeyBtn.style.color = '';
+                hotkeyBtn.style.color      = '';
                 _waitingHotkey = false;
                 document.removeEventListener('keydown', onKey, { capture: true });
             };
@@ -2088,21 +1727,22 @@
         hotkeyRow.appendChild(hotkeyBtn);
         ytFs.appendChild(hotkeyRow);
 
+        // フロートボタン表示設定
         const floatRow = document.createElement('div');
         floatRow.className = 'lolex-setting-row';
         const floatLabel = document.createElement('label');
         floatLabel.className = 'setting-name';
         floatLabel.innerHTML = `<i class="fas fa-circle"></i>${t('ytFloatBtn')}`;
 
-        const floatModes = ['show', 'faint', 'hide'];
+        const floatModes  = ['show', 'faint', 'hide'];
         const floatLabels = [t('ytFloatBtnShow'), t('ytFloatBtnFaint'), t('ytFloatBtnHide')];
-        const curMode = localStorage.getItem(STORAGE.FLOAT_BTN) || 'show';
+        const curMode     = localStorage.getItem(STORAGE.FLOAT_BTN) || 'show';
 
         const floatGroup = document.createElement('div');
         floatGroup.style.cssText = 'display:flex; gap:4px;';
         floatModes.forEach((mode, i) => {
             const btn = document.createElement('button');
-            btn.textContent = floatLabels[i];
+            btn.textContent   = floatLabels[i];
             btn.style.cssText = 'font-size:0.78em; padding:2px 8px;';
             if (mode === curMode) btn.style.fontWeight = '700';
             on(btn, { click: () => {
@@ -2119,8 +1759,8 @@
         floatRow.appendChild(floatGroup);
         ytFs.appendChild(floatRow);
 
-        const loopRow    = makeToggleRow('ytLoopToggle',    `<i class="fas fa-sync-alt"></i>${t('loop')}`,    getStoredBool(STORAGE.LOOP));
-        const shuffleRow = makeToggleRow('ytShuffleToggle', `<i class="fas fa-random"></i>${t('shuffle')}`,   getStoredBool(STORAGE.SHUFFLE));
+        const loopRow    = makeToggleRow('ytLoopToggle',    `<i class="fas fa-sync-alt"></i>${t('loop')}`,  getStoredBool(STORAGE.LOOP));
+        const shuffleRow = makeToggleRow('ytShuffleToggle', `<i class="fas fa-random"></i>${t('shuffle')}`, getStoredBool(STORAGE.SHUFFLE));
         ytFs.appendChild(loopRow);
         ytFs.appendChild(shuffleRow);
         const ytNote = document.createElement('div');
@@ -2130,12 +1770,12 @@
         container.appendChild(ytFs);
 
         [
-            [updateFs,  'update'],
-            [langFs,    'lang'],
-            [gameFs,    'airmove'],
-            [courseFs,  'course'],
-            [visualFs,  'visual'],
-            [ytFs,      'yt'],
+            [updateFs, 'update'],
+            [langFs,   'lang'],
+            [gameFs,   'airmove'],
+            [courseFs, 'course'],
+            [visualFs, 'visual'],
+            [ytFs,     'yt'],
         ].forEach(([fs, key]) => makeCollapsibleFieldset(fs, key));
 
         panel.appendChild(container);
@@ -2169,8 +1809,7 @@
 
         $('background-reset-to-default-button')?.addEventListener('click', () => {
             if (!confirm(t('resetListConfirm'))) return;
-            const def = DEFAULT.BG_URLS.join('\n');
-            localStorage.setItem(STORAGE.BG_LIST, def);
+            localStorage.setItem(STORAGE.BG_LIST, DEFAULT.BG_URLS.join('\n'));
             applyCustomBackground(true);
         });
 
@@ -2194,9 +1833,7 @@
 
         $('ytLoopToggle')?.addEventListener('change', (e) => {
             setStoredBool(STORAGE.LOOP, e.target.checked);
-            try {
-                if (player && typeof player.setLoop === 'function') player.setLoop(e.target.checked);
-            } catch (_) {}
+            try { if (player && typeof player.setLoop === 'function') player.setLoop(e.target.checked); } catch (_) {}
         });
 
         $('ytShuffleToggle')?.addEventListener('change', (e) => {
@@ -2223,6 +1860,10 @@
         unsafeWindow.console.log._lolexHooked = true;
     }
 
+    // ★ 次ラウンドラベルをグローバルに保持（DOM出現前でも対応できるよう）
+    let _pendingNextRoundLabel = null;
+    let _nextRoundObserver     = null;
+
     function handleMapLoad(mapName) {
         if (getStoredBool(STORAGE.AIR_MOVE_AUTO)) {
             const course = COURSES.find(c => mapName.toLowerCase().includes(c.keyword.toLowerCase()));
@@ -2234,30 +1875,75 @@
         const displayText = course ? course.message : mapName;
         const label       = `${t('nextRound')} ${displayText}`;
 
-        updateNextRoundDisplay('end-match-header',       'next-round-display-header', label, {
+        // ラベルを保持しておく
+        _pendingNextRoundLabel = label;
+
+        // 既にDOMに出ていれば即挿入、なければMutationObserverで監視
+        _tryInjectNextRoundLabel();
+        _startNextRoundObserver();
+    }
+
+    /**
+     * end-match-header / death-screen が既にDOMにあれば即座にラベルを挿入する
+     */
+    function _tryInjectNextRoundLabel() {
+        if (!_pendingNextRoundLabel) return;
+
+        const headerStyles = {
             fontSize: '14px', color: '#fff', marginTop: '8px', textAlign: 'center',
-        });
-        updateNextRoundDisplay('#death-screen .top-section', 'next-round-display-death', label, {
+        };
+        const deathStyles = {
             fontSize: '1.5rem', color: '#fff', textAlign: 'center',
             fontWeight: 'bold', paddingTop: '50px',
             textShadow: '2px 2px 4px rgba(0,0,0,0.7)',
-        });
+        };
+
+        const header = document.getElementById('end-match-header');
+        if (header) {
+            _injectLabel(header, 'next-round-display-header', _pendingNextRoundLabel, headerStyles);
+        }
+
+        const deathSection = document.querySelector('#death-screen .top-section');
+        if (deathSection) {
+            _injectLabel(deathSection, 'next-round-display-death', _pendingNextRoundLabel, deathStyles);
+        }
     }
 
-    function updateNextRoundDisplay(parentSelector, displayId, text, styles) {
-        const parent = parentSelector.startsWith('#') && !parentSelector.includes(' ')
-            ? document.getElementById(parentSelector.slice(1))
-            : document.querySelector(parentSelector);
-        if (!parent) return;
-
-        let elem = document.getElementById(displayId);
+    function _injectLabel(parent, id, text, styles) {
+        let elem = document.getElementById(id);
         if (!elem) {
             elem = document.createElement('div');
-            elem.id = displayId;
+            elem.id = id;
             Object.assign(elem.style, styles);
             parent.appendChild(elem);
         }
         elem.textContent = text;
+    }
+
+    /**
+     * MutationObserverでend-match-headerやdeath-screenの出現を監視し、
+     * 出現したら即ラベルを挿入する
+     */
+    function _startNextRoundObserver() {
+        if (_nextRoundObserver) return; // 既に監視中
+
+        _nextRoundObserver = new MutationObserver(() => {
+            if (!_pendingNextRoundLabel) {
+                _nextRoundObserver.disconnect();
+                _nextRoundObserver = null;
+                return;
+            }
+            _tryInjectNextRoundLabel();
+
+            // 両方挿入済みなら監視終了
+            if (document.getElementById('next-round-display-header') &&
+                document.getElementById('next-round-display-death')) {
+                _nextRoundObserver.disconnect();
+                _nextRoundObserver = null;
+            }
+        });
+
+        _nextRoundObserver.observe(document.body, { childList: true, subtree: true });
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -2300,9 +1986,9 @@
         const stored = localStorage.getItem(STORAGE.YT_HOTKEY);
         const cfg = stored ? JSON.parse(stored) : { key: 'm', ctrlKey: true, altKey: false, shiftKey: false };
         const mods = [
-            cfg.ctrlKey  ? 'Ctrl' : '',
-            cfg.altKey   ? 'Alt'  : '',
-            cfg.shiftKey ? 'Shift': '',
+            cfg.ctrlKey  ? 'Ctrl'  : '',
+            cfg.altKey   ? 'Alt'   : '',
+            cfg.shiftKey ? 'Shift' : '',
         ].filter(Boolean);
         return [...mods, cfg.key.toUpperCase()].join('+') || t('ytHotkeyNone');
     }

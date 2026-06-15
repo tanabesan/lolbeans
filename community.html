@@ -6,7 +6,7 @@
 <title id="page-title">LOLBeans コース一覧</title>
 <link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon-128.png">
 <link rel="stylesheet" href="https://tanabesan.github.io/lolbeans/tool-menu.css">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -226,11 +226,10 @@ body::before{
 .card-display{position:relative;padding-top:100%;width:100%;overflow:hidden}
 .card-thumb{
   position:absolute;inset:0;background-size:cover;background-position:center;
-  filter:brightness(.7) saturate(.8);
+  filter:brightness(.92) saturate(.95);
   transition:filter .3s,transform .3s;
-  image-rendering:pixelated;
 }
-.level-grid-card:hover .card-thumb{filter:brightness(.9) saturate(1.1);transform:scale(1.05)}
+.level-grid-card:hover .card-thumb{filter:brightness(1.0) saturate(1.1);transform:scale(1.05)}
 
 /* scanline on thumb */
 .card-thumb::after{
@@ -327,28 +326,33 @@ body::before{
   position:fixed;top:50%;left:50%;
   transform:translate(-50%,-48%) scale(.95);
   width:92%;max-width:840px;
-  background:var(--panel);
   border:2px solid var(--acc3);
-  box-shadow:8px 8px 0 var(--acc3),var(--glow-b),inset 0 0 40px rgba(0,212,255,.04);
+  box-shadow:8px 8px 0 var(--acc3),var(--glow-b);
   overflow:hidden;z-index:2000;
   opacity:0;visibility:hidden;
   transition:all .35s cubic-bezier(.175,.885,.32,1.275);
+  /* サムネ背景 */
+  background-color:var(--panel);
+  background-image:var(--thumb-url,none);
+  background-size:cover;
+  background-position:center;
 }
 .card-details.active-modal{
   opacity:1;visibility:visible;
   transform:translate(-50%,-50%) scale(1);
 }
-.modal-banner{
-  width:100%;height:130px;
-  background-size:cover;background-position:center;position:relative;
+/* サムネ上に乗せる暗幕 — スキャンライン+グラデ */
+.card-details::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    linear-gradient(to bottom,rgba(0,4,8,.55) 0%,rgba(0,4,8,.88) 100%),
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px);
 }
-.modal-banner-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to bottom,rgba(0,4,8,.2) 0%,rgba(0,4,8,1) 100%);
-}
+.modal-banner{display:none}
+.modal-banner-overlay{display:none}
 .modal-close-btn{
-  position:absolute;top:10px;right:10px;
-  background:rgba(0,4,8,.7);color:var(--acc2);
+  position:absolute;top:12px;right:12px;
+  background:rgba(0,4,8,.6);color:var(--acc2);
   border:2px solid var(--acc2);
   width:32px;height:32px;cursor:pointer;z-index:10;
   display:flex;align-items:center;justify-content:center;
@@ -357,8 +361,9 @@ body::before{
 }
 .modal-close-btn:hover{background:var(--acc2);color:#fff;box-shadow:var(--glow-r)}
 .modal-cw{
-  padding:0 24px 20px;
-  max-height:calc(95vh - 130px);overflow-y:auto;
+  position:relative;z-index:1;
+  padding:20px 24px 24px;
+  max-height:95vh;overflow-y:auto;
 }
 /* スクロールバー */
 .modal-cw::-webkit-scrollbar{width:6px}
@@ -405,6 +410,94 @@ body::before{
 .desc-box p{margin:0}
 
 /* ── PLAY BUTTON ── */
+/* ── HIGHLIGHTS ── */
+.hl-box{
+  background:var(--bg);border:1px solid var(--line2);
+  border-left:3px solid var(--acc);padding:12px;
+}
+.hl-box-title{
+  font-family:var(--ffh);font-size:.5rem;color:var(--acc);
+  letter-spacing:.08em;margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+  text-shadow:var(--glow-g);
+}
+.hl-box-title::before{content:'■';font-size:.6rem}
+.hl-tag{
+  font-size:.8rem;color:var(--t0);line-height:1.7;
+  padding:4px 0;border-bottom:1px solid var(--line);
+}
+.hl-tag:last-child{border-bottom:none;padding-bottom:0}
+.hl-none{font-size:.78rem;color:var(--t2)}
+
+/* ── FAVORITE ── */
+.fav-filter-btn{
+  background:none;border:2px solid var(--line2);color:var(--t2);
+  font-family:var(--ffh);font-size:.48rem;padding:7px 12px;
+  cursor:pointer;height:40px;transition:all .15s;white-space:nowrap;
+}
+.fav-filter-btn:hover{border-color:var(--acc2);color:var(--acc2)}
+.fav-filter-btn.active{
+  background:rgba(255,45,85,.12);border-color:var(--acc2);
+  color:var(--acc2);box-shadow:2px 2px 0 rgba(255,45,85,.4);
+}
+/* カード上のハートボタン */
+.card-fav-btn{
+  position:absolute;bottom:10px;right:10px;z-index:20;
+  background:rgba(0,4,8,.6);border:1px solid var(--line2);
+  color:var(--t2);width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:.9rem;transition:all .15s;
+  border-radius:2px;
+}
+.card-fav-btn:hover,.card-fav-btn.active{color:var(--acc2);border-color:var(--acc2);background:rgba(255,45,85,.15)}
+.card-fav-btn.active{text-shadow:0 0 8px var(--acc2)}
+/* モーダル内ハートボタン */
+.modal-fav-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:10px;margin-bottom:8px;
+  background:none;border:2px solid var(--line2);
+  color:var(--t2);font-family:var(--ffh);font-size:.5rem;
+  letter-spacing:.06em;cursor:pointer;transition:all .15s;
+}
+.modal-fav-btn:hover{border-color:var(--acc2);color:var(--acc2)}
+.modal-fav-btn.active{
+  background:rgba(255,45,85,.1);border-color:var(--acc2);
+  color:var(--acc2);box-shadow:2px 2px 0 rgba(255,45,85,.4);
+}
+
+/* ── DIFFICULTY GAUGE ── */
+.diff-gauge-wrap{
+  grid-column:1/-1;
+  padding:8px 10px;background:var(--bg);
+  border:1px solid var(--line2);border-left:3px solid var(--acc3);
+  display:flex;flex-direction:column;gap:6px;
+}
+.diff-gauge-wrap strong{
+  color:var(--t2);display:flex;align-items:center;
+  font-family:var(--ffh);font-size:.45rem;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.diff-gauge-wrap strong i{margin-right:4px;color:var(--acc3);opacity:.8}
+.diff-bar-bg{
+  width:100%;height:10px;background:var(--edge);
+  border:1px solid var(--line2);position:relative;overflow:hidden;
+}
+.diff-bar-fill{
+  height:100%;transition:width .6s cubic-bezier(.25,.46,.45,.94);
+  position:relative;
+}
+/* ブロック模様 */
+.diff-bar-fill::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(0,0,0,.2) 6px,rgba(0,0,0,.2) 7px);
+}
+.diff-label{
+  display:flex;justify-content:space-between;
+  font-size:.7rem;font-weight:800;
+}
+.diff-label .pct{color:var(--t0)}
+.diff-label .txt{color:var(--t2);font-size:.65rem}
+
 .modal-play-btn{
   display:flex;align-items:center;justify-content:center;gap:10px;
   width:100%;padding:14px 20px;
@@ -479,7 +572,7 @@ body::before{
 @media(max-width:640px){
   .card-details{width:100%;max-width:100%;height:100dvh;max-height:100dvh;top:0;left:0;transform:none;border-radius:0;border-left:none;border-right:none}
   .card-details.active-modal{transform:none}
-  .modal-cw{max-height:calc(100dvh - 130px);padding:0 14px 14px}
+  .modal-cw{max-height:100dvh;padding:16px 14px 20px}
   .modal-hdr{flex-direction:column;align-items:flex-start}
   .modal-stats{flex-wrap:wrap}
   .modal-body{flex-direction:column;gap:14px}
@@ -500,6 +593,43 @@ body::before{
 
 /* DEVモードON時縦積み */
 .card-details.dev-active .modal-body{flex-direction:column}
+
+/* ── 省エネモード ── */
+/* body.eco がついたら全部上書き */
+body.eco{--ff:system-ui,-apple-system,sans-serif;--ffh:system-ui,-apple-system,sans-serif;--ffj:system-ui,-apple-system,sans-serif}
+/* アニメーション全停止 */
+body.eco *,body.eco *::before,body.eco *::after{
+  animation:none!important;
+  transition:none!important;
+  text-shadow:none!important;
+  box-shadow:none!important;
+}
+/* グロウ・スキャンライン消去 */
+body.eco{--glow-g:none;--glow-b:none;--glow-r:none}
+body.eco::before{display:none}
+body.eco .bg-grid{display:none}
+body.eco .bg-corner-tl,body.eco .bg-corner-tr,body.eco .bg-corner-bl,body.eco .bg-corner-br{display:none}
+body.eco #particles{display:none}
+/* モーダル背景サムネ無効化 */
+body.eco .card-details{background-image:none!important;background-color:var(--panel)!important}
+body.eco .card-details::before{display:none}
+/* カードサムネはそのまま（省かない） */
+/* ヘッダーの点滅カーソルも止める */
+body.eco .site-header p::after{content:''}
+body.eco .site-header h1::after{box-shadow:none}
+
+/* 省エネボタン */
+.eco-toggle{
+  background:none;border:2px solid var(--line2);color:var(--t2);
+  font-family:var(--ffh);font-size:.48rem;
+  padding:7px 10px;cursor:pointer;height:40px;
+  transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.eco-toggle:hover{color:var(--acc3);border-color:var(--acc3)}
+.eco-toggle.eco-on{
+  background:rgba(0,255,65,.08);border-color:var(--acc);
+  color:var(--acc);
+}
 </style>
 </head>
 <body>
@@ -566,6 +696,8 @@ body::before{
       </div>
     </div>
     <button class="search-btn" id="search-button"><i class="fas fa-search"></i> 検索</button>
+    <button class="fav-filter-btn" id="favFilterBtn">♡ お気に入り</button>
+    <button class="eco-toggle" id="ecoToggle">🌿 省エネ</button>
     <button class="dev-toggle" id="devToggle">🛠 DEV</button>
   </div>
 
@@ -583,6 +715,23 @@ const GAS_URL='https://script.google.com/macros/s/AKfycbxdO6Xv8VFLkjc5vrX1hy3u4D
 const PER_PAGE=12;
 const LT={'-1':{ja:'すべて',en:'All',icon:'https://tanabesan.github.io/lolbeans/file/page/all.png'},'0':{ja:'サンドボックス',en:'Sandbox',icon:'https://tanabesan.github.io/lolbeans/file/page/sandbox.png'},'1':{ja:'タイムレース',en:'Timed Race',icon:'https://tanabesan.github.io/lolbeans/file/page/timed.png'},'2':{ja:'競争レース',en:'Competitive Race',icon:'https://tanabesan.github.io/lolbeans/file/page/competitive.png'},'3':{ja:'エリミネーション',en:'Elimination',icon:'https://tanabesan.github.io/lolbeans/file/page/elimination.png'}};
 let lang='ja',page=0,maxP=0,activeEl=null,listView=localStorage.getItem('viewMode')==='list',pMode=false,pName='',devMode=false;
+let ecoMode=localStorage.getItem('ecoMode')==='1';
+
+/* ── 省エネモード ── */
+function applyEco(on){
+  ecoMode=on;
+  localStorage.setItem('ecoMode',on?'1':'0');
+  document.body.classList.toggle('eco',on);
+  // Googleフォント link を有効/無効切り替え
+  const fl=document.getElementById('gfont-link');
+  if(fl)fl.disabled=on;
+  // パーティクル停止/再開
+  const pc=document.getElementById('particles');
+  if(pc)pc.style.display=on?'none':'';
+  // ボタン表示更新
+  const btn=document.getElementById('ecoToggle');
+  if(btn){btn.classList.toggle('eco-on',on);btn.textContent=on?'🌿 省エネ ON':'🌿 省エネ';}
+}
 
 /* ── levelId → 5文字英字ID ── */
 const Ts='CMWXZEPANBTHSYVFGKJDRU';
@@ -596,6 +745,89 @@ const T={
 };
 
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ── お気に入り ── */
+let favMode=false;
+const FAV_KEY='lolbeans_favs';
+function getFavs(){try{return new Set(JSON.parse(localStorage.getItem(FAV_KEY)||'[]'))}catch{return new Set()}}
+function saveFavs(s){localStorage.setItem(FAV_KEY,JSON.stringify([...s]))}
+function isFav(id){return getFavs().has(id)}
+function toggleFav(id){const s=getFavs();s.has(id)?s.delete(id):s.add(id);saveFavs(s);return s.has(id)}
+function updateFavBtns(id,active){
+  document.querySelectorAll(`.card-fav-btn[data-fav-id="${id}"]`).forEach(b=>{
+    b.classList.toggle('active',active);b.textContent=active?'♥':'♡';
+  });
+  document.querySelectorAll(`.modal-fav-btn[data-fav-id="${id}"]`).forEach(b=>{
+    b.classList.toggle('active',active);
+    const isJa=lang==='ja';
+    b.textContent=active?(isJa?'♥ お気に入り済み':'♥ Favorited'):(isJa?'♡ お気に入りに追加':'♡ Add to Favorites');
+  });
+}
+
+/* ── 難易度ゲージ ── */
+function mkDiffGauge(lv){
+  const fp=lv.finishPercent;
+  if(fp==null||lv.type===0)return''; // サンドボックスはなし
+  const pct=Math.round(fp*100);
+  // 色: 低→赤、中→黄、高→緑
+  const color=pct<=20?'#ff2d55':pct<=50?'#ffcc00':'#00ff41';
+  const glow=pct<=20?'rgba(255,45,85,.5)':pct<=50?'rgba(255,204,0,.5)':'rgba(0,255,65,.5)';
+  const label=lang==='ja'
+    ?(pct<=10?'超激ムズ':pct<=30?'難しい':pct<=60?'普通':pct<=85?'簡単':'ヌルゲー')
+    :(pct<=10?'Extreme':pct<=30?'Hard':pct<=60?'Normal':pct<=85?'Easy':'Very Easy');
+  return`<div class="diff-gauge-wrap">
+    <strong><i class="fas fa-tachometer-alt"></i>${lang==='ja'?'難易度（クリア率）':'Difficulty (Finish Rate)'}</strong>
+    <div class="diff-bar-bg">
+      <div class="diff-bar-fill" style="width:${pct}%;background:${color};box-shadow:0 0 8px ${glow}"></div>
+    </div>
+    <div class="diff-label"><span class="pct">${pct}%</span><span class="txt">${label}</span></div>
+  </div>`;
+}
+
+/* ── 統計ベース ハイライト生成 ── */
+function getHighlights(lv){
+  const isJa=lang==='ja';
+  const tags=[];
+  const now=Date.now();
+  const daysSince=d=>Math.floor((now-new Date(d))/86400000);
+  const fp=lv.finishPercent;
+  const r=lv.rating??0;
+
+  // 🔥 今アツい: 公開7日以内 かつ プレイ数500以上
+  if(lv.date&&daysSince(lv.date)<=7&&(lv.starts||0)>=500)
+    tags.push({emoji:'🔥',ja:'今アツい！公開直後から大量プレイ中',en:'🔥 Blowing up right now — massive plays since launch!'});
+
+  // ⭐ 神コース: 評価4.3以上 かつ 投票1000以上
+  if(r>=4.3&&(lv.votes||0)>=1000)
+    tags.push({emoji:'⭐',ja:`神コース認定！${lv.votes.toLocaleString()}票で評価${r.toFixed(2)}という圧倒的な支持`,en:`⭐ Hall of Fame! ${lv.votes.toLocaleString()} votes at ${r.toFixed(2)} — community certified masterpiece`});
+
+  // 💀 激ムズ: クリア率10%以下 (sandboxは除外)
+  if(fp!=null&&fp<=0.10&&lv.type!==0)
+    tags.push({emoji:'💀',ja:`激ムズ注意！クリア率わずか${Math.round(fp*100)}%。完走できたら本物`,en:`💀 Brutal! Only ${Math.round(fp*100)}% finish rate. Think you can make it?`});
+
+  // 👼 ヌルゲー: クリア率90%以上 (sandboxは除外)
+  if(fp!=null&&fp>=0.90&&lv.type!==0)
+    tags.push({emoji:'👼',ja:`クリア率${Math.round(fp*100)}%！初心者でも楽しめる親切設計`,en:`👼 Beginner friendly! ${Math.round(fp*100)}% finish rate — great for newcomers`});
+
+  // 🏆 WR更新中: WR日が7日以内
+  if(lv.wrDate&&daysSince(lv.wrDate)<=7&&lv.wrHolder)
+    tags.push({emoji:'🏆',ja:`WR更新ホット！${lv.wrHolder} が ${lv.wr?.toFixed(2)}秒 を7日以内に叩き出した`,en:`🏆 WR just set! ${lv.wrHolder} nailed ${lv.wr?.toFixed(2)}s within the last 7 days`});
+
+  // 🌱 穴場: 評価4.0以上 かつ プレイ数500未満 かつ 投票50以上
+  if(r>=4.0&&(lv.starts||0)<500&&(lv.votes||0)>=50)
+    tags.push({emoji:'🌱',ja:`穴場発見！高評価なのにまだ${(lv.starts||0).toLocaleString()}プレイしかない隠れた名作`,en:`🌱 Hidden gem! High-rated but only ${(lv.starts||0).toLocaleString()} plays — discover it first`});
+
+  return tags.map(tag=>isJa?tag.ja:tag.en);
+}
+
+function renderHighlights(lv, box){
+  const lines=getHighlights(lv);
+  if(!lines.length){
+    box.innerHTML=`<span class="hl-none">${lang==='ja'?'—':'—'}</span>`;
+    return;
+  }
+  box.innerHTML=lines.map(l=>`<div class="hl-tag">${l}</div>`).join('');
+}
 
 function mkDevSection(lv){
   if(!devMode)return'';
@@ -627,17 +859,36 @@ function mkCard(lv,idx){
   const playUrl=levelPlayUrl(lv);
   const card=document.createElement('div');
   card.className='level-grid-card';card.dataset.cardId=cid;
-  card.innerHTML=`<div class="card-display">${isNew?'<div class="new-badge">NEW</div>':''}<div class="card-thumb" style="background-image:url('${th}')"></div><div class="card-type-icon" title="${tn}"><img src="${lt2.icon}" alt="${tn}"></div><div class="card-details" data-card-id="${cid}"><div class="modal-banner" style="background-image:url('${th}')"><div class="modal-banner-overlay"></div><button class="modal-close-btn"><i class="fas fa-times"></i></button></div><div class="modal-cw"><div class="modal-hdr"><div class="modal-info"><h2>${esc(lv.name)}</h2><p><i class="fas fa-user-circle"></i> ${esc(lv.author||'N/A')}</p><div class="modal-stats"><span><i class="fas fa-star"></i>${r.toFixed(2)}</span><span><i class="fas fa-chart-bar"></i>${fp}%</span><span class="gt-icon"><img src="${lt2.icon}" alt=""> ${tn}</span></div></div></div><div class="modal-body"><div class="modal-left"><div class="desc-box"><strong><i class="fas fa-align-left"></i> ${t.desc}</strong><p>${desc}</p></div><a class="modal-play-btn" href="${playUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${t.playBtn}</a></div><div class="modal-right"><div class="detail-grid">${mkDI('rating',r,false)}${mkDI('wr',fTime(lv.wr),true)}${mkDI('wrHolder',esc(lv.wrHolder||'N/A'),false)}${mkDI('avgTime',fTime(lv.averageFinishTime),false)}${mkDI('starts',lv.starts,false)}${mkDI('votes',lv.votes,false)}${mkDI('players',lv.distinctPlayers,false)}${mkDI('date',pd,false)}</div></div></div><button class="modal-close-bar">${t.closeModal}</button></div></div></div><div class="card-overlay"><div class="ov-title" title="${esc(lv.name)}">${esc(lv.name)}</div><div class="ov-author">${esc(lv.author||'N/A')}</div><div class="ov-stats"><span class="ov-stat"><i class="fas fa-star"></i>${r.toFixed(2)}</span><span class="ov-stat fin"><i class="fas fa-chart-bar"></i>${fp}%</span></div><div class="ov-date">${pd}</div></div>`;
+  const faved=isFav(lv.levelId);
+  card.innerHTML=`<div class="card-display">${isNew?'<div class="new-badge">NEW</div>':''}<div class="card-thumb" style="background-image:url('${th}')"></div><div class="card-type-icon" title="${tn}"><img src="${lt2.icon}" alt="${tn}"></div><div class="card-details" data-card-id="${cid}"><button class="modal-close-btn"><i class="fas fa-times"></i></button><div class="modal-cw"><div class="modal-hdr"><div class="modal-info"><h2>${esc(lv.name)}</h2><p><i class="fas fa-user-circle"></i> ${esc(lv.author||'N/A')}</p><div class="modal-stats"><span><i class="fas fa-star"></i>${r.toFixed(2)}</span><span><i class="fas fa-chart-bar"></i>${fp}%</span><span class="gt-icon"><img src="${lt2.icon}" alt=""> ${tn}</span></div></div></div><div class="modal-body"><div class="modal-left"><div class="desc-box"><strong><i class="fas fa-align-left"></i> ${t.desc}</strong><p>${desc}</p></div><div class="hl-box"><div class="hl-box-title">${lang==='ja'?'注目ポイント':'Highlights'}</div><div class="hl-content"></div></div><button class="modal-fav-btn ${faved?'active':''}" data-fav-id="${lv.levelId}">${faved?(lang==='ja'?'♥ お気に入り済み':'♥ Favorited'):(lang==='ja'?'♡ お気に入りに追加':'♡ Add to Favorites')}</button><a class="modal-play-btn" href="${playUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${t.playBtn}</a></div><div class="modal-right"><div class="detail-grid">${mkDI('rating',r,false)}${mkDI('wr',fTime(lv.wr),true)}${mkDI('wrHolder',esc(lv.wrHolder||'N/A'),false)}${mkDI('avgTime',fTime(lv.averageFinishTime),false)}${mkDI('starts',lv.starts,false)}${mkDI('votes',lv.votes,false)}${mkDI('players',lv.distinctPlayers,false)}${mkDI('date',pd,false)}${mkDiffGauge(lv)}</div></div></div><button class="modal-close-bar">${t.closeModal}</button></div></div></div><div class="card-overlay"><div class="ov-title" title="${esc(lv.name)}">${esc(lv.name)}</div><div class="ov-author">${esc(lv.author||'N/A')}</div><div class="ov-stats"><span class="ov-stat"><i class="fas fa-star"></i>${r.toFixed(2)}</span><span class="ov-stat fin"><i class="fas fa-chart-bar"></i>${fp}%</span></div><div class="ov-date">${pd}</div></div><button class="card-fav-btn ${faved?'active':''}" data-fav-id="${lv.levelId}">${faved?'♥':'♡'}</button>`;
   const de=card.querySelector('.card-details');card._levelData=lv;
   de.querySelector('.modal-close-btn').addEventListener('click',e=>{e.stopPropagation();closeModal()});
   de.querySelector('.modal-close-bar').addEventListener('click',e=>{e.stopPropagation();closeModal()});
+  // カード上ハートボタン
+  card.querySelector('.card-fav-btn').addEventListener('click',e=>{
+    e.stopPropagation();
+    const active=toggleFav(lv.levelId);
+    updateFavBtns(lv.levelId,active);
+    if(favMode&&!active)card.style.display='none';
+  });
+  // モーダル内ハートボタン
+  de.querySelector('.modal-fav-btn').addEventListener('click',e=>{
+    e.stopPropagation();
+    const active=toggleFav(lv.levelId);
+    updateFavBtns(lv.levelId,active);
+    if(favMode&&!active){closeModal();card.style.display='none';}
+  });
   card.addEventListener('click',e=>{
     if(e.target.closest('.card-details'))return;
     const bd=document.getElementById('modal-backdrop');
     if(activeEl&&activeEl!==de)closeModal();
     if(card.classList.contains('open')){closeModal();return}
     document.body.appendChild(de);activeEl=de;card.classList.add('open');
+    de.style.setProperty('--thumb-url',`url('${th}')`);
     const existingDev=de.querySelector('.dev-section');if(existingDev)existingDev.remove();
+    // ハイライト描画
+    const hlContent=de.querySelector('.hl-content');
+    if(hlContent)renderHighlights(lv,hlContent);
     if(devMode&&card._levelData){const ml=de.querySelector('.modal-left');if(ml)ml.insertAdjacentHTML('beforeend',mkDevSection(card._levelData));de.classList.add('dev-active')}else{de.classList.remove('dev-active')}
     requestAnimationFrame(()=>{de.classList.add('active-modal');bd.classList.add('active')});
     document.body.style.overflow='hidden';
@@ -758,10 +1009,37 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   });
   document.getElementById('search-button').addEventListener('click',()=>fetchL(0));
+  // 省エネモード初期適用 & ボタン
+  if(ecoMode)applyEco(true);
+  document.getElementById('ecoToggle').addEventListener('click',()=>applyEco(!ecoMode));
   document.getElementById('search-text').addEventListener('keydown',e=>{if(e.key==='Enter')fetchL(0)});
   ['sort-type','filter-type','filter-finish'].forEach(id=>document.getElementById(id).addEventListener('change',()=>fetchL(0)));
   document.getElementById('btn-grid-view').addEventListener('click',()=>{listView=false;localStorage.setItem('viewMode','grid');applyView()});
   document.getElementById('btn-list-view').addEventListener('click',()=>{listView=true;localStorage.setItem('viewMode','list');applyView()});
+  // お気に入りフィルター
+  document.getElementById('favFilterBtn').addEventListener('click',()=>{
+    favMode=!favMode;
+    const btn=document.getElementById('favFilterBtn');
+    btn.classList.toggle('active',favMode);
+    btn.textContent=favMode?(lang==='ja'?'♥ お気に入り':'♥ Favorites'):(lang==='ja'?'♡ お気に入り':'♡ Favorites');
+    if(favMode){
+      // お気に入りモード: 現在表示中のカードをフィルタリング
+      const favs=getFavs();
+      document.querySelectorAll('.level-grid-card').forEach(c=>{
+        const fid=c.querySelector('.card-fav-btn')?.dataset.favId;
+        c.style.display=(fid&&favs.has(Number(fid)))?'':'none';
+      });
+      const visible=document.querySelectorAll('.level-grid-card[style=""],.level-grid-card:not([style])');
+      if(!visible.length){
+        const ld=document.getElementById('loading-message');
+        ld.innerHTML=lang==='ja'?'お気に入りがまだありません。':'No favorites yet.';
+        ld.style.display='block';
+      }
+    }else{
+      document.querySelectorAll('.level-grid-card').forEach(c=>c.style.display='');
+      document.getElementById('loading-message').style.display='none';
+    }
+  });
   applyView();
 
   /* ブラウザの戻る/進む対応 */

@@ -4,15 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LOLBeans WR ランキング</title>
-
-<!-- ── ファビコン ── -->
 <link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon-128.png">
-
-<!-- ── SEO ── -->
 <meta name="description" content="LOLBeans コミュニティ WR ランキング。ワールドレコード保持者のポイントランキングを確認しよう。">
-<meta name="theme-color" content="#08071a">
-
-<!-- ── OGP (Twitter / Discord / LINE 等) ── -->
+<meta name="theme-color" content="#000408">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tanabesan.github.io/lolbeans/file/page/">
 <meta property="og:title" content="LOLBeans 🫘 WR ランキング">
@@ -21,324 +15,390 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ja_JP">
-
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="LOLBeans 🫘 WR ランキング">
 <meta name="twitter:description" content="LOLBeans コミュニティ WR ランキング。ワールドレコード保持者のポイント・階級を一覧で確認！">
 <meta name="twitter:image" content="https://tanabesan.github.io/lolbeans/file/page/ogp.png">
 <link rel="stylesheet" href="https://tanabesan.github.io/lolbeans/tool-menu.css">
-<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;800;900&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
+
+/* ── TOKENS (コース一覧と統一) ── */
 :root{
-  --bg:#08071a;--panel:#111028;--card:#181630;--edge:#241f48;--line:#2d2860;
-  --t0:#f0eaff;--t1:#a89ed0;--t2:#5f5890;--t3:#322e60;
-  --acc:#ffd23f;--acc2:#ff5f7e;--acc3:#3de8f7;
-  --ff:'Nunito',sans-serif;--ffj:'M PLUS Rounded 1c',sans-serif;--ffh:'Boogaloo',cursive;
+  --bg:#000408;--bg2:#010c0f;--panel:#001a1f;--card:#001014;
+  --edge:#002830;--line:#004050;--line2:#006070;
+  --t0:#e0fff8;--t1:#80c8be;--t2:#3a7870;--t3:#1a4840;
+  --acc:#00ff41;--acc2:#ff2d55;--acc3:#00d4ff;--acc4:#ffcc00;
+  --glow-g:0 0 8px #00ff41,0 0 20px rgba(0,255,65,.4);
+  --glow-b:0 0 8px #00d4ff,0 0 20px rgba(0,212,255,.4);
+  --glow-r:0 0 8px #ff2d55,0 0 20px rgba(255,45,85,.4);
+  --ff:'Share Tech Mono',monospace;
+  --ffj:'M PLUS Rounded 1c',sans-serif;
+  --ffh:'Press Start 2P',cursive;
 }
+
 body{font-family:var(--ff);background:var(--bg);color:var(--t0);min-height:100vh;overflow-x:hidden}
 body.jp{font-family:var(--ffj)}
 
-/* BG */
-.bg-atm{position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse 70% 45% at 20% 0%,rgba(100,60,255,.12) 0%,transparent 60%),
-             radial-gradient(ellipse 55% 40% at 80% 10%,rgba(255,60,120,.09) 0%,transparent 55%),
-             radial-gradient(ellipse 60% 45% at 50% 100%,rgba(60,220,247,.07) 0%,transparent 55%)}
-.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.035;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:50px 50px}
+/* ── CRT SCANLINES ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);
+}
+
+/* ── BG ── */
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.3;
+  background-image:linear-gradient(rgba(0,212,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.15) 1px,transparent 1px);
+  background-size:32px 32px}
+.bg-corner-tl,.bg-corner-tr,.bg-corner-bl,.bg-corner-br{position:fixed;width:120px;height:120px;pointer-events:none;z-index:0;opacity:.4}
+.bg-corner-tl{top:0;left:0;border-top:2px solid var(--acc3);border-left:2px solid var(--acc3)}
+.bg-corner-tr{top:0;right:0;border-top:2px solid var(--acc3);border-right:2px solid var(--acc3)}
+.bg-corner-bl{bottom:0;left:0;border-bottom:2px solid var(--acc3);border-left:2px solid var(--acc3)}
+.bg-corner-br{bottom:0;right:0;border-bottom:2px solid var(--acc3);border-right:2px solid var(--acc3)}
 
 /* ── PARTICLES ── */
 #particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.pt{position:absolute;border-radius:50%;animation:ptFloat var(--dur) ease-in-out infinite var(--del);opacity:0}
-@keyframes ptFloat{
-  0%{opacity:0;transform:translateY(0) scale(.5)}
-  15%{opacity:.8}
-  85%{opacity:.5}
-  100%{opacity:0;transform:translateY(-95vh) scale(1.3)}
-}
-
-/* ── LANG TOGGLE ── */
-.lang-toggle{position:fixed;top:1rem;right:1rem;z-index:100;display:flex;gap:.3rem}
-  padding:.3rem .7rem;font-size:.75rem;font-weight:800;color:var(--t2);cursor:pointer;transition:all .2s}
+.pt{position:absolute;animation:ptFloat var(--dur) linear infinite var(--del);opacity:0}
+@keyframes ptFloat{0%{opacity:0;transform:translateY(0)}10%{opacity:1}90%{opacity:.6}100%{opacity:0;transform:translateY(-100vh)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
 /* ── HEADER ── */
-header{position:relative;z-index:10;text-align:center;padding:3.2rem 1rem 1.4rem}
-.logo-line{display:flex;align-items:center;justify-content:center;gap:.5rem}
-.logo-icon{font-size:2.8rem;display:inline-block;animation:iconBob 2s ease-in-out infinite}
+header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
+.logo-line{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+.logo-icon{font-size:2rem;display:inline-block;animation:iconBob 2s ease-in-out infinite}
 .logo-icon:nth-child(3){animation-delay:-.7s;animation-direction:alternate-reverse}
-@keyframes iconBob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-13px) rotate(6deg)}}
-.logo-text{font-family:var(--ffh);font-size:clamp(2.4rem,7vw,4.2rem);
-  background:linear-gradient(130deg,#ffe066 0%,#ff9f43 45%,#ff6b9d 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  filter:drop-shadow(0 0 28px rgba(255,180,50,.35));
-  animation:logoP 5s ease-in-out infinite}
-@keyframes logoP{0%,100%{filter:drop-shadow(0 0 28px rgba(255,180,50,.35))}50%{filter:drop-shadow(0 0 44px rgba(255,100,157,.45))}}
-.logo-sub{font-family:var(--ffh);font-size:clamp(.85rem,2.2vw,1.15rem);letter-spacing:5px;color:var(--acc3);text-transform:uppercase;margin-top:2px;opacity:.85}
-.deco{display:flex;align-items:center;justify-content:center;gap:1.2rem;margin-top:1rem}
-.deco-l{width:120px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,200,80,.35),transparent)}
+@keyframes iconBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.logo-text{
+  font-family:var(--ffh);font-size:clamp(.9rem,3.5vw,1.6rem);
+  color:var(--acc3);text-shadow:var(--glow-b);letter-spacing:.06em;
+}
+.logo-sub{
+  font-family:var(--ffh);font-size:clamp(.5rem,2vw,.75rem);
+  color:var(--acc);letter-spacing:.12em;text-shadow:var(--glow-g);
+  margin-top:6px;
+}
+.logo-sub::after{content:'_';animation:blink .8s step-end infinite}
+.logo-deco{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px}
+.logo-deco-line{width:80px;height:2px;background:var(--acc3);box-shadow:var(--glow-b);
+  clip-path:polygon(0 0,100% 0,100% 50%,calc(100% - 4px) 50%,calc(100% - 4px) 100%,4px 100%,4px 50%,0 50%)}
+.logo-deco span{color:var(--acc3);font-family:var(--ffh);font-size:.5rem}
 
 /* ── STATS ── */
-.stats-bar{position:relative;z-index:10;display:flex;justify-content:center;flex-wrap:wrap;gap:.7rem;padding:.4rem 1rem 2rem}
-.s-pill{background:var(--card);border:1.5px solid var(--line);border-radius:50px;
-  padding:.42rem 1.15rem;font-size:.8rem;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:.4rem}
-.s-pill .v{color:var(--acc);font-size:.9rem;font-weight:900}
+.stats-bar{position:relative;z-index:10;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:.4rem 1rem 1.8rem}
+.s-pill{
+  background:var(--panel);border:2px solid var(--line2);
+  box-shadow:2px 2px 0 var(--edge);
+  padding:7px 14px;font-size:.7rem;font-weight:700;color:var(--t2);
+  display:flex;align-items:center;gap:8px;font-family:var(--ff);
+}
+.s-pill .v{color:var(--acc);font-family:var(--ffh);font-size:.65rem;text-shadow:var(--glow-g)}
+.s-pill .ms{font-size:1rem;color:var(--acc3)}
 
 /* ── RANK LEGEND ── */
-.rank-legend-wrap{position:relative;z-index:10;max-width:100%;margin:0 auto 2rem;padding:0 1rem}
-.rl-head{font-family:var(--ffh);font-size:.72rem;letter-spacing:.4rem;color:var(--t3);text-align:center;text-transform:uppercase;margin-bottom:.8rem}
-.rank-legend{display:flex;justify-content:flex-start;flex-wrap:nowrap;gap:.45rem;overflow-x:auto;padding-bottom:.4rem;scrollbar-width:thin;scrollbar-color:var(--line) transparent;justify-content:center}
-.rank-legend::-webkit-scrollbar{height:3px}.rank-legend::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
-.rl-item{display:flex;align-items:center;gap:.5rem;background:var(--card);border:1.5px solid var(--line);
-  border-radius:10px;padding:.35rem .8rem .35rem .4rem;cursor:default;transition:transform .18s,box-shadow .18s;flex-shrink:0}
-.rl-item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.45)}
-.rl-icon{height:44px;width:auto;flex-shrink:0;object-fit:contain}
-.rl-name{display:block;font-weight:800;font-size:.73rem}
-.pname-link{color:inherit;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.25);transition:border-color .2s,color .2s}
+.rank-legend-wrap{position:relative;z-index:10;max-width:100%;margin:0 auto 1.8rem;padding:0 1rem}
+.rl-head{
+  font-family:var(--ffh);font-size:.48rem;letter-spacing:.1em;
+  color:var(--acc3);text-align:center;text-transform:uppercase;
+  text-shadow:var(--glow-b);margin-bottom:12px;
+}
+.rank-legend{
+  display:flex;justify-content:center;flex-wrap:nowrap;gap:6px;
+  overflow-x:auto;padding-bottom:6px;
+  scrollbar-width:thin;scrollbar-color:var(--line2) transparent;
+}
+.rank-legend::-webkit-scrollbar{height:3px}
+.rank-legend::-webkit-scrollbar-thumb{background:var(--line2)}
+.rl-item{
+  display:flex;align-items:center;gap:6px;
+  background:var(--card);border:2px solid var(--line2);
+  box-shadow:2px 2px 0 var(--edge);
+  padding:6px 10px 6px 6px;cursor:default;
+  transition:transform .15s,box-shadow .15s;flex-shrink:0;
+}
+.rl-item:hover{transform:translate(-1px,-2px);box-shadow:3px 3px 0 var(--acc3),var(--glow-b)}
+.rl-icon{height:40px;width:auto;flex-shrink:0;object-fit:contain}
+.rl-name{display:block;font-family:var(--ffh);font-size:.5rem;font-weight:800}
+.rl-pts{display:block;font-size:.6rem;opacity:.5;font-weight:700;margin-top:2px}
+.pname-link{color:inherit;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.25);transition:all .2s}
 .pname-link:hover{border-bottom-color:currentColor;opacity:.85}
-.rl-pts{display:block;font-size:.62rem;opacity:.5;font-weight:700}
 
 /* ── CONTROLS ── */
-.controls{position:relative;z-index:10;display:flex;justify-content:center;align-items:center;gap:.65rem;flex-wrap:wrap;padding:0 1rem 1.8rem}
+.controls{position:relative;z-index:10;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;padding:0 1rem 1.8rem}
 .sbox{position:relative}
-.sbox input{background:var(--card);border:1.5px solid var(--line);border-radius:50px;
-  padding:.58rem 1.1rem .58rem 2.4rem;color:var(--t0);font-family:inherit;
-  font-size:.85rem;font-weight:700;width:210px;outline:none;transition:border-color .25s,box-shadow .25s}
-.sbox input:focus{border-color:rgba(255,210,63,.5);box-shadow:0 0 0 3px rgba(255,210,63,.1)}
+.sbox input{
+  background:var(--bg);border:2px solid var(--line2);
+  padding:8px 12px 8px 36px;color:var(--t0);font-family:var(--ff);
+  font-size:.82rem;font-weight:700;width:200px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.sbox input:focus{border-color:var(--acc3);box-shadow:var(--glow-b)}
 .sbox input::placeholder{color:var(--t3)}
-.si{position:absolute;left:.82rem;top:50%;transform:translateY(-50%);color:var(--t2);font-size:.85rem;pointer-events:none}
-.cbtn{background:var(--card);border:1.5px solid var(--line);border-radius:50px;
-  padding:.58rem 1.1rem;color:var(--t2);font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;transition:all .2s}
-.cbtn:hover,.cbtn.on{border-color:rgba(255,210,63,.5);color:var(--acc);background:rgba(255,210,63,.07)}
-.rbtn{background:linear-gradient(135deg,var(--acc2),#c026d3);border:none;border-radius:50px;
-  padding:.58rem 1.4rem;color:#fff;font-family:inherit;font-size:.85rem;font-weight:900;
-  cursor:pointer;box-shadow:0 4px 18px rgba(255,80,126,.3);transition:transform .18s,box-shadow .18s}
-.rbtn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,80,126,.45)}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t2);font-size:.85rem;pointer-events:none}
+.cbtn{
+  background:var(--panel);border:2px solid var(--line2);box-shadow:2px 2px 0 var(--edge);
+  padding:8px 14px;color:var(--t2);font-family:var(--ffh);font-size:.45rem;
+  font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.04em;
+}
+.cbtn:hover,.cbtn.on{border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,204,0,.4),0 0 8px rgba(255,204,0,.2)}
+.rbtn{
+  background:var(--acc2);border:2px solid var(--acc2);
+  padding:8px 16px;color:#fff;font-family:var(--ffh);font-size:.45rem;
+  font-weight:900;cursor:pointer;box-shadow:4px 4px 0 rgba(255,45,85,.5);
+  transition:all .15s;letter-spacing:.04em;
+}
+.rbtn:hover{background:transparent;color:var(--acc2);box-shadow:var(--glow-r),4px 4px 0 var(--acc2)}
 .rbtn.spin{animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* ── PT LEGEND ── */
-.pt-legend{position:relative;z-index:10;max-width:880px;margin:0 auto 2.2rem;padding:0 1rem;display:flex;justify-content:center;flex-wrap:wrap;gap:.5rem}
-.ptl{display:flex;align-items:center;gap:.32rem;background:var(--card);border:1px solid var(--line);border-radius:7px;padding:.27rem .65rem;font-size:.72rem;font-weight:700;color:var(--t2)}
-.ptd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pt-legend{position:relative;z-index:10;max-width:880px;margin:0 auto 2rem;padding:0 1rem;display:flex;justify-content:center;flex-wrap:wrap;gap:6px}
+.ptl{
+  display:flex;align-items:center;gap:5px;
+  background:var(--card);border:1px solid var(--line2);
+  padding:4px 10px;font-size:.65rem;font-weight:700;color:var(--t2);
+}
+.ptd{width:8px;height:8px;flex-shrink:0}
 
 /* ── TABLE ── */
 .tw{position:relative;z-index:10;max-width:980px;margin:0 auto;padding:0 1rem 5rem}
-.slbl{font-family:var(--ffh);font-size:.72rem;letter-spacing:.4rem;color:var(--t3);text-transform:uppercase;text-align:center;margin-bottom:1rem}
-.rt{width:100%;border-collapse:separate;border-spacing:0 5px}
-.rt thead th{font-family:var(--ffh);font-size:.72rem;letter-spacing:.18rem;color:var(--t3);text-transform:uppercase;padding:.38rem 1rem;text-align:left}
+.slbl{
+  font-family:var(--ffh);font-size:.48rem;letter-spacing:.1em;
+  color:var(--acc3);text-transform:uppercase;text-align:center;
+  margin-bottom:14px;text-shadow:var(--glow-b);
+}
+.rt{width:100%;border-collapse:separate;border-spacing:0 6px}
+.rt thead th{
+  font-family:var(--ffh);font-size:.45rem;letter-spacing:.1em;
+  color:var(--t2);text-transform:uppercase;padding:6px 10px;text-align:left;
+}
 .rt thead th.c{text-align:center}
 
 /* ROW */
-.rrow{background:var(--card);border-radius:14px;transition:transform .18s,box-shadow .18s;animation:rIn .35s ease-out both;cursor:pointer}
-@keyframes rIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
-.rrow:hover{transform:translateY(-2px) scale(1.004);box-shadow:0 8px 30px rgba(0,0,0,.5)}
-.rrow td{padding:.78rem 1rem;vertical-align:middle}
-.rrow td:first-child{border-radius:14px 0 0 14px;text-align:center;width:54px}
-.rrow td:last-child{border-radius:0 14px 14px 0}
-.top1{box-shadow:inset 3px 0 0 #ffd700}
-.top2{box-shadow:inset 3px 0 0 #c8c8d4}
-.top3{box-shadow:inset 3px 0 0 #e8874a}
+.rrow{
+  background:var(--card);border:2px solid var(--line2);
+  box-shadow:3px 3px 0 var(--edge);
+  transition:transform .15s,box-shadow .15s,border-color .15s;
+  animation:rIn .3s ease-out both;cursor:pointer;
+}
+@keyframes rIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.rrow:hover{transform:translate(-2px,-3px);border-color:var(--acc3);box-shadow:5px 5px 0 var(--acc3),var(--glow-b)}
+.rrow td{padding:10px 10px;vertical-align:middle}
+.rrow td:first-child{text-align:center;width:48px}
+.top1{border-left:4px solid #ffd700;box-shadow:3px 3px 0 rgba(255,215,0,.4)}
+.top2{border-left:4px solid #c8c8d4;box-shadow:3px 3px 0 rgba(200,200,212,.3)}
+.top3{border-left:4px solid #e8874a;box-shadow:3px 3px 0 rgba(232,135,74,.35)}
+.top1:hover{border-color:#ffd700;box-shadow:5px 5px 0 #ffd700,0 0 14px rgba(255,215,0,.4)}
+.top2:hover{border-color:#c8c8d4;box-shadow:5px 5px 0 #c8c8d4}
+.top3:hover{border-color:#e8874a;box-shadow:5px 5px 0 #e8874a}
 
-.rnum{font-family:var(--ffh);font-size:.95rem;color:var(--t3);display:inline-block;min-width:28px;text-align:center}
+.rnum{font-family:var(--ffh);font-size:.75rem;color:var(--t3);display:inline-block;min-width:28px;text-align:center}
 .top1 .rnum{color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.6)}
 .top2 .rnum{color:#c8c8d4}
 .top3 .rnum{color:#e8874a}
 
-/* player cell */
-.pcell{display:flex;align-items:center;gap:.65rem}
-.shw{width:44px;height:52px;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center;overflow:visible}
-.shi{width:auto;height:52px;object-fit:contain;transition:transform .22s,filter .22s;filter:drop-shadow(0 3px 7px var(--sg,rgba(0,0,0,.5)))}
-.rrow:hover .shi{transform:scale(1.18) rotate(-5deg);filter:drop-shadow(0 4px 14px var(--sg,rgba(0,0,0,.5))) brightness(1.12)}
-.pname{font-weight:900;font-size:.95rem;line-height:1.2;display:flex;align-items:center;gap:.3rem}
+.pcell{display:flex;align-items:center;gap:10px}
+.shw{width:44px;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:visible}
+.shi{width:auto;height:52px;object-fit:contain;transition:transform .2s,filter .2s;filter:drop-shadow(0 3px 7px var(--sg,rgba(0,0,0,.5)))}
+.rrow:hover .shi{transform:scale(1.15) rotate(-4deg);filter:drop-shadow(0 4px 12px var(--sg,rgba(0,0,0,.5))) brightness(1.1)}
+.pname{font-family:var(--ffh);font-size:.6rem;line-height:1.4;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .top1 .pname{color:#ffe066}.top2 .pname{color:#dde}.top3 .pname{color:#e8874a}.topN .pname{color:var(--t0)}
-.prank-lbl{font-size:.62rem;font-weight:800;padding:1px 7px;border-radius:4px;letter-spacing:.06em;text-transform:uppercase;margin-top:3px;display:inline-block}
-/* sub-tier pip dots */
-.subtier{display:flex;gap:3px;margin-top:4px;align-items:center}
-.stpip{width:7px;height:7px;border-radius:50%;transition:transform .15s}
+.prank-lbl{font-family:var(--ffh);font-size:.42rem;font-weight:800;padding:2px 6px;letter-spacing:.04em;text-transform:uppercase;margin-top:3px;display:inline-block}
+.subtier{display:flex;gap:3px;margin-top:5px;align-items:center}
+.stpip{width:7px;height:7px;transition:transform .15s}
 .stpip.filled{box-shadow:0 0 4px var(--pc)}
 .stpip.empty{opacity:.2}
-/* material icons */
-.ms{font-family:'Material Symbols Rounded';font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;
-  white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
+.ms{font-family:'Material Symbols Rounded';font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
 
-/* chips */
-.cats{display:flex;flex-wrap:wrap;gap:.28rem}
-.chip{font-size:.68rem;font-weight:800;padding:2px 6px;border-radius:5px;white-space:nowrap}
+.cats{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-family:var(--ffh);font-size:.42rem;font-weight:800;padding:2px 6px;white-space:nowrap}
 .c1000{background:rgba(255,80,110,.15);color:#ff5070;border:1px solid rgba(255,80,110,.28)}
 .c750{background:rgba(255,205,50,.13);color:#ffc832;border:1px solid rgba(255,205,50,.28)}
 .c500{background:rgba(50,220,240,.1);color:#32dce8;border:1px solid rgba(50,220,240,.22)}
 .c100{background:rgba(165,100,255,.13);color:#a564ff;border:1px solid rgba(165,100,255,.28)}
 .cu100{background:rgba(60,230,140,.1);color:#3ce68c;border:1px solid rgba(60,230,140,.22)}
 
-.wrc{font-family:var(--ffh);font-size:1.18rem;color:var(--acc3);text-align:center}
-.ptv{font-family:var(--ffh);font-size:1.35rem;text-align:center;font-weight:900}
+.wrc{font-family:var(--ffh);font-size:.9rem;color:var(--acc3);text-align:center;text-shadow:var(--glow-b)}
+.ptv{font-family:var(--ffh);font-size:1rem;text-align:center;font-weight:900}
 .top1 .ptv{color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.5)}
 .top2 .ptv{color:#c8c8d4}
 .top3 .ptv{color:#e8874a}
 
-/* state/pager/toast */
-.smsg{text-align:center;padding:5rem 2rem;color:var(--t2);font-size:.95rem;font-weight:700}
-.smsg .big{font-size:3rem;display:block;margin-bottom:1rem}
-.pager{display:flex;justify-content:center;align-items:center;gap:.38rem;margin-top:1.5rem;flex-wrap:wrap}
-.pgb{background:var(--card);border:1.5px solid var(--line);border-radius:9px;width:34px;height:34px;
-  color:var(--t2);font-family:var(--ffh);font-weight:700;font-size:.82rem;cursor:pointer;
-  transition:all .18s;display:flex;align-items:center;justify-content:center}
-.pgb:hover{border-color:rgba(255,210,63,.45);color:var(--acc)}
-.pgb.on{background:rgba(255,210,63,.14);border-color:var(--acc);color:var(--acc)}
+/* ── STATE / PAGER / TOAST ── */
+.smsg{text-align:center;padding:5rem 2rem;color:var(--t2);font-size:.8rem;font-weight:700;font-family:var(--ffh);letter-spacing:.06em}
+.smsg .big{font-size:2.5rem;display:block;margin-bottom:1rem}
+
+.pager{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:1.5rem;flex-wrap:wrap}
+.pgb{
+  background:var(--panel);border:2px solid var(--line2);
+  box-shadow:2px 2px 0 var(--edge);
+  width:36px;height:36px;color:var(--t2);
+  font-family:var(--ffh);font-weight:700;font-size:.5rem;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;
+}
+.pgb:hover{border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,204,0,.4)}
+.pgb.on{background:var(--acc4);border-color:var(--acc4);color:var(--bg);box-shadow:2px 2px 0 rgba(255,204,0,.5)}
 .pgb:disabled{opacity:.25;cursor:not-allowed}
-#toast{position:fixed;bottom:2rem;right:1.5rem;background:var(--card);border:1.5px solid var(--line);border-left:3px solid var(--acc);
-  border-radius:10px;padding:.8rem 1.3rem;color:var(--t0);font-weight:700;font-size:.82rem;z-index:9999;
-  transform:translateY(70px);opacity:0;transition:all .38s cubic-bezier(.175,.885,.32,1.275);max-width:260px}
+
+#toast{
+  position:fixed;bottom:2rem;right:1.5rem;
+  background:var(--panel);border:2px solid var(--acc3);
+  box-shadow:4px 4px 0 var(--acc3),var(--glow-b);
+  padding:10px 16px;color:var(--t0);font-family:var(--ffh);font-size:.5rem;
+  z-index:9999;transform:translateY(70px);opacity:0;
+  transition:all .35s cubic-bezier(.175,.885,.32,1.275);max-width:260px;letter-spacing:.04em;
+}
 #toast.show{transform:translateY(0);opacity:1}
 
-/* ══════════════════════════════
-   MODAL
-══════════════════════════════ */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:500;
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,4,8,.88);
+  backdrop-filter:blur(4px);z-index:500;
   display:flex;align-items:center;justify-content:center;padding:1rem;
-  opacity:0;pointer-events:none;transition:opacity .25s}
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
 .modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--panel);border:1.5px solid var(--line);border-radius:20px;
-  width:100%;max-width:480px;padding:2rem 1.8rem;position:relative;
-  transform:translateY(30px) scale(.96);transition:transform .28s cubic-bezier(.175,.885,.32,1.275);max-height:90vh;overflow-y:auto}
+.modal{
+  background:var(--panel);border:2px solid var(--acc3);
+  box-shadow:8px 8px 0 var(--acc3),var(--glow-b);
+  width:100%;max-width:480px;padding:24px 22px;position:relative;
+  transform:translateY(20px) scale(.96);transition:transform .28s cubic-bezier(.175,.885,.32,1.275);
+  max-height:90vh;overflow-y:auto;
+}
 .modal-overlay.open .modal{transform:none}
-.modal-close{position:absolute;top:.9rem;right:.9rem;background:var(--edge);border:none;border-radius:50%;
-  width:32px;height:32px;color:var(--t1);font-size:1.1rem;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:background .18s}
-.modal-close:hover{background:var(--acc2);color:#fff}
+.modal-close{
+  position:absolute;top:10px;right:10px;
+  background:rgba(0,4,8,.6);border:2px solid var(--acc2);color:var(--acc2);
+  width:32px;height:32px;font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  box-shadow:2px 2px 0 var(--acc2);
+}
+.modal-close:hover{background:var(--acc2);color:#fff;box-shadow:var(--glow-r)}
 
 /* modal header */
-.mh{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--line)}
-.mh-shield{height:76px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
-.mh-info{}
-.mh-name{font-family:var(--ffh);font-size:1.35rem;line-height:1.2}
-.mh-rank{font-size:.72rem;font-weight:800;padding:2px 9px;border-radius:5px;letter-spacing:.08em;text-transform:uppercase;margin-top:.3rem;display:inline-block}
+.mh{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid var(--line2)}
+.mh-shield{height:72px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
+.mh-name{font-family:var(--ffh);font-size:clamp(.65rem,2.5vw,.9rem);line-height:1.4}
+.mh-rank{font-family:var(--ffh);font-size:.42rem;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase;margin-top:5px;display:inline-block}
 
 /* rank position bar */
-.rank-pos-wrap{margin-bottom:1.5rem}
-.rp-label{font-size:.72rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem}
-.rp-bar-bg{background:var(--edge);border-radius:50px;height:14px;overflow:visible;position:relative;margin-bottom:1.6rem}
-.rp-bar-track{position:absolute;inset:0;border-radius:50px;overflow:hidden}
-.rp-bar-fill{height:14px;border-radius:50px 0 0 50px;transition:width .8s cubic-bezier(.22,1,.36,1);position:relative;min-width:4px}
-.rp-bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.18),transparent);border-radius:50px 0 0 50px}
-/* 3-section dividers inside track */
+.rank-pos-wrap{margin-bottom:16px}
+.rp-label{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.rp-bar-bg{background:var(--edge);border:1px solid var(--line2);height:12px;overflow:visible;position:relative;margin-bottom:20px}
+.rp-bar-track{position:absolute;inset:0;overflow:hidden}
+.rp-bar-fill{height:12px;transition:width .8s cubic-bezier(.22,1,.36,1);position:relative;min-width:4px}
+.rp-bar-fill::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(0,0,0,.2) 6px,rgba(0,0,0,.2) 7px)}
 .rp-div{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.5);z-index:2}
-/* score tooltip on bar tip */
-.rp-tip{position:absolute;top:-28px;transform:translateX(-50%);background:var(--panel);border:1.5px solid var(--tipcolor,#fff);border-radius:6px;
-  padding:2px 8px;font-size:.7rem;font-weight:800;color:var(--t0);white-space:nowrap;
-  transition:left .8s cubic-bezier(.22,1,.36,1);pointer-events:none;z-index:10}
-.rp-tip::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
-  border:3px solid transparent;border-top-color:var(--tipcolor,#fff)}
-/* segment labels under bar */
-.rp-seg-labels{display:flex;margin-top:.25rem}
-.rp-seg-lbl{flex:1;font-size:.6rem;font-weight:800;color:var(--t3);text-align:center;letter-spacing:.03em}
-.rp-pct{font-family:var(--ffh);font-size:.82rem;color:var(--t1);margin-top:.2rem;text-align:right}
+.rp-tip{position:absolute;top:-26px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--tipcolor,#fff);padding:2px 6px;font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t0);white-space:nowrap;transition:left .8s cubic-bezier(.22,1,.36,1);pointer-events:none;z-index:10}
+.rp-tip::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--tipcolor,#fff)}
+.rp-seg-labels{display:flex;margin-top:4px}
+.rp-seg-lbl{flex:1;font-size:.5rem;font-weight:800;color:var(--t3);text-align:center;letter-spacing:.02em}
+.rp-pct{font-family:var(--ffh);font-size:.48rem;color:var(--t1);margin-top:4px;text-align:right}
 
-/* sub-tier display in modal */
-.stier-wrap{margin-bottom:1.5rem}
-.stier-title{font-size:.72rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.8rem}
-.stier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
-.stier-card{background:var(--edge);border-radius:10px;padding:.6rem .5rem;text-align:center;border:1.5px solid transparent;transition:border-color .2s}
-.stier-card.current{border-color:var(--pc,#fff)}
-.stier-card-name{font-size:.7rem;font-weight:800;letter-spacing:.05em}
-.stier-card-range{font-size:.6rem;opacity:.5;margin-top:2px}
-.stier-card-you{font-size:.6rem;font-weight:800;margin-top:4px;color:var(--acc)}
+/* sub-tier */
+.stier-wrap{margin-bottom:16px}
+.stier-title{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.stier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stier-card{background:var(--edge);border:1px solid var(--line2);padding:8px 6px;text-align:center;transition:border-color .2s}
+.stier-card.current{border-color:var(--pc,#fff);box-shadow:2px 2px 0 var(--pc,#fff)}
+.stier-card-name{font-family:var(--ffh);font-size:.5rem;letter-spacing:.03em}
+.stier-card-range{font-size:.55rem;opacity:.5;margin-top:2px}
+.stier-card-you{font-family:var(--ffh);font-size:.42rem;font-weight:800;margin-top:4px;color:var(--acc)}
 
-/* stats grid in modal */
-.mstats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.5rem}
-.mstat{background:var(--edge);border-radius:10px;padding:.7rem .9rem}
-.mstat-lbl{font-size:.65rem;font-weight:800;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.25rem}
-.mstat-val{font-family:var(--ffh);font-size:1.2rem}
+/* stats grid */
+.mstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.mstat{background:var(--edge);border:1px solid var(--line2);border-left:3px solid var(--acc3);padding:10px 12px}
+.mstat-lbl{font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.mstat-val{font-family:var(--ffh);font-size:1rem}
+.mchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
 
-/* chips in modal */
-.mchips{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem}
-
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
-
-/* ── CALC SECTION ── */
-.calc-wrap{background:var(--edge);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.calc-summary{padding:.7rem 1rem;font-size:.8rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:.4rem;user-select:none}
+/* calc section */
+.calc-wrap{background:var(--edge);border:1px solid var(--line2);overflow:hidden;margin-bottom:14px}
+.calc-summary{padding:10px 14px;font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;letter-spacing:.04em}
 .calc-summary::-webkit-details-marker{display:none}
-.calc-summary::after{content:'▶';margin-left:auto;font-size:.65rem;color:var(--t3);transition:transform .2s}
+.calc-summary::after{content:'▶';margin-left:auto;font-size:.55rem;color:var(--t3);transition:transform .2s}
 details[open] .calc-summary::after{transform:rotate(90deg)}
-.calc-body{padding:.2rem 1rem 1rem;border-top:1px solid var(--line)}
-.calc-section-title{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin:.8rem 0 .45rem}
-.calc-table{display:flex;flex-direction:column;gap:.28rem}
-.ct-row{display:flex;align-items:center;gap:.5rem;font-size:.75rem}
-.ct-tag{font-size:.65rem;font-weight:800;padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0}
-.ct-rank-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.ct-desc{flex:1;color:var(--t1);font-size:.73rem}
-.ct-pts{font-family:var(--ffh);font-size:.82rem;color:var(--acc);font-weight:900;flex-shrink:0}
-.calc-note{font-size:.7rem;color:var(--t2);margin-top:.6rem;line-height:1.5;background:rgba(255,255,255,.03);border-radius:6px;padding:.5rem .7rem}
+.calc-body{padding:4px 14px 14px;border-top:1px solid var(--line2)}
+.calc-section-title{font-family:var(--ffh);font-size:.42rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--t2);margin:10px 0 6px}
+.calc-table{display:flex;flex-direction:column;gap:5px}
+.ct-row{display:flex;align-items:center;gap:6px;font-size:.72rem}
+.ct-tag{font-family:var(--ffh);font-size:.4rem;font-weight:800;padding:1px 6px;white-space:nowrap;flex-shrink:0}
+.ct-rank-dot{width:9px;height:9px;flex-shrink:0}
+.ct-desc{flex:1;color:var(--t1);font-size:.7rem}
+.ct-pts{font-family:var(--ffh);font-size:.6rem;color:var(--acc);font-weight:900;flex-shrink:0}
+.calc-note{font-size:.65rem;color:var(--t2);margin-top:8px;line-height:1.6;background:rgba(255,255,255,.03);border-left:2px solid var(--acc3);padding:6px 8px}
 
-/* ── MOBILE RANK LEGEND accordion ── */
-.rl-accordion{display:none} /* hidden on desktop */
-.rl-acc-summary{padding:.55rem 1rem;font-size:.8rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;
-  display:flex;align-items:center;gap:.5rem;user-select:none;background:var(--card);border:1.5px solid var(--line);border-radius:10px}
+/* scrollbar */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--line2)}::-webkit-scrollbar-thumb:hover{background:var(--acc3)}
+
+/* mobile rank legend accordion */
+.rl-accordion{display:none}
+.rl-acc-summary{padding:8px 14px;font-family:var(--ffh);font-size:.48rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:var(--card);border:2px solid var(--line2);box-shadow:2px 2px 0 var(--edge);letter-spacing:.04em}
 .rl-acc-summary::-webkit-details-marker{display:none}
-.rl-acc-summary::after{content:'▶';margin-left:auto;font-size:.65rem;color:var(--t3);transition:transform .2s}
+.rl-acc-summary::after{content:'▶';margin-left:auto;font-size:.55rem;color:var(--t3);transition:transform .2s}
 details[open] .rl-acc-summary::after{transform:rotate(90deg)}
-.rl-acc-body{margin-top:.5rem;display:flex;flex-direction:column;gap:.35rem}
-.rl-acc-item{display:flex;align-items:center;gap:.6rem;background:var(--card);border:1.5px solid var(--line);
-  border-radius:10px;padding:.4rem .85rem .4rem .45rem}
-.rl-acc-icon{width:32px;height:38px;object-fit:contain;flex-shrink:0}
+.rl-acc-body{margin-top:6px;display:flex;flex-direction:column;gap:5px}
+.rl-acc-item{display:flex;align-items:center;gap:10px;background:var(--card);border:2px solid var(--line2);padding:6px 12px 6px 6px}
+.rl-acc-icon{width:28px;height:34px;object-fit:contain;flex-shrink:0}
 .rl-acc-info{flex:1}
-.rl-acc-name{font-weight:800;font-size:.8rem}
-.rl-acc-range{font-size:.65rem;opacity:.5;font-weight:700}
-.rl-acc-sub{font-size:.62rem;color:var(--t2);margin-top:2px}
+.rl-acc-name{font-family:var(--ffh);font-weight:800;font-size:.55rem}
+.rl-acc-range{font-size:.55rem;opacity:.5;font-weight:700;margin-top:2px}
 
-/* ── MOBILE PT accordion ── */
+/* mobile pt accordion */
 .pt-accordion{display:none}
-.pt-acc-summary{padding:.55rem 1rem;font-size:.8rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;
-  display:flex;align-items:center;gap:.5rem;user-select:none;background:var(--card);border:1.5px solid var(--line);border-radius:10px}
+.pt-acc-summary{padding:8px 14px;font-family:var(--ffh);font-size:.48rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;background:var(--card);border:2px solid var(--line2);box-shadow:2px 2px 0 var(--edge);letter-spacing:.04em}
 .pt-acc-summary::-webkit-details-marker{display:none}
-.pt-acc-summary::after{content:'▶';margin-left:auto;font-size:.65rem;color:var(--t3);transition:transform .2s}
+.pt-acc-summary::after{content:'▶';margin-left:auto;font-size:.55rem;color:var(--t3);transition:transform .2s}
 details[open] .pt-acc-summary::after{transform:rotate(90deg)}
-.pt-acc-body{margin-top:.5rem;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:.6rem .9rem;display:flex;flex-direction:column;gap:.4rem}
-.pt-acc-row{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:700;color:var(--t1)}
-.pt-acc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.pt-acc-pts{font-family:var(--ffh);color:var(--acc);margin-left:auto;font-size:.82rem}
+.pt-acc-body{margin-top:6px;background:var(--card);border:2px solid var(--line2);padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.pt-acc-row{display:flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;color:var(--t1)}
+.pt-acc-dot{width:9px;height:9px;flex-shrink:0}
+.pt-acc-pts{font-family:var(--ffh);color:var(--acc);margin-left:auto;font-size:.6rem}
+
+/* ── 省エネモード ── */
+body.eco{--ff:system-ui,-apple-system,sans-serif;--ffh:system-ui,-apple-system,sans-serif;--ffj:system-ui,-apple-system,sans-serif}
+body.eco *,body.eco *::before,body.eco *::after{animation:none!important;transition:none!important;text-shadow:none!important;box-shadow:none!important}
+body.eco{--glow-g:none;--glow-b:none;--glow-r:none}
+body.eco::before{display:none}
+body.eco .bg-grid{display:none}
+body.eco .bg-corner-tl,body.eco .bg-corner-tr,body.eco .bg-corner-bl,body.eco .bg-corner-br{display:none}
+body.eco #particles{display:none}
+body.eco .logo-sub::after{content:''}
 
 /* ── RESPONSIVE ── */
 @media(max-width:640px){
   .cc,.rt thead th.cc{display:none}
-  .sbox input{width:150px}
-  /* hide desktop legend/pt, show accordion */
+  .sbox input{width:140px}
   .rank-legend-wrap .rank-legend,.rank-legend-wrap .rl-head{display:none}
   .rl-accordion{display:block}
   .pt-legend{display:none}
   .pt-accordion{display:block}
-  /* tighter controls */
-  .controls{gap:.45rem;padding:0 .75rem 1.4rem}
-  .cbtn{padding:.5rem .8rem;font-size:.75rem}
-  .rbtn{padding:.5rem 1rem;font-size:.8rem}
-  /* table row compact */
-  .rrow td{padding:.6rem .6rem}
-  .shi{width:auto;height:42px}
-  .shw{width:36px;height:42px;overflow:visible}
-  .pname{font-size:.85rem}
-  .prank-lbl{font-size:.58rem}
-  .wrc{font-size:1rem}
-  .ptv{font-size:1.1rem}
-  /* stats bar */
-  .stats-bar{gap:.45rem;padding:.3rem .75rem 1.4rem}
-  .s-pill{padding:.35rem .85rem;font-size:.72rem}
-  /* header */
-  .logo-icon{font-size:2.2rem}
+  .controls{gap:6px;padding:0 10px 1.2rem}
+  .cbtn,.rbtn{padding:7px 10px;font-size:.42rem}
+  .rrow td{padding:8px 8px}
+  .shi{height:40px}
+  .shw{width:36px;height:40px}
+  .pname{font-size:.52rem}
+  .prank-lbl{font-size:.38rem}
+  .wrc{font-size:.8rem}
+  .ptv{font-size:.9rem}
+  .stats-bar{gap:5px;padding:.3rem 10px 1.2rem}
+  .s-pill{padding:6px 10px;font-size:.6rem}
+  .modal{padding:16px 14px}
+  header{padding:40px 12px 24px}
 }
 </style>
 </head>
 <body>
-
-<div class="bg-atm"></div>
 <div class="bg-grid"></div>
+<div class="bg-corner-tl"></div>
+<div class="bg-corner-tr"></div>
+<div class="bg-corner-bl"></div>
+<div class="bg-corner-br"></div>
 <div id="particles"></div>
 
-<!-- HEADER -->
 <header>
   <div class="logo-line">
     <span class="logo-icon">🫘</span>
@@ -346,31 +406,31 @@ details[open] .pt-acc-summary::after{transform:rotate(90deg)}
     <span class="logo-icon">🏆</span>
   </div>
   <div class="logo-sub" id="hSub">WR ランキング</div>
-  <div class="deco"><div class="deco-l"></div><span>✦</span><div class="deco-l"></div></div>
+  <div class="logo-deco">
+    <div class="logo-deco-line"></div>
+    <span>✦</span>
+    <div class="logo-deco-line"></div>
+  </div>
 </header>
 
-<!-- STATS -->
 <div class="stats-bar">
-  <div class="s-pill"><span class="ms" style="font-size:1rem;color:var(--acc)">groups</span><span class="i18n" data-en="Holders" data-jp="ホルダー数">ホルダー数</span><span class="v" id="sH">—</span></div>
-  <div class="s-pill"><span class="ms" style="font-size:1rem;color:var(--acc)">emoji_events</span><span class="i18n" data-en="Total WRs" data-jp="WR 総数">WR 総数</span><span class="v" id="sL">—</span></div>
-  <div class="s-pill"><span class="ms" style="font-size:1rem;color:var(--acc)">schedule</span><span class="i18n" data-en="Updated" data-jp="更新">更新</span><span class="v" id="sT">—</span></div>
+  <div class="s-pill"><span class="ms" style="font-size:1rem">groups</span><span class="i18n" data-en="Holders" data-jp="ホルダー数">ホルダー数</span><span class="v" id="sH">—</span></div>
+  <div class="s-pill"><span class="ms" style="font-size:1rem">emoji_events</span><span class="i18n" data-en="Total WRs" data-jp="WR 総数">WR 総数</span><span class="v" id="sL">—</span></div>
+  <div class="s-pill"><span class="ms" style="font-size:1rem">schedule</span><span class="i18n" data-en="Updated" data-jp="更新">更新</span><span class="v" id="sT">—</span></div>
 </div>
 
-<!-- RANK LEGEND (desktop: pills / mobile: accordion) -->
 <div class="rank-legend-wrap">
   <div class="rl-head i18n" data-en="— Rank Tiers —" data-jp="— ランク一覧 —">— ランク一覧 —</div>
   <div class="rank-legend" id="rankLegend"></div>
-  <!-- mobile accordion -->
   <details class="rl-accordion" id="rlAccordion">
     <summary class="rl-acc-summary">
-      <span class="ms" style="font-size:1.1rem;color:var(--acc)">shield</span>
+      <span class="ms" style="font-size:1.1rem;color:var(--acc3)">shield</span>
       <span class="i18n" data-en="Rank Tiers" data-jp="ランク一覧">ランク一覧</span>
     </summary>
     <div class="rl-acc-body" id="rlAccBody"></div>
   </details>
 </div>
 
-<!-- CONTROLS -->
 <div class="controls">
   <div class="sbox">
     <span class="ms si" style="font-size:1rem">search</span>
@@ -390,7 +450,6 @@ details[open] .pt-acc-summary::after{transform:rotate(90deg)}
   </button>
 </div>
 
-<!-- PT LEGEND (desktop: pills / mobile: accordion) -->
 <div class="pt-legend">
   <div class="ptl"><div class="ptd" style="background:#ff5070"></div><span class="i18n" data-en="avg 1000+→15pt" data-jp="平均1000+→15pt">平均1000+→15pt</span></div>
   <div class="ptl"><div class="ptd" style="background:#ffc832"></div><span class="i18n" data-en="avg 750+→10pt" data-jp="平均750+→10pt">平均750+→10pt</span></div>
@@ -398,7 +457,6 @@ details[open] .pt-acc-summary::after{transform:rotate(90deg)}
   <div class="ptl"><div class="ptd" style="background:#a564ff"></div><span class="i18n" data-en="avg 100+→2pt" data-jp="平均100+→2pt">平均100+→2pt</span></div>
   <div class="ptl"><div class="ptd" style="background:#3ce68c"></div><span class="i18n" data-en="under100→1pt" data-jp="100未満→1pt">100未満→1pt</span></div>
 </div>
-<!-- mobile PT accordion -->
 <div class="pt-accordion" style="position:relative;z-index:10;max-width:980px;margin:0 auto .8rem;padding:0 1rem">
   <details>
     <summary class="pt-acc-summary">
@@ -415,14 +473,12 @@ details[open] .pt-acc-summary::after{transform:rotate(90deg)}
   </details>
 </div>
 
-<!-- TABLE -->
 <div class="tw">
   <div class="slbl i18n" data-en="— Champions Board —" data-jp="— チャンピオンボード —">— チャンピオンボード —</div>
-  <div id="tc"><div class="smsg"><span class="ms" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--t2)">progress_activity</span>読み込み中…</div></div>
+  <div id="tc"><div class="smsg"><span class="ms" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:var(--acc3)">progress_activity</span>読み込み中…</div></div>
   <div class="pager" id="pg"></div>
 </div>
 
-<!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modalBox">
     <button class="modal-close" onclick="closeModalDirect()">✕</button>
@@ -436,8 +492,18 @@ details[open] .pt-acc-summary::after{transform:rotate(90deg)}
 const GAS='https://script.google.com/macros/s/AKfycbxdO6Xv8VFLkjc5vrX1hy3u4DQWEP28Ht8sX8Rc1kKb9sGBap0RdqAF1TXHPEBrIAA8vA/exec';
 const PG=30;
 let all=[],fil=[],sort='pts',pg=1,lang='jp';
+let ecoMode=localStorage.getItem('ecoMode')==='1';
 
-/* ══════ i18n ══════ */
+/* ── 省エネ ── */
+function applyEco(on){
+  ecoMode=on;localStorage.setItem('ecoMode',on?'1':'0');
+  document.body.classList.toggle('eco',on);
+  const fl=document.getElementById('gfont-link');if(fl)fl.disabled=on;
+  const pc=document.getElementById('particles');if(pc)pc.style.display=on?'none':'';
+}
+if(ecoMode)applyEco(true);
+
+/* ── i18n ── */
 function setLang(l){
   lang=l;
   document.body.classList.toggle('jp',l==='jp');
@@ -447,676 +513,215 @@ function setLang(l){
   buildLegend();renderTable();
 }
 
-/* ══════ RANKS with sub-tiers (3 divisions each: I, II, III) ══════ */
+/* ── RANKS ── */
 const RANKS=[
-  {id:'gm',   jp:'グランドマスター',en:'Grand Master',minPts:150,maxPts:Infinity,
-   col:'#ff2d55',bg:'#1a000a',b1:'#ff2d55',b2:'#ff8c00',b3:'#ffd700',glow:'rgba(255,45,85,.8)',icon:'crown',
-   subs:[{jp:'I',en:'I',min:150},{jp:'II',en:'II',min:175},{jp:'III',en:'III',min:200}]},
-  {id:'mst',  jp:'マスター',        en:'Master',      minPts:75, maxPts:149,
-   col:'#d946ef',bg:'#150020',b1:'#7c3aed',b2:'#c026d3',b3:'#e879f9',glow:'rgba(192,38,211,.75)',icon:'gem',
-   subs:[{jp:'I',en:'I',min:75},{jp:'II',en:'II',min:95},{jp:'III',en:'III',min:120}]},
-  {id:'dia',  jp:'ダイヤモンド',    en:'Diamond',     minPts:30, maxPts:74,
-   col:'#22d3ee',bg:'#001520',b1:'#0891b2',b2:'#06b6d4',b3:'#67e8f9',glow:'rgba(6,182,212,.7)',icon:'diamond',
-   subs:[{jp:'I',en:'I',min:30},{jp:'II',en:'II',min:42},{jp:'III',en:'III',min:55}]},
-  {id:'plat', jp:'プラチナ',        en:'Platinum',    minPts:10, maxPts:29,
-   col:'#34d399',bg:'#001a10',b1:'#059669',b2:'#10b981',b3:'#6ee7b7',glow:'rgba(16,185,129,.65)',icon:'star6',
-   subs:[{jp:'I',en:'I',min:10},{jp:'II',en:'II',min:16},{jp:'III',en:'III',min:22}]},
-  {id:'gold', jp:'ゴールド',        en:'Gold',        minPts:5,  maxPts:9,
-   col:'#fbbf24',bg:'#1a0e00',b1:'#b45309',b2:'#d97706',b3:'#fde68a',glow:'rgba(251,191,36,.7)',icon:'star5',
-   subs:[{jp:'I',en:'I',min:5},{jp:'II',en:'II',min:6},{jp:'III',en:'III',min:8}]},
-  {id:'sil',  jp:'シルバー',        en:'Silver',      minPts:2,  maxPts:4,
-   col:'#94a3b8',bg:'#0e1018',b1:'#475569',b2:'#64748b',b3:'#cbd5e1',glow:'rgba(100,116,139,.6)',icon:'shield',
-   subs:[{jp:'I',en:'I',min:2},{jp:'II',en:'II',min:3},{jp:'III',en:'III',min:4}]},
-  {id:'brz',  jp:'ブロンズ',        en:'Bronze',      minPts:0,  maxPts:1,
-   col:'#fb923c',bg:'#1a0800',b1:'#9a3412',b2:'#ea580c',b3:'#fed7aa',glow:'rgba(234,88,12,.6)',icon:'bean',
-   subs:[{jp:'I',en:'I',min:0},{jp:'II',en:'II',min:1},{jp:'III',en:'III',min:1}]},
+  {id:'gm',jp:'グランドマスター',en:'Grand Master',minPts:150,maxPts:Infinity,col:'#ff2d55',bg:'#1a000a',b1:'#ff2d55',b2:'#ff8c00',b3:'#ffd700',glow:'rgba(255,45,85,.8)',icon:'crown',subs:[{jp:'I',en:'I',min:150},{jp:'II',en:'II',min:175},{jp:'III',en:'III',min:200}]},
+  {id:'mst',jp:'マスター',en:'Master',minPts:75,maxPts:149,col:'#d946ef',bg:'#150020',b1:'#7c3aed',b2:'#c026d3',b3:'#e879f9',glow:'rgba(192,38,211,.75)',icon:'gem',subs:[{jp:'I',en:'I',min:75},{jp:'II',en:'II',min:95},{jp:'III',en:'III',min:120}]},
+  {id:'dia',jp:'ダイヤモンド',en:'Diamond',minPts:30,maxPts:74,col:'#22d3ee',bg:'#001520',b1:'#0891b2',b2:'#06b6d4',b3:'#67e8f9',glow:'rgba(6,182,212,.7)',icon:'diamond',subs:[{jp:'I',en:'I',min:30},{jp:'II',en:'II',min:42},{jp:'III',en:'III',min:55}]},
+  {id:'plat',jp:'プラチナ',en:'Platinum',minPts:10,maxPts:29,col:'#34d399',bg:'#001a10',b1:'#059669',b2:'#10b981',b3:'#6ee7b7',glow:'rgba(16,185,129,.65)',icon:'star6',subs:[{jp:'I',en:'I',min:10},{jp:'II',en:'II',min:16},{jp:'III',en:'III',min:22}]},
+  {id:'gold',jp:'ゴールド',en:'Gold',minPts:5,maxPts:9,col:'#fbbf24',bg:'#1a0e00',b1:'#b45309',b2:'#d97706',b3:'#fde68a',glow:'rgba(251,191,36,.7)',icon:'star5',subs:[{jp:'I',en:'I',min:5},{jp:'II',en:'II',min:6},{jp:'III',en:'III',min:8}]},
+  {id:'sil',jp:'シルバー',en:'Silver',minPts:2,maxPts:4,col:'#94a3b8',bg:'#0e1018',b1:'#475569',b2:'#64748b',b3:'#cbd5e1',glow:'rgba(100,116,139,.6)',icon:'shield',subs:[{jp:'I',en:'I',min:2},{jp:'II',en:'II',min:3},{jp:'III',en:'III',min:4}]},
+  {id:'brz',jp:'ブロンズ',en:'Bronze',minPts:0,maxPts:1,col:'#fb923c',bg:'#1a0800',b1:'#9a3412',b2:'#ea580c',b3:'#fed7aa',glow:'rgba(234,88,12,.6)',icon:'bean',subs:[{jp:'I',en:'I',min:0},{jp:'II',en:'II',min:1},{jp:'III',en:'III',min:1}]},
 ];
 const getRank=p=>RANKS.find(r=>p>=r.minPts)||RANKS[6];
-// subs[0]=I(最低,min最小), subs[1]=II, subs[2]=III(最高,min最大)
-// ポイントが高いほど大きいindexを返す → index2=III=星3個=最高
-function getSubTier(rk,pts){
-  let result=0;
-  for(let i=0;i<rk.subs.length;i++){if(pts>=rk.subs[i].min)result=i;}
-  return result;
-}
+function getSubTier(rk,pts){let r=0;for(let i=0;i<rk.subs.length;i++){if(pts>=rk.subs[i].min)r=i;}return r;}
 
-/* ══════ SHIELD SVG ══════ */
+/* ── SHIELD SVG (元のコードをそのまま流用) ── */
 function mkShield(r,sz=44,subIdx=null){
   const id=`${r.id}_${Math.random().toString(36).slice(2,7)}`;
   const icons={
-    crown:`<g transform="translate(22,19)">
-      <path d="M-9,7 L-9,-1 L-5.5,3 L0,-7 L5.5,3 L9,-1 L9,7 Z" fill="${r.b3}" stroke="${r.b1}" stroke-width="1.2" stroke-linejoin="round"/>
-      <rect x="-9" y="7" width="18" height="4" rx="2" fill="${r.b3}" stroke="${r.b1}" stroke-width="1"/>
-      <circle cx="-9" cy="-1" r="2" fill="${r.b2}"/><circle cx="0" cy="-7" r="2.4" fill="${r.b2}"/><circle cx="9" cy="-1" r="2" fill="${r.b2}"/>
-      <rect x="-6" y="8.2" width="12" height="1.4" rx=".7" fill="white" opacity=".3"/>
-    </g>`,
-    gem:`<g transform="translate(22,20)">
-      <polygon points="0,-10 7,-3 7,4 0,9 -7,4 -7,-3" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.5" stroke-linejoin="round"/>
-      <polygon points="0,-6 4,-2 4,2 0,5 -4,2 -4,-2" fill="${r.b3}" opacity=".55"/>
-      <polygon points="-7,-3 0,-10 7,-3" fill="${r.b3}" opacity=".4"/>
-      <line x1="-7" y1="-3" x2="7" y2="-3" stroke="white" stroke-width=".7" opacity=".25"/>
-    </g>`,
-    diamond:`<g transform="translate(22,20)">
-      <polygon points="0,-11 8,0 0,11 -8,0" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.5" stroke-linejoin="round"/>
-      <polygon points="0,-6 5,0 0,6 -5,0" fill="${r.b3}" opacity=".5"/>
-      <polygon points="0,-11 8,0 0,-3 -8,0" fill="${r.b3}" opacity=".4"/>
-      <polygon points="0,-2.5 3,0 0,2.5 -3,0" fill="white" opacity=".55"/>
-    </g>`,
-    star6:`<g transform="translate(22,20)">
-      <polygon points="0,-10 2.6,-3.5 9,-3.5 4,1 6,8 0,4.5 -6,8 -4,1 -9,-3.5 -2.6,-3.5" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.3" stroke-linejoin="round"/>
-      <polygon points="0,-6 1.6,-2.1 5.5,-2.1 2.4,0.6 3.6,4.8 0,2.7 -3.6,4.8 -2.4,0.6 -5.5,-2.1 -1.6,-2.1" fill="${r.b3}" opacity=".55"/>
-      <circle cx="0" cy="0" r="2.2" fill="white" opacity=".5"/>
-    </g>`,
-    star5:`<g transform="translate(22,20)">
-      <polygon points="0,-11 3.2,-3.8 11,-3.5 5.2,1.5 7.2,9.5 0,5.5 -7.2,9.5 -5.2,1.5 -11,-3.5 -3.2,-3.8" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.3" stroke-linejoin="round"/>
-      <polygon points="0,-7 2,-2.4 7,-2.2 3.2,1 4.5,6 0,3.5 -4.5,6 -3.2,1 -7,-2.2 -2,-2.4" fill="${r.b3}" opacity=".5"/>
-      <circle cx="0" cy="1" r="2" fill="white" opacity=".45"/>
-    </g>`,
-    shield:`<g transform="translate(22,20)">
-      <path d="M0,-10 L8,-6 L8,2 Q8,9 0,12 Q-8,9 -8,2 L-8,-6 Z" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.4" stroke-linejoin="round"/>
-      <path d="M0,-6 L5,-3 L5,2 Q5,6.5 0,8.5 Q-5,6.5 -5,2 L-5,-3 Z" fill="${r.b3}" opacity=".4"/>
-      <line x1="-5" y1="-1" x2="5" y2="-1" stroke="${r.b3}" stroke-width="1" opacity=".5"/>
-      <line x1="0" y1="-6" x2="0" y2="8" stroke="${r.b3}" stroke-width=".8" opacity=".35"/>
-    </g>`,
-    bean:`<g transform="translate(22,20)">
-      <ellipse cx="0" cy="0" rx="7" ry="9.5" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.4"/>
-      <path d="M-3,-8 Q7,-2 2,8" stroke="${r.b3}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
-      <ellipse cx="0" cy="0" rx="4" ry="5.5" fill="${r.b3}" opacity=".35"/>
-    </g>`,
+    crown:`<g transform="translate(22,19)"><path d="M-9,7 L-9,-1 L-5.5,3 L0,-7 L5.5,3 L9,-1 L9,7 Z" fill="${r.b3}" stroke="${r.b1}" stroke-width="1.2" stroke-linejoin="round"/><rect x="-9" y="7" width="18" height="4" rx="2" fill="${r.b3}" stroke="${r.b1}" stroke-width="1"/><circle cx="-9" cy="-1" r="2" fill="${r.b2}"/><circle cx="0" cy="-7" r="2.4" fill="${r.b2}"/><circle cx="9" cy="-1" r="2" fill="${r.b2}"/><rect x="-6" y="8.2" width="12" height="1.4" rx=".7" fill="white" opacity=".3"/></g>`,
+    gem:`<g transform="translate(22,20)"><polygon points="0,-10 7,-3 7,4 0,9 -7,4 -7,-3" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.5" stroke-linejoin="round"/><polygon points="0,-6 4,-2 4,2 0,5 -4,2 -4,-2" fill="${r.b3}" opacity=".55"/><polygon points="-7,-3 0,-10 7,-3" fill="${r.b3}" opacity=".4"/><line x1="-7" y1="-3" x2="7" y2="-3" stroke="white" stroke-width=".7" opacity=".25"/></g>`,
+    diamond:`<g transform="translate(22,20)"><polygon points="0,-11 8,0 0,11 -8,0" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.5" stroke-linejoin="round"/><polygon points="0,-6 5,0 0,6 -5,0" fill="${r.b3}" opacity=".5"/><polygon points="0,-11 8,0 0,-3 -8,0" fill="${r.b3}" opacity=".4"/><polygon points="0,-2.5 3,0 0,2.5 -3,0" fill="white" opacity=".55"/></g>`,
+    star6:`<g transform="translate(22,20)"><polygon points="0,-10 2.6,-3.5 9,-3.5 4,1 6,8 0,4.5 -6,8 -4,1 -9,-3.5 -2.6,-3.5" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-6 1.6,-2.1 5.5,-2.1 2.4,0.6 3.6,4.8 0,2.7 -3.6,4.8 -2.4,0.6 -5.5,-2.1 -1.6,-2.1" fill="${r.b3}" opacity=".55"/><circle cx="0" cy="0" r="2.2" fill="white" opacity=".5"/></g>`,
+    star5:`<g transform="translate(22,20)"><polygon points="0,-11 3.2,-3.8 11,-3.5 5.2,1.5 7.2,9.5 0,5.5 -7.2,9.5 -5.2,1.5 -11,-3.5 -3.2,-3.8" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-7 2,-2.4 7,-2.2 3.2,1 4.5,6 0,3.5 -4.5,6 -3.2,1 -7,-2.2 -2,-2.4" fill="${r.b3}" opacity=".5"/><circle cx="0" cy="1" r="2" fill="white" opacity=".45"/></g>`,
+    shield:`<g transform="translate(22,20)"><path d="M0,-10 L8,-6 L8,2 Q8,9 0,12 Q-8,9 -8,2 L-8,-6 Z" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.4" stroke-linejoin="round"/><path d="M0,-6 L5,-3 L5,2 Q5,6.5 0,8.5 Q-5,6.5 -5,2 L-5,-3 Z" fill="${r.b3}" opacity=".4"/><line x1="-5" y1="-1" x2="5" y2="-1" stroke="${r.b3}" stroke-width="1" opacity=".5"/><line x1="0" y1="-6" x2="0" y2="8" stroke="${r.b3}" stroke-width=".8" opacity=".35"/></g>`,
+    bean:`<g transform="translate(22,20)"><ellipse cx="0" cy="0" rx="7" ry="9.5" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.4"/><path d="M-3,-8 Q7,-2 2,8" stroke="${r.b3}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/><ellipse cx="0" cy="0" rx="4" ry="5.5" fill="${r.b3}" opacity=".35"/></g>`,
   };
-
-  // 盾中心は (22, 25) / viewBox 0 0 44 52 固定 / overflow:visible で装飾をはみ出させる
-  const si = subIdx===null ? 2 : subIdx; // 0=I 1=II 2=III
-  const cx=22, cy=25; // 盾中心
-
-  // ── 装飾（座標は 0 0 44 52 基準） ──
+  const si=subIdx===null?2:subIdx;
+  const cx=22,cy=25;
   let deco='';
-
   if(r.id==='brz'){
-    // ブロンズ: I=なし II=細いふちどり光 III=光るふちどり+粒子2個
-    if(si>=1){
-      deco+=`<path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z"
-        fill="none" stroke="${r.b3}" stroke-width="${si===1?1.2:2}" stroke-linejoin="round" opacity="${si===1?0.25:0.4}"/>`;
-    }
-    if(si>=2){
-      for(let i=0;i<3;i++){
-        const angle=[-30,0,30][i]*Math.PI/180;
-        const px=cx+Math.cos(angle-Math.PI/2)*26, py=cy+Math.sin(angle-Math.PI/2)*26;
-        deco+=`<circle cx="${px}" cy="${py}" r="1" fill="${r.b3}" opacity="0.7">
-          <animate attributeName="opacity" values="0.2;0.9;0.2" dur="${1.2+i*0.4}s" repeatCount="indefinite"/>
-        </circle>`;
-      }
-    }
-
+    if(si>=1){deco+=`<path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b3}" stroke-width="${si===1?1.2:2}" stroke-linejoin="round" opacity="${si===1?0.25:0.4}"/>`;}
+    if(si>=2){for(let i=0;i<3;i++){const angle=[-30,0,30][i]*Math.PI/180;const px=cx+Math.cos(angle-Math.PI/2)*26,py=cy+Math.sin(angle-Math.PI/2)*26;deco+=`<circle cx="${px}" cy="${py}" r="1" fill="${r.b3}" opacity="0.7"><animate attributeName="opacity" values="0.2;0.9;0.2" dur="${1.2+i*0.4}s" repeatCount="indefinite"/></circle>`;}}
   }else if(r.id==='sil'){
-    // シルバー: I=きらめき3粒 II=7粒+細リング III=12粒+リング+光軸
-    const count=[3,7,12][si];
-    const pts=[[3,8],[41,7],[1,26],[43,25],[5,44],[39,43],[22,-2],[10,16],[34,16],[6,35],[38,35],[22,54],[14,-1]];
-    for(let i=0;i<count;i++){
-      const [px,py]=pts[i];
-      deco+=`<circle cx="${px}" cy="${py}" r="${0.8+i%2*0.4}" fill="${r.b3}" opacity="0.7">
-        <animate attributeName="opacity" values="0.1;0.9;0.1" dur="${1+i*0.28}s" repeatCount="indefinite"/>
-      </circle>`;
-    }
-    if(si>=1){
-      deco+=`<ellipse cx="${cx}" cy="${cy}" rx="21" ry="24.5" fill="none" stroke="${r.b3}" stroke-width="0.6" opacity="0.2">
-        <animate attributeName="opacity" values="0.08;0.28;0.08" dur="3s" repeatCount="indefinite"/>
-      </ellipse>`;
-    }
-    if(si>=2){
-      // 上下に光の線
-      deco+=`<line x1="${cx}" y1="-6" x2="${cx}" y2="2" stroke="${r.b3}" stroke-width="0.8" stroke-linecap="round" opacity="0.5">
-        <animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.8s" repeatCount="indefinite"/>
-      </line>`;
-    }
-
+    const count=[3,7,12][si];const pts=[[3,8],[41,7],[1,26],[43,25],[5,44],[39,43],[22,-2],[10,16],[34,16],[6,35],[38,35],[22,54],[14,-1]];
+    for(let i=0;i<count;i++){const[px,py]=pts[i];deco+=`<circle cx="${px}" cy="${py}" r="${0.8+i%2*0.4}" fill="${r.b3}" opacity="0.7"><animate attributeName="opacity" values="0.1;0.9;0.1" dur="${1+i*0.28}s" repeatCount="indefinite"/></circle>`;}
+    if(si>=1){deco+=`<ellipse cx="${cx}" cy="${cy}" rx="21" ry="24.5" fill="none" stroke="${r.b3}" stroke-width="0.6" opacity="0.2"><animate attributeName="opacity" values="0.08;0.28;0.08" dur="3s" repeatCount="indefinite"/></ellipse>`;}
+    if(si>=2){deco+=`<line x1="${cx}" y1="-6" x2="${cx}" y2="2" stroke="${r.b3}" stroke-width="0.8" stroke-linecap="round" opacity="0.5"><animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.8s" repeatCount="indefinite"/></line>`;}
   }else if(r.id==='gold'){
-    // ゴールド: I=リング1重 II=リング2重+コーナー輝き II=リング3重+コーナー輝き+脈動
-    const rings=si+1;
-    for(let i=0;i<rings;i++){
-      const rx2=20+i*3.5, ry2=23+i*4;
-      deco+=`<ellipse cx="${cx}" cy="${cy}" rx="${rx2}" ry="${ry2}" fill="none" stroke="${r.b3}" stroke-width="${0.9-i*0.15}" opacity="${0.35-i*0.05}">
-        <animate attributeName="opacity" values="0.08;${0.38-i*0.06};0.08" dur="${2.2+i*0.8}s" repeatCount="indefinite"/>
-        <animate attributeName="rx" values="${rx2};${rx2+1.2};${rx2}" dur="${2.2+i*0.8}s" repeatCount="indefinite"/>
-        <animate attributeName="ry" values="${ry2};${ry2+1.4};${ry2}" dur="${2.2+i*0.8}s" repeatCount="indefinite"/>
-      </ellipse>`;
-    }
-    if(si>=1){
-      // 四隅に小さな輝き
-      [[4,4],[40,4],[4,46],[40,46]].forEach(([px,py],i)=>{
-        deco+=`<circle cx="${px}" cy="${py}" r="1.2" fill="${r.b3}" opacity="0.6">
-          <animate attributeName="opacity" values="0.1;0.8;0.1" dur="${1.4+i*0.3}s" repeatCount="indefinite"/>
-          <animate attributeName="r" values="0.7;1.6;0.7" dur="${1.4+i*0.3}s" repeatCount="indefinite"/>
-        </circle>`;
-      });
-    }
-    if(si>=2){
-      // 上部に光の弧
-      deco+=`<path d="M10,0 Q22,-5 34,0" fill="none" stroke="${r.b3}" stroke-width="1" stroke-linecap="round" opacity="0.45">
-        <animate attributeName="opacity" values="0.15;0.6;0.15" dur="2s" repeatCount="indefinite"/>
-      </path>`;
-    }
-
-  }else if(r.id==='plat'||r.id==='dia'||r.id==='mst'||r.id==='gm'){
-    // 天使の翼：siに応じて羽根数・サイズ・輝きを増やす
-    const drawWing=(wx,wy,side,n,len,glowAlpha)=>{
-      let g='';
-      for(let i=0;i<n;i++){
-        const t=i/(n-1);
-        const deg=-90+t*80;
-        const rad=deg*Math.PI/180;
-        const l=len*(0.5+Math.sin((t*0.9+0.05)*Math.PI)*0.6);
-        const ex=-side*Math.cos(rad)*l*0.55 + Math.sin(rad)*(-l*0.1);
-        const ey=-Math.abs(Math.sin(rad))*l;
-        const hw=l*0.07;
-        const mx=ex*0.45 + side*hw*0.6;
-        const my=ey*0.45 - hw*0.4;
-        g+=`<path d="M0,${-hw*0.2} Q${mx},${my-hw*0.8} ${ex},${ey} Q${mx+side*hw*0.3},${my+hw*0.5} 0,${hw*0.2} Z"
-          fill="${r.b2}" stroke="${r.b3}" stroke-width="0.28" stroke-opacity="0.45" opacity="0.85"/>`;
-        g+=`<line x1="0" y1="0" x2="${ex*0.82}" y2="${ey*0.82}"
-          stroke="${r.b3}" stroke-width="0.45" stroke-linecap="round" opacity="0.6"/>`;
-        // IIIは各羽根の先端に輝き
-        if(glowAlpha>0){
-          g+=`<circle cx="${ex*0.88}" cy="${ey*0.88}" r="0.7" fill="${r.b3}" opacity="${glowAlpha}">
-            <animate attributeName="opacity" values="${glowAlpha*0.2};${glowAlpha};${glowAlpha*0.2}" dur="${1+i*0.18}s" repeatCount="indefinite"/>
-          </circle>`;
-        }
-      }
-      return `<g transform="translate(${wx},${wy})">${g}</g>`;
-    };
-
-    // siによって羽根数・サイズを変える
-    const baseCfgs={
-      plat:{n:[4,5,7], len:[8,10,13],  fy:30},
-      dia: {n:[5,6,8], len:[10,13,16], fy:29},
-      mst: {n:[6,7,9], len:[12,16,19], fy:28},
-      gm:  {n:[7,8,10],len:[14,19,22], fy:27},
-    };
-    const bc=baseCfgs[r.id];
-    const wn=bc.n[si], wlen=bc.len[si], fy=bc.fy;
-    const glowAlpha=si===0?0:si===1?0.35:0.7;
-
-    // IIIは2段（上下）、IIは上段のみ追加、Iは1段
-    const rowYOffsets=[0,-wlen*0.3, wlen*0.25];
-    const rows=si+1;
-    for(let row=0;row<rows;row++){
-      const ly=fy+rowYOffsets[row];
-      const rowLen=row===0?wlen:wlen*0.72;
-      const rowN=row===0?wn:Math.max(3,wn-2);
-      deco+=drawWing(4,  ly,  1, rowN, rowLen, row===0?glowAlpha:glowAlpha*0.6);
-      deco+=drawWing(40, ly, -1, rowN, rowLen, row===0?glowAlpha:glowAlpha*0.6);
-    }
-
-    // ランク固有の追加装飾（siで豪華さ変化）
-    if(r.id==='plat'){
-      // IIIは上部に光輪
-      if(si>=2){
-        deco+=`<ellipse cx="${cx}" cy="${cy-4}" rx="18" ry="5" fill="none" stroke="${r.b3}" stroke-width="0.5" opacity="0.2">
-          <animate attributeName="opacity" values="0.05;0.3;0.05" dur="2.5s" repeatCount="indefinite"/>
-        </ellipse>`;
-      }
-
-    }else if(r.id==='dia'){
-      // II以上：上部宝石
-      if(si>=1) deco+=`<polygon points="${cx},-3 ${cx+2.5},0 ${cx},5 ${cx-2.5},0" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.5" opacity="0.9">
-        <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
-      </polygon>`;
-      // III：側面にも宝石
-      if(si>=2){
-        deco+=`<polygon points="-3,20 0,24 -3,28 -6,24" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.4" opacity="0.8"/>`;
-        deco+=`<polygon points="47,20 50,24 47,28 44,24" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.4" opacity="0.8"/>`;
-      }
-
-    }else if(r.id==='mst'){
-      // I: 小魔法陣、II: 中、III: 大+二重
-      const hr=19+si*3;
-      const hp=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i-Math.PI/6;return `${cx+Math.cos(a)*hr},${cy+Math.sin(a)*hr}`;}).join(' ');
-      deco=`<polygon points="${hp}" fill="none" stroke="${r.b2}" stroke-width="${0.4+si*0.15}" opacity="${0.15+si*0.08}">
-        <animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="${10-si*2}s" repeatCount="indefinite"/>
-      </polygon>`+deco;
-      if(si>=2){
-        const hr2=hr+6;
-        const hp2=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i;return `${cx+Math.cos(a)*hr2},${cy+Math.sin(a)*hr2}`;}).join(' ');
-        deco=`<polygon points="${hp2}" fill="none" stroke="${r.b3}" stroke-width="0.35" opacity="0.18">
-          <animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="-360 ${cx} ${cy}" dur="6s" repeatCount="indefinite"/>
-        </polygon>`+deco;
-      }
-
-    }else if(r.id==='gm'){
-      // 炎: I=3本 II=5本 III=7本
-      const fc=si===0?3:si===1?5:7;
-      for(let i=0;i<fc;i++){
-        const fx=10+i*(24/(fc-1)), fh=4+Math.sin(i*1.1)*2;
-        deco+=`<path d="M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52" fill="${i%2?r.b2:r.b1}" opacity="${0.35+si*0.1}">
-          <animate attributeName="d" values="M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52;M${fx},52 Q${fx-2},${48-fh} ${fx},${45-fh} Q${fx+2},${48-fh} ${fx},52;M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52" dur="${0.7+i*0.12}s" repeatCount="indefinite"/>
-        </path>`;
-      }
-      // 光輪: II以上
-      if(si>=1){
-        deco+=`<circle cx="${cx}" cy="${cy}" r="${21+si*2}" fill="none" stroke="${r.b1}" stroke-width="${0.6+si*0.3}" opacity="0.15">
-          <animate attributeName="opacity" values="0.05;0.25;0.05" dur="2.2s" repeatCount="indefinite"/>
-          <animate attributeName="r" values="${20+si*2};${23+si*2};${20+si*2}" dur="2.2s" repeatCount="indefinite"/>
-        </circle>`;
-      }
-      // 輝き粒子: I=2個 II=4個 III=6個
-      const sc=si===0?2:si===1?4:6;
-      for(let i=0;i<sc;i++){
-        const sx=8+i*(28/(sc-1)), sy=-3+i%2*4;
-        deco+=`<circle cx="${sx}" cy="${sy}" r="${0.7+si*0.15}" fill="${r.b3}">
-          <animate attributeName="opacity" values="0.1;1;0.1" dur="${0.8+i*0.25}s" repeatCount="indefinite"/>
-          <animate attributeName="r" values="${0.4+si*0.1};${1.2+si*0.2};${0.4+si*0.1}" dur="${0.8+i*0.25}s" repeatCount="indefinite"/>
-        </circle>`;
-      }
-    }
-  } // end if(r.id===...)
-
-  // 星ピップ
-  const maxPips=3;
-  const filledPips=subIdx===null?3:subIdx+1;
-  let pips='';
-  {
-    const sp=9,ox=22-(maxPips-1)*sp/2;
-    for(let i=0;i<maxPips;i++){
-      const pcx=ox+i*sp;
-      const filled=i<filledPips;
-      const fillCol=filled?r.b3:'rgba(255,255,255,0.12)';
-      const strokeCol=filled?r.b1:'rgba(255,255,255,0.18)';
-      pips+=`<polygon points="${pcx},40 ${pcx+1.6},43.2 ${pcx+5.5},43.2 ${pcx+2.5},45.2 ${pcx+3.4},48.5 ${pcx},46.3 ${pcx-3.4},48.5 ${pcx-2.5},45.2 ${pcx-5.5},43.2 ${pcx-1.6},43.2" fill="${fillCol}" stroke="${strokeCol}" stroke-width=".6"/>`;
-    }
+    const rings=si+1;for(let i=0;i<rings;i++){const rx2=20+i*3.5,ry2=23+i*4;deco+=`<ellipse cx="${cx}" cy="${cy}" rx="${rx2}" ry="${ry2}" fill="none" stroke="${r.b3}" stroke-width="${0.9-i*0.15}" opacity="${0.35-i*0.05}"><animate attributeName="opacity" values="0.08;${0.38-i*0.06};0.08" dur="${2.2+i*0.8}s" repeatCount="indefinite"/><animate attributeName="rx" values="${rx2};${rx2+1.2};${rx2}" dur="${2.2+i*0.8}s" repeatCount="indefinite"/><animate attributeName="ry" values="${ry2};${ry2+1.4};${ry2}" dur="${2.2+i*0.8}s" repeatCount="indefinite"/></ellipse>`;}
+    if(si>=1){[[4,4],[40,4],[4,46],[40,46]].forEach(([px,py],i)=>{deco+=`<circle cx="${px}" cy="${py}" r="1.2" fill="${r.b3}" opacity="0.6"><animate attributeName="opacity" values="0.1;0.8;0.1" dur="${1.4+i*0.3}s" repeatCount="indefinite"/><animate attributeName="r" values="0.7;1.6;0.7" dur="${1.4+i*0.3}s" repeatCount="indefinite"/></circle>`;});}
+    if(si>=2){deco+=`<path d="M10,0 Q22,-5 34,0" fill="none" stroke="${r.b3}" stroke-width="1" stroke-linecap="round" opacity="0.45"><animate attributeName="opacity" values="0.15;0.6;0.15" dur="2s" repeatCount="indefinite"/></path>`;}
+  }else if(['plat','dia','mst','gm'].includes(r.id)){
+    const drawWing=(wx,wy,side,n,len,glowAlpha)=>{let g='';for(let i=0;i<n;i++){const t=i/(n-1);const deg=-90+t*80;const rad=deg*Math.PI/180;const l=len*(0.5+Math.sin((t*0.9+0.05)*Math.PI)*0.6);const ex=-side*Math.cos(rad)*l*0.55+Math.sin(rad)*(-l*0.1);const ey=-Math.abs(Math.sin(rad))*l;const hw=l*0.07;const mx=ex*0.45+side*hw*0.6;const my=ey*0.45-hw*0.4;g+=`<path d="M0,${-hw*0.2} Q${mx},${my-hw*0.8} ${ex},${ey} Q${mx+side*hw*0.3},${my+hw*0.5} 0,${hw*0.2} Z" fill="${r.b2}" stroke="${r.b3}" stroke-width="0.28" stroke-opacity="0.45" opacity="0.85"/>`;g+=`<line x1="0" y1="0" x2="${ex*0.82}" y2="${ey*0.82}" stroke="${r.b3}" stroke-width="0.45" stroke-linecap="round" opacity="0.6"/>`;if(glowAlpha>0){g+=`<circle cx="${ex*0.88}" cy="${ey*0.88}" r="0.7" fill="${r.b3}" opacity="${glowAlpha}"><animate attributeName="opacity" values="${glowAlpha*0.2};${glowAlpha};${glowAlpha*0.2}" dur="${1+i*0.18}s" repeatCount="indefinite"/></circle>`;}}return`<g transform="translate(${wx},${wy})">${g}</g>`;};
+    const baseCfgs={plat:{n:[4,5,7],len:[8,10,13],fy:30},dia:{n:[5,6,8],len:[10,13,16],fy:29},mst:{n:[6,7,9],len:[12,16,19],fy:28},gm:{n:[7,8,10],len:[14,19,22],fy:27}};
+    const bc=baseCfgs[r.id];const wn=bc.n[si],wlen=bc.len[si],fy=bc.fy;const glowAlpha=si===0?0:si===1?0.35:0.7;
+    const rowYOffsets=[0,-wlen*0.3,wlen*0.25];const rows=si+1;
+    for(let row=0;row<rows;row++){const ly=fy+rowYOffsets[row];const rowLen=row===0?wlen:wlen*0.72;const rowN=row===0?wn:Math.max(3,wn-2);deco+=drawWing(4,ly,1,rowN,rowLen,row===0?glowAlpha:glowAlpha*0.6);deco+=drawWing(40,ly,-1,rowN,rowLen,row===0?glowAlpha:glowAlpha*0.6);}
+    if(r.id==='plat'){if(si>=2){deco+=`<ellipse cx="${cx}" cy="${cy-4}" rx="18" ry="5" fill="none" stroke="${r.b3}" stroke-width="0.5" opacity="0.2"><animate attributeName="opacity" values="0.05;0.3;0.05" dur="2.5s" repeatCount="indefinite"/></ellipse>`;}}
+    else if(r.id==='dia'){if(si>=1)deco+=`<polygon points="${cx},-3 ${cx+2.5},0 ${cx},5 ${cx-2.5},0" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.5" opacity="0.9"><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></polygon>`;if(si>=2){deco+=`<polygon points="-3,20 0,24 -3,28 -6,24" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.4" opacity="0.8"/>`;deco+=`<polygon points="47,20 50,24 47,28 44,24" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.4" opacity="0.8"/>`;}}
+    else if(r.id==='mst'){const hr=19+si*3;const hp=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i-Math.PI/6;return`${cx+Math.cos(a)*hr},${cy+Math.sin(a)*hr}`;}).join(' ');deco=`<polygon points="${hp}" fill="none" stroke="${r.b2}" stroke-width="${0.4+si*0.15}" opacity="${0.15+si*0.08}"><animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="${10-si*2}s" repeatCount="indefinite"/></polygon>`+deco;if(si>=2){const hr2=hr+6;const hp2=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i;return`${cx+Math.cos(a)*hr2},${cy+Math.sin(a)*hr2}`;}).join(' ');deco=`<polygon points="${hp2}" fill="none" stroke="${r.b3}" stroke-width="0.35" opacity="0.18"><animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="-360 ${cx} ${cy}" dur="6s" repeatCount="indefinite"/></polygon>`+deco;}}
+    else if(r.id==='gm'){const fc=si===0?3:si===1?5:7;for(let i=0;i<fc;i++){const fx=10+i*(24/(fc-1)),fh=4+Math.sin(i*1.1)*2;deco+=`<path d="M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52" fill="${i%2?r.b2:r.b1}" opacity="${0.35+si*0.1}"><animate attributeName="d" values="M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52;M${fx},52 Q${fx-2},${48-fh} ${fx},${45-fh} Q${fx+2},${48-fh} ${fx},52;M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52" dur="${0.7+i*0.12}s" repeatCount="indefinite"/></path>`;}if(si>=1){deco+=`<circle cx="${cx}" cy="${cy}" r="${21+si*2}" fill="none" stroke="${r.b1}" stroke-width="${0.6+si*0.3}" opacity="0.15"><animate attributeName="opacity" values="0.05;0.25;0.05" dur="2.2s" repeatCount="indefinite"/><animate attributeName="r" values="${20+si*2};${23+si*2};${20+si*2}" dur="2.2s" repeatCount="indefinite"/></circle>`;}const sc=si===0?2:si===1?4:6;for(let i=0;i<sc;i++){const sx=8+i*(28/(sc-1)),sy=-3+i%2*4;deco+=`<circle cx="${sx}" cy="${sy}" r="${0.7+si*0.15}" fill="${r.b3}"><animate attributeName="opacity" values="0.1;1;0.1" dur="${0.8+i*0.25}s" repeatCount="indefinite"/><animate attributeName="r" values="${0.4+si*0.1};${1.2+si*0.2};${0.4+si*0.1}" dur="${0.8+i*0.25}s" repeatCount="indefinite"/></circle>`;}}
   }
-
-  // ランクに応じた余白（装飾がはみ出す分）
-  // pad = [left, right, top, bottom]
-  const padMap = {
-    brz:[0,0,0,0], sil:[4,4,5,2], gold:[6,6,6,4],
-    plat:[12,12,5,4], dia:[14,14,8,4],
-    mst:[16,16,8,6], gm:[18,18,12,10]
-  };
-  const [pl,pr,pt,pb] = padMap[r.id]||[0,0,0,0];
-  const vbW=44+pl+pr, vbH=52+pt+pb;
-  const ox=pl, oy=pt;
-  // szは盾本体(44px幅)の表示サイズ → SVG全体はその比率で拡大
-  const scale=sz/44;
-  const svgW=Math.round(vbW*scale), svgH=Math.round(vbH*scale);
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${vbW} ${vbH}">
-  <defs>
-    <linearGradient id="bg_${id}" x1="0%" y1="0%" x2="60%" y2="100%">
-      <stop offset="0%" stop-color="${r.b1}"/><stop offset="55%" stop-color="${r.b2}"/><stop offset="100%" stop-color="${r.bg}"/>
-    </linearGradient>
-    <linearGradient id="sh_${id}" x1="10%" y1="0%" x2="90%" y2="100%">
-      <stop offset="0%" stop-color="white" stop-opacity=".28"/><stop offset="100%" stop-color="white" stop-opacity="0"/>
-    </linearGradient>
-    <filter id="gf_${id}" x="-50%" y="-40%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <clipPath id="cl_${id}"><path d="M${22+ox},${2+oy} L${40+ox},${9+oy} L${40+ox},${24+oy} Q${40+ox},${38+oy} ${22+ox},${48+oy} Q${4+ox},${38+oy} ${4+ox},${24+oy} L${4+ox},${9+oy} Z"/></clipPath>
-  </defs>
-  ${deco ? `<g transform="translate(${ox},${oy})">${deco}</g>` : ''}
-  <g transform="translate(${ox},${oy})">
-    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="${r.b2}" opacity=".22" filter="url(#gf_${id})" transform="translate(0,3) scale(1.06,1.04) translate(-1.3,-1.3)"/>
-    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b3}" stroke-width="3.5" stroke-linejoin="round" opacity=".9"/>
-    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b1}" stroke-width="5.5" stroke-linejoin="round" opacity=".35"/>
-    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#bg_${id})"/>
-    <path d="M22,5.5 L37,11.5 L37,24 Q37,36 22,45 Q7,36 7,24 L7,11.5 Z" fill="none" stroke="${r.b3}" stroke-width="1" opacity=".3"/>
-    <path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#sh_${id})" clip-path="url(#cl_${id})"/>
-    ${icons[r.icon]||''}${pips}
-    <path d="M14,7 Q22,4 30,7" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".28"/>
-  </g>
-</svg>`;
+  const maxPips=3;const filledPips=subIdx===null?3:subIdx+1;let pips='';
+  {const sp=9,ox=22-(maxPips-1)*sp/2;for(let i=0;i<maxPips;i++){const pcx=ox+i*sp;const filled=i<filledPips;const fillCol=filled?r.b3:'rgba(255,255,255,0.12)';const strokeCol=filled?r.b1:'rgba(255,255,255,0.18)';pips+=`<polygon points="${pcx},40 ${pcx+1.6},43.2 ${pcx+5.5},43.2 ${pcx+2.5},45.2 ${pcx+3.4},48.5 ${pcx},46.3 ${pcx-3.4},48.5 ${pcx-2.5},45.2 ${pcx-5.5},43.2 ${pcx-1.6},43.2" fill="${fillCol}" stroke="${strokeCol}" stroke-width=".6"/>`;}}
+  const padMap={brz:[0,0,0,0],sil:[4,4,5,2],gold:[6,6,6,4],plat:[12,12,5,4],dia:[14,14,8,4],mst:[16,16,8,6],gm:[18,18,12,10]};
+  const[pl,pr,pt,pb]=padMap[r.id]||[0,0,0,0];const vbW=44+pl+pr,vbH=52+pt+pb;const ox=pl,oy=pt;const scale=sz/44;const svgW=Math.round(vbW*scale),svgH=Math.round(vbH*scale);
+  return`<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${vbW} ${vbH}"><defs><linearGradient id="bg_${id}" x1="0%" y1="0%" x2="60%" y2="100%"><stop offset="0%" stop-color="${r.b1}"/><stop offset="55%" stop-color="${r.b2}"/><stop offset="100%" stop-color="${r.bg}"/></linearGradient><linearGradient id="sh_${id}" x1="10%" y1="0%" x2="90%" y2="100%"><stop offset="0%" stop-color="white" stop-opacity=".28"/><stop offset="100%" stop-color="white" stop-opacity="0"/></linearGradient><filter id="gf_${id}" x="-50%" y="-40%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><clipPath id="cl_${id}"><path d="M${22+ox},${2+oy} L${40+ox},${9+oy} L${40+ox},${24+oy} Q${40+ox},${38+oy} ${22+ox},${48+oy} Q${4+ox},${38+oy} ${4+ox},${24+oy} L${4+ox},${9+oy} Z"/></clipPath></defs>${deco?`<g transform="translate(${ox},${oy})">${deco}</g>`:''}<g transform="translate(${ox},${oy})"><path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="${r.b2}" opacity=".22" filter="url(#gf_${id})" transform="translate(0,3) scale(1.06,1.04) translate(-1.3,-1.3)"/><path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b3}" stroke-width="3.5" stroke-linejoin="round" opacity=".9"/><path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="none" stroke="${r.b1}" stroke-width="5.5" stroke-linejoin="round" opacity=".35"/><path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#bg_${id})"/><path d="M22,5.5 L37,11.5 L37,24 Q37,36 22,45 Q7,36 7,24 L7,11.5 Z" fill="none" stroke="${r.b3}" stroke-width="1" opacity=".3"/><path d="M22,2 L40,9 L40,24 Q40,38 22,48 Q4,38 4,24 L4,9 Z" fill="url(#sh_${id})" clip-path="url(#cl_${id})"/>${icons[r.icon]||''}${pips}<path d="M14,7 Q22,4 30,7" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".28"/></g></svg>`;
 }
 const s2u=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
 
-/* ══════ PARTICLES ══════ */
+/* ── PARTICLES (8bit文字) ── */
 (function(){
+  const chars=['0','1','▶','■','★','◆','▲','WR'];
+  const cols=['#00ff41','#00d4ff','#ff2d55','#ffcc00'];
   const c=document.getElementById('particles');
-  const cols=['#ff5f7e','#ffd23f','#3de8f7','#b16fff','#4dffa6','#ff9f43','#67e8f9'];
-  for(let i=0;i<70;i++){
-    const d=document.createElement('div');d.className='pt';
-    const sz=2+Math.random()*5,col=cols[i%cols.length];
-    d.style.cssText=`left:${Math.random()*100}%;bottom:${-10+Math.random()*10}%;width:${sz}px;height:${sz}px;background:${col};box-shadow:0 0 ${sz*2}px ${col};--dur:${6+Math.random()*9}s;--del:${Math.random()*8}s;`;
-    c.appendChild(d);
+  for(let i=0;i<24;i++){
+    const p=document.createElement('div');p.className='pt';
+    const sz=Math.random()<.5?10:8;
+    const col=cols[Math.floor(Math.random()*4)];
+    p.style.cssText=`left:${Math.random()*100}%;bottom:-20px;font-family:'Press Start 2P',monospace;font-size:${sz}px;color:${col};text-shadow:0 0 8px ${col};--dur:${8+Math.random()*12}s;--del:${-Math.random()*15}s`;
+    p.textContent=chars[Math.floor(Math.random()*chars.length)];
+    c.appendChild(p);
   }
 })();
 
-/* ══════ LEGEND ══════ */
+/* ── LEGEND ── */
 function buildLegend(){
-  // desktop pills — subIdx=2でI(最高=星3個)を表示
   document.getElementById('rankLegend').innerHTML=RANKS.map(r=>{
     const url=s2u(mkShield(r,34,2));
     const next=RANKS[RANKS.indexOf(r)-1];
     const lbl=next?`${r.minPts}–${next.minPts-1} pt`:`${r.minPts}+ pt`;
     const name=lang==='jp'?r.jp:r.en;
-    return `<div class="rl-item" style="border-color:${r.col}30">
-      <img class="rl-icon" src="${url}" alt="${name}">
-      <div><span class="rl-name" style="color:${r.col}">${name}</span><span class="rl-pts">${lbl}</span></div>
-    </div>`;
+    return`<div class="rl-item" style="border-color:${r.col}50"><img class="rl-icon" src="${url}" alt="${name}"><div><span class="rl-name" style="color:${r.col}">${name}</span><span class="rl-pts">${lbl}</span></div></div>`;
   }).join('');
-
-  // mobile accordion — show each rank with all 3 sub-tiers (shields I/II/III)
   document.getElementById('rlAccBody').innerHTML=RANKS.map(r=>{
     const next=RANKS[RANKS.indexOf(r)-1];
     const lbl=next?`${r.minPts}–${next.minPts-1} pt`:`${r.minPts}+ pt`;
     const name=lang==='jp'?r.jp:r.en;
-    // 3 mini shields: 左からIII(星1)→II(星2)→I(星3)
-    const miniShields=[2,1,0].map(si=>{
-      const u=s2u(mkShield(r,22,si));
-      // subs[0]=I, subs[1]=II, subs[2]=III → si=2→IIIラベル
-      const sn=r.subs[si][lang];
-      const stars=3-si; // si=2→1個, si=1→2個, si=0→3個
-      return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-        <img src="${u}" width="22" style="height:26px;object-fit:contain">
-        <span style="font-size:.55rem;color:${r.col};font-weight:800;opacity:.8">${sn}</span>
-      </div>`;
-    }).join('');
-    return `<div class="rl-acc-item" style="border-color:${r.col}30">
-      <img class="rl-acc-icon" src="${s2u(mkShield(r,32,2))}" alt="${name}">
-      <div class="rl-acc-info">
-        <div class="rl-acc-name" style="color:${r.col}">${name}</div>
-        <div class="rl-acc-range">${lbl}</div>
-      </div>
-      <div style="display:flex;gap:6px;align-items:flex-end">${miniShields}</div>
-    </div>`;
+    const miniShields=[2,1,0].map(si=>{const u=s2u(mkShield(r,22,si));const sn=r.subs[si][lang];return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><img src="${u}" width="22" style="height:26px;object-fit:contain"><span style="font-size:.45rem;color:${r.col};font-weight:800;opacity:.8">${sn}</span></div>`;}).join('');
+    return`<div class="rl-acc-item" style="border-color:${r.col}40"><img class="rl-acc-icon" src="${s2u(mkShield(r,32,2))}" alt="${name}"><div class="rl-acc-info"><div class="rl-acc-name" style="color:${r.col}">${name}</div><div class="rl-acc-range">${lbl}</div></div><div style="display:flex;gap:6px;align-items:flex-end">${miniShields}</div></div>`;
   }).join('');
 }
 
-/* ══════ DATA ══════ */
+/* ── DATA ── */
 async function loadData(){
   const btn=document.getElementById('rBtn');btn.classList.add('spin');
-  document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--t2)">progress_activity</span>${lang==='jp'?'読み込み中…':'Loading…'}</div>`;
+  document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:var(--acc3)">progress_activity</span>${lang==='jp'?'読み込み中…':'Loading…'}</div>`;
   document.getElementById('pg').innerHTML='';
   try{
-    const res=await fetch(GAS);
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const res=await fetch(GAS);if(!res.ok)throw new Error(`HTTP ${res.status}`);
     const raw=await res.json();
     if(!Array.isArray(raw)||!raw.length)throw new Error(lang==='jp'?'データが空です':'Empty data');
-    all=raw.map(r=>({
-      name:String(r.name||''),
-      under100:+r.under100||0,p100:+r.p100||0,
-      p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,
-      wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0
-    }));
-    // assign global rank index
+    all=raw.map(r=>({name:String(r.name||''),under100:+r.under100||0,p100:+r.p100||0,p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0}));
     all.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
     all.forEach((d,i)=>d.globalRank=i+1);
     document.getElementById('sH').textContent=all.length.toLocaleString();
     document.getElementById('sL').textContent=all.reduce((s,d)=>s+d.wrCount,0).toLocaleString();
     document.getElementById('sT').textContent=new Date().toLocaleTimeString('ja-JP');
-    applyFil();
-    toast(lang==='jp'?'読み込み完了':'Loaded');
+    applyFil();toast(lang==='jp'?'読み込み完了':'Loaded');
   }catch(e){
-    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms big" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--acc2)">error</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.75rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
+    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms big" style="color:var(--acc2)">error</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.65rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
     toast(lang==='jp'?'失敗':'Failed');
   }
   btn.classList.remove('spin');
 }
 
-function setSort(m){
-  sort=m;pg=1;
-  document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('on'));
-  document.getElementById(m==='pts'?'bPts':'bWr').classList.add('on');
-  applyFil();
-}
+function setSort(m){sort=m;pg=1;document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('on'));document.getElementById(m==='pts'?'bPts':'bWr').classList.add('on');applyFil();}
 function onSearch(){pg=1;applyFil();}
-
 function applyFil(){
   const q=document.getElementById('si').value.trim().toLowerCase();
   fil=all.filter(d=>d.name.toLowerCase().includes(q));
-  if(sort==='pts') fil.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
-  else             fil.sort((a,b)=>b.wrCount-a.wrCount||b.totalPoints-a.totalPoints);
+  if(sort==='pts')fil.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
+  else fil.sort((a,b)=>b.wrCount-a.wrCount||b.totalPoints-a.totalPoints);
   renderTable();renderPager();
 }
 
-/* ══════ RENDER TABLE ══════ */
+/* ── RENDER TABLE ── */
 function renderTable(){
-  if(!fil.length){
-    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:3rem;display:block;margin-bottom:1rem;color:var(--t2)">manage_search</span>${lang==='jp'?'見つかりませんでした':'No players found.'}</div>`;
-    return;
-  }
+  if(!fil.length){document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:var(--t2)">manage_search</span>${lang==='jp'?'見つかりませんでした':'No players found.'}</div>`;return;}
   const start=(pg-1)*PG;
   const rows=fil.slice(start,start+PG).map((d,li)=>{
     const gr=start+li+1;
     const tc=gr===1?'top1':gr===2?'top2':gr===3?'top3':'topN';
-    const rk=getRank(d.totalPoints);
-    const subIdx=getSubTier(rk,d.totalPoints);
+    const rk=getRank(d.totalPoints);const subIdx=getSubTier(rk,d.totalPoints);
     const url=s2u(mkShield(rk,44,subIdx));
-    // sub-tier pips: I=1個, II=2個, III=3個 (subIdx 0=I=最低)
-    const filledPips=subIdx+1;
-    let pips='';
-    for(let i=0;i<3;i++){
-      const filled=i<filledPips;
-      pips+=`<div class="stpip ${filled?'filled':'empty'}" style="background:${filled?rk.col:'var(--t3)'};${filled?`--pc:${rk.col}`:''}"></div>`;
-    }
-    const chips=[
-      d.p1000?`<span class="chip c1000">1000+×${d.p1000}</span>`:'',
-      d.p750?`<span class="chip c750">750+×${d.p750}</span>`:'',
-      d.p500?`<span class="chip c500">500+×${d.p500}</span>`:'',
-      d.p100?`<span class="chip c100">100+×${d.p100}</span>`:'',
-      d.under100?`<span class="chip cu100">&lt;100×${d.under100}</span>`:'',
-    ].join('');
-    const rkName=lang==='jp'?rk.jp:rk.en;
-    const subName=rk.subs[subIdx][lang];
-    const ptsStyle=gr>3?`color:${rk.col};text-shadow:0 0 10px ${rk.col}55`:
-      gr===1?'color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.55)':
-      gr===2?'color:#c8c8d4':'color:#e8874a';
-    return `
-    <tr class="rrow ${tc}" style="animation-delay:${li*.028}s" onclick="openModal(${d.globalRank-1})">
+    const filledPips=subIdx+1;let pips='';
+    for(let i=0;i<3;i++){const filled=i<filledPips;pips+=`<div class="stpip ${filled?'filled':'empty'}" style="background:${filled?rk.col:'var(--t3)'};${filled?`--pc:${rk.col}`:''}"></div>`;}
+    const chips=[d.p1000?`<span class="chip c1000">1000+×${d.p1000}</span>`:'',d.p750?`<span class="chip c750">750+×${d.p750}</span>`:'',d.p500?`<span class="chip c500">500+×${d.p500}</span>`:'',d.p100?`<span class="chip c100">100+×${d.p100}</span>`:'',d.under100?`<span class="chip cu100">&lt;100×${d.under100}</span>`:''].join('');
+    const rkName=lang==='jp'?rk.jp:rk.en;const subName=rk.subs[subIdx][lang];
+    const ptsStyle=gr>3?`color:${rk.col};text-shadow:0 0 10px ${rk.col}55`:gr===1?'color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.55)':gr===2?'color:#c8c8d4':'color:#e8874a';
+    return`<tr class="rrow ${tc}" style="animation-delay:${li*.028}s" onclick="openModal(${d.globalRank-1})">
       <td><span class="rnum">${gr}</span></td>
-      <td>
-        <div class="pcell">
-          <div class="shw" style="--sg:${rk.glow}">
-            <img class="shi" src="${url}" alt="${rkName}">
-          </div>
-          <div>
-            <a class="pname pname-link" href="community.html?player=${encodeURIComponent(d.name)}" target="_blank" onclick="event.stopPropagation()" title="${lang==='jp'?'WRコース一覧を見る':'View WR courses'}">${esc(d.name)}</a>
-            <span class="prank-lbl" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}28">${rkName} ${subName}</span>
-            <div class="subtier">${pips}</div>
-          </div>
-        </div>
-      </td>
-      <td class="cc"><div class="cats">${chips||`<span style="color:var(--t3);font-size:.7rem">—</span>`}</div></td>
+      <td><div class="pcell"><div class="shw" style="--sg:${rk.glow}"><img class="shi" src="${url}" alt="${rkName}"></div>
+        <div>
+          <a class="pname pname-link" href="community.html?player=${encodeURIComponent(d.name)}" target="_blank" onclick="event.stopPropagation()" title="${lang==='jp'?'WRコース一覧を見る':'View WR courses'}">${esc(d.name)}</a>
+          <span class="prank-lbl" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}28">${rkName} ${subName}</span>
+          <div class="subtier">${pips}</div>
+        </div></div></td>
+      <td class="cc"><div class="cats">${chips||`<span style="color:var(--t3);font-size:.65rem">—</span>`}</div></td>
       <td><div class="wrc">${d.wrCount}</div></td>
       <td><div class="ptv" style="${ptsStyle}">${d.totalPoints}</div></td>
     </tr>`;
   }).join('');
-
   const thPl=lang==='jp'?'プレイヤー':'Player';
   const thCa=lang==='jp'?'カテゴリ':'WR Breakdown';
   const thWr=lang==='jp'?'WR数':'WRs';
   const thPt=lang==='jp'?'ポイント':'Points';
-  document.getElementById('tc').innerHTML=`
-  <table class="rt">
-    <thead><tr>
-      <th class="c" style="width:48px">#</th><th>${thPl}</th>
-      <th class="c cc">${thCa}</th><th class="c">${thWr}</th><th class="c">${thPt}</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+  document.getElementById('tc').innerHTML=`<table class="rt"><thead><tr><th class="c" style="width:48px">#</th><th>${thPl}</th><th class="c cc">${thCa}</th><th class="c">${thWr}</th><th class="c">${thPt}</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-/* ══════ MODAL ══════ */
+/* ── MODAL ── */
 function openModal(idx){
   const d=all[idx];if(!d)return;
-  const rk=getRank(d.totalPoints);
-  const subIdx=getSubTier(rk,d.totalPoints);
-  const rkName=lang==='jp'?rk.jp:rk.en;
-  const subName=rk.subs[subIdx][lang];
+  const rk=getRank(d.totalPoints);const subIdx=getSubTier(rk,d.totalPoints);
+  const rkName=lang==='jp'?rk.jp:rk.en;const subName=rk.subs[subIdx][lang];
   const url=s2u(mkShield(rk,64,subIdx));
-
-  // position in all players (points-sorted)
-  const pos=d.globalRank;
-  const total=all.length;
-  const pct=Math.round((1-(pos-1)/total)*100);
-
-  // rank range players (same rank)
+  const pos=d.globalRank;const total=all.length;const pct=Math.round((1-(pos-1)/total)*100);
   const sameRank=all.filter(x=>getRank(x.totalPoints).id===rk.id);
-  const posInRank=sameRank.findIndex(x=>x.name===d.name)+1;
-  const totalInRank=sameRank.length;
-
-  // progress within rank (how far to next rank)
-  const nextRank=RANKS[RANKS.indexOf(rk)-1];
-  const prevMin=rk.minPts;
-  const nextMin=nextRank?nextRank.minPts:rk.minPts+50;
-  const progressPct=nextRank
-    ?Math.min(100,Math.round(((d.totalPoints-prevMin)/(nextMin-prevMin))*100))
-    :100;
-
-  // sub-tier cards: subs[0]=I(最低), subs[1]=II, subs[2]=III(最高) → 左からI・II・IIIの順で表示
-  const stCards=rk.subs.map((s,i)=>{
-    const isCurrent=i===subIdx;
-    const hi = i<rk.subs.length-1 ? rk.subs[i+1].min-1 : (nextRank?nextMin-1:999);
-    const range=`${s.min}–${hi}pt`;
-    return `<div class="stier-card${isCurrent?' current':''}" style="--pc:${rk.col}">
-      <div class="stier-card-name" style="color:${isCurrent?rk.col:'var(--t2)'}">${lang==='jp'?rk.jp:rk.en} ${s[lang]}</div>
-      <div class="stier-card-range">${range}</div>
-      ${isCurrent?`<div class="stier-card-you">▶ ${esc(d.name)}</div>`:''}
-    </div>`;
-  }).join('');
-
-  const chips=[
-    d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',
-    d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',
-    d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',
-    d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',
-    d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:'',
-  ].join('');
-
+  const posInRank=sameRank.findIndex(x=>x.name===d.name)+1;const totalInRank=sameRank.length;
+  const nextRank=RANKS[RANKS.indexOf(rk)-1];const prevMin=rk.minPts;const nextMin=nextRank?nextRank.minPts:rk.minPts+50;
+  const progressPct=nextRank?Math.min(100,Math.round(((d.totalPoints-prevMin)/(nextMin-prevMin))*100)):100;
+  const stCards=rk.subs.map((s,i)=>{const isCurrent=i===subIdx;const hi=i<rk.subs.length-1?rk.subs[i+1].min-1:(nextRank?nextMin-1:999);const range=`${s.min}–${hi}pt`;return`<div class="stier-card${isCurrent?' current':''}" style="--pc:${rk.col}"><div class="stier-card-name" style="color:${isCurrent?rk.col:'var(--t2)'}">${lang==='jp'?rk.jp:rk.en} ${s[lang]}</div><div class="stier-card-range">${range}</div>${isCurrent?`<div class="stier-card-you">▶ ${esc(d.name)}</div>`:''}</div>`;}).join('');
+  const chips=[d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:''].join('');
   const t=lang==='jp';
-
-  // ── 3-section progress bar: 左=I(最低), 中=II, 右=III(最高) ──
-  // subs[0]=I(min最小), subs[1]=II, subs[2]=III(min最大)
-  const seg3 = nextRank ? (() => {
-    const rangeTotal = nextMin - prevMin;
-    const b1 = rk.subs[1].min; // I→II 境界
-    const b2 = rk.subs[2].min; // II→III 境界
-    const p1 = Math.round((b1 - prevMin) / rangeTotal * 100);
-    const p2 = Math.round((b2 - prevMin) / rangeTotal * 100);
-    return { p1, p2, b1, b2 };
-  })() : null;
-
-  const tipLeft = Math.min(98, Math.max(2, progressPct));
-  const tipHtml = nextRank ? `<div class="rp-tip" id="rpTip" style="left:${tipLeft}%;--tipcolor:${rk.col}">${d.totalPoints}pt</div>` : '';
-  const divHtml = seg3 ? `
-    <div class="rp-div" style="left:${seg3.p1}%"></div>
-    <div class="rp-div" style="left:${seg3.p2}%"></div>` : '';
-  const segLblHtml = seg3 ? `
-    <div class="rp-seg-labels">
-      <div class="rp-seg-lbl" style="flex:${seg3.p1}">${lang==='jp'?rk.jp+' I':rk.en+' I'}<br>${prevMin}–${seg3.b1-1}pt</div>
-      <div class="rp-seg-lbl" style="flex:${seg3.p2-seg3.p1}">${lang==='jp'?rk.jp+' II':rk.en+' II'}<br>${seg3.b1}–${seg3.b2-1}pt</div>
-      <div class="rp-seg-lbl" style="flex:${100-seg3.p2}">${lang==='jp'?rk.jp+' III':rk.en+' III'}<br>${seg3.b2}–${nextMin-1}pt</div>
-    </div>` : '';
-
-  const calcHtml = `
-    <details class="calc-wrap" style="margin-bottom:1.2rem">
-      <summary class="calc-summary"><span class="ms" style="font-size:1rem;vertical-align:middle;color:var(--acc)">calculate</span>${t?'ポイント計算方法':'How Points Work'}</summary>
-      <div class="calc-body">
-        <div class="calc-section-title">${t?'WR カテゴリポイント':'WR Category Points'}</div>
-        <div class="calc-table">
-          <div class="ct-row"><span class="ct-tag c1000">1000+</span><span class="ct-desc">${t?'平均フィニッシュタイム 1000秒以上':'avg finish time ≥ 1000s'}</span><span class="ct-pts">+15 pt</span></div>
-          <div class="ct-row"><span class="ct-tag c750">750+</span><span class="ct-desc">${t?'平均フィニッシュタイム 750秒以上':'avg finish time ≥ 750s'}</span><span class="ct-pts">+10 pt</span></div>
-          <div class="ct-row"><span class="ct-tag c500">500+</span><span class="ct-desc">${t?'平均フィニッシュタイム 500秒以上':'avg finish time ≥ 500s'}</span><span class="ct-pts">+5 pt</span></div>
-          <div class="ct-row"><span class="ct-tag c100">100+</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒以上':'avg finish time ≥ 100s'}</span><span class="ct-pts">+2 pt</span></div>
-          <div class="ct-row"><span class="ct-tag cu100">&lt;100</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒未満':'avg finish time &lt; 100s'}</span><span class="ct-pts">+1 pt</span></div>
-        </div>
-        <div class="calc-note">${t?'WR を 1 つ取得するごとに、そのコースの平均フィニッシュタイムに応じたポイントが加算されます。':'Each WR grants points based on that level\'s average finish time.'}</div>
-        <div class="calc-section-title" style="margin-top:.9rem">${t?'ランク昇格条件':'Rank Thresholds'}</div>
-        <div class="calc-table">${RANKS.slice().reverse().map(r=>{
-          const nm=t?r.jp:r.en;
-          const nxt=RANKS[RANKS.indexOf(r)-1];
-          const rng=nxt?`${r.minPts}–${nxt.minPts-1} pt`:`${r.minPts}+ pt`;
-          return `<div class="ct-row"><span class="ct-rank-dot" style="background:${r.col}"></span><span class="ct-desc" style="color:${r.col};font-weight:800">${nm}</span><span class="ct-pts">${rng}</span></div>`;
-        }).join('')}</div>
-      </div>
-    </details>`;
-
+  const seg3=nextRank?(()=>{const rangeTotal=nextMin-prevMin;const b1=rk.subs[1].min;const b2=rk.subs[2].min;const p1=Math.round((b1-prevMin)/rangeTotal*100);const p2=Math.round((b2-prevMin)/rangeTotal*100);return{p1,p2,b1,b2};})():null;
+  const tipLeft=Math.min(98,Math.max(2,progressPct));
+  const tipHtml=nextRank?`<div class="rp-tip" id="rpTip" style="left:${tipLeft}%;--tipcolor:${rk.col}">${d.totalPoints}pt</div>`:'';
+  const divHtml=seg3?`<div class="rp-div" style="left:${seg3.p1}%"></div><div class="rp-div" style="left:${seg3.p2}%"></div>`:'';
+  const segLblHtml=seg3?`<div class="rp-seg-labels"><div class="rp-seg-lbl" style="flex:${seg3.p1}">${lang==='jp'?rk.jp+' I':rk.en+' I'}<br>${prevMin}–${seg3.b1-1}pt</div><div class="rp-seg-lbl" style="flex:${seg3.p2-seg3.p1}">${lang==='jp'?rk.jp+' II':rk.en+' II'}<br>${seg3.b1}–${seg3.b2-1}pt</div><div class="rp-seg-lbl" style="flex:${100-seg3.p2}">${lang==='jp'?rk.jp+' III':rk.en+' III'}<br>${seg3.b2}–${nextMin-1}pt</div></div>`:'';
+  const calcHtml=`<details class="calc-wrap"><summary class="calc-summary"><span class="ms" style="font-size:1rem;vertical-align:middle;color:var(--acc)">calculate</span>${t?'ポイント計算方法':'How Points Work'}</summary><div class="calc-body"><div class="calc-section-title">${t?'WR カテゴリポイント':'WR Category Points'}</div><div class="calc-table"><div class="ct-row"><span class="ct-tag c1000">1000+</span><span class="ct-desc">${t?'平均フィニッシュタイム 1000秒以上':'avg finish time ≥ 1000s'}</span><span class="ct-pts">+15 pt</span></div><div class="ct-row"><span class="ct-tag c750">750+</span><span class="ct-desc">${t?'平均フィニッシュタイム 750秒以上':'avg finish time ≥ 750s'}</span><span class="ct-pts">+10 pt</span></div><div class="ct-row"><span class="ct-tag c500">500+</span><span class="ct-desc">${t?'平均フィニッシュタイム 500秒以上':'avg finish time ≥ 500s'}</span><span class="ct-pts">+5 pt</span></div><div class="ct-row"><span class="ct-tag c100">100+</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒以上':'avg finish time ≥ 100s'}</span><span class="ct-pts">+2 pt</span></div><div class="ct-row"><span class="ct-tag cu100">&lt;100</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒未満':'avg finish time &lt; 100s'}</span><span class="ct-pts">+1 pt</span></div></div><div class="calc-note">${t?'WR を 1 つ取得するごとに、そのコースの平均フィニッシュタイムに応じたポイントが加算されます。':'Each WR grants points based on that level\'s average finish time.'}</div><div class="calc-section-title" style="margin-top:.9rem">${t?'ランク昇格条件':'Rank Thresholds'}</div><div class="calc-table">${RANKS.slice().reverse().map(r=>{const nm=t?r.jp:r.en;const nxt=RANKS[RANKS.indexOf(r)-1];const rng=nxt?`${r.minPts}–${nxt.minPts-1} pt`:`${r.minPts}+ pt`;return`<div class="ct-row"><span class="ct-rank-dot" style="background:${r.col}"></span><span class="ct-desc" style="color:${r.col};font-weight:800">${nm}</span><span class="ct-pts">${rng}</span></div>`;}).join('')}</div></div></details>`;
   document.getElementById('modalContent').innerHTML=`
-    <div class="mh">
-      <img class="mh-shield" src="${url}" alt="${rkName}" style="--mg:${rk.glow}">
-      <div class="mh-info">
-        <div class="mh-name" style="color:${rk.col}">${esc(d.name)}</div>
-        <span class="mh-rank" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}30">${rkName} ${subName}</span>
-      </div>
-    </div>
-
-    <div class="rank-pos-wrap">
-      <div class="rp-label">${t?'全体順位':'Overall Ranking'}</div>
-      <div class="rp-bar-bg">
-        <div class="rp-bar-track" style="background:var(--edge)">
-          <div class="rp-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div>
-        </div>
-      </div>
-      <div class="rp-pct">${t?`全${total}人中 ${pos}位 (上位${100-pct}%)`:`#${pos} of ${total} players (Top ${100-pct}%)`}</div>
-    </div>
-
-    <div class="rank-pos-wrap">
-      <div class="rp-label">${t?'次のランクまで':'Progress to Next Rank'}</div>
-      <div class="rp-bar-bg">
-        <div class="rp-bar-track" style="background:var(--edge)">
-          <div class="rp-bar-fill" style="width:${progressPct}%;background:linear-gradient(90deg,${rk.b2},${rk.b3})"></div>
-          ${divHtml}
-        </div>
-        ${tipHtml}
-      </div>
-      ${segLblHtml}
-      <div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'最高ランク到達！':'Max Rank Achieved!')}</div>
-    </div>
-
-    <div class="stier-wrap">
-      <div class="stier-title">${t?'ランク内の階級':'Rank Divisions'}</div>
-      <div class="stier-grid">${stCards}</div>
-    </div>
-
-    <div class="mstats">
-      <div class="mstat"><div class="mstat-lbl">${t?'ポイント':'Points'}</div><div class="mstat-val" style="color:${rk.col}">${d.totalPoints}</div></div>
-      <div class="mstat"><div class="mstat-lbl">${t?'WR数':'WR Count'}</div><div class="mstat-val" style="color:var(--acc3)">${d.wrCount}</div></div>
-      <div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div>
-      <div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div>
-    </div>
-
+    <div class="mh"><img class="mh-shield" src="${url}" alt="${rkName}" style="--mg:${rk.glow}"><div><div class="mh-name" style="color:${rk.col}">${esc(d.name)}</div><span class="mh-rank" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}30">${rkName} ${subName}</span></div></div>
+    <div class="rank-pos-wrap"><div class="rp-label">${t?'全体順位':'Overall Ranking'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div></div></div><div class="rp-pct">${t?`全${total}人中 ${pos}位 (上位${100-pct}%)`:`#${pos} of ${total} players (Top ${100-pct}%)`}</div></div>
+    <div class="rank-pos-wrap"><div class="rp-label">${t?'次のランクまで':'Progress to Next Rank'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${progressPct}%;background:linear-gradient(90deg,${rk.b2},${rk.b3})"></div>${divHtml}</div>${tipHtml}</div>${segLblHtml}<div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'最高ランク到達！':'Max Rank Achieved!')}</div></div>
+    <div class="stier-wrap"><div class="stier-title">${t?'ランク内の階級':'Rank Divisions'}</div><div class="stier-grid">${stCards}</div></div>
+    <div class="mstats"><div class="mstat"><div class="mstat-lbl">${t?'ポイント':'Points'}</div><div class="mstat-val" style="color:${rk.col}">${d.totalPoints}</div></div><div class="mstat"><div class="mstat-lbl">${t?'WR数':'WR Count'}</div><div class="mstat-val" style="color:var(--acc3)">${d.wrCount}</div></div><div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div><div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div></div>
     ${chips?`<div class="mchips">${chips}</div>`:''}
-    ${calcHtml}
-  `;
+    ${calcHtml}`;
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow='hidden';
 }
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect();}
-function closeModalDirect(){
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow='';
-}
+function closeModalDirect(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
 
-/* ══════ PAGER ══════ */
+/* ── PAGER ── */
 function renderPager(){
-  const tot=Math.ceil(fil.length/PG);
-  if(tot<=1){document.getElementById('pg').innerHTML='';return;}
-  const ns=[];
-  for(let i=1;i<=tot;i++){
-    if(i===1||i===tot||Math.abs(i-pg)<=2)ns.push(i);
-    else if(ns[ns.length-1]!=='…')ns.push('…');
-  }
+  const tot=Math.ceil(fil.length/PG);if(tot<=1){document.getElementById('pg').innerHTML='';return;}
+  const ns=[];for(let i=1;i<=tot;i++){if(i===1||i===tot||Math.abs(i-pg)<=2)ns.push(i);else if(ns[ns.length-1]!=='…')ns.push('…');}
   let h=`<button class="pgb" onclick="goP(${pg-1})" ${pg===1?'disabled':''}>◀</button>`;
-  ns.forEach(n=>{
-    if(n==='…')h+=`<span style="color:var(--t3);padding:0 4px;font-size:.8rem">…</span>`;
-    else h+=`<button class="pgb ${n===pg?'on':''}" onclick="goP(${n})">${n}</button>`;
-  });
+  ns.forEach(n=>{if(n==='…')h+=`<span style="color:var(--t3);padding:0 4px;font-size:.7rem">…</span>`;else h+=`<button class="pgb ${n===pg?'on':''}" onclick="goP(${n})">${n}</button>`;});
   h+=`<button class="pgb" onclick="goP(${pg+1})" ${pg===tot?'disabled':''}>▶</button>`;
   document.getElementById('pg').innerHTML=h;
 }
-function goP(n){
-  const t=Math.ceil(fil.length/PG);if(n<1||n>t)return;
-  pg=n;renderTable();renderPager();window.scrollTo({top:0,behavior:'smooth'});
-}
+function goP(n){const t=Math.ceil(fil.length/PG);if(n<1||n>t)return;pg=n;renderTable();renderPager();window.scrollTo({top:0,behavior:'smooth'});}
 
 let tt;
-function toast(m){
-  const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
-  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);
-}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-
-window.TM_LANG_HOOK = l => setLang(l === 'ja' ? 'jp' : 'en');
-// ESC to close modal
+window.TM_LANG_HOOK=l=>setLang(l==='ja'?'jp':'en');
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModalDirect()});
 
 buildLegend();

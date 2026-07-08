@@ -1,24 +1,25 @@
 /* ================================================================
-   tool-menu.css — LOLBeans ツール共通メニュー
-   https://tanabesan.github.io/lolbeans/tool-menu.css
+   tool-menu.css — LOLBeans ツール共通メニュー (8bit edition)
    ================================================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@700;800;900&family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=M+PLUS+Rounded+1c:wght@700;800&display=swap');
 
 :root {
-  --tm-bg:    #08071a;
-  --tm-panel: #111028;
-  --tm-edge:  #241f48;
-  --tm-line:  #2d2860;
-  --tm-t0:    #f0eaff;
-  --tm-t1:    #a89ed0;
-  --tm-t2:    #5f5890;
-  --tm-acc:   #ffd23f;
-  --tm-acc2:  #ff5f7e;
-  --tm-acc3:  #3de8f7;
-  --tm-ffh:   'Boogaloo', cursive;
-  --tm-ff:    'Nunito', sans-serif;
+  --tm-bg:    #000408;
+  --tm-panel: #001a1f;
+  --tm-edge:  #002830;
+  --tm-line:  #006070;
+  --tm-t0:    #e0fff8;
+  --tm-t1:    #80c8be;
+  --tm-t2:    #3a7870;
+  --tm-acc:   #00ff41;
+  --tm-acc2:  #ff2d55;
+  --tm-acc3:  #00d4ff;
+  --tm-acc4:  #ffcc00;
+  --tm-ffh:   'Press Start 2P', cursive;
+  --tm-ff:    'Share Tech Mono', monospace;
   --tm-ffj:   'M PLUS Rounded 1c', sans-serif;
+  --tm-glow-g: 0 0 6px #00ff41, 0 0 14px rgba(0,255,65,.35);
+  --tm-glow-b: 0 0 6px #00d4ff, 0 0 14px rgba(0,212,255,.35);
 }
 
 /* ── バー本体（右上固定） ── */
@@ -26,59 +27,71 @@
   position: fixed;
   top: 16px;
   right: 16px;
-  left: auto;
-  transform: none;
-  z-index: 9999;
+  z-index: 1000; /* モーダル(z-index:2000)より下 */
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(17, 16, 40, 0.92);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
-  padding: 6px 8px;
-  box-shadow:
-    0 8px 32px rgba(0,0,0,.65),
-    0 0 0 1px rgba(100,60,255,.10),
-    inset 0 1px 0 rgba(255,255,255,.05);
+  gap: 2px;
+  background: rgba(0, 4, 8, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid var(--tm-line);
+  box-shadow: 4px 4px 0 var(--tm-edge), var(--tm-glow-b);
+  padding: 5px 7px;
   white-space: nowrap;
   user-select: none;
 }
 
+/* CRTスキャンライン */
+#tool-menu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.1) 2px,
+    rgba(0,0,0,.1) 4px
+  );
+  z-index: 0;
+}
+
 /* ── 区切り線 ── */
 .tm-sep {
-  width: 1px;
-  height: 22px;
+  width: 2px;
+  height: 18px;
   background: var(--tm-line);
   margin: 0 4px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 /* ── 各ボタン ── */
 .tm-btn {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 13px;
-  border-radius: 11px;
-  border: 1px solid transparent;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 2px solid transparent;
   background: transparent;
-  color: var(--tm-t1);
-  font-family: var(--tm-ff);
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: .03em;
+  color: var(--tm-t2);
+  font-family: var(--tm-ffh);
+  font-size: 0.42rem;
+  font-weight: 400;
+  letter-spacing: .05em;
   text-decoration: none;
   cursor: pointer;
-  transition: color .18s, background .18s, border-color .18s, transform .12s;
-  position: relative;
+  transition: color .15s, background .15s, border-color .15s, box-shadow .15s;
 }
 .tm-btn:hover {
-  color: var(--tm-t0);
-  background: rgba(255,255,255,.06);
-  border-color: rgba(255,255,255,.10);
-  transform: translateY(-1px);
+  color: var(--tm-acc3);
+  border-color: var(--tm-acc3);
+  background: rgba(0,212,255,.08);
+  box-shadow: 2px 2px 0 var(--tm-acc3), var(--tm-glow-b);
 }
 
 /* アクティブ（現在のページ） */
@@ -86,72 +99,72 @@
   color: var(--tm-bg);
   background: var(--tm-acc);
   border-color: var(--tm-acc);
-  box-shadow: 0 0 10px rgba(255,210,63,.35);
+  box-shadow: 2px 2px 0 rgba(0,255,65,.5), var(--tm-glow-g);
 }
 .tm-btn.tm-active:hover {
-  transform: translateY(-1px);
-  background: #ffe566;
+  background: var(--tm-acc);
+  opacity: .88;
 }
 
-/* ── ボタンアイコン（絵文字 or img） ── */
+/* ── ボタンアイコン ── */
 .tm-btn .tm-icon {
-  font-size: 1.05em;
+  font-size: 1em;
   line-height: 1;
   flex-shrink: 0;
 }
 .tm-btn .tm-icon img {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   object-fit: contain;
   vertical-align: middle;
 }
 
 /* ── 言語トグル ── */
 .tm-lang {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 5px 8px;
-  border-radius: 10px;
+  padding: 4px 6px;
   border: 1px solid var(--tm-line);
-  background: var(--tm-panel);
+  background: var(--tm-edge);
 }
 .tm-lang-btn {
   background: none;
-  border: none;
+  border: 1px solid transparent;
   color: var(--tm-t2);
-  font-family: var(--tm-ff);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: .04em;
-  padding: 3px 7px;
-  border-radius: 7px;
+  font-family: var(--tm-ffh);
+  font-size: 0.38rem;
+  letter-spacing: .05em;
+  padding: 3px 6px;
   cursor: pointer;
-  transition: color .15s, background .15s;
+  transition: color .15s, background .15s, border-color .15s;
 }
 .tm-lang-btn:hover { color: var(--tm-t0); }
 .tm-lang-btn.tm-lang-active {
-  background: var(--tm-edge);
-  color: var(--tm-t0);
+  background: var(--tm-acc4);
+  border-color: var(--tm-acc4);
+  color: var(--tm-bg);
+  box-shadow: 1px 1px 0 rgba(255,204,0,.5);
 }
 
-/* ── ページ上部余白（メニューに隠れないよう） ── */
-body { padding-top: 72px !important; }
+/* ── ページ上部余白 ── */
+body { padding-top: 68px !important; }
 
 /* ── モバイル ── */
 @media (max-width: 600px) {
   #tool-menu {
     top: 10px;
     right: 10px;
-    padding: 5px 6px;
-    gap: 2px;
-    border-radius: 14px;
+    padding: 4px 5px;
+    gap: 1px;
   }
   .tm-btn {
-    padding: 6px 10px;
-    font-size: 0.70rem;
-    gap: 4px;
+    padding: 5px 8px;
+    font-size: 0.36rem;
+    gap: 3px;
   }
   .tm-btn .tm-icon { display: none; }
-  .tm-lang-btn { font-size: 0.68rem; padding: 3px 6px; }
+  .tm-lang-btn { font-size: 0.34rem; padding: 3px 5px; }
 }

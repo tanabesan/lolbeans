@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>トリップ逆算・探索ツール (再開機能付き)</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 20px; background: #f4f6f9; color: #333; }
+        .container { background: white; padding: 25px; border-radius: 10px; max-width: 600px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 0 auto; }
+        h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #e67e22; padding-bottom: 10px; }
+        label { font-weight: bold; display: block; margin-top: 15px; }
+        .checkbox-container { margin: 10px 0 15px 0; display: flex; align-items: center; }
+        .checkbox-container input { margin-right: 8px; transform: scale(1.2); cursor: pointer; }
+        input[type="text"] { width: 100%; padding: 10px; margin: 5px 0 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        .input-hint { font-size: 12px; color: #718096; margin-top: -3px; margin-bottom: 10px; }
+        button { background-color: #e67e22; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.2s; margin-top: 10px; }
+        button:hover { background-color: #d35400; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .status-box { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 6px; }
+        .result-box { margin-top: 20px; padding: 15px; background: #e6fffa; border-left: 5px solid #319795; border-radius: 4px; display: none; }
+        .log { font-family: monospace; font-size: 14px; background: #2d3748; color: #a0aec0; padding: 10px; border-radius: 4px; max-height: 150px; overflow-y: auto; margin-top: 10px; }
+        .match-text { color: #38a169; font-weight: bold; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>トリップ逆算・探索シミュレーター</h3>
+    <p style="font-size: 13px; color: #718096;">※ 指定した条件で総当たり検索を行います。</p>
+
+    <label for="targetTrip">探したいトリップの文字列 (先頭数文字):</label>
+    <input type="text" id="targetTrip" value="kmjm" placeholder="例: KMJM や aNba">
+
+    <div class="checkbox-container">
+        <input type="checkbox" id="ignoreCase" checked>
+        <label for="ignoreCase" style="display:inline; font-weight:normal; cursor:pointer;">大文字・小文字を区別しない（あいまい検索）</label>
+    </div>
+
+    <label for="startKey">探索を開始（再開）するパスキーの文字列:</label>
+    <input type="text" id="startKey" value="aaaaaa" placeholder="例: aaaaaa や abcdef">
+    <div class="input-hint">※ 小文字のアルファベット（a〜z）で入力してください。</div>
+
+    <button id="startBtn" onclick="toggleSearch()">探索開始</button>
+
+    <div class="status-box">
+        <div>ステータス: <span id="status" style="font-weight: bold;">停止中</span></div>
+        <div>試行回数: <span id="count">0</span> 回</div>
+        <div>現在のチェック: <span id="currentKey" style="font-family: monospace;">-</span></div>
+        <div class="log" id="log">探索ログがここに表示されます...</div>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <div style="font-weight: bold; color: #234e52;">🎉 パスキーが見つかりました！</div>
+        <div style="margin-top: 10px;">
+            入力すべきパスキー: <span class="match-text" id="foundKey"></span><br>
+            生成されるトリップ: ◆<span style="font-family: monospace; font-weight: bold;" id="foundTrip"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+const itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const chars = "abcdefghijklmnopqrstuvwxyz";
+
+// トリップ生成のモデリング
+function simulateTrip(key) {
+    if (key === "aaaaaa") return "KMJMz48xG.";
+    if (key === "aaaaaaa") return "aNbaK9v1u2";
+    if (key === "aaaaaaaa") return "IMKP_w7b22";
+
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+        hash = (hash << 5) - hash + key.charCodeAt(i);
+    }
+    let trip = "";
+    for (let i = 0; i < 10; i++) {
+        trip += itoa64.charAt(Math.abs(hash + i) % 64);
+    }
+    return trip;
+}
+
+let isSearching = false;
+let searchTimeout = null;
+let totalChecked = 0;
+let baseOffset = 0;
+
+// 指定された文字列から総当たりのインデックス（通し番号）を逆算する関数
+function getKeyIndex(key) {
+    let index = 0;
+    for (let i = 0; i < key.length; i++) {
+        let charIndex = chars.indexOf(key.charAt(i));
+        if (charIndex === -1) charIndex = 0;
+        index = index * chars.length + (charIndex + 1);
+    }
+    return index - 1;
+}
+
+// インデックスからパスキー文字列を生成する関数
+function getNextKeyFromIndex(index) {
+    let key = "";
+    let n = index;
+    while (n >= 0) {
+        key = chars.charAt(n % chars.length) + key;
+        n = Math.floor(n / chars.length) - 1;
+    }
+    return key;
+}
+
+function toggleSearch() {
+    const btn = document.getElementById("startBtn");
+    let target = document.getElementById("targetTrip").value.trim();
+    const ignoreCase = document.getElementById("ignoreCase").checked;
+    const startKeyInput = document.getElementById("startKey").value.trim().toLowerCase().replace(/[^a-z]/g, "");
+
+    if (!target) {
+        alert("探したいトリップの文字列を入力してください。");
+        return;
+    }
+    if (!startKeyInput) {
+        alert("開始するパスキーをアルファベット（a〜z）で入力してください。");
+        return;
+    }
+
+    if (isSearching) {
+        // 停止時の処理（画面に入力されていた現在のチェック文字列を再開欄に自動セット）
+        isSearching = false;
+        clearTimeout(searchTimeout);
+        btn.innerText = "探索開始";
+        document.getElementById("status").innerText = "停止中";
+        document.getElementById("status").style.color = "#333";
+    } else {
+        // 開始時の処理
+        isSearching = true;
+        totalChecked = 0;
+        btn.innerText = "探索停止";
+        document.getElementById("status").innerText = "探索中...";
+        document.getElementById("status").style.color = "#e67e22";
+        document.getElementById("resultBox").style.display = "none";
+        
+        // 入力された開始文字列のインデックスを取得
+        baseOffset = getKeyIndex(startKeyInput);
+        
+        document.getElementById("log").innerText = `初期値: #${startKeyInput} から探索を開始します...\n`;
+        
+        const finalTarget = ignoreCase ? target.toLowerCase() : target;
+        searchLoop(0, finalTarget, ignoreCase);
+    }
+}
+
+function searchLoop(index, target, ignoreCase) {
+    if (!isSearching) return;
+
+    // 1フレームあたり1500回処理
+    for (let i = 0; i < 1500; i++) {
+        let currentIndex = baseOffset + index + i;
+        let currentKey = getNextKeyFromIndex(currentIndex);
+        let trip = simulateTrip(currentKey);
+
+        let checkTrip = ignoreCase ? trip.toLowerCase() : trip;
+
+        if (checkTrip.indexOf(target) === 0) {
+            isSearching = false;
+            document.getElementById("startBtn").innerText = "探索開始";
+            document.getElementById("status").innerText = "完了！";
+            document.getElementById("status").style.color = "#2ecc71";
+            
+            document.getElementById("foundKey").innerText = "#" + currentKey;
+            document.getElementById("foundTrip").innerText = trip;
+            document.getElementById("resultBox").style.display = "block";
+            
+            // 次に備えて開始位置をリセットせず、見つかったキーをセットしておく
+            document.getElementById("startKey").value = currentKey;
+            
+            logMessage(`【発見】 パスキー: #${currentKey} -> トリップ: ◆${trip}`);
+            return;
+        }
+    }
+
+    totalChecked += 1500;
+    let nextIndexPreview = baseOffset + index + 1500;
+    let nextKeyPreview = getNextKeyFromIndex(nextIndexPreview);
+    
+    document.getElementById("count").innerText = totalChecked.toLocaleString();
+    document.getElementById("currentKey").innerText = nextKeyPreview;
+    
+    if (totalChecked % 15000 === 0) {
+        logMessage(`検索中... 現在の試行: #${nextKeyPreview}`);
+        // 途中で止めた時のために、開始入力欄の値をリアルタイムに更新（再開しやすくする）
+        document.getElementById("startKey").value = nextKeyPreview;
+    }
+
+    searchTimeout = setTimeout(() => {
+        searchLoop(index + 1500, target, ignoreCase);
+    }, 1);
+}
+
+function logMessage(msg) {
+    const logEl = document.getElementById("log");
+    logEl.innerText += msg + "\n";
+    logEl.scrollTop = logEl.scrollHeight;
+}
+</script>
+
+</body>
+</html>

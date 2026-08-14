@@ -39,8 +39,8 @@
     </div>
 
     <label for="startKey">探索を開始するパスキーの文字列（タブごとに変える）:</label>
-    <input type="text" id="startKey" value="aaaaaa" placeholder="例: aaaaaa や baaaaa">
-    <div class="input-hint">※ 小文字のアルファベット（a〜z）で入力してください。</div>
+    <input type="text" id="startKey" value="aaaaaa" placeholder="例: aaaaaa や 000000">
+    <div class="input-hint">※ 英小文字および数字（a〜z, 0〜9）で入力してください。</div>
 
     <button id="startBtn" onclick="toggleSearch()">このタブで探索開始</button>
 
@@ -64,7 +64,7 @@
 // Web Worker（バックグラウンド処理用）のソースコードを文字列として定義
 const workerCode = `
     const itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    const chars = "abcdefghijklmnopqrstuvwxyz";
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
     function simulateTrip(key) {
         if (key === "aaaaaa") return "KMJMz48xG.";
@@ -153,8 +153,8 @@ const workerCode = `
 let worker = null;
 let isSearching = false;
 
-// アルファベット（a-z）のインデックス計算用（UI側のスタート指定判定などで使用）
-const chars = "abcdefghijklmnopqrstuvwxyz";
+// 英小文字および数字（a-z, 0-9）のインデックス計算用
+const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 function getKeyIndex(key) {
     let index = 0;
     for (let i = 0; i < key.length; i++) {
@@ -169,14 +169,14 @@ function toggleSearch() {
     const btn = document.getElementById("startBtn");
     let target = document.getElementById("targetTrip").value.trim();
     const ignoreCase = document.getElementById("ignoreCase").checked;
-    const startKeyInput = document.getElementById("startKey").value.trim().toLowerCase().replace(/[^a-z]/g, "");
+    const startKeyInput = document.getElementById("startKey").value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
 
     if (!target) {
         alert("探したいトリップの文字列を入力してください。");
         return;
     }
     if (!startKeyInput) {
-        alert("開始するパスキーをアルファベット（a〜z）で入力してください。");
+        alert("開始するパスキーを英小文字および数字（a〜z, 0〜9）で入力してください。");
         return;
     }
 
@@ -225,7 +225,7 @@ function toggleSearch() {
                 document.getElementById("resultBox").style.display = "block";
                 document.getElementById("startKey").value = e.data.key;
                 
-                logMessage(`【発見】 パスキ: #${e.data.key} -> トリップ: ◆${e.data.trip}`);
+                logMessage(`【発見】 パスキー: #${e.data.key} -> トリップ: ◆${e.data.trip}`);
                 
                 worker.terminate();
                 worker = null;

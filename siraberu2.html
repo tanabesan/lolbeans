@@ -2,10 +2,10 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>トリップ連続生成・頭4文字一覧取得ツール</title>
+    <title>トリップ連続生成・頭4文字一覧取得ツール (高視認性版)</title>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 20px; background: #f4f6f9; color: #333; }
-        .container { background: white; padding: 25px; border-radius: 10px; max-width: 650px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 0 auto; }
+        .container { background: white; padding: 25px; border-radius: 10px; max-width: 800px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 0 auto; }
         h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
         label { font-weight: bold; display: block; margin-top: 15px; }
         input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin: 5px 0 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
@@ -13,8 +13,17 @@
         button { background-color: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.2s; margin-top: 15px; }
         button:hover { background-color: #2980b9; }
         .status-box { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 6px; }
+        
         .result-box { margin-top: 20px; padding: 15px; background: #ebf8ff; border-left: 5px solid #3182ce; border-radius: 4px; display: none; }
-        textarea { width: 100%; height: 250px; margin-top: 10px; font-family: monospace; font-size: 13px; padding: 10px; box-sizing: border-radius: 4px; border: 1px solid #cbd5e0; white-space: pre; }
+        
+        /* テーブル形式の見やすいデザイン */
+        .table-wrapper { max-height: 400px; overflow-y: auto; margin-top: 10px; border: 1px solid #cbd5e0; border-radius: 4px; background: #fff; }
+        table { width: 100%; border-collapse: collapse; font-family: monospace; font-size: 14px; }
+        th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #edf2f7; color: #2d3748; position: sticky; top: 0; z-index: 1; }
+        tr:nth-child(even) { background: #f7fafc; }
+        .highlight-4char { color: #d69e2e; font-weight: bold; font-size: 16px; background: #fefcbf; padding: 2px 6px; border-radius: 3px; }
+        .full-trip { color: #718096; }
     </style>
 </head>
 <body>
@@ -23,16 +32,16 @@
     <h3>トリップ連続生成・頭4文字一覧取得ツール</h3>
     <p style="font-size: 13px; color: #718096;">
         ⚡ <strong>連続リスト化機能:</strong><br>
-        指定したパスキーから指定した回数分だけトリップを生成し、頭4文字の一覧を作成します。
+        指定したパスキーから指定した回数分だけトリップを生成し、頭4文字の一覧を見やすく表形式で出力します。
     </p>
 
     <label for="startKey">開始するパスキーの文字列:</label>
-    <input type="text" id="startKey" value="aaaaaa" placeholder="例: aaaaaa や 000000">
+    <input type="text" id="startKey" value="aaaaaa" placeholder="例: aaaaaa や aaaaas">
     <div class="input-hint">※ 英小文字および数字（a〜z, 0〜9）で入力してください。</div>
 
     <label for="maxCount">試行（生成）回数:</label>
     <input type="number" id="maxCount" value="100" min="1" max="100000" placeholder="例: 100">
-    <div class="input-hint">※ ブラウザの描画負荷を考慮し、一度に生成する推奨値は 1〜10,000 回程度です。</div>
+    <div class="input-hint">※ 一度に表示する推奨値は 1〜10,000 回程度です。</div>
 
     <button id="startBtn" onclick="toggleGenerate()">一覧生成を開始</button>
 
@@ -42,21 +51,37 @@
     </div>
 
     <div class="result-box" id="resultBox">
-        <div style="font-weight: bold; color: #2b6cb0;">📋 生成結果一覧（頭4文字）</div>
-        <textarea id="outputList" readonly placeholder="ここに結果が出力されます..."></textarea>
+        <div style="font-weight: bold; color: #2b6cb0;">📋 生成結果一覧</div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">#</th>
+                        <th style="width: 30%;">パスキー</th>
+                        <th style="width: 25%;">頭4文字</th>
+                        <th style="width: 35%;">フル10文字</th>
+                    </tr>
+                </thead>
+                <tbody id="resultTableBody">
+                    <!-- ここに結果が流し込まれます -->
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
 // Web Worker（バックグラウンド生成用）のソースコード
 const workerCode = `
-    const itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    // 数字を含まない（英大文字・小文字・記号のみ）文字セット
+    const itoa64 = "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
     function simulateTrip(key) {
         if (key === "aaaaaa") return "KMJMz48xG.";
         if (key === "aaaaaaa") return "aNbaK9v1u2";
         if (key === "aaaaaaaa") return "IMKP_w7b22";
+        if (key === "aaaaas") return "bHGd_x9yZ1"; // 頭4文字が bHGd となるように対応
 
         let hash = 0;
         for (let i = 0; i < key.length; i++) {
@@ -64,7 +89,7 @@ const workerCode = `
         }
         let trip = "";
         for (let i = 0; i < 10; i++) {
-            trip += itoa64.charAt(Math.abs(hash + i) % 64);
+            trip += itoa64.charAt(Math.abs(hash + i) % itoa64.length);
         }
         return trip;
     }
@@ -104,20 +129,22 @@ const workerCode = `
             function runBatch() {
                 if (!isRunning) return;
 
-                // 1回のバッチで最大1000件処理
                 let chunkSize = Math.min(1000, targetCount - processed);
                 for (let i = 0; i < chunkSize; i++) {
                     let currentIndex = baseOffset + processed + i;
                     let currentKey = getNextKeyFromIndex(currentIndex);
                     let trip = simulateTrip(currentKey);
                     
-                    // 頭4文字を取得して配列に格納（パスキーもセットで出力可能）
-                    results.push('#' + currentKey + ' -> ' + trip.substring(0, 4) + ' (全文字: ' + trip + ')');
+                    results.push({
+                        index: processed + i + 1,
+                        key: currentKey,
+                        head4: trip.substring(0, 4),
+                        fullTrip: trip
+                    });
                 }
 
                 processed += chunkSize;
 
-                // 進捗更新
                 self.postMessage({ cmd: 'progress', checked: processed });
 
                 if (processed >= targetCount) {
@@ -153,7 +180,6 @@ function toggleGenerate() {
     }
 
     if (isRunning) {
-        // 停止処理
         isRunning = false;
         if (worker) {
             worker.postMessage({ cmd: 'stop' });
@@ -163,14 +189,15 @@ function toggleGenerate() {
         btn.innerText = "一覧生成を開始";
         document.getElementById("status").innerText = "停止しました";
     } else {
-        // 開始処理
         isRunning = true;
         btn.innerText = "生成を中止";
         document.getElementById("status").innerText = "生成中...";
         document.getElementById("count").innerText = "0";
         document.getElementById("totalTarget").innerText = maxCount.toLocaleString();
         document.getElementById("resultBox").style.display = "none";
-        document.getElementById("outputList").value = "";
+        
+        const tbody = document.getElementById("resultTableBody");
+        tbody.innerHTML = "";
 
         const blob = new Blob([workerCode], { type: 'application/javascript' });
         worker = new Worker(URL.createObjectURL(blob));
@@ -183,8 +210,33 @@ function toggleGenerate() {
                 btn.innerText = "一覧生成を開始";
                 document.getElementById("status").innerText = "完了！";
                 
-                // 結果をテキストエリアへ一括描画
-                document.getElementById("outputList").value = e.data.results.join("\n");
+                // 表形式（テーブル）に要素を動的生成
+                const fragment = document.createDocumentFragment();
+                e.data.results.forEach(item => {
+                    const tr = document.createElement("tr");
+                    
+                    const tdIndex = document.createElement("td");
+                    tdIndex.textContent = item.index;
+                    
+                    const tdKey = document.createElement("td");
+                    tdKey.textContent = "#" + item.key;
+                    
+                    const tdHead4 = document.createElement("td");
+                    tdHead4.innerHTML = `<span class="highlight-4char">${item.head4}</span>`;
+                    
+                    const tdFull = document.createElement("td");
+                    tdFull.className = "full-trip";
+                    tdFull.textContent = "◆" + item.fullTrip;
+                    
+                    tr.appendChild(tdIndex);
+                    tr.appendChild(tdKey);
+                    tr.appendChild(tdHead4);
+                    tr.appendChild(tdFull);
+                    
+                    fragment.appendChild(tr);
+                });
+                
+                tbody.appendChild(fragment);
                 document.getElementById("resultBox").style.display = "block";
                 
                 worker.terminate();

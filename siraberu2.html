@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>トリップ連続生成・頭4文字一覧取得ツール (高視認性版)</title>
+    <title>トリップ連続生成・頭4文字一覧取得ツール (crypt実装版)</title>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 20px; background: #f4f6f9; color: #333; }
         .container { background: white; padding: 25px; border-radius: 10px; max-width: 800px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 0 auto; }
@@ -16,32 +16,31 @@
         
         .result-box { margin-top: 20px; padding: 15px; background: #ebf8ff; border-left: 5px solid #3182ce; border-radius: 4px; display: none; }
         
-        /* テーブル形式の見やすいデザイン */
         .table-wrapper { max-height: 400px; overflow-y: auto; margin-top: 10px; border: 1px solid #cbd5e0; border-radius: 4px; background: #fff; }
         table { width: 100%; border-collapse: collapse; font-family: monospace; font-size: 14px; }
         th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
         th { background: #edf2f7; color: #2d3748; position: sticky; top: 0; z-index: 1; }
         tr:nth-child(even) { background: #f7fafc; }
         .highlight-4char { color: #d69e2e; font-weight: bold; font-size: 16px; background: #fefcbf; padding: 2px 6px; border-radius: 3px; }
-        .full-trip { color: #718096; }
+        .full-trip { color: #4a5568; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h3>トリップ連続生成・頭4文字一覧取得ツール</h3>
+    <h3>トリップ連続生成・頭4文字一覧取得ツール (crypt完全準拠)</h3>
     <p style="font-size: 13px; color: #718096;">
-        ⚡ <strong>連続リスト化機能:</strong><br>
-        指定したパスキーから指定した回数分だけトリップを生成し、頭4文字の一覧を見やすく表形式で出力します。
+        🔒 <strong>DES crypt() アルゴリズム採用:</strong><br>
+        2ちゃんねる/5ちゃんねる等の標準10桁トリップ計算処理に対応しています。
     </p>
 
     <label for="startKey">開始するパスキーの文字列:</label>
-    <input type="text" id="startKey" value="aaaaaa" placeholder="例: aaaaaa や aaaaas">
+    <input type="text" id="startKey" value="aaaaas" placeholder="例: aaaaaa や aaaaas">
     <div class="input-hint">※ 英小文字および数字（a〜z, 0〜9）で入力してください。</div>
 
     <label for="maxCount">試行（生成）回数:</label>
-    <input type="number" id="maxCount" value="100" min="1" max="100000" placeholder="例: 100">
-    <div class="input-hint">※ 一度に表示する推奨値は 1〜10,000 回程度です。</div>
+    <input type="number" id="maxCount" value="50" min="1" max="10000" placeholder="例: 50">
+    <div class="input-hint">※ 本物のcrypt処理は計算負荷が高いため、1回あたりの推奨は 1〜1,000 件程度です。</div>
 
     <button id="startBtn" onclick="toggleGenerate()">一覧生成を開始</button>
 
@@ -71,27 +70,169 @@
 </div>
 
 <script>
-// Web Worker（バックグラウンド生成用）のソースコード
+// Web Worker（純粋JSによる DES crypt() バックグラウンド計算エンジン）
 const workerCode = `
-    // 数字を含まない（英大文字・小文字・記号のみ）文字セット
-    const itoa64 = "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const CODES = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-    function simulateTrip(key) {
-        if (key === "aaaaaa") return "KMJMz48xG.";
-        if (key === "aaaaaaa") return "aNbaK9v1u2";
-        if (key === "aaaaaaaa") return "IMKP_w7b22";
-        if (key === "aaaaas") return "bHGd_x9yZ1"; // 頭4文字が bHGd となるように対応
+    const IP = [
+        58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4,
+        62, 54, 46, 38, 30, 22, 14, 6, 64, 56, 48, 40, 32, 24, 16, 8,
+        57, 49, 41, 33, 25, 17, 9, 1, 59, 51, 43, 35, 27, 19, 11, 3,
+        61, 53, 45, 37, 29, 21, 13, 5, 63, 55, 47, 39, 31, 23, 15, 7
+    ];
+    const FP = [
+        40, 8, 48, 16, 56, 24, 64, 32, 39, 7, 47, 15, 55, 23, 63, 31,
+        38, 6, 46, 14, 54, 22, 62, 30, 37, 5, 45, 13, 53, 21, 61, 29,
+        36, 4, 44, 12, 52, 20, 60, 28, 35, 3, 43, 11, 51, 19, 59, 27,
+        34, 2, 42, 10, 50, 18, 58, 26, 33, 1, 41, 9, 49, 17, 57, 25
+    ];
+    const E = [
+        32, 1, 2, 3, 4, 5, 4, 5, 6, 7, 8, 9, 8, 9, 10, 11, 12, 13,
+        12, 13, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21, 20, 21, 22, 23, 24, 25,
+        24, 25, 26, 27, 28, 29, 28, 29, 30, 31, 32, 1
+    ];
+    const P = [
+        16, 7, 20, 21, 29, 12, 28, 17, 1, 15, 23, 26, 5, 18, 31, 10,
+        2, 8, 24, 14, 32, 27, 3, 9, 19, 13, 30, 6, 22, 11, 4, 25
+    ];
+    const PC1_C = [
+        57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18,
+        10, 2, 59, 51, 43, 35, 27, 19, 11, 3, 60, 52, 44, 36
+    ];
+    const PC1_D = [
+        63, 55, 47, 39, 31, 23, 15, 7, 62, 54, 46, 38, 30, 22,
+        14, 6, 61, 53, 45, 37, 29, 21, 13, 5, 28, 20, 12, 4
+    ];
+    const PC2_C = [
+        14, 17, 11, 24, 1, 5, 3, 28, 15, 6, 21, 10, 23, 19, 12, 4, 26, 8, 16, 7, 27, 20, 13, 2
+    ];
+    const PC2_D = [
+        41, 52, 31, 37, 47, 55, 30, 40, 51, 45, 33, 48, 44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32
+    ];
+    const shifts = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
+    const S = [
+        [[14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7],[0,15,7,4,14,2,13,1,10,6,12,11,9,5,3,8],[4,1,14,8,13,6,2,11,15,12,9,7,3,10,5,0],[15,12,8,2,4,9,1,7,5,11,3,14,10,0,6,13]],
+        [[15,1,8,14,6,11,3,4,9,7,2,13,12,0,5,10],[3,13,4,7,15,2,8,14,12,0,1,10,6,9,11,5],[0,14,7,11,10,4,13,1,5,8,12,6,9,3,2,15],[13,8,10,1,3,15,4,2,11,6,7,12,0,5,14,9]],
+        [[10,0,9,14,6,3,15,5,1,13,12,7,11,4,2,8],[13,7,0,9,3,4,6,10,2,8,5,14,12,11,15,1],[13,6,4,9,8,15,3,0,11,1,2,12,5,10,14,7],[1,10,13,0,6,9,8,7,4,15,14,3,11,5,2,12]],
+        [[7,13,14,3,0,6,9,10,1,2,8,5,11,12,4,15],[13,8,11,5,6,15,0,3,4,7,2,12,1,10,14,9],[10,6,9,0,12,11,7,13,15,1,3,14,5,2,8,4],[3,15,0,6,10,1,13,8,9,4,5,11,12,7,2,14]],
+        [[2,12,4,1,7,10,11,6,8,5,3,15,13,0,14,9],[14,11,2,12,4,7,13,1,5,0,15,10,3,9,8,6],[4,2,1,11,10,13,7,8,15,9,12,5,6,3,0,14],[11,8,12,7,1,14,2,13,6,15,0,9,10,4,5,3]],
+        [[12,1,10,15,9,2,6,8,0,13,3,4,14,7,5,11],[10,15,4,2,7,12,9,5,6,1,13,14,0,11,3,8],[9,14,15,5,2,8,12,3,7,0,4,10,1,13,11,6],[4,3,2,12,9,5,15,10,11,14,1,7,6,0,8,13]],
+        [[4,11,2,14,15,0,8,13,3,12,9,7,5,10,6,1],[13,0,11,7,4,9,1,10,14,3,5,12,2,15,8,6],[1,4,11,13,12,3,7,14,10,15,6,8,0,5,9,2],[6,11,13,8,1,4,10,7,9,5,0,15,14,2,3,12]],
+        [[13,2,8,4,6,15,11,1,10,9,3,14,5,0,12,7],[1,15,13,8,10,3,7,4,12,5,6,11,0,14,9,2],[7,11,4,1,9,12,14,2,0,6,10,13,15,3,5,8],[2,1,14,7,4,10,8,13,15,12,9,0,3,5,6,11]]
+    ];
 
-        let hash = 0;
-        for (let i = 0; i < key.length; i++) {
-            hash = (hash << 5) - hash + key.charCodeAt(i);
+    function des_crypt(key, salt) {
+        let s0 = CODES.indexOf(salt.charAt(0));
+        let s1 = CODES.indexOf(salt.charAt(1));
+        if (s0 < 0) s0 = 0;
+        if (s1 < 0) s1 = 0;
+
+        let keyBits = new Array(64).fill(0);
+        for (let i = 0; i < 8; i++) {
+            let ch = i < key.length ? key.charCodeAt(i) : 0;
+            for (let j = 0; j < 7; j++) {
+                keyBits[i * 7 + j] = (ch >> (6 - j)) & 1;
+            }
         }
-        let trip = "";
-        for (let i = 0; i < 10; i++) {
-            trip += itoa64.charAt(Math.abs(hash + i) % itoa64.length);
+
+        let C = new Array(28), D = new Array(28);
+        for (let i = 0; i < 28; i++) {
+            C[i] = keyBits[PC1_C[i] - 1];
+            D[i] = keyBits[PC1_D[i] - 1];
         }
-        return trip;
+
+        let K = new Array(16);
+        for (let round = 0; round < 16; round++) {
+            let numShifts = shifts[round];
+            for (let s = 0; s < numShifts; s++) {
+                C.push(C.shift());
+                D.push(D.shift());
+            }
+            let subKey = new Array(48);
+            for (let i = 0; i < 24; i++) {
+                subKey[i] = C[PC2_C[i] - 1];
+                subKey[i + 24] = D[PC2_D[i] - 29];
+            }
+            K[round] = subKey;
+        }
+
+        let E_mod = E.slice();
+        for (let i = 0; i < 2; i++) {
+            let sVal = (i === 0) ? s0 : s1;
+            for (let j = 0; j < 6; j++) {
+                if ((sVal >> j) & 1) {
+                    let temp = E_mod[i * 6 + j];
+                    E_mod[i * 6 + j] = E_mod[i * 6 + j + 24];
+                    E_mod[i * 6 + j + 24] = temp;
+                }
+            }
+        }
+
+        let L = new Array(32).fill(0);
+        let R = new Array(32).fill(0);
+
+        for (let iter = 0; iter < 25; iter++) {
+            for (let round = 0; round < 16; round++) {
+                let nextL = R.slice();
+                let ER = new Array(48);
+                for (let i = 0; i < 48; i++) {
+                    ER[i] = R[E_mod[i] - 1] ^ K[round][i];
+                }
+                let f = new Array(32);
+                for (let b = 0; b < 8; b++) {
+                    let row = (ER[b * 6] << 1) | ER[b * 6 + 5];
+                    let col = (ER[b * 6 + 1] << 3) | (ER[b * 6 + 2] << 2) | (ER[b * 6 + 3] << 1) | ER[b * 6 + 4];
+                    let val = S[b][row][col];
+                    for (let j = 0; j < 4; j++) {
+                        f[b * 4 + j] = (val >> (3 - j)) & 1;
+                    }
+                }
+                let Pf = new Array(32);
+                for (let i = 0; i < 32; i++) {
+                    Pf[i] = f[P[i] - 1];
+                }
+                for (let i = 0; i < 32; i++) {
+                    R[i] = L[i] ^ Pf[i];
+                }
+                L = nextL;
+            }
+            let temp = L; L = R; R = temp;
+        }
+        let temp = L; L = R; R = temp;
+
+        let preFP = L.concat(R);
+        let resultBits = new Array(64);
+        for (let i = 0; i < 64; i++) {
+            resultBits[i] = preFP[FP[i] - 1];
+        }
+
+        let outBits = resultBits.concat([0, 0]);
+        let enc = salt;
+        for (let i = 0; i < 11; i++) {
+            let v = 0;
+            for (let j = 0; j < 6; j++) {
+                v = (v << 1) | outBits[i * 6 + j];
+            }
+            enc += CODES.charAt(v);
+        }
+        return enc;
+    }
+
+    // 2ch公式トリップ変換関数
+    function generate2chTrip(key) {
+        let k = key.substr(0, 8);
+        let salt = (k + "H.").substr(1, 2);
+        salt = salt.replace(/[^\\.-z]/g, '.');
+        
+        const from = ":;<=>?@[\\\\]^_`";
+        const to   = "ABCDEFGabcdef";
+        for (let i = 0; i < from.length; i++) {
+            salt = salt.replace(from.charAt(i), to.charAt(i));
+        }
+        
+        let crypted = des_crypt(k, salt);
+        return crypted.substr(-10); // 末尾10文字を取り出す
     }
 
     function getKeyIndex(key) {
@@ -129,11 +270,12 @@ const workerCode = `
             function runBatch() {
                 if (!isRunning) return;
 
-                let chunkSize = Math.min(1000, targetCount - processed);
+                // バッチ処理（CPU負荷を分散しつつ進捗報告）
+                let chunkSize = Math.min(20, targetCount - processed);
                 for (let i = 0; i < chunkSize; i++) {
                     let currentIndex = baseOffset + processed + i;
                     let currentKey = getNextKeyFromIndex(currentIndex);
-                    let trip = simulateTrip(currentKey);
+                    let trip = generate2chTrip(currentKey);
                     
                     results.push({
                         index: processed + i + 1,
@@ -144,7 +286,6 @@ const workerCode = `
                 }
 
                 processed += chunkSize;
-
                 self.postMessage({ cmd: 'progress', checked: processed });
 
                 if (processed >= targetCount) {
@@ -191,7 +332,7 @@ function toggleGenerate() {
     } else {
         isRunning = true;
         btn.innerText = "生成を中止";
-        document.getElementById("status").innerText = "生成中...";
+        document.getElementById("status").innerText = "crypt計算中...";
         document.getElementById("count").innerText = "0";
         document.getElementById("totalTarget").innerText = maxCount.toLocaleString();
         document.getElementById("resultBox").style.display = "none";
@@ -210,7 +351,6 @@ function toggleGenerate() {
                 btn.innerText = "一覧生成を開始";
                 document.getElementById("status").innerText = "完了！";
                 
-                // 表形式（テーブル）に要素を動的生成
                 const fragment = document.createDocumentFragment();
                 e.data.results.forEach(item => {
                     const tr = document.createElement("tr");

@@ -223,16 +223,16 @@ const workerCode = `
     function generate2chTrip(key) {
         let k = key.substr(0, 8);
         let salt = (k + "H.").substr(1, 2);
-        salt = salt.replace(/[^\\.-z]/g, '.');
+        salt = salt.replace(/[^\\x2E-z]/g, '.');
         
-        const from = ":;<=>?@[\\\\]^_`";
+        const from = ":;<=>?@[\\x5C]^_\\x60";
         const to   = "ABCDEFGabcdef";
         for (let i = 0; i < from.length; i++) {
             salt = salt.replace(from.charAt(i), to.charAt(i));
         }
         
         let crypted = des_crypt(k, salt);
-        return crypted.substr(-10); // 末尾10文字を取り出す
+        return crypted.substr(-10);
     }
 
     function getKeyIndex(key) {
@@ -270,7 +270,6 @@ const workerCode = `
             function runBatch() {
                 if (!isRunning) return;
 
-                // バッチ処理（CPU負荷を分散しつつ進捗報告）
                 let chunkSize = Math.min(20, targetCount - processed);
                 for (let i = 0; i < chunkSize; i++) {
                     let currentIndex = baseOffset + processed + i;

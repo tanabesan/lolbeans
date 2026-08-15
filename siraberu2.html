@@ -35,7 +35,7 @@
     </p>
 
     <label for="startKey">開始するパスキーの文字列:</label>
-    <input type="text" id="startKey" value="aaaaas" placeholder="例: aaaaaa や aaaaas">
+    <input type="text" id="startKey" value="aaaaaa" placeholder="例: aaaaaa や aaaaas">
     <div class="input-hint">※ 英小文字および数字（a〜z, 0〜9）で入力してください。</div>
 
     <label for="maxCount">試行（生成）回数:</label>
@@ -132,7 +132,8 @@ const workerCode = `
         for (let i = 0; i < 8; i++) {
             let ch = i < key.length ? key.charCodeAt(i) : 0;
             for (let j = 0; j < 7; j++) {
-                keyBits[i * 7 + j] = (ch >> (6 - j)) & 1;
+                // i * 8 + j に修正。上位から詰める
+                keyBits[i * 8 + j] = (ch >> (6 - j)) & 1;
             }
         }
 
@@ -227,9 +228,19 @@ const workerCode = `
         
         const from = ":;<=>?@[\\x5C]^_\\x60";
         const to   = "ABCDEFGabcdef";
-        for (let i = 0; i < from.length; i++) {
-            salt = salt.replace(from.charAt(i), to.charAt(i));
+        
+        // 1文字ずつ確実に置換するよう修正
+        let newSalt = "";
+        for (let i = 0; i < salt.length; i++) {
+            let c = salt.charAt(i);
+            let idx = from.indexOf(c);
+            if (idx !== -1) {
+                newSalt += to.charAt(idx);
+            } else {
+                newSalt += c;
+            }
         }
+        salt = newSalt;
         
         let crypted = des_crypt(k, salt);
         return crypted.substr(-10);

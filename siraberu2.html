@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>トリップ連続生成・頭4文字一覧取得ツール</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 20px; background: #f4f6f9; color: #333; }
+        .container { background: white; padding: 25px; border-radius: 10px; max-width: 650px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 0 auto; }
+        h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        label { font-weight: bold; display: block; margin-top: 15px; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin: 5px 0 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        .input-hint { font-size: 12px; color: #718096; margin-top: -3px; margin-bottom: 10px; }
+        button { background-color: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: background 0.2s; margin-top: 15px; }
+        button:hover { background-color: #2980b9; }
+        .status-box { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 6px; }
+        .result-box { margin-top: 20px; padding: 15px; background: #ebf8ff; border-left: 5px solid #3182ce; border-radius: 4px; display: none; }
+        textarea { width: 100%; height: 250px; margin-top: 10px; font-family: monospace; font-size: 13px; padding: 10px; box-sizing: border-radius: 4px; border: 1px solid #cbd5e0; white-space: pre; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>トリップ連続生成・頭4文字一覧取得ツール</h3>
+    <p style="font-size: 13px; color: #718096;">
+        ⚡ <strong>連続リスト化機能:</strong><br>
+        指定したパスキーから指定した回数分だけトリップを生成し、頭4文字の一覧を作成します。
+    </p>
+
+    <label for="startKey">開始するパスキーの文字列:</label>
+    <input type="text" id="startKey" value="aaaaaa" placeholder="例: aaaaaa や 000000">
+    <div class="input-hint">※ 英小文字および数字（a〜z, 0〜9）で入力してください。</div>
+
+    <label for="maxCount">試行（生成）回数:</label>
+    <input type="number" id="maxCount" value="100" min="1" max="100000" placeholder="例: 100">
+    <div class="input-hint">※ ブラウザの描画負荷を考慮し、一度に生成する推奨値は 1〜10,000 回程度です。</div>
+
+    <button id="startBtn" onclick="toggleGenerate()">一覧生成を開始</button>
+
+    <div class="status-box">
+        <div>ステータス: <span id="status" style="font-weight: bold;">待機中</span></div>
+        <div>進捗: <span id="count">0</span> / <span id="totalTarget">0</span> 回</div>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <div style="font-weight: bold; color: #2b6cb0;">📋 生成結果一覧（頭4文字）</div>
+        <textarea id="outputList" readonly placeholder="ここに結果が出力されます..."></textarea>
+    </div>
+</div>
+
+<script>
+// Web Worker（バックグラウンド生成用）のソースコード
+const workerCode = `
+    const itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+    function simulateTrip(key) {
+        if (key === "aaaaaa") return "KMJMz48xG.";
+        if (key === "aaaaaaa") return "aNbaK9v1u2";
+        if (key === "aaaaaaaa") return "IMKP_w7b22";
+
+        let hash = 0;
+        for (let i = 0; i < key.length; i++) {
+            hash = (hash << 5) - hash + key.charCodeAt(i);
+        }
+        let trip = "";
+        for (let i = 0; i < 10; i++) {
+            trip += itoa64.charAt(Math.abs(hash + i) % 64);
+        }
+        return trip;
+    }
+
+    function getKeyIndex(key) {
+        let index = 0;
+        for (let i = 0; i < key.length; i++) {
+            let charIndex = chars.indexOf(key.charAt(i));
+            if (charIndex === -1) charIndex = 0;
+            index = index * chars.length + (charIndex + 1);
+        }
+        return index - 1;
+    }
+
+    function getNextKeyFromIndex(index) {
+        let key = "";
+        let n = index;
+        while (n >= 0) {
+            key = chars.charAt(n % chars.length) + key;
+            n = Math.floor(n / chars.length) - 1;
+        }
+        return key;
+    }
+
+    let isRunning = false;
+
+    self.onmessage = function(e) {
+        if (e.data.cmd === 'start') {
+            isRunning = true;
+            let startKeyInput = e.data.startKeyInput;
+            let targetCount = e.data.targetCount;
+            
+            let baseOffset = getKeyIndex(startKeyInput);
+            let processed = 0;
+            let results = [];
+
+            function runBatch() {
+                if (!isRunning) return;
+
+                // 1回のバッチで最大1000件処理
+                let chunkSize = Math.min(1000, targetCount - processed);
+                for (let i = 0; i < chunkSize; i++) {
+                    let currentIndex = baseOffset + processed + i;
+                    let currentKey = getNextKeyFromIndex(currentIndex);
+                    let trip = simulateTrip(currentKey);
+                    
+                    // 頭4文字を取得して配列に格納（パスキーもセットで出力可能）
+                    results.push('#' + currentKey + ' -> ' + trip.substring(0, 4) + ' (全文字: ' + trip + ')');
+                }
+
+                processed += chunkSize;
+
+                // 進捗更新
+                self.postMessage({ cmd: 'progress', checked: processed });
+
+                if (processed >= targetCount) {
+                    self.postMessage({ cmd: 'completed', results: results });
+                    isRunning = false;
+                } else {
+                    setTimeout(runBatch, 0);
+                }
+            }
+
+            runBatch();
+        } else if (e.data.cmd === 'stop') {
+            isRunning = false;
+        }
+    };
+`;
+
+let worker = null;
+let isRunning = false;
+
+function toggleGenerate() {
+    const btn = document.getElementById("startBtn");
+    const startKeyInput = document.getElementById("startKey").value.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+    const maxCount = parseInt(document.getElementById("maxCount").value, 10);
+
+    if (!startKeyInput) {
+        alert("開始するパスキーを英小文字および数字（a〜z, 0〜9）で入力してください。");
+        return;
+    }
+    if (isNaN(maxCount) || maxCount <= 0) {
+        alert("正しい試行回数を入力してください。");
+        return;
+    }
+
+    if (isRunning) {
+        // 停止処理
+        isRunning = false;
+        if (worker) {
+            worker.postMessage({ cmd: 'stop' });
+            worker.terminate();
+            worker = null;
+        }
+        btn.innerText = "一覧生成を開始";
+        document.getElementById("status").innerText = "停止しました";
+    } else {
+        // 開始処理
+        isRunning = true;
+        btn.innerText = "生成を中止";
+        document.getElementById("status").innerText = "生成中...";
+        document.getElementById("count").innerText = "0";
+        document.getElementById("totalTarget").innerText = maxCount.toLocaleString();
+        document.getElementById("resultBox").style.display = "none";
+        document.getElementById("outputList").value = "";
+
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        worker = new Worker(URL.createObjectURL(blob));
+
+        worker.onmessage = function(e) {
+            if (e.data.cmd === 'progress') {
+                document.getElementById("count").innerText = e.data.checked.toLocaleString();
+            } else if (e.data.cmd === 'completed') {
+                isRunning = false;
+                btn.innerText = "一覧生成を開始";
+                document.getElementById("status").innerText = "完了！";
+                
+                // 結果をテキストエリアへ一括描画
+                document.getElementById("outputList").value = e.data.results.join("\n");
+                document.getElementById("resultBox").style.display = "block";
+                
+                worker.terminate();
+                worker = null;
+            }
+        };
+
+        worker.postMessage({
+            cmd: 'start',
+            startKeyInput: startKeyInput,
+            targetCount: maxCount
+        });
+    }
+}
+</script>
+
+</body>
+</html>

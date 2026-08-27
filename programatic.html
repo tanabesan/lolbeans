@@ -768,32 +768,38 @@ function copyText(text, btn){
 
 /* ============================================================
    PERSISTENCE (auto-save across reloads, this browser only)
+   ------------------------------------------------------------
+   window.storage only exists while this file is viewed inside
+   Claude.ai's artifact panel. Since this tool is meant to be
+   downloaded and opened as a normal .html file, we save to the
+   browser's localStorage instead — that works in any browser,
+   any time you reopen this file (as long as it's the same
+   browser & the same file location).
    ============================================================ */
 const STORAGE_KEY = 'blockforge-workspace-v1';
 let saveTimer = null;
 function saveState(){
-  if(!window.storage) return;
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
+  saveTimer = setTimeout(()=>{
     try{
       const state = { mode, uidCounter, instances, lines };
-      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if(window.storage) window.storage.set(STORAGE_KEY, JSON.stringify(state), false).catch(()=>{});
       setSaveStatus('保存済み ✓');
     }catch(err){
-      setSaveStatus('保存できませんでした');
+      setSaveStatus('保存できませんでした（ブラウザの設定をご確認ください）');
     }
-  }, 300);
+  }, 250);
 }
 function setSaveStatus(text){
   const el = document.getElementById('saveStatus');
   if(el) el.textContent = text;
 }
-async function loadState(){
-  if(!window.storage) return false;
+function loadState(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, false);
-    if(!res || !res.value) return false;
-    const state = JSON.parse(res.value);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const state = JSON.parse(raw);
     mode = state.mode || 'var';
     uidCounter = state.uidCounter || 1;
     Object.keys(instances).forEach(k=>delete instances[k]);
@@ -806,8 +812,8 @@ async function loadState(){
   }
 }
 function clearSavedState(){
-  if(!window.storage) return;
-  window.storage.delete(STORAGE_KEY, false).catch(()=>{});
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(err){}
+  if(window.storage) window.storage.delete(STORAGE_KEY, false).catch(()=>{});
 }
 function setMode(m, skipInit){
   mode = m;
@@ -888,9 +894,8 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
 window.addEventListener('dragover', e=> e.preventDefault());
 window.addEventListener('drop', e=> e.preventDefault());
 
-(async function boot(){
-  setSaveStatus(window.storage ? '読み込み中…' : '');
-  const restored = await loadState();
+(function boot(){
+  const restored = loadState();
   if(restored){
     document.getElementById('modeVarBtn').classList.toggle('active', mode==='var');
     document.getElementById('modeProgBtn').classList.toggle('active', mode==='prog');

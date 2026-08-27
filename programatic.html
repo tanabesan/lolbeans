@@ -1,419 +1,692 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOLBeans Programmatic Object Simulator V5 (動作保証版)</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 20px;
-            background-color: #f4f7f6;
-            color: #333;
-        }
-        .container {
-            display: flex;
-            gap: 20px;
-            max-width: 1200px;
-            margin: auto;
-        }
-        .controls, .simulation {
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
-        }
-        .controls {
-            flex: 1;
-            min-width: 350px;
-        }
-        .simulation {
-            flex: 2;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid #5D54A4;
-            perspective: 800px; 
-        }
-        h1 { color: #5D54A4; }
-        h2 {
-            color: #5D54A4;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 10px;
-            margin-top: 0;
-        }
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-            color: #444;
-        }
-        select, input[type="number"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        #formula-output {
-            background-color: #eee;
-            padding: 15px;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            margin-top: 15px;
-            border-left: 5px solid #007bff;
-            word-break: break-all;
-            min-height: 100px;
-        }
-        #sim-object {
-            width: 80px; 
-            height: 80px;
-            background-color: #ff6f61;
-            border-radius: 8px; 
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform-style: preserve-3d; 
-            /* 初期傾き: Y軸はCSSで固定し、3D回転の視認性を高める */
-            transform: translate(-50%, -50%) rotateX(-15deg) rotateY(15deg); 
-            will-change: transform;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            border: 3px solid #e91e63;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-        }
-        .param-group {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 4px;
-        }
-        .hidden {
-            display: none !important;
-        }
-        .axis-info {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            font-size: 12px;
-            color: #aaa;
-        }
-        #axis-selector label {
-            display: inline-block;
-            margin-right: 15px;
-            font-weight: normal;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>BLOCK FORGE — LOLBeans Expression Builder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#0a0e14;
+  --panel:#101720;
+  --grid-line:#162030;
+  --ink:#dbe8ee;
+  --dim:#5f7688;
+  --accent:#39ffc9;   /* variables / signal green */
+  --accent2:#ff3d81;  /* logic / hot magenta */
+  --value:#3fa9ff;    /* value blocks - blue */
+  --math:#ffb23f;     /* math - amber */
+  --cmp:#c07bff;      /* comparison - violet */
+  --logic:#ff3d81;    /* logic - magenta */
+  --func:#39ffc9;     /* functions - green */
+  --var:#ff8a3f;       /* predefined vars - orange-red */
+  --line:#1c2733;
+  --danger:#ff5566;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:'Consolas','SF Mono',ui-monospace,Menlo,monospace;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:28px 28px;
+  min-height:100vh;
+}
+::selection{background:var(--accent);color:#00140e;}
+
+/* ---------- header ---------- */
+header{
+  padding:22px 28px 16px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(16,23,32,0.9), rgba(16,23,32,0.4));
+  position:sticky; top:0; z-index:50; backdrop-filter:blur(6px);
+}
+.brand{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;}
+.brand h1{
+  font-family:inherit; font-size:22px; letter-spacing:3px; margin:0;
+  color:var(--accent); text-shadow:0 0 14px rgba(57,255,201,.45);
+  font-weight:700;
+}
+.brand .tag{color:var(--dim); font-size:12px; letter-spacing:2px;}
+.mode-row{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; align-items:center;}
+.mode-btn{
+  border:1px solid var(--line); background:#0c131c; color:var(--dim);
+  padding:8px 16px; font:inherit; font-size:12px; letter-spacing:1.5px;
+  cursor:pointer; border-radius:3px; transition:.15s;
+}
+.mode-btn.active{color:#00140e; background:var(--accent); border-color:var(--accent); box-shadow:0 0 16px rgba(57,255,201,.4);}
+.mode-btn:hover:not(.active){border-color:var(--accent); color:var(--accent);}
+.mode-desc{color:var(--dim); font-size:12px; margin-left:6px;}
+
+/* ---------- layout ---------- */
+.app{display:grid; grid-template-columns:250px 1fr 380px; gap:0; min-height:calc(100vh - 118px);}
+@media (max-width:1050px){ .app{grid-template-columns:1fr; } }
+
+.palette{
+  border-right:1px solid var(--line); padding:16px 12px 40px; overflow-y:auto;
+  max-height:calc(100vh - 118px); position:sticky; top:118px;
+}
+.cat-title{
+  font-size:11px; letter-spacing:2px; color:var(--dim); margin:18px 4px 8px;
+  text-transform:uppercase;
+}
+.cat-title:first-child{margin-top:2px;}
+
+/* ---------- block visual language ---------- */
+.chip, .blk{
+  position:relative;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 12px 7px 18px;
+  border-radius:3px;
+  font-size:13px; line-height:1.3;
+  cursor:grab; user-select:none;
+  border:1px solid rgba(255,255,255,.08);
+}
+.chip{width:100%; margin-bottom:7px; box-shadow:0 2px 0 rgba(0,0,0,.35);}
+.chip:active{cursor:grabbing;}
+.chip::before, .blk::before{
+  content:""; position:absolute; left:6px; top:50%; transform:translateY(-50%);
+  width:6px; height:6px; border-radius:50%; background:rgba(0,0,0,.35);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);
+}
+.c-value{background:linear-gradient(180deg,#1a4a76,#123456); color:#bfe4ff; border-color:#2f7fc4;}
+.c-math{background:linear-gradient(180deg,#7a5713,#5c4110); color:#ffe2b0; border-color:#c98a1f;}
+.c-cmp{background:linear-gradient(180deg,#4c2a76,#39205a); color:#ecd8ff; border-color:#8a4fd1;}
+.c-logic{background:linear-gradient(180deg,#7a1442,#590f30); color:#ffd1e5; border-color:#d1387b;}
+.c-func{background:linear-gradient(180deg,#0f5c48,#0b4235); color:#c3ffec; border-color:#22a883;}
+.c-var{background:linear-gradient(180deg,#7a3b12,#5c2c0d); color:#ffd7b0; border-color:#c96a1f;}
+
+/* ---------- workspace ---------- */
+.workspace{
+  padding:22px 24px 60px; overflow-x:auto; max-height:calc(100vh - 118px); overflow-y:auto;
+}
+.line{
+  background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:12px 14px; margin-bottom:14px; position:relative;
+}
+.line.is-return{border-color:var(--accent); box-shadow:0 0 0 1px rgba(57,255,201,.15), 0 0 20px rgba(57,255,201,.06);}
+.line-head{display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;}
+.line-badge{
+  font-size:10px; letter-spacing:1.5px; color:var(--dim); border:1px solid var(--line);
+  padding:2px 7px; border-radius:20px;
+}
+.line.is-return .line-badge{color:var(--accent); border-color:var(--accent);}
+.varname-input{
+  background:#060a10; border:1px solid var(--line); color:var(--accent);
+  font:inherit; font-size:13px; padding:5px 8px; border-radius:3px; width:170px;
+}
+.varname-input:focus{outline:none; border-color:var(--accent);}
+.eq{color:var(--dim); font-size:13px;}
+.line-del{
+  margin-left:auto; background:none; border:1px solid var(--line); color:var(--dim);
+  width:24px; height:24px; border-radius:3px; cursor:pointer; font-size:13px;
+}
+.line-del:hover{border-color:var(--danger); color:var(--danger);}
+
+.slot{
+  min-height:34px; border:1.5px dashed #2a3946; border-radius:4px;
+  padding:6px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;
+  background:rgba(0,0,0,.15);
+}
+.slot.drag-over{border-color:var(--accent); background:rgba(57,255,201,.06);}
+.slot.filled{border-style:solid; border-color:transparent; padding:2px; background:none;}
+.slot-empty{color:var(--dim); font-size:12px; padding:4px 6px; letter-spacing:.5px;}
+
+.blk{flex-wrap:wrap;}
+.blk .del{
+  background:rgba(0,0,0,.25); border:none; color:inherit; opacity:.55;
+  width:16px; height:16px; border-radius:50%; font-size:10px; line-height:16px;
+  padding:0; cursor:pointer; margin-left:4px;
+}
+.blk .del:hover{opacity:1; background:var(--danger); color:#fff;}
+.blk .txt{opacity:.85; font-size:12px;}
+.blk input.field{
+  background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.15); color:inherit;
+  font:inherit; font-size:12px; width:56px; padding:2px 5px; border-radius:3px;
+}
+.blk input.field.wide{width:110px;}
+.blk .inner-slot{min-height:26px; min-width:34px; padding:3px 4px;}
+
+.addline-row{display:flex; gap:10px; margin-top:6px; flex-wrap:wrap;}
+.addline-btn{
+  background:#0c131c; border:1px dashed var(--line); color:var(--dim);
+  padding:9px 16px; border-radius:5px; cursor:pointer; font:inherit; font-size:12px; letter-spacing:1px;
+}
+.addline-btn:hover{color:var(--accent); border-color:var(--accent);}
+
+/* ---------- output panel ---------- */
+.output{
+  border-left:1px solid var(--line); padding:18px 18px 40px; position:sticky; top:118px;
+  max-height:calc(100vh - 118px); overflow-y:auto;
+}
+.output h2{font-size:12px; letter-spacing:2px; color:var(--dim); margin:0 0 10px; text-transform:uppercase;}
+.code-card{
+  background:#060a10; border:1px solid var(--line); border-radius:6px; padding:12px;
+  margin-bottom:14px; font-size:12.5px; word-break:break-all; white-space:pre-wrap;
+  line-height:1.6;
+}
+.code-card .name{color:var(--accent); display:block; font-size:10px; letter-spacing:1px; margin-bottom:4px;}
+.code-card .val{color:#e9f6ff;}
+.copy-btn{
+  display:block; width:100%; margin-top:6px; background:none; border:1px solid var(--line);
+  color:var(--dim); padding:6px; font:inherit; font-size:11px; letter-spacing:1px; border-radius:3px; cursor:pointer;
+}
+.copy-btn:hover{border-color:var(--accent); color:var(--accent);}
+.copy-btn.copied{color:var(--accent); border-color:var(--accent);}
+.full-block{
+  background:#060a10; border:1px solid var(--accent); border-radius:6px; padding:12px;
+  margin-top:4px; font-size:12.5px; color:#eafff7; white-space:pre-wrap; word-break:break-all;
+}
+.hint{color:var(--dim); font-size:11.5px; line-height:1.7; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;}
+.hint b{color:var(--ink);}
+</style>
 </head>
 <body>
 
-    <h1>LOLBeans Programmatic Object シミュレーター (動作保証版)</h1>
-    <p>数式を設定したい**軸を複数選択**し、プリセットやパラメータを調整して動きを確認できます。</p>
+<header>
+  <div class="brand">
+    <h1>⛓ BLOCK FORGE</h1>
+    <div class="tag">LOLBeans Level Editor — programmatic / variable expression builder</div>
+  </div>
+  <div class="mode-row">
+    <button class="mode-btn active" data-mode="var" id="modeVarBtn">🎲 VARIABLES モード</button>
+    <button class="mode-btn" data-mode="prog" id="modeProgBtn">📈 PROGRAMMATIC モード</button>
+    <span class="mode-desc" id="modeDesc"></span>
+  </div>
+</header>
 
-    <div class="container">
-        <div class="controls">
-            <h2>設定とパラメータ</h2>
+<div class="app">
+  <!-- PALETTE -->
+  <div class="palette" id="palette"></div>
 
-            <div class="param-group">
-                <label>適用する軸の選択 (複数選択可):</label>
-                <div id="axis-selector">
-                    <label><input type="checkbox" name="axis" value="positionX"> PositionX</label>
-                    <label><input type="checkbox" name="axis" value="positionY"> PositionY</label>
-                    <label><input type="checkbox" name="axis" value="positionZ" checked> PositionZ</label>
-                    <label><input type="checkbox" name="axis" value="rotationX"> RotationX</label>
-                    <label><input type="checkbox" name="axis" value="rotationY"> RotationY</label>
-                    <label><input type="checkbox" name="axis" value="rotationZ"> RotationZ</label>
-                </div>
-            </div>
-
-            <label for="preset">プリセットの選択:</label>
-            <select id="preset">
-                <option value="straight_line_ease">往復移動 (easeInOutQuad)</option>
-                <option value="circular_motion_xz">応用: 水平面 (X-Z) 円運動</option>
-                <option value="swing">スイング (sin波)</option>
-                <option value="rotation">一定速度の回転</option>
-                <option value="straight_line">直線移動 (ループ)</option>
-                <option value="linear_acceleration_cap">線形加速 (速度上限あり)</option>
-            </select>
-
-            <div class="param-group">
-                <label for="duration">Loop Duration (duration) / 周期 (秒):</label>
-                <input type="number" id="duration" value="5" min="0.1" step="0.1">
-            </div>
-            
-            <div id="movement-params" class="param-group">
-                <label for="distance">距離 / 半径 (Distance/Radius):</label>
-                <input type="number" id="distance" value="100" min="1" step="10">
-            </div>
-
-            <div id="rotation-params" class="param-group hidden">
-                <label for="amplitude">振幅 / 回転速度 (Amplitude/Speed):</label>
-                <input type="number" id="amplitude" value="45" min="1" step="1">
-                <small>スイング: 振幅(°) / 回転: 速度(°/s)</small>
-            </div>
-
-            <label>生成された数式 (選択された軸分):</label>
-            <pre id="formula-output"></pre>
-        </div>
-
-        <div class="simulation">
-            <h2>シミュレーションエリア</h2>
-            <div class="axis-info">PositionX: 左右 | PositionZ: 奥手前（奥行き）| Rotation: 3D回転</div>
-            <div id="sim-object">OBJ</div>
-        </div>
+  <!-- WORKSPACE -->
+  <div class="workspace">
+    <div id="lines"></div>
+    <div class="addline-row">
+      <button class="addline-btn" id="addLineBtn">＋ 変数を追加</button>
     </div>
+  </div>
 
-    <script>
-        const PI = Math.PI;
-        
-        // シミュレーション内の初期座標（相対位置）
-        const START_POS_X = 0;
-        const START_POS_Y = 0;
-        const START_POS_Z = 0;
-        const START_ROT_X = 0;
-        const START_ROT_Y = 0;
-        const START_ROT_Z = 0;
-        
-        // 初期傾き (CSSと合わせて、3D回転の視認性を高める)
-        const INITIAL_ROT_X = -15; 
-        const INITIAL_ROT_Y = 15;
+  <!-- OUTPUT -->
+  <div class="output">
+    <h2>出力コード</h2>
+    <div id="outputLines"></div>
+    <div id="fullOutputWrap" style="display:none;">
+      <h2 style="margin-top:16px;">Programmatic 全体式</h2>
+      <div class="full-block" id="fullOutput">—</div>
+      <button class="copy-btn" id="copyFullBtn">全体をコピー</button>
+    </div>
+    <div class="hint">
+      <b>使い方</b><br>
+      左のブロックを右の枠（スロット）にドラッグ＆ドロップして式を組み立てます。<br>
+      数値・変数名はブロック内をクリックして直接編集できます。<br><br>
+      <b>VARIABLES</b>: LOLBeansの「EDIT VARIABLES」パネル用。各行が1つの変数（名前＝式）。上の行の変数名は下の行から参照できます。<br>
+      <b>PROGRAMMATIC</b>: Programmatic オブジェクトの position/rotation 式。複数行を <code>;</code> でつなぎ、最後の行が戻り値になります。<code>time</code> / <code>startPositionX/Y/Z</code> / <code>startRotationX/Y/Z</code> / <code>duration</code> が使えます。
+    </div>
+  </div>
+</div>
 
-        // DOM要素
-        const presetSelect = document.getElementById('preset');
-        const durationInput = document.getElementById('duration');
-        const distanceInput = document.getElementById('distance');
-        const amplitudeInput = document.getElementById('amplitude');
-        const formulaOutput = document.getElementById('formula-output');
-        const simObject = document.getElementById('sim-object');
-        const axisCheckboxes = document.querySelectorAll('#axis-selector input[type="checkbox"]');
-        
-        let startTime = null;
-        let animationFrameId;
+<script>
+/* ============================================================
+   BLOCK FORGE — data model
+   ============================================================ */
 
-        /**
-         * LOLBeansの数式を評価する（強化版）
-         */
-        const safe_evaluate = (formula, context) => {
-            const { time, duration, startPositionX, startPositionY, startPositionZ, startRotationX, startRotationY, startRotationZ } = context;
-            const sin = Math.sin;
-            const cos = Math.cos;
-            const pow = Math.pow;
-            const abs = Math.abs;
-            const PI = Math.PI;
-            
-            // ユーザー定義変数をローカルスコープに宣言
-            let t, step1, step2, step3, a, v0, radius; 
+// ---- block type registry ----
+// parts: array of {t:'text', s:'...'} | {t:'field', name, kind:'number'|'text', default, wide?} | {t:'slot', name, ph:'a'}
+const CATS = {
+  value: {label:'数値・定数', cls:'c-value'},
+  varref:{label:'変数を参照', cls:'c-var'},
+  predef:{label:'定義済み変数 (Programmatic)', cls:'c-var', progOnly:true},
+  math:  {label:'算術', cls:'c-math'},
+  cmp:   {label:'比較', cls:'c-cmp'},
+  logic: {label:'論理・条件', cls:'c-logic'},
+  func:  {label:'関数', cls:'c-func'},
+};
 
-            try {
-                let code = formula.trim();
-                let lines = code.split(';').map(line => line.trim()).filter(line => line.length > 0);
-                if (lines.length === 0) return null; 
-                
-                let finalLine = lines.pop();
-                let fullCode = lines.join('; ') + (lines.length > 0 ? ';' : '') + ` return (${finalLine});`;
+function T(s){return {t:'text', s};}
+function F(name, kind, def, wide){return {t:'field', name, kind, default:def, wide:!!wide};}
+function S(name, ph){return {t:'slot', name, ph:ph||'式'};}
 
-                // evalを使って、数式内の変数定義と計算を同じスコープで実行
-                // 安全性のため、ユーザーからの入力（formula）にのみ使用
-                return eval(fullCode); 
+const DEFS = {
+  // -- values --
+  num:        {cat:'value', parts:[F('v','number',1)], fmt:f=>String(f.v)},
+  const_pi:   {cat:'value', parts:[T('PI')], fmt:()=>'PI'},
+  const_e:    {cat:'value', parts:[T('E')], fmt:()=>'E'},
+  const_true: {cat:'value', parts:[T('true')], fmt:()=>'true'},
+  const_false:{cat:'value', parts:[T('false')], fmt:()=>'false'},
 
-            } catch (e) {
-                // エラー時は初期値を返す
-                const axis = formula.includes("position") ? formula.match(/position[XYZ]/) : (formula.includes("rotation") ? formula.match(/rotation[XYZ]/) : null);
-                const axisStr = axis ? axis[0] : '';
+  // -- variable references --
+  varref:     {cat:'varref', parts:[T('◆'),F('v','text','MyVariable',true)], fmt:f=>f.v},
 
-                if (axisStr === 'positionX') return startPositionX;
-                if (axisStr === 'positionY') return startPositionY;
-                if (axisStr === 'positionZ') return startPositionZ;
-                if (axisStr === 'rotationX') return startRotationX;
-                if (axisStr === 'rotationY') return startRotationY;
-                if (axisStr === 'rotationZ') return startRotationZ;
-                return 0; 
-            }
-        };
+  // -- predefined (programmatic only) --
+  p_time:     {cat:'predef', parts:[T('time')], fmt:()=>'time'},
+  p_duration: {cat:'predef', parts:[T('duration')], fmt:()=>'duration'},
+  p_spx:      {cat:'predef', parts:[T('startPositionX')], fmt:()=>'startPositionX'},
+  p_spy:      {cat:'predef', parts:[T('startPositionY')], fmt:()=>'startPositionY'},
+  p_spz:      {cat:'predef', parts:[T('startPositionZ')], fmt:()=>'startPositionZ'},
+  p_srx:      {cat:'predef', parts:[T('startRotationX')], fmt:()=>'startRotationX'},
+  p_sry:      {cat:'predef', parts:[T('startRotationY')], fmt:()=>'startRotationY'},
+  p_srz:      {cat:'predef', parts:[T('startRotationZ')], fmt:()=>'startRotationZ'},
 
+  // -- math (binary) --
+  add: {cat:'math', parts:[S('a'),T('+'),S('b')], fmt:(f,s)=>`${s.a} + ${s.b}`},
+  sub: {cat:'math', parts:[S('a'),T('−'),S('b')], fmt:(f,s)=>`${s.a} - ${s.b}`},
+  mul: {cat:'math', parts:[S('a'),T('×'),S('b')], fmt:(f,s)=>`${s.a} * ${s.b}`},
+  div: {cat:'math', parts:[S('a'),T('÷'),S('b')], fmt:(f,s)=>`${s.a} / ${s.b}`},
+  mod: {cat:'math', parts:[S('a'),T('%'),S('b')], fmt:(f,s)=>`${s.a} % ${s.b}`},
+  pow: {cat:'math', parts:[S('a'),T('^'),S('b')], fmt:(f,s)=>`${s.a} ^ ${s.b}`},
+  neg: {cat:'math', parts:[T('−'),S('a')], fmt:(f,s)=>`-${s.a}`},
+  fact:{cat:'math', parts:[S('a'),T('!')], fmt:(f,s)=>`${s.a}!`},
 
-        /**
-         * プリセットと軸の選択に基づいて数式を生成し、UIを更新する
-         */
-        function updateFormula() {
-            const selectedAxes = Array.from(axisCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
-            const preset = presetSelect.value;
-            // duration, distance, amplitude はここでは再利用するため、const宣言
-            const duration = parseFloat(durationInput.value) || 1;
-            const valueA = parseFloat(distanceInput.value) || 100; // 移動量/半径
-            const valueB = parseFloat(amplitudeInput.value) || 45; // 振幅/速度
+  // -- comparison --
+  eq: {cat:'cmp', parts:[S('a'),T('=='),S('b')], fmt:(f,s)=>`${s.a} == ${s.b}`},
+  ne: {cat:'cmp', parts:[S('a'),T('!='),S('b')], fmt:(f,s)=>`${s.a} != ${s.b}`},
+  gt: {cat:'cmp', parts:[S('a'),T('>'),S('b')], fmt:(f,s)=>`${s.a} > ${s.b}`},
+  lt: {cat:'cmp', parts:[S('a'),T('<'),S('b')], fmt:(f,s)=>`${s.a} < ${s.b}`},
+  ge: {cat:'cmp', parts:[S('a'),T('>='),S('b')], fmt:(f,s)=>`${s.a} >= ${s.b}`},
+  le: {cat:'cmp', parts:[S('a'),T('<='),S('b')], fmt:(f,s)=>`${s.a} <= ${s.b}`},
 
-            let outputFormula = '';
-            let targetProperties = [];
+  // -- logic / conditional --
+  and:{cat:'logic', parts:[S('a'),T('and'),S('b')], fmt:(f,s)=>`${s.a} and ${s.b}`},
+  or: {cat:'logic', parts:[S('a'),T('or'),S('b')], fmt:(f,s)=>`${s.a} or ${s.b}`},
+  not:{cat:'logic', parts:[T('not'),S('a')], fmt:(f,s)=>`not ${s.a}`},
+  ternary:{cat:'logic', parts:[T('もし'),S('c','条件'),T('なら'),S('a','真の時'),T('でなければ'),S('b','偽の時')],
+            fmt:(f,s)=>`${s.c} ? ${s.a} : ${s.b}`},
 
-            // プリセットによる軸の強制選択チェック
-            if (preset === 'circular_motion_xz' && (!selectedAxes.includes('positionX') || !selectedAxes.includes('positionZ'))) {
-                 outputFormula = "// 円運動には PositionX と PositionZ の両方の設定が必要です。軸を選択し直すか、他のプリセットを選んでください。";
-                 formulaOutput.textContent = outputFormula;
-                 // アニメーションを停止させる (または現在の設定で再描画する)
-                 startSimulation([]);
-                 return;
-            }
+  // -- functions --
+  f_abs:  {cat:'func', parts:[T('abs('),S('a'),T(')')], fmt:(f,s)=>`abs(${s.a})`},
+  f_sqrt: {cat:'func', parts:[T('sqrt('),S('a'),T(')')], fmt:(f,s)=>`sqrt(${s.a})`},
+  f_sin:  {cat:'func', parts:[T('sin('),S('a'),T(')')], fmt:(f,s)=>`sin(${s.a})`},
+  f_cos:  {cat:'func', parts:[T('cos('),S('a'),T(')')], fmt:(f,s)=>`cos(${s.a})`},
+  f_tan:  {cat:'func', parts:[T('tan('),S('a'),T(')')], fmt:(f,s)=>`tan(${s.a})`},
+  f_floor:{cat:'func', parts:[T('floor('),S('a'),T(')')], fmt:(f,s)=>`floor(${s.a})`},
+  f_ceil: {cat:'func', parts:[T('ceil('),S('a'),T(')')], fmt:(f,s)=>`ceil(${s.a})`},
+  f_round:{cat:'func', parts:[T('round('),S('a'),T(')')], fmt:(f,s)=>`round(${s.a})`},
+  f_trunc:{cat:'func', parts:[T('trunc('),S('a'),T(')')], fmt:(f,s)=>`trunc(${s.a})`},
+  f_sign: {cat:'func', parts:[T('sign('),S('a'),T(')')], fmt:(f,s)=>`sign(${s.a})`},
+  f_ln:   {cat:'func', parts:[T('ln('),S('a'),T(')')], fmt:(f,s)=>`ln(${s.a})`},
+  f_log10:{cat:'func', parts:[T('log10('),S('a'),T(')')], fmt:(f,s)=>`log10(${s.a})`},
+  f_log2: {cat:'func', parts:[T('log2('),S('a'),T(')')], fmt:(f,s)=>`log2(${s.a})`},
+  f_exp:  {cat:'func', parts:[T('exp('),S('a'),T(')')], fmt:(f,s)=>`exp(${s.a})`},
+  f_min:  {cat:'func', parts:[T('min('),S('a'),T(','),S('b'),T(')')], fmt:(f,s)=>`min(${s.a}, ${s.b})`},
+  f_max:  {cat:'func', parts:[T('max('),S('a'),T(','),S('b'),T(')')], fmt:(f,s)=>`max(${s.a}, ${s.b})`},
+  f_hypot:{cat:'func', parts:[T('hypot('),S('a'),T(','),S('b'),T(')')], fmt:(f,s)=>`hypot(${s.a}, ${s.b})`},
+  f_pow2: {cat:'func', parts:[T('pow('),S('a'),T(','),S('b'),T(')')], fmt:(f,s)=>`pow(${s.a}, ${s.b})`},
+  f_atan2:{cat:'func', parts:[T('atan2('),S('a','y'),T(','),S('b','x'),T(')')], fmt:(f,s)=>`atan2(${s.a}, ${s.b})`},
+  f_roundto:{cat:'func', parts:[T('roundTo('),S('a'),T(','),S('b','桁数'),T(')')], fmt:(f,s)=>`roundTo(${s.a}, ${s.b})`},
+  f_random: {cat:'func', parts:[T('random('),S('a','n'),T(')')], fmt:(f,s)=>`random(${s.a})`},
+  f_randomint:{cat:'func', parts:[T('randomInt('),S('a','min'),T(','),S('b','max'),T(')')], fmt:(f,s)=>`randomInt(${s.a}, ${s.b})`},
+  f_if:   {cat:'func', parts:[T('if('),S('c','条件'),T(','),S('a','真'),T(','),S('b','偽'),T(')')], fmt:(f,s)=>`if(${s.c}, ${s.a}, ${s.b})`},
+};
 
+// ---- runtime state ----
+let uidCounter = 1;
+const instances = {}; // uid -> {type, fields:{}, slots:{}}
+let mode = 'var'; // 'var' | 'prog'
+let lines = [];    // {id, isReturn:bool, name:string, rootUid:number|null}
+let lineCounter = 1;
 
-            selectedAxes.forEach(axis => {
-                let formula = '';
-                let isRotation = axis.includes('rotation');
-                const startVar = isRotation ? `start${axis.substring(8)}` : `start${axis}`;
-                
-                // --- 数式生成ロジック ---
-                switch(preset) {
-                    case 'straight_line':
-                        formula = `${startVar} + (time / duration) % 1 * ${valueA}`;
-                        break;
-                    case 'straight_line_ease':
-                        formula = `t = (time / duration) % 1;
-t = (t < 0.5 ? t : 1 - t) * 2;
-t = t < 0.5 ? 2 * t * t : 1 - pow(-2 * t + 2, 2) / 2;
-${startVar} + t * ${valueA}`;
-                        break;
-                    case 'rotation':
-                        formula = `(${startVar} + time * ${valueB}) % 360`;
-                        break;
-                    case 'swing':
-                        formula = `${startVar} + sin(time / duration * 2 * PI) * ${valueB}`;
-                        break;
-                    case 'linear_acceleration_cap':
-                        const acc = 45; 
-                        const v0 = 45;  
-                        const capTime = 5; 
-                        const angleAtCap = v0 * capTime + acc * capTime * capTime / 2;
-                        const speedAtCap = v0 + acc * capTime;
-                        formula = `a = ${acc};
-v0 = ${v0};
-time < ${capTime} ?
-(${startVar} + v0 * time + a * time * time / 2) % 360
-:
-(${startVar} + ${angleAtCap} + ${speedAtCap} * (time - ${capTime}) ) % 360`;
-                        break;
-                    case 'circular_motion_xz':
-                        const radius = valueA;
-                        if (axis === 'positionX') {
-                            formula = `${startVar} + cos(time / duration * 2 * PI) * ${radius}`;
-                        } else if (axis === 'positionZ') {
-                            formula = `${startVar} + sin(time / duration * 2 * PI) * ${radius}`;
-                        } else {
-                            formula = `${startVar}`;
-                        }
-                        break;
-                    default:
-                        formula = `${startVar}`;
-                }
-                // --------------------------
+function newInstance(type){
+  const def = DEFS[type];
+  const fields = {};
+  def.parts.forEach(p=>{ if(p.t==='field') fields[p.name]=p.default; });
+  const slots = {};
+  def.parts.forEach(p=>{ if(p.t==='slot') slots[p.name]=null; });
+  const uid = uidCounter++;
+  instances[uid] = {type, fields, slots};
+  return uid;
+}
 
-                if (formula) {
-                    outputFormula += `Set ${axis} to:\n${formula}\n\n`;
-                    targetProperties.push({ axis: axis, formula: formula });
-                }
-            });
+function initLines(){
+  lines = [];
+  if(mode==='var'){
+    lines.push(mkLine('OpenedDoorNumber', false));
+  } else {
+    lines.push(mkLine(null, true));
+  }
+}
+function mkLine(name, isReturn){
+  return {id: lineCounter++, isReturn, name: name||('Var'+lineCounter), rootUid:null};
+}
 
-            formulaOutput.textContent = outputFormula.trim() || "// 軸を選択してください";
-            startSimulation(targetProperties); // 👈 重要な修正: 常にシミュレーションを開始/更新
-        }
+/* ============================================================
+   PALETTE render
+   ============================================================ */
+function renderPalette(){
+  const pal = document.getElementById('palette');
+  pal.innerHTML = '';
+  const order = ['value','varref','predef','math','cmp','logic','func'];
+  order.forEach(catKey=>{
+    const cat = CATS[catKey];
+    if(cat.progOnly && mode!=='prog') return;
+    const title = document.createElement('div');
+    title.className='cat-title';
+    title.textContent = cat.label;
+    pal.appendChild(title);
+    Object.entries(DEFS).forEach(([type,def])=>{
+      if(def.cat!==catKey) return;
+      const chip = document.createElement('div');
+      chip.className = 'chip '+cat.cls;
+      chip.draggable = true;
+      chip.innerHTML = previewLabel(type);
+      chip.addEventListener('dragstart', e=>{
+        e.dataTransfer.setData('text/new-block', type);
+        e.dataTransfer.effectAllowed='copy';
+      });
+      pal.appendChild(chip);
+    });
+  });
+}
+function previewLabel(type){
+  const def = DEFS[type];
+  return def.parts.map(p=>{
+    if(p.t==='text') return `<span class="txt">${escapeHtml(p.s)}</span>`;
+    if(p.t==='field') return `<span class="txt" style="opacity:.6">${p.kind==='number'?def===DEFS.num? '#':p.default : '“'+p.default+'”'}</span>`;
+    if(p.t==='slot') return `<span class="txt" style="opacity:.4">◯</span>`;
+  }).join(' ');
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-        /**
-         * アニメーションループを開始する (実行ロジック修正)
-         */
-        function startSimulation(targetProperties) {
-            // アニメーションが既に動いている場合は停止
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-            }
-            
-            // 軸が選択されていない場合は、アニメーションを動かさず初期位置に戻す
-            if (targetProperties.length === 0) {
-                 simObject.style.transform = `translate(-50%, -50%) rotateX(${INITIAL_ROT_X}deg) rotateY(${INITIAL_ROT_Y}deg)`;
-                 simObject.style.backgroundColor = '#ff6f61';
-                 simObject.textContent = 'OBJ';
-                 return;
-            }
+/* ============================================================
+   WORKSPACE render
+   ============================================================ */
+function renderLines(){
+  const wrap = document.getElementById('lines');
+  wrap.innerHTML = '';
+  lines.forEach(line=>{
+    const div = document.createElement('div');
+    div.className = 'line' + (line.isReturn?' is-return':'');
+    div.dataset.lineId = line.id;
 
+    const head = document.createElement('div');
+    head.className='line-head';
 
-            startTime = Date.now();
-            
-            const MAX_PIXEL_MOVEMENT = 150; 
-            const maxDistance = parseFloat(distanceInput.value) || 100;
-            const scaleFactor = maxDistance === 0 ? 0 : MAX_PIXEL_MOVEMENT / maxDistance;
+    const badge = document.createElement('span');
+    badge.className='line-badge';
+    badge.textContent = line.isReturn ? 'RETURN' : 'VAR';
+    head.appendChild(badge);
 
-            simObject.style.backgroundColor = targetProperties.some(p => p.axis.includes('rotation')) ? '#4CAF50' : '#ff6f61';
-            simObject.textContent = targetProperties.some(p => p.axis.includes('rotation')) ? 'ROT' : 'POS';
+    if(!line.isReturn){
+      const nameInput = document.createElement('input');
+      nameInput.className='varname-input';
+      nameInput.value = line.name;
+      nameInput.spellcheck=false;
+      nameInput.addEventListener('input', e=>{ line.name = e.target.value; updateOutput(); });
+      head.appendChild(nameInput);
+      const eq = document.createElement('span');
+      eq.className='eq'; eq.textContent='=';
+      head.appendChild(eq);
+    } else {
+      const lbl = document.createElement('span');
+      lbl.className='eq'; lbl.textContent='戻り値の式';
+      head.appendChild(lbl);
+    }
 
+    if(!(line.isReturn && lines.length===1) ){
+      const del = document.createElement('button');
+      del.className='line-del'; del.textContent='×'; del.title='この行を削除';
+      del.addEventListener('click', ()=>{
+        if(line.isReturn) return; // return line not deletable directly
+        lines = lines.filter(l=>l.id!==line.id);
+        renderLines(); updateOutput();
+      });
+      if(!line.isReturn) head.appendChild(del);
+    }
 
-            const loop = (timestamp) => {
-                const elapsedTime = (timestamp - startTime) / 1000;
+    div.appendChild(head);
 
-                const context = {
-                    time: elapsedTime,
-                    duration: parseFloat(durationInput.value) || 1,
-                    startPositionX: START_POS_X,
-                    startPositionY: START_POS_Y,
-                    startPositionZ: START_POS_Z,
-                    startRotationX: START_ROT_X,
-                    startRotationY: START_ROT_Y,
-                    startRotationZ: START_ROT_Z,
-                    PI: PI,
-                };
-                
-                const results = { x: 0, y: 0, z: 0, rotX: 0, rotY: 0, rotZ: 0 };
-                
-                targetProperties.forEach(prop => {
-                    const newValue = safe_evaluate(prop.formula, context);
+    const slotDiv = document.createElement('div');
+    slotDiv.className='slot';
+    attachSlotDnD(slotDiv, {kind:'line', lineId:line.id});
+    if(line.rootUid){
+      slotDiv.classList.add('filled');
+      slotDiv.appendChild(renderBlock(line.rootUid, {kind:'line', lineId:line.id}));
+    } else {
+      const ph = document.createElement('span');
+      ph.className='slot-empty'; ph.textContent='← ここにブロックをドロップ';
+      slotDiv.appendChild(ph);
+    }
+    div.appendChild(slotDiv);
+    wrap.appendChild(div);
+  });
+}
 
-                    if (prop.axis === 'positionX') results.x = newValue - START_POS_X;
-                    else if (prop.axis === 'positionY') results.y = newValue - START_POS_Y;
-                    else if (prop.axis === 'positionZ') results.z = newValue - START_POS_Z; // 奥行きの移動
-                    else if (prop.axis === 'rotationX') results.rotX = newValue;
-                    else if (prop.axis === 'rotationY') results.rotY = newValue;
-                    else if (prop.axis === 'rotationZ') results.rotZ = newValue;
-                });
+function renderBlock(uid, parentRef){
+  const inst = instances[uid];
+  const def = DEFS[inst.type];
+  const cat = CATS[def.cat];
+  const el = document.createElement('div');
+  el.className = 'blk ' + cat.cls;
+  el.draggable = true;
+  el.dataset.uid = uid;
 
-                // 座標マッピング (PositionX: 左右, PositionZ: 奥行き)
-                const pixelShiftX = results.x * scaleFactor; 
-                const pixelShiftY = results.y * scaleFactor * -1; // PositionYは通常「高さ」なので、CSSのY軸（上下）にマッピング
-                const pixelShiftZ = results.z * scaleFactor; // PositionZはCSSのZ軸（奥手前）にマッピング
-                
-                // CSS Transformの適用 (適用順序を改善)
-                simObject.style.transform = 
-                    // 1. 3D回転が分かるように、初期の傾きを適用 (原点を中心に)
-                    `rotateX(${INITIAL_ROT_X}deg) rotateY(${INITIAL_ROT_Y}deg)` + 
-                    // 2. 数式による回転を適用
-                    `rotateX(${results.rotX}deg)` + 
-                    `rotateY(${results.rotY}deg)` + 
-                    `rotateZ(${results.rotZ}deg)` +
-                    // 3. 移動を適用 (translate3dでX/Y/Zを一度に設定)
-                    `translate3d(calc(-50% + ${pixelShiftX}px), calc(-50% + ${pixelShiftY}px), ${pixelShiftZ}px)`;
+  el.addEventListener('dragstart', e=>{
+    e.stopPropagation();
+    e.dataTransfer.setData('text/move-uid', String(uid));
+    e.dataTransfer.effectAllowed='move';
+  });
 
+  def.parts.forEach(p=>{
+    if(p.t==='text'){
+      const s = document.createElement('span');
+      s.className='txt'; s.textContent=p.s;
+      el.appendChild(s);
+    } else if(p.t==='field'){
+      const inp = document.createElement('input');
+      inp.className='field'+(p.wide?' wide':'');
+      inp.type = p.kind==='number' ? 'number':'text';
+      inp.value = inst.fields[p.name];
+      inp.step = 'any';
+      inp.spellcheck=false;
+      inp.addEventListener('click', e=>e.stopPropagation());
+      inp.addEventListener('dragstart', e=>e.stopPropagation());
+      inp.addEventListener('input', e=>{
+        inst.fields[p.name] = p.kind==='number' ? (e.target.value===''?0:e.target.value) : e.target.value;
+        updateOutput();
+      });
+      el.appendChild(inp);
+    } else if(p.t==='slot'){
+      const sd = document.createElement('span');
+      sd.className='slot inner-slot';
+      attachSlotDnD(sd, {kind:'slot', ownerUid:uid, slotName:p.name});
+      const childUid = inst.slots[p.name];
+      if(childUid){
+        sd.classList.add('filled');
+        sd.appendChild(renderBlock(childUid, {kind:'slot', ownerUid:uid, slotName:p.name}));
+      } else {
+        const ph = document.createElement('span');
+        ph.className='slot-empty'; ph.textContent=p.ph;
+        sd.appendChild(ph);
+      }
+      el.appendChild(sd);
+    }
+  });
 
-                animationFrameId = requestAnimationFrame(loop);
-            };
+  const del = document.createElement('button');
+  del.className='del'; del.textContent='×'; del.title='削除';
+  del.addEventListener('click', e=>{
+    e.stopPropagation();
+    detach(parentRef);
+    deleteTree(uid);
+    renderLines(); updateOutput();
+  });
+  el.appendChild(del);
 
-            animationFrameId = requestAnimationFrame(loop);
-        }
+  return el;
+}
 
-        // --- 起動ロジック ---
-        const inputs = [presetSelect, durationInput, distanceInput, amplitudeInput];
-        inputs.forEach(input => input.addEventListener('input', updateFormula));
-        axisCheckboxes.forEach(cb => cb.addEventListener('change', updateFormula));
+function deleteTree(uid){
+  const inst = instances[uid];
+  if(!inst) return;
+  Object.values(inst.slots).forEach(childUid=>{ if(childUid) deleteTree(childUid); });
+  delete instances[uid];
+}
 
-        // ページロード時に即座に実行を開始
-        // これがないと、入力やチェックボックスが変更されるまでアニメーションが開始されませんでした。
-        updateFormula(); 
-    </script>
+function detach(ref){
+  if(!ref) return;
+  if(ref.kind==='line'){
+    const line = lines.find(l=>l.id===ref.lineId);
+    if(line) line.rootUid = null;
+  } else if(ref.kind==='slot'){
+    const owner = instances[ref.ownerUid];
+    if(owner) owner.slots[ref.slotName] = null;
+  }
+}
+function attachTo(ref, uid){
+  if(ref.kind==='line'){
+    const line = lines.find(l=>l.id===ref.lineId);
+    if(line) line.rootUid = uid;
+  } else if(ref.kind==='slot'){
+    const owner = instances[ref.ownerUid];
+    if(owner) owner.slots[ref.slotName] = uid;
+  }
+}
+
+function isDescendant(rootUid, targetUid){
+  if(rootUid===targetUid) return true;
+  const inst = instances[rootUid];
+  if(!inst) return false;
+  return Object.values(inst.slots).some(c=> c && isDescendant(c, targetUid));
+}
+
+function attachSlotDnD(el, ref){
+  el.addEventListener('dragover', e=>{ e.preventDefault(); el.classList.add('drag-over'); });
+  el.addEventListener('dragleave', ()=> el.classList.remove('drag-over'));
+  el.addEventListener('drop', e=>{
+    e.preventDefault(); e.stopPropagation();
+    el.classList.remove('drag-over');
+    const newType = e.dataTransfer.getData('text/new-block');
+    const moveUid = e.dataTransfer.getData('text/move-uid');
+
+    // clear whatever currently occupies target slot (orphan it)
+    const currentUid = ref.kind==='line'
+      ? lines.find(l=>l.id===ref.lineId)?.rootUid
+      : instances[ref.ownerUid]?.slots[ref.slotName];
+
+    if(newType){
+      if(currentUid) deleteTree(currentUid);
+      const uid = newInstance(newType);
+      attachTo(ref, uid);
+    } else if(moveUid){
+      const uid = parseInt(moveUid,10);
+      if(ref.kind==='slot' && isDescendant(uid, ref.ownerUid)){
+        return; // prevent cycle
+      }
+      // find & clear old location
+      removeFromWherever(uid);
+      if(currentUid && currentUid!==uid) deleteTree(currentUid);
+      attachTo(ref, uid);
+    } else { return; }
+    renderLines(); updateOutput();
+  });
+}
+
+function removeFromWherever(uid){
+  lines.forEach(l=>{ if(l.rootUid===uid) l.rootUid=null; });
+  Object.values(instances).forEach(inst=>{
+    Object.keys(inst.slots).forEach(k=>{ if(inst.slots[k]===uid) inst.slots[k]=null; });
+  });
+}
+
+/* ============================================================
+   CODE GENERATION
+   ============================================================ */
+function genExpr(uid){
+  if(!uid) return '0';
+  const inst = instances[uid];
+  const def = DEFS[inst.type];
+  const s = {};
+  Object.keys(inst.slots).forEach(name=>{ s[name] = wrapIfNeeded(inst.slots[name], inst.type, name); });
+  return def.fmt(inst.fields, s);
+}
+// wrap child expression in parens when it's a lower-precedence binary/ternary op
+const NEEDS_PARENS = new Set(['add','sub','mul','div','mod','pow','and','or','eq','ne','gt','lt','ge','le','ternary']);
+function wrapIfNeeded(childUid, parentType, slotName){
+  const raw = genExpr(childUid);
+  if(!childUid) return raw;
+  const childType = instances[childUid].type;
+  if(NEEDS_PARENS.has(childType)){
+    // don't wrap if parent is the return-line root or a simple func-call arg is fine unwrapped too, but safe = always wrap for binary/ternary children of another operator
+    if(parentType==='varref') return raw;
+    return `(${raw})`;
+  }
+  return raw;
+}
+
+function updateOutput(){
+  const outWrap = document.getElementById('outputLines');
+  outWrap.innerHTML='';
+  const parts = [];
+  lines.forEach(line=>{
+    const exprText = line.rootUid ? genExpr(line.rootUid) : '0';
+    const card = document.createElement('div');
+    card.className='code-card';
+    const nameLabel = line.isReturn ? '戻り値' : (line.name||'変数名未設定');
+    card.innerHTML = `<span class="name">${escapeHtml(nameLabel)}</span><span class="val">${escapeHtml(exprText)}</span>`;
+    const btn = document.createElement('button');
+    btn.className='copy-btn'; btn.textContent='この式をコピー';
+    btn.addEventListener('click', ()=>copyText(exprText, btn));
+    card.appendChild(btn);
+    outWrap.appendChild(card);
+    parts.push(line.isReturn ? exprText : `${line.name} = ${exprText}`);
+  });
+
+  const fullWrap = document.getElementById('fullOutputWrap');
+  if(mode==='prog'){
+    fullWrap.style.display='block';
+    document.getElementById('fullOutput').textContent = parts.join(';\n');
+  } else {
+    fullWrap.style.display='none';
+  }
+}
+
+function copyText(text, btn){
+  navigator.clipboard?.writeText(text).then(()=>{
+    if(btn){
+      const orig = btn.textContent;
+      btn.textContent='コピーしました ✓'; btn.classList.add('copied');
+      setTimeout(()=>{btn.textContent=orig; btn.classList.remove('copied');}, 1400);
+    }
+  }).catch(()=>{});
+}
+
+/* ============================================================
+   MODE + WIRING
+   ============================================================ */
+function setMode(m){
+  mode = m;
+  document.getElementById('modeVarBtn').classList.toggle('active', m==='var');
+  document.getElementById('modeProgBtn').classList.toggle('active', m==='prog');
+  document.getElementById('modeDesc').textContent = m==='var'
+    ? '「EDIT VARIABLES」パネル用：名前つき変数を1行ずつ定義'
+    : 'Programmatic オブジェクト用：time等の定義済み変数と複数行の式が使える';
+  document.getElementById('addLineBtn').textContent = m==='var' ? '＋ 変数を追加' : '＋ 中間変数を追加';
+  initLines();
+  renderPalette();
+  renderLines();
+  updateOutput();
+}
+
+document.getElementById('modeVarBtn').addEventListener('click', ()=>setMode('var'));
+document.getElementById('modeProgBtn').addEventListener('click', ()=>setMode('prog'));
+document.getElementById('addLineBtn').addEventListener('click', ()=>{
+  if(mode==='var'){
+    lines.push(mkLine('Variable'+lineCounter, false));
+  } else {
+    // insert new assignment line before the return line (always last)
+    const retIdx = lines.findIndex(l=>l.isReturn);
+    lines.splice(retIdx, 0, mkLine('temp'+lineCounter, false));
+  }
+  renderLines(); updateOutput();
+});
+document.getElementById('copyFullBtn').addEventListener('click', function(){
+  copyText(document.getElementById('fullOutput').textContent, this);
+});
+
+// allow dropping new-block-type chips directly is handled per-slot; prevent default page drop nav
+window.addEventListener('dragover', e=> e.preventDefault());
+window.addEventListener('drop', e=> e.preventDefault());
+
+setMode('var');
+</script>
 </body>
 </html>

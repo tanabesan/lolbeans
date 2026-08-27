@@ -56,6 +56,13 @@ header{
 .mode-btn.active{color:#00140e; background:var(--accent); border-color:var(--accent); box-shadow:0 0 16px rgba(57,255,201,.4);}
 .mode-btn:hover:not(.active){border-color:var(--accent); color:var(--accent);}
 .mode-desc{color:var(--dim); font-size:12px; margin-left:6px;}
+.save-status{color:var(--accent); font-size:11px; margin-left:auto; opacity:.85; letter-spacing:.5px;}
+.reset-btn{
+  border:1px solid var(--line); background:#0c131c; color:var(--dim);
+  padding:7px 12px; font:inherit; font-size:11px; letter-spacing:.5px;
+  cursor:pointer; border-radius:3px;
+}
+.reset-btn:hover{border-color:var(--danger); color:var(--danger);}
 
 /* ---------- layout ---------- */
 .app{display:grid; grid-template-columns:250px 1fr 380px; gap:0; min-height:calc(100vh - 118px);}
@@ -216,6 +223,8 @@ header{
     <button class="mode-btn active" data-mode="var" id="modeVarBtn">🎲 VARIABLES モード</button>
     <button class="mode-btn" data-mode="prog" id="modeProgBtn">📈 PROGRAMMATIC モード</button>
     <span class="mode-desc" id="modeDesc"></span>
+    <span class="save-status" id="saveStatus"></span>
+    <button class="reset-btn" id="resetBtn" title="保存されている内容を消して最初からやり直します">🗑 最初からやり直す</button>
   </div>
 </header>
 
@@ -744,6 +753,7 @@ function updateOutput(){
   } else {
     fullWrap.style.display='none';
   }
+  saveState();
 }
 
 function copyText(text, btn){
@@ -757,8 +767,48 @@ function copyText(text, btn){
 }
 
 /* ============================================================
-   MODE + WIRING
+   PERSISTENCE (auto-save across reloads, this browser only)
    ============================================================ */
+const STORAGE_KEY = 'blockforge-workspace-v1';
+let saveTimer = null;
+function saveState(){
+  if(!window.storage) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      const state = { mode, uidCounter, instances, lines };
+      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      setSaveStatus('保存済み ✓');
+    }catch(err){
+      setSaveStatus('保存できませんでした');
+    }
+  }, 300);
+}
+function setSaveStatus(text){
+  const el = document.getElementById('saveStatus');
+  if(el) el.textContent = text;
+}
+async function loadState(){
+  if(!window.storage) return false;
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(!res || !res.value) return false;
+    const state = JSON.parse(res.value);
+    mode = state.mode || 'var';
+    uidCounter = state.uidCounter || 1;
+    Object.keys(instances).forEach(k=>delete instances[k]);
+    Object.assign(instances, state.instances || {});
+    lines = state.lines || [];
+    if(lines.length===0) return false;
+    return true;
+  }catch(err){
+    return false;
+  }
+}
+function clearSavedState(){
+  if(!window.storage) return;
+  window.storage.delete(STORAGE_KEY, false).catch(()=>{});
+}
 function setMode(m, skipInit){
   mode = m;
   document.getElementById('modeVarBtn').classList.toggle('active', m==='var');
@@ -825,11 +875,39 @@ document.getElementById('loadSampleBtn').addEventListener('click', ()=>{
   renderLines(); updateOutput();
 });
 
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('保存されている内容をすべて消して最初からやり直します。よろしいですか？')) return;
+  clearSavedState();
+  mode = 'var';
+  document.getElementById('guideBox').classList.remove('collapsed');
+  document.getElementById('guideToggleBtn').textContent='たたむ';
+  setMode('var');
+});
+
 // allow dropping new-block-type chips directly is handled per-slot; prevent default page drop nav
 window.addEventListener('dragover', e=> e.preventDefault());
 window.addEventListener('drop', e=> e.preventDefault());
 
-setMode('var');
+(async function boot(){
+  setSaveStatus(window.storage ? '読み込み中…' : '');
+  const restored = await loadState();
+  if(restored){
+    document.getElementById('modeVarBtn').classList.toggle('active', mode==='var');
+    document.getElementById('modeProgBtn').classList.toggle('active', mode==='prog');
+    document.getElementById('modeDesc').textContent = mode==='var'
+      ? '「EDIT VARIABLES」パネル用：名前つき変数を1行ずつ定義'
+      : 'Programmatic オブジェクト用：time等の定義済み変数と複数行の式が使える';
+    document.getElementById('addLineBtn').textContent = mode==='var' ? '＋ 変数を追加' : '＋ 中間変数を追加';
+    renderPalette();
+    renderLines();
+    updateOutput();
+    document.getElementById('guideBox').classList.add('collapsed');
+    document.getElementById('guideToggleBtn').textContent='開く';
+    setSaveStatus('前回の続きから復元しました ✓');
+  } else {
+    setMode('var');
+  }
+})();
 </script>
 </body>
 </html>

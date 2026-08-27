@@ -70,6 +70,12 @@ header{
   text-transform:uppercase;
 }
 .cat-title:first-child{margin-top:2px;}
+.palette-intro{
+  font-size:11px; color:var(--dim); background:#0c131c; border:1px solid var(--line);
+  border-radius:5px; padding:8px 10px; margin-bottom:6px; line-height:1.6;
+}
+.cat-desc{color:var(--dim); font-size:11px; line-height:1.6; margin:0 4px 10px; opacity:.85;}
+.chip-name{white-space:normal; word-break:keep-all; line-height:1.4;}
 
 /* ---------- block visual language ---------- */
 .chip, .blk{
@@ -99,6 +105,25 @@ header{
 .workspace{
   padding:22px 24px 60px; overflow-x:auto; max-height:calc(100vh - 118px); overflow-y:auto;
 }
+.guide{
+  background:linear-gradient(180deg, rgba(57,255,201,.07), rgba(57,255,201,.02));
+  border:1px solid rgba(57,255,201,.35); border-radius:8px;
+  padding:16px 18px; margin-bottom:20px;
+}
+.guide-title{font-size:14px; font-weight:700; color:var(--accent); margin-bottom:8px; letter-spacing:.5px;}
+.guide-steps{margin:0 0 12px; padding-left:20px; color:var(--ink); font-size:12.5px; line-height:1.85;}
+.guide-steps b{color:var(--accent);}
+.sample-btn{
+  background:rgba(57,255,201,.12); border:1px solid var(--accent); color:var(--accent);
+  padding:9px 14px; border-radius:5px; cursor:pointer; font:inherit; font-size:12px; letter-spacing:.5px;
+}
+.sample-btn:hover{background:rgba(57,255,201,.22);}
+.guide.collapsed .guide-steps, .guide.collapsed .sample-btn{display:none;}
+.guide-toggle{
+  float:right; background:none; border:1px solid var(--line); color:var(--dim);
+  font-size:11px; padding:3px 9px; border-radius:12px; cursor:pointer;
+}
+
 .line{
   background:var(--panel); border:1px solid var(--line); border-radius:6px;
   padding:12px 14px; margin-bottom:14px; position:relative;
@@ -196,10 +221,23 @@ header{
 
 <div class="app">
   <!-- PALETTE -->
-  <div class="palette" id="palette"></div>
+  <div class="palette">
+    <div class="palette-intro">ブロックをドラッグして右の枠に置いてね</div>
+    <div id="palette"></div>
+  </div>
 
   <!-- WORKSPACE -->
   <div class="workspace">
+    <div class="guide" id="guideBox">
+      <div class="guide-title">はじめての方へ 👋 <button class="guide-toggle" id="guideToggleBtn">たたむ</button></div>
+      <ol class="guide-steps">
+        <li>左のパレットから、青い「数値・定数」ブロックを下の点線の枠に<b>ドラッグ＆ドロップ</b>してみましょう。</li>
+        <li>ブロックの中の数字はクリックすると書き換えられます。</li>
+        <li>もっと複雑な式にしたいときは、オレンジの「計算」ブロックなどを枠にドロップすると、その中にさらにブロックを入れられます（入れ子）。</li>
+        <li>右側に、今組み立てた式がLOLBeansにそのままコピペできる形で表示されます。</li>
+      </ol>
+      <button class="sample-btn" id="loadSampleBtn">🎲 サンプルを読み込んで見てみる（3つのドアからランダムに1つ開ける）</button>
+    </div>
     <div id="lines"></div>
     <div class="addline-row">
       <button class="addline-btn" id="addLineBtn">＋ 変数を追加</button>
@@ -233,13 +271,78 @@ header{
 // ---- block type registry ----
 // parts: array of {t:'text', s:'...'} | {t:'field', name, kind:'number'|'text', default, wide?} | {t:'slot', name, ph:'a'}
 const CATS = {
-  value: {label:'数値・定数', cls:'c-value'},
-  varref:{label:'変数を参照', cls:'c-var'},
-  predef:{label:'定義済み変数 (Programmatic)', cls:'c-var', progOnly:true},
-  math:  {label:'算術', cls:'c-math'},
-  cmp:   {label:'比較', cls:'c-cmp'},
-  logic: {label:'論理・条件', cls:'c-logic'},
-  func:  {label:'関数', cls:'c-func'},
+  value: {label:'① 数値・定数', cls:'c-value', desc:'まずはここから。数字や PI, E, true/false などの「そのままの値」です。'},
+  varref:{label:'② ほかの変数を使う', cls:'c-var', desc:'上の行で作った変数の名前をここで呼び出せます（例：さっき作った DoorNumber をもう一度使う）。'},
+  predef:{label:'③ 最初から用意された変数 (Programmatic専用)', cls:'c-var', progOnly:true, desc:'time（経過秒数）や開始位置など、LOLBeans側が自動で用意してくれる値です。'},
+  math:  {label:'④ 計算する（＋－×÷など）', cls:'c-math', desc:'2つの値を計算して1つの値にします。'},
+  cmp:   {label:'⑤ 比べる（＝や＞など）', cls:'c-cmp', desc:'2つの値を比べて「true / false」を作ります。ifブロックの条件に使います。'},
+  logic: {label:'⑥ 条件分岐・論理', cls:'c-logic', desc:'true/false を組み合わせたり、「もし〜なら〜」を作ります。'},
+  func:  {label:'⑦ 便利な関数', cls:'c-func', desc:'ランダムな数を出したり、三角関数・四捨五入などLOLBeansが用意している便利な計算です。'},
+};
+
+// Beginner-friendly names + one-line explanations shown on hover, per block type
+const CHIP_META = {
+  num:        {name:'数値 #', desc:'そのままの数（例：10、3.5）を表します。クリックして数字を変更できます。'},
+  const_pi:   {name:'円周率 PI', desc:'円周率 3.14159… を表す決まった値です。'},
+  const_e:    {name:'ネイピア数 E', desc:'自然対数の底 2.71828… を表す決まった値です。'},
+  const_true: {name:'true（はい）', desc:'「オン／はい」を表す値。チェックボックス系のプロパティに使います。'},
+  const_false:{name:'false（いいえ）', desc:'「オフ／いいえ」を表す値。チェックボックス系のプロパティに使います。'},
+
+  varref:     {name:'◆ 変数の名前で呼び出す', desc:'上の行で定義した変数の名前を入力すると、その値をここで使えます。'},
+
+  p_time:     {name:'time（経過秒数）', desc:'ラウンド開始（またはトリガー起動）からの経過時間（秒）。'},
+  p_duration: {name:'duration（ループ時間）', desc:'ブロックの「Loop Duration」プロパティの値です。'},
+  p_spx:      {name:'startPositionX（開始X座標）', desc:'このブロックが最初にあったX位置。'},
+  p_spy:      {name:'startPositionY（開始Y座標）', desc:'このブロックが最初にあったY位置。'},
+  p_spz:      {name:'startPositionZ（開始Z座標）', desc:'このブロックが最初にあったZ位置。'},
+  p_srx:      {name:'startRotationX（開始X回転）', desc:'このブロックが最初にあったX回転角度。'},
+  p_sry:      {name:'startRotationY（開始Y回転）', desc:'このブロックが最初にあったY回転角度。'},
+  p_srz:      {name:'startRotationZ（開始Z回転）', desc:'このブロックが最初にあったZ回転角度。'},
+
+  add: {name:'足し算　A ＋ B', desc:'2つの値を足します。'},
+  sub: {name:'引き算　A － B', desc:'AからBを引きます。'},
+  mul: {name:'かけ算　A × B', desc:'2つの値をかけます。'},
+  div: {name:'わり算　A ÷ B', desc:'AをBで割ります。'},
+  mod: {name:'あまり　A ％ B', desc:'AをBで割った「あまり」を求めます。'},
+  pow: {name:'べき乗　A ^ B', desc:'AのB乗を計算します（例：2^3＝8）。'},
+  neg: {name:'マイナスにする　－A', desc:'値の符号を反転します（プラスをマイナスに）。'},
+  fact:{name:'階乗　A！', desc:'A × (A-1) × (A-2) × … × 1 を計算します。'},
+
+  eq: {name:'等しい　A ＝＝ B', desc:'AとBが同じなら true、違えば false。'},
+  ne: {name:'等しくない　A ≠ B', desc:'AとBが違えば true、同じなら false。'},
+  gt: {name:'より大きい　A ＞ B', desc:'AがBより大きいなら true。'},
+  lt: {name:'より小さい　A ＜ B', desc:'AがBより小さいなら true。'},
+  ge: {name:'以上　A ≧ B', desc:'AがB以上なら true。'},
+  le: {name:'以下　A ≦ B', desc:'AがB以下なら true。'},
+
+  and:{name:'かつ（AND）', desc:'AとBが両方 true のときだけ true。'},
+  or: {name:'または（OR）', desc:'AとBのどちらかが true なら true。'},
+  not:{name:'反対にする（NOT）', desc:'trueとfalseを入れ替えます。'},
+  ternary:{name:'もし〜なら〜でなければ〜', desc:'条件がtrueなら1つ目の値、falseなら2つ目の値を選びます。ドアの開閉などランダム分岐の基本形です。'},
+
+  f_abs:  {name:'絶対値 abs(A)', desc:'符号を取り除いた値（マイナスをプラスに）。'},
+  f_sqrt: {name:'平方根 sqrt(A)', desc:'Aの平方根を求めます。'},
+  f_sin:  {name:'サイン sin(A)', desc:'三角関数のサイン（A はラジアン）。揺れる動きなどに。'},
+  f_cos:  {name:'コサイン cos(A)', desc:'三角関数のコサイン（A はラジアン）。'},
+  f_tan:  {name:'タンジェント tan(A)', desc:'三角関数のタンジェント（A はラジアン）。'},
+  f_floor:{name:'切り捨て floor(A)', desc:'Aを超えない一番大きい整数にします。'},
+  f_ceil: {name:'切り上げ ceil(A)', desc:'Aより小さくない一番小さい整数にします。'},
+  f_round:{name:'四捨五入 round(A)', desc:'一番近い整数にします。'},
+  f_trunc:{name:'整数部分 trunc(A)', desc:'小数点以下を切り捨てて整数部分だけ残します。'},
+  f_sign: {name:'符号 sign(A)', desc:'プラスなら1、マイナスなら-1、0なら0を返します。'},
+  f_ln:   {name:'自然対数 ln(A)', desc:'Aの自然対数を求めます。'},
+  f_log10:{name:'常用対数 log10(A)', desc:'Aの底10の対数を求めます。'},
+  f_log2: {name:'2進対数 log2(A)', desc:'Aの底2の対数を求めます。'},
+  f_exp:  {name:'指数関数 exp(A)', desc:'eのA乗を求めます。'},
+  f_min:  {name:'小さい方 min(A, B)', desc:'AとBのうち小さい方を返します。'},
+  f_max:  {name:'大きい方 max(A, B)', desc:'AとBのうち大きい方を返します。'},
+  f_hypot:{name:'斜辺の長さ hypot(A, B)', desc:'直角三角形の斜辺の長さ（√(A²+B²)）。'},
+  f_pow2: {name:'べき乗 pow(A, B)', desc:'AのB乗（^演算子と同じ）。'},
+  f_atan2:{name:'角度を求める atan2(Y, X)', desc:'(0,0)から(X,Y)への角度（ラジアン）を求めます。'},
+  f_roundto:{name:'桁数を指定して丸める roundTo(A, 桁数)', desc:'Aを指定した小数点以下の桁数に丸めます。'},
+  f_random: {name:'ランダムな小数 random(N)', desc:'0以上N未満のランダムな小数を返します。'},
+  f_randomint:{name:'ランダムな整数 randomInt(最小, 最大)', desc:'最小〜最大の範囲でランダムな整数を1つ選びます。「3つのドアから1つ選ぶ」等の基本ブロックです。'},
+  f_if:   {name:'条件で値を選ぶ if(条件, 真, 偽)', desc:'条件がtrueなら2番目、falseなら3番目の値を返します（もし〜なら〜と同じ意味）。'},
 };
 
 function T(s){return {t:'text', s};}
@@ -362,27 +465,28 @@ function renderPalette(){
     title.className='cat-title';
     title.textContent = cat.label;
     pal.appendChild(title);
+    if(cat.desc){
+      const d = document.createElement('div');
+      d.className='cat-desc';
+      d.textContent = cat.desc;
+      pal.appendChild(d);
+    }
     Object.entries(DEFS).forEach(([type,def])=>{
       if(def.cat!==catKey) return;
+      const meta = CHIP_META[type] || {name:type, desc:''};
       const chip = document.createElement('div');
       chip.className = 'chip '+cat.cls;
       chip.draggable = true;
-      chip.innerHTML = previewLabel(type);
+      chip.title = meta.desc;
+      chip.innerHTML = `<span class="chip-name">${escapeHtml(meta.name)}</span>`;
       chip.addEventListener('dragstart', e=>{
         e.dataTransfer.setData('text/new-block', type);
         e.dataTransfer.effectAllowed='copy';
       });
+      // gentle "pick me up" affordance on touch/click devices: also allow tap-to-add to first empty slot? kept drag-only but with clearer cursor hint
       pal.appendChild(chip);
     });
   });
-}
-function previewLabel(type){
-  const def = DEFS[type];
-  return def.parts.map(p=>{
-    if(p.t==='text') return `<span class="txt">${escapeHtml(p.s)}</span>`;
-    if(p.t==='field') return `<span class="txt" style="opacity:.6">${p.kind==='number'?def===DEFS.num? '#':p.default : '“'+p.default+'”'}</span>`;
-    if(p.t==='slot') return `<span class="txt" style="opacity:.4">◯</span>`;
-  }).join(' ');
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -402,7 +506,10 @@ function renderLines(){
 
     const badge = document.createElement('span');
     badge.className='line-badge';
-    badge.textContent = line.isReturn ? 'RETURN' : 'VAR';
+    badge.textContent = line.isReturn ? '戻り値' : '変数';
+    badge.title = line.isReturn
+      ? 'このブロックの位置／回転として最終的に使われる式です'
+      : '名前をつけて、あとで再利用できる値です';
     head.appendChild(badge);
 
     if(!line.isReturn){
@@ -442,7 +549,7 @@ function renderLines(){
       slotDiv.appendChild(renderBlock(line.rootUid, {kind:'line', lineId:line.id}));
     } else {
       const ph = document.createElement('span');
-      ph.className='slot-empty'; ph.textContent='← ここにブロックをドロップ';
+      ph.className='slot-empty'; ph.textContent='👈 左のパレットからブロックをここにドラッグ＆ドロップ';
       slotDiv.appendChild(ph);
     }
     div.appendChild(slotDiv);
@@ -652,7 +759,7 @@ function copyText(text, btn){
 /* ============================================================
    MODE + WIRING
    ============================================================ */
-function setMode(m){
+function setMode(m, skipInit){
   mode = m;
   document.getElementById('modeVarBtn').classList.toggle('active', m==='var');
   document.getElementById('modeProgBtn').classList.toggle('active', m==='prog');
@@ -660,10 +767,12 @@ function setMode(m){
     ? '「EDIT VARIABLES」パネル用：名前つき変数を1行ずつ定義'
     : 'Programmatic オブジェクト用：time等の定義済み変数と複数行の式が使える';
   document.getElementById('addLineBtn').textContent = m==='var' ? '＋ 変数を追加' : '＋ 中間変数を追加';
-  initLines();
+  if(!skipInit) initLines();
   renderPalette();
-  renderLines();
-  updateOutput();
+  if(!skipInit){
+    renderLines();
+    updateOutput();
+  }
 }
 
 document.getElementById('modeVarBtn').addEventListener('click', ()=>setMode('var'));
@@ -680,6 +789,40 @@ document.getElementById('addLineBtn').addEventListener('click', ()=>{
 });
 document.getElementById('copyFullBtn').addEventListener('click', function(){
   copyText(document.getElementById('fullOutput').textContent, this);
+});
+
+document.getElementById('guideToggleBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  const box = document.getElementById('guideBox');
+  box.classList.toggle('collapsed');
+  this.textContent = box.classList.contains('collapsed') ? '開く' : 'たたむ';
+});
+
+function numInst(v){ const u=newInstance('num'); instances[u].fields.v=v; return u; }
+function varInst(name){ const u=newInstance('varref'); instances[u].fields.v=name; return u; }
+
+document.getElementById('loadSampleBtn').addEventListener('click', ()=>{
+  setMode('var', true);
+  lines = [];
+  // DoorNumber = randomInt(1, 3)
+  const l1 = mkLine('DoorNumber', false);
+  const rInt = newInstance('f_randomint');
+  instances[rInt].slots.a = numInst(1);
+  instances[rInt].slots.b = numInst(3);
+  l1.rootUid = rInt;
+  lines.push(l1);
+  // Door1Open / Door2Open / Door3Open = DoorNumber == n
+  [1,2,3].forEach(n=>{
+    const l = mkLine('Door'+n+'Open', false);
+    const eqUid = newInstance('eq');
+    instances[eqUid].slots.a = varInst('DoorNumber');
+    instances[eqUid].slots.b = numInst(n);
+    l.rootUid = eqUid;
+    lines.push(l);
+  });
+  document.getElementById('guideBox').classList.add('collapsed');
+  document.getElementById('guideToggleBtn').textContent='開く';
+  renderLines(); updateOutput();
 });
 
 // allow dropping new-block-type chips directly is handled per-slot; prevent default page drop nav

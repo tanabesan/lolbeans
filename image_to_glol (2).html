@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>IMAGE → GLOL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #12141f;
+    --panel: #1a1d2b;
+    --panel-line: #2c3044;
+    --text: #d8dce8;
+    --text-dim: #6b7189;
+    --accent: #7dfab0;
+    --accent-dim: #3f7a5c;
+    --warn: #ff5fa8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+  }
+
+  .pixel-noise {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--panel-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.15;
+    z-index: 0;
+  }
+
+  header {
+    position: relative;
+    z-index: 1;
+    padding: 28px 32px 20px;
+    border-bottom: 2px solid var(--panel-line);
+  }
+
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: var(--accent);
+    margin: 0 0 8px;
+    letter-spacing: 1px;
+    text-shadow: 3px 3px 0 var(--accent-dim);
+  }
+
+  header p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 96px);
+  }
+
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    padding: 28px;
+    border-right: 2px solid var(--panel-line);
+    background: var(--panel);
+  }
+
+  .field { margin-bottom: 22px; }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: lowercase;
+  }
+
+  #drop {
+    border: 2px dashed var(--panel-line);
+    padding: 24px 12px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  #drop:hover, #drop.drag { border-color: var(--accent); color: var(--accent); }
+  #fileInput { display: none; }
+
+  .field input[type="number"] {
+    width: 100%;
+    background: var(--bg);
+    border: 2px solid var(--panel-line);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+  .field input[type="number"]:focus { outline: none; border-color: var(--accent); }
+
+  .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .checkbox-row input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+  button#convertBtn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #0b1410;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+  button#convertBtn:hover { background: #97ffc2; }
+  button#convertBtn:disabled { background: var(--panel-line); color: var(--text-dim); cursor: not-allowed; }
+
+  .stats {
+    margin-top: 16px;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .stats span { color: var(--accent); }
+
+  .viewport {
+    position: relative;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .canvas-wrap {
+    border: 2px solid var(--panel-line);
+    background:
+      linear-gradient(45deg, #1f2233 25%, transparent 25%) -8px 0/16px 16px,
+      linear-gradient(-45deg, #1f2233 25%, transparent 25%) -8px 0/16px 16px,
+      linear-gradient(45deg, transparent 75%, #1f2233 75%) 0 0/16px 16px,
+      linear-gradient(-45deg, transparent 75%, #1f2233 75%) 0 0/16px 16px;
+    background-color: #16182422;
+    padding: 12px;
+  }
+
+  canvas#preview {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: block;
+    max-width: min(70vw, 560px);
+    max-height: 60vh;
+  }
+
+  .empty-state {
+    color: var(--text-dim);
+    font-size: 12px;
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  #downloadBtn {
+    padding: 12px 28px;
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: none;
+  }
+  #downloadBtn:hover { background: var(--accent); color: #0b1410; }
+
+  #err {
+    color: var(--warn);
+    font-size: 12px;
+    margin-top: 10px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="pixel-noise"></div>
+
+<header>
+  <h1>IMAGE → GLOL</h1>
+  <p>画像をLOLBeansのSolid Paneピクセルアートに変換する</p>
+</header>
+
+<main>
+  <div class="panel">
+
+    <div class="field">
+      <label>入力画像</label>
+      <div id="drop">クリック or ドラッグ&ドロップ</div>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="field">
+      <label>グリッドサイズ (ブロック数)</label>
+      <div class="grid-two">
+        <input type="number" id="gridW" value="32" min="1" max="128">
+        <input type="number" id="gridH" value="32" min="1" max="128">
+      </div>
+      <div class="checkbox-row" style="margin-top:10px;">
+        <input type="checkbox" id="lockAspect" checked>
+        <span>元画像の縦横比に合わせる</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>グループ名</label>
+      <input type="text" id="groupName" value="Converted" style="width:100%; background: var(--bg); border: 2px solid var(--panel-line); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 14px; padding: 8px 10px;">
+    </div>
+
+    <div class="field">
+      <label>彩度 / 明度 補正(薄く見える場合の調整)</label>
+      <div class="grid-two">
+        <div>
+          <label style="font-size:10px; margin-bottom:4px;">彩度 <span id="satVal">1.0</span></label>
+          <input type="range" id="saturation" min="0.5" max="2" step="0.05" value="1" style="width:100%;">
+        </div>
+        <div>
+          <label style="font-size:10px; margin-bottom:4px;">明度 <span id="briVal">1.0</span></label>
+          <input type="range" id="brightness" min="0.5" max="1.5" step="0.05" value="1" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="checkbox-row">
+        <input type="checkbox" id="keepTransparent">
+        <span>透明ピクセルもブロック化する</span>
+      </div>
+    </div>
+
+    <button id="convertBtn" disabled>変換する</button>
+    <div id="err"></div>
+
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="viewport">
+    <div class="canvas-wrap">
+      <canvas id="preview" width="1" height="1"></canvas>
+      <div class="empty-state" id="emptyState">画像を選択するとここにピクセル化プレビューが表示されます</div>
+    </div>
+    <button id="downloadBtn">.glol をダウンロード</button>
+  </div>
+</main>
+
+<script>
+const BLOCK_ID = 500;
+const BLOCK_NAME = "Solid Pane";
+const SPACING = 1.0;
+const DEFAULT_QUATERNION = { x: 0, y: -0.7071067811865475, z: 0, w: 0.7071067811865476 };
+
+let sourceImg = null;
+let lastGlol = null;
+let aspectRatio = 1;
+let syncing = false;
+
+const gridWInput = document.getElementById('gridW');
+const gridHInput = document.getElementById('gridH');
+const lockAspectEl = document.getElementById('lockAspect');
+
+gridWInput.addEventListener('input', () => {
+  if (syncing || !lockAspectEl.checked) return;
+  syncing = true;
+  const w = parseInt(gridWInput.value, 10);
+  if (w > 0) gridHInput.value = Math.max(1, Math.round(w / aspectRatio));
+  syncing = false;
+});
+
+gridHInput.addEventListener('input', () => {
+  if (syncing || !lockAspectEl.checked) return;
+  syncing = true;
+  const h = parseInt(gridHInput.value, 10);
+  if (h > 0) gridWInput.value = Math.max(1, Math.round(h * aspectRatio));
+  syncing = false;
+});
+
+const dropEl = document.getElementById('drop');
+const fileInput = document.getElementById('fileInput');
+const convertBtn = document.getElementById('convertBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const previewCanvas = document.getElementById('preview');
+const emptyState = document.getElementById('emptyState');
+const statsEl = document.getElementById('stats');
+const errEl = document.getElementById('err');
+
+dropEl.addEventListener('click', () => fileInput.click());
+dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('drag'); });
+dropEl.addEventListener('dragleave', () => dropEl.classList.remove('drag'));
+dropEl.addEventListener('drop', e => {
+  e.preventDefault();
+  dropEl.classList.remove('drag');
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) loadFile(e.target.files[0]);
+});
+
+function loadFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      sourceImg = img;
+      aspectRatio = img.naturalWidth / img.naturalHeight;
+      dropEl.textContent = file.name;
+      convertBtn.disabled = false;
+      errEl.style.display = 'none';
+
+      if (lockAspectEl.checked) {
+        syncing = true;
+        const w = parseInt(gridWInput.value, 10) || 32;
+        gridHInput.value = Math.max(1, Math.round(w / aspectRatio));
+        syncing = false;
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+convertBtn.addEventListener('click', convert);
+
+function rgbToTint(r, g, b) {
+  return (r << 16) + (g << 8) + b;
+}
+
+function adjustColor(r, g, b, saturation, brightness) {
+  const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+  r = gray + (r - gray) * saturation;
+  g = gray + (g - gray) * saturation;
+  b = gray + (b - gray) * saturation;
+  r *= brightness; g *= brightness; b *= brightness;
+  const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
+  return [clamp(r), clamp(g), clamp(b)];
+}
+
+const saturationInput = document.getElementById('saturation');
+const brightnessInput = document.getElementById('brightness');
+const satVal = document.getElementById('satVal');
+const briVal = document.getElementById('briVal');
+saturationInput.addEventListener('input', () => satVal.textContent = parseFloat(saturationInput.value).toFixed(2));
+brightnessInput.addEventListener('input', () => briVal.textContent = parseFloat(brightnessInput.value).toFixed(2));
+
+function convert() {
+  errEl.style.display = 'none';
+  const gw = parseInt(document.getElementById('gridW').value, 10);
+  const gh = parseInt(document.getElementById('gridH').value, 10);
+  const groupName = document.getElementById('groupName').value || 'Converted';
+  const keepTransparent = document.getElementById('keepTransparent').checked;
+  const saturation = parseFloat(saturationInput.value);
+  const brightness = parseFloat(brightnessInput.value);
+
+  if (!sourceImg || !gw || !gh || gw < 1 || gh < 1) {
+    errEl.textContent = '画像とグリッドサイズを正しく指定してください';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // ソースをグリッドサイズにニアレストネイバーで縮小
+  const sampleCanvas = document.createElement('canvas');
+  sampleCanvas.width = gw;
+  sampleCanvas.height = gh;
+  const sctx = sampleCanvas.getContext('2d');
+  sctx.imageSmoothingEnabled = false;
+  sctx.drawImage(sourceImg, 0, 0, gw, gh);
+  const data = sctx.getImageData(0, 0, gw, gh).data;
+
+  function getTint(col, row) {
+    const idx = (row * gw + col) * 4;
+    const a = data[idx + 3];
+    if (!keepTransparent && a < 10) return null;
+    const [r, g, b] = adjustColor(data[idx], data[idx + 1], data[idx + 2], saturation, brightness);
+    return rgbToTint(r, g, b);
+  }
+
+  // 1st pass: 各行で横方向のラン(同色の連続)を検出
+  const rowRuns = [];
+  for (let row = 0; row < gh; row++) {
+    const runs = [];
+    let col = 0;
+    while (col < gw) {
+      const tint = getTint(col, row);
+      if (tint === null) { col++; continue; }
+      let runLen = 1;
+      while (col + runLen < gw && getTint(col + runLen, row) === tint) {
+        runLen++;
+      }
+      runs.push([col, runLen, tint]);
+      col += runLen;
+    }
+    rowRuns.push(runs);
+  }
+
+  // 2nd pass: 同じ幅・同じ色の横ランが縦に連続していたら1つの大きいブロックにまとめる
+  const blocks = [];
+  const ids = [];
+  let nextId = 1;
+  const openBlocks = new Map(); // key "col,len,tint" -> {startRow, height}
+
+  function flush(key, info) {
+    const [colStart, runLen, tint] = key.split(',').map(Number);
+    const { startRow, height } = info;
+    const x = colStart * SPACING + (runLen - 1) * SPACING / 2;
+    // scale.y は下端がピボットで上方向にだけ伸びるので、縦ランの一番下の行の位置を使う
+    const bottomRow = startRow + height - 1;
+    const y = -0.5 - bottomRow * SPACING;
+    const z = 0;
+    const block = {
+      id: nextId,
+      blockId: BLOCK_ID,
+      name: BLOCK_NAME,
+      type: "static",
+      position: { x, y, z },
+      quaternion: { ...DEFAULT_QUATERNION },
+      tintColor: tint
+    };
+    // 90度回転しているため、横幅はローカルz軸、縦幅はローカルy軸のスケールで伸ばす
+    if (runLen > 1 || height > 1) {
+      block.scale = { x: 1, y: height, z: runLen };
+    }
+    blocks.push(block);
+    ids.push(nextId);
+    nextId++;
+  }
+
+  for (let row = 0; row < gh; row++) {
+    const currentKeys = new Set(rowRuns[row].map(r => r.join(',')));
+    for (const key of Array.from(openBlocks.keys())) {
+      if (!currentKeys.has(key)) {
+        flush(key, openBlocks.get(key));
+        openBlocks.delete(key);
+      }
+    }
+    for (const r of rowRuns[row]) {
+      const key = r.join(',');
+      if (openBlocks.has(key)) {
+        openBlocks.get(key).height++;
+      } else {
+        openBlocks.set(key, { startRow: row, height: 1 });
+      }
+    }
+  }
+  for (const [key, info] of openBlocks) {
+    flush(key, info);
+  }
+
+  lastGlol = {
+    blocks,
+    groups: { [groupName]: ids },
+    version: 3
+  };
+
+  // プレビュー描画(拡大して見やすく、ドット感を保持)
+  const displayScale = Math.max(1, Math.floor(480 / Math.max(gw, gh)));
+  previewCanvas.width = gw * displayScale;
+  previewCanvas.height = gh * displayScale;
+  const pctx = previewCanvas.getContext('2d');
+  pctx.imageSmoothingEnabled = false;
+  pctx.drawImage(sampleCanvas, 0, 0, gw * displayScale, gh * displayScale);
+  emptyState.style.display = 'none';
+  previewCanvas.style.display = 'block';
+
+  statsEl.innerHTML = `ブロック数: <span>${blocks.length}</span> (${gw * gh}ピクセル中)<br>グリッド: <span>${gw} × ${gh}</span>`;
+  downloadBtn.style.display = 'inline-block';
+}
+
+downloadBtn.addEventListener('click', () => {
+  if (!lastGlol) return;
+  const blob = new Blob([JSON.stringify(lastGlol)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (document.getElementById('groupName').value || 'converted') + '.glol';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+previewCanvas.style.display = 'none';
+</script>
+
+</body>
+</html>

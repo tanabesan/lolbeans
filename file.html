@@ -211,6 +211,11 @@
             color: var(--text-dim);
             margin-bottom: 12px;
         }
+        .download-count {
+            font-size: 11px;
+            color: var(--accent2);
+            margin-bottom: 12px;
+        }
         .download-item-content p {
             font-size: 12px;
             color: var(--text-dim);
@@ -345,6 +350,45 @@
         <p style="margin-top: 15px;">2025 Yuki.</p>
     </footer>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDocs, collection, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
+            authDomain: "lolex0204.firebaseapp.com",
+            projectId: "lolex0204",
+            storageBucket: "lolex0204.firebasestorage.app",
+            messagingSenderId: "940620254622",
+            appId: "1:940620254622:web:edca80d191423cd460da8f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ダウンロード数を読み込んでグローバルに公開(下の通常scriptから参照する)
+        window.__downloadCounts = {};
+        getDocs(collection(db, "downloadCounts")).then(snapshot => {
+            snapshot.forEach(d => {
+                window.__downloadCounts[d.id] = d.data().count || 0;
+            });
+            if (window.__renderFilesIfReady) window.__renderFilesIfReady();
+        }).catch(err => {
+            console.error("ダウンロード数の取得に失敗:", err);
+            if (window.__renderFilesIfReady) window.__renderFilesIfReady();
+        });
+
+        // ダウンロードボタンが押された時にカウントを+1する
+        window.__incrementDownloadCount = async (fileId) => {
+            if (!fileId) return;
+            try {
+                await setDoc(doc(db, "downloadCounts", fileId), { count: increment(1) }, { merge: true });
+            } catch (err) {
+                console.error("ダウンロード数の更新に失敗:", err);
+            }
+        };
+    </script>
+
     <script>
         const translations = {
             ja: {
@@ -432,7 +476,12 @@
                 displayFiles(filteredFiles);
             };
 
+            let filesDataReady = false;
+            let filteredFilesCache = [];
+
             const displayFiles = (files) => {
+                filesDataReady = true;
+                filteredFilesCache = files;
                 fileListContainer.innerHTML = '';
                 const langData = translations[localStorage.getItem('language') || 'ja'];
 
@@ -442,6 +491,7 @@
                 }
                 files.forEach(item => {
                     const typeLabel = item.type === 'glol-template' ? 'GLOL-T' : item.type.toUpperCase();
+                    const count = (window.__downloadCounts && window.__downloadCounts[item.id]) || 0;
                     const cardHtml = `
                         <div class="download-item-card">
                             <img src="${item.thumbnailUrl}" alt="${item.title}のサムネイル">
@@ -449,14 +499,28 @@
                             <div class="download-item-content">
                                 <h3>${item.title}</h3>
                                 <p class="author-name">by ${item.author}</p>
+                                <p class="download-count">⬇ ${count} 回ダウンロード</p>
                                 <p>${item.description}</p>
-                                <a href="${item.downloadUrl}" class="download-button-small">${langData.downloadButton}</a>
+                                <a href="${item.downloadUrl}" class="download-button-small" data-file-id="${item.id || ''}">${langData.downloadButton}</a>
                             </div>
                         </div>
                     `;
                     fileListContainer.innerHTML += cardHtml;
                 });
             };
+
+            // Firestoreのダウンロード数取得が終わった後に再描画するためのフック
+            window.__renderFilesIfReady = () => {
+                if (filesDataReady) displayFiles(filteredFilesCache);
+            };
+
+            // ダウンロードボタンのクリックをイベント委譲でハンドリング(カウント+1)
+            fileListContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('.download-button-small');
+                if (btn && btn.dataset.fileId && window.__incrementDownloadCount) {
+                    window.__incrementDownloadCount(btn.dataset.fileId);
+                }
+            });
 
             fetch('data.json', { cache: 'no-cache' })
                 .then(response => {

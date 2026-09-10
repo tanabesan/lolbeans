@@ -204,6 +204,16 @@
             </div>
 
             <div class="field">
+                <label>ヘッダー画像(サムネイル・任意)</label>
+                <div class="file-drop" id="dropThumb">
+                    <div>クリック or ドラッグ&ドロップ (画像)</div>
+                    <div class="fname" id="fnameThumb"></div>
+                </div>
+                <input type="file" id="thumbInput" accept="image/*">
+                <div class="hint">未指定の場合はデフォルト画像が使われます。最大 3MB。</div>
+            </div>
+
+            <div class="field">
                 <label>ファイル (.lol / .glol)</label>
                 <div class="file-drop" id="drop">
                     <div>クリック or ドラッグ&ドロップ</div>
@@ -238,15 +248,48 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+        const MAX_SIZE = 2 * 1024 * 1024; // 2MB (.lol/.glol)
+        const MAX_THUMB_SIZE = 3 * 1024 * 1024; // 3MB (サムネイル画像)
+        const DEFAULT_THUMBNAIL = "https://tanabesan.github.io/lolbeans/file/page/7396.png";
 
         const dropEl = document.getElementById('drop');
         const fileInput = document.getElementById('fileInput');
         const fnameEl = document.getElementById('fname');
+        const dropThumbEl = document.getElementById('dropThumb');
+        const thumbInput = document.getElementById('thumbInput');
+        const fnameThumbEl = document.getElementById('fnameThumb');
         const submitBtn = document.getElementById('submitBtn');
         const statusEl = document.getElementById('statusMsg');
 
         let selectedFile = null;
+        let selectedThumb = null;
+
+        dropThumbEl.addEventListener('click', () => thumbInput.click());
+        dropThumbEl.addEventListener('dragover', e => { e.preventDefault(); dropThumbEl.classList.add('drag'); });
+        dropThumbEl.addEventListener('dragleave', () => dropThumbEl.classList.remove('drag'));
+        dropThumbEl.addEventListener('drop', e => {
+            e.preventDefault();
+            dropThumbEl.classList.remove('drag');
+            if (e.dataTransfer.files[0]) handleThumb(e.dataTransfer.files[0]);
+        });
+        thumbInput.addEventListener('change', e => {
+            if (e.target.files[0]) handleThumb(e.target.files[0]);
+        });
+
+        function handleThumb(file) {
+            if (!file.type.startsWith('image/')) {
+                showStatus('error', '画像ファイルを選んでください');
+                selectedThumb = null;
+                return;
+            }
+            if (file.size > MAX_THUMB_SIZE) {
+                showStatus('error', 'サムネイル画像が3MBを超えています');
+                selectedThumb = null;
+                return;
+            }
+            selectedThumb = file;
+            fnameThumbEl.textContent = file.name;
+        }
 
         dropEl.addEventListener('click', () => fileInput.click());
         dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('drag'); });
@@ -326,6 +369,14 @@
                 await uploadBytes(storageRef, selectedFile);
                 const downloadUrl = await getDownloadURL(storageRef);
 
+                let thumbnailUrl = DEFAULT_THUMBNAIL;
+                if (selectedThumb) {
+                    const safeThumbName = `${Date.now()}_${selectedThumb.name}`;
+                    const thumbRef = ref(storage, `pending/thumbnails/${safeThumbName}`);
+                    await uploadBytes(thumbRef, selectedThumb);
+                    thumbnailUrl = await getDownloadURL(thumbRef);
+                }
+
                 await addDoc(collection(db, "pendingFiles"), {
                     title,
                     author,
@@ -333,6 +384,7 @@
                     type: fileType,
                     fileName: selectedFile.name,
                     downloadUrl,
+                    thumbnailUrl,
                     storagePath: `pending/${safeName}`,
                     status: "pending",
                     createdAt: serverTimestamp()
@@ -343,7 +395,9 @@
                 document.getElementById('author').value = '';
                 document.getElementById('description').value = '';
                 fnameEl.textContent = '';
+                fnameThumbEl.textContent = '';
                 selectedFile = null;
+                selectedThumb = null;
             } catch (err) {
                 console.error(err);
                 showStatus('error', '投稿に失敗しました。時間をおいて再度お試しください');

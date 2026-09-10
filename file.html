@@ -366,19 +366,29 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ダウンロード数を読み込んでグローバルに公開(下の通常scriptから参照する)
         window.__downloadCounts = {};
-        getDocs(collection(db, "downloadCounts")).then(snapshot => {
-            snapshot.forEach(d => {
+        window.__filesFromFirestore = null;
+
+        async function loadEverything() {
+            const [filesSnap, countsSnap] = await Promise.all([
+                getDocs(collection(db, "files")),
+                getDocs(collection(db, "downloadCounts"))
+            ]);
+
+            countsSnap.forEach(d => {
                 window.__downloadCounts[d.id] = d.data().count || 0;
             });
-            if (window.__renderFilesIfReady) window.__renderFilesIfReady();
-        }).catch(err => {
-            console.error("ダウンロード数の取得に失敗:", err);
-            if (window.__renderFilesIfReady) window.__renderFilesIfReady();
-        });
 
-        // ダウンロードボタンが押された時にカウントを+1する
+            const files = [];
+            filesSnap.forEach(d => {
+                files.push({ id: d.id, ...d.data() });
+            });
+            window.__filesFromFirestore = files;
+
+            if (window.__renderFilesFromFirestore) window.__renderFilesFromFirestore(files);
+        }
+        loadEverything().catch(err => console.error("ファイル一覧の取得に失敗:", err));
+
         window.__incrementDownloadCount = async (fileId) => {
             if (!fileId) return;
             try {
@@ -509,9 +519,10 @@
                 });
             };
 
-            // Firestoreのダウンロード数取得が終わった後に再描画するためのフック
-            window.__renderFilesIfReady = () => {
-                if (filesDataReady) displayFiles(filteredFilesCache);
+            // Firestoreのファイル一覧が取得できたら描画する
+            window.__renderFilesFromFirestore = (files) => {
+                allFiles = files;
+                filterAndDisplayFiles();
             };
 
             // ダウンロードボタンのクリックをイベント委譲でハンドリング(カウント+1)
@@ -522,22 +533,12 @@
                 }
             });
 
-            fetch('data.json', { cache: 'no-cache' })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok ' + response.statusText);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    allFiles = data;
-                    filterAndDisplayFiles();
-                })
-                .catch(error => {
-                    console.error('ファイルの読み込みに失敗しました:', error);
-                    const langData = translations[localStorage.getItem('language') || 'ja'];
-                    fileListContainer.innerHTML = `<p style="color: #ff5f7a; text-align: center;">${langData.loadingError}</p>`;
-                });
+            if (window.__filesFromFirestore) {
+                allFiles = window.__filesFromFirestore;
+                filterAndDisplayFiles();
+            } else {
+                fileListContainer.innerHTML = '<p style="text-align:center; color: var(--text-dim);">読み込み中...</p>';
+            }
 
             searchInput.addEventListener('keyup', () => {
                 filterAndDisplayFiles();

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOL.ex - ファイルを投稿</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg: #0d0e17;
+            --panel: #171a29;
+            --panel-line: #2c3044;
+            --text: #d8dce8;
+            --text-dim: #6b7189;
+            --accent: #ff00ff;
+            --accent2: #00ffff;
+            --accent-dim: #7a2f7a;
+            --error-color: #ff5f7a;
+            --success-color: #00ffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        .pixel-noise {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(var(--panel-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
+            background-size: 24px 24px;
+            opacity: 0.12;
+            z-index: 0;
+        }
+
+        .hero-section {
+            position: relative;
+            z-index: 1;
+            padding: 64px 20px 44px;
+            text-align: center;
+            border-bottom: 2px solid var(--panel-line);
+        }
+        .hero-section h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 20px;
+            font-weight: normal;
+            letter-spacing: 1px;
+            color: #fff;
+            margin: 0 0 16px;
+            text-shadow: 3px 3px 0 var(--accent-dim), 0 0 16px rgba(0,255,255,0.35);
+        }
+        .hero-section p {
+            font-size: 0.9em;
+            font-weight: 400;
+            margin: 0;
+            color: var(--text-dim);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 620px;
+            margin: 0 auto 60px;
+            padding: 44px 20px 0;
+        }
+
+        .form-card {
+            background: var(--panel);
+            border: 2px solid var(--panel-line);
+            padding: 32px;
+        }
+
+        .field { margin-bottom: 22px; }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            margin-bottom: 8px;
+            color: var(--text-dim);
+        }
+
+        .field input[type="text"],
+        .field textarea,
+        .field select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            border: 2px solid var(--panel-line);
+            border-radius: 0;
+        }
+        .field input:focus, .field textarea:focus, .field select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .field textarea { resize: vertical; min-height: 80px; }
+
+        .file-drop {
+            border: 2px dashed var(--panel-line);
+            padding: 24px 12px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-dim);
+            font-size: 12px;
+            transition: border-color 0.15s, color 0.15s;
+        }
+        .file-drop:hover, .file-drop.drag { border-color: var(--accent); color: var(--accent); }
+        .file-drop input { display: none; }
+        .file-drop .fname { color: var(--accent); font-weight: 700; margin-top: 8px; }
+
+        .hint { font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+
+        button#submitBtn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent2);
+            color: #0b0715;
+            border: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+        button#submitBtn:hover { background: #66ffff; }
+        button#submitBtn:disabled { background: var(--panel-line); color: var(--text-dim); cursor: not-allowed; }
+
+        #statusMsg {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border: 2px solid;
+            font-size: 12px;
+            display: none;
+        }
+        #statusMsg.error { background: rgba(255,95,122,0.08); color: var(--error-color); border-color: var(--error-color); display: block; }
+        #statusMsg.success { background: rgba(0,255,255,0.08); color: var(--success-color); border-color: var(--success-color); display: block; }
+        #statusMsg.loading { background: rgba(255,0,255,0.08); color: var(--accent); border-color: var(--accent); display: block; }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .hero-section { padding: 44px 18px 32px; }
+            .hero-section h1 { font-size: 15px; }
+            .form-card { padding: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pixel-noise"></div>
+
+    <header class="hero-section">
+        <h1>ファイルを投稿</h1>
+        <p>あなたの.lol / .glolファイルをライブラリに投稿しよう</p>
+    </header>
+
+    <div class="container">
+        <div class="form-card">
+            <div class="field">
+                <label>タイトル</label>
+                <input type="text" id="title" maxlength="60" placeholder="例: サイバーパンク street map">
+            </div>
+
+            <div class="field">
+                <label>作者名</label>
+                <input type="text" id="author" maxlength="30" placeholder="表示される名前">
+            </div>
+
+            <div class="field">
+                <label>説明</label>
+                <textarea id="description" maxlength="300" placeholder="どんなファイルか簡単に説明してください"></textarea>
+            </div>
+
+            <div class="field">
+                <label>ファイル種別</label>
+                <select id="fileType">
+                    <option value="lol">.lol</option>
+                    <option value="glol">.glol</option>
+                    <option value="glol-template">.glol (template)</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>ファイル (.lol / .glol)</label>
+                <div class="file-drop" id="drop">
+                    <div>クリック or ドラッグ&ドロップ</div>
+                    <div class="fname" id="fname"></div>
+                </div>
+                <input type="file" id="fileInput" accept=".lol,.glol">
+                <div class="hint">最大 2MB。中身がJSONとして正しいか自動でチェックされます。</div>
+            </div>
+
+            <button id="submitBtn">投稿する(審査待ちになります)</button>
+            <div id="statusMsg"></div>
+        </div>
+
+        <a class="back-link" href="file.html">← ファイルライブラリに戻る</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
+            authDomain: "lolex0204.firebaseapp.com",
+            projectId: "lolex0204",
+            storageBucket: "lolex0204.firebasestorage.app",
+            messagingSenderId: "940620254622",
+            appId: "1:940620254622:web:edca80d191423cd460da8f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+
+        const dropEl = document.getElementById('drop');
+        const fileInput = document.getElementById('fileInput');
+        const fnameEl = document.getElementById('fname');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusEl = document.getElementById('statusMsg');
+
+        let selectedFile = null;
+
+        dropEl.addEventListener('click', () => fileInput.click());
+        dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('drag'); });
+        dropEl.addEventListener('dragleave', () => dropEl.classList.remove('drag'));
+        dropEl.addEventListener('drop', e => {
+            e.preventDefault();
+            dropEl.classList.remove('drag');
+            if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', e => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
+
+        function showStatus(type, text) {
+            statusEl.className = type;
+            statusEl.textContent = text;
+        }
+
+        function handleFile(file) {
+            showStatus('', '');
+            statusEl.style.display = 'none';
+
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext !== 'lol' && ext !== 'glol') {
+                showStatus('error', '.lol または .glol ファイルを選んでください');
+                selectedFile = null;
+                return;
+            }
+            if (file.size > MAX_SIZE) {
+                showStatus('error', 'ファイルサイズが2MBを超えています');
+                selectedFile = null;
+                return;
+            }
+
+            // JSONとして正しいか、最低限のスキーマ(blocks/groups/version)を満たしているか検証
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const json = JSON.parse(ev.target.result);
+                    if (!json.blocks || !json.groups || json.version === undefined) {
+                        showStatus('error', 'JSONは読めましたが、blocks / groups / version のいずれかが欠けています');
+                        selectedFile = null;
+                        return;
+                    }
+                    selectedFile = file;
+                    fnameEl.textContent = file.name + ` (${json.blocks.length} blocks)`;
+                    const typeSelect = document.getElementById('fileType');
+                    const currentBase = typeSelect.value.startsWith('glol') ? 'glol' : typeSelect.value;
+                    if (currentBase !== ext) {
+                        typeSelect.value = ext;
+                    }
+                } catch (err) {
+                    showStatus('error', 'JSONとして読み込めませんでした。ファイルが壊れている可能性があります');
+                    selectedFile = null;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        submitBtn.addEventListener('click', async () => {
+            const title = document.getElementById('title').value.trim();
+            const author = document.getElementById('author').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const fileType = document.getElementById('fileType').value;
+
+            if (!title || !author || !selectedFile) {
+                showStatus('error', 'タイトル・作者名・ファイルは必須です');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            showStatus('loading', 'アップロード中...');
+
+            try {
+                const safeName = `${Date.now()}_${selectedFile.name}`;
+                const storageRef = ref(storage, `pending/${safeName}`);
+                await uploadBytes(storageRef, selectedFile);
+                const downloadUrl = await getDownloadURL(storageRef);
+
+                await addDoc(collection(db, "pendingFiles"), {
+                    title,
+                    author,
+                    description,
+                    type: fileType,
+                    fileName: selectedFile.name,
+                    downloadUrl,
+                    storagePath: `pending/${safeName}`,
+                    status: "pending",
+                    createdAt: serverTimestamp()
+                });
+
+                showStatus('success', '投稿ありがとうございます!審査後に公開されます。');
+                document.getElementById('title').value = '';
+                document.getElementById('author').value = '';
+                document.getElementById('description').value = '';
+                fnameEl.textContent = '';
+                selectedFile = null;
+            } catch (err) {
+                console.error(err);
+                showStatus('error', '投稿に失敗しました。時間をおいて再度お試しください');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

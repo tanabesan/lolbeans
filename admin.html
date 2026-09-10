@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOL.ex - 管理画面</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0d0e17;
+            --panel: #171a29;
+            --panel-line: #2c3044;
+            --text: #d8dce8;
+            --text-dim: #6b7189;
+            --accent: #ff00ff;
+            --accent2: #00ffff;
+            --accent-dim: #7a2f7a;
+            --error-color: #ff5f7a;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+        }
+        header {
+            padding: 30px 24px;
+            border-bottom: 2px solid var(--panel-line);
+            text-align: center;
+        }
+        header h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 16px;
+            font-weight: normal;
+            color: #fff;
+            margin: 0;
+            text-shadow: 2px 2px 0 var(--accent-dim);
+        }
+
+        #loginScreen {
+            max-width: 340px;
+            margin: 80px auto;
+            padding: 32px;
+            background: var(--panel);
+            border: 2px solid var(--panel-line);
+        }
+        #loginScreen input {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            background: var(--bg);
+            border: 2px solid var(--panel-line);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+        }
+        #loginScreen input:focus { outline: none; border-color: var(--accent); }
+        #loginScreen button {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent2);
+            color: #0b0715;
+            border: none;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+        }
+        #loginError { color: var(--error-color); font-size: 12px; margin-top: 10px; display: none; }
+
+        #adminScreen { display: none; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 30px 20px 80px; }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .top-bar button {
+            background: transparent;
+            border: 2px solid var(--panel-line);
+            color: var(--text-dim);
+            padding: 6px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .top-bar button:hover { border-color: var(--accent); color: var(--accent); }
+
+        .pending-card {
+            background: var(--panel);
+            border: 2px solid var(--panel-line);
+            padding: 20px;
+            margin-bottom: 16px;
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 18px;
+            align-items: center;
+        }
+        .pending-card img {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border: 2px solid var(--panel-line);
+        }
+        .pending-card h3 { margin: 0 0 4px; font-size: 14px; }
+        .pending-card .meta { font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
+        .pending-card .desc { font-size: 12px; color: var(--text); }
+        .pending-card .type-badge {
+            display: inline-block;
+            font-size: 10px;
+            border: 1px solid var(--accent2);
+            color: var(--accent2);
+            padding: 2px 8px;
+            margin-right: 8px;
+        }
+
+        .actions { display: flex; flex-direction: column; gap: 8px; }
+        .actions button {
+            padding: 10px 18px;
+            border: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-approve { background: var(--accent2); color: #0b0715; }
+        .btn-approve:hover { background: #66ffff; }
+        .btn-reject { background: transparent; border: 2px solid var(--error-color) !important; color: var(--error-color); }
+        .btn-reject:hover { background: var(--error-color); color: #0b0715; }
+        .actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .empty { text-align: center; color: var(--text-dim); padding: 60px 0; font-size: 13px; }
+
+        @media (max-width: 620px) {
+            .pending-card { grid-template-columns: 1fr; }
+            .pending-card img { width: 100%; height: 160px; }
+            .actions { flex-direction: row; }
+        }
+    </style>
+</head>
+<body>
+
+<header><h1>ADMIN PANEL</h1></header>
+
+<div id="loginScreen">
+    <input type="email" id="email" placeholder="管理者メールアドレス">
+    <input type="password" id="password" placeholder="パスワード">
+    <button id="loginBtn">ログイン</button>
+    <div id="loginError"></div>
+</div>
+
+<div id="adminScreen">
+    <div class="container">
+        <div class="top-bar">
+            <span id="userLabel"></span>
+            <button id="logoutBtn">ログアウト</button>
+        </div>
+        <div id="pendingList"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+        getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+        getFirestore, collection, query, where, getDocs, getDoc, doc, setDoc, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
+        authDomain: "lolex0204.firebaseapp.com",
+        projectId: "lolex0204",
+        storageBucket: "lolex0204.firebasestorage.app",
+        messagingSenderId: "940620254622",
+        appId: "1:940620254622:web:edca80d191423cd460da8f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const loginScreen = document.getElementById('loginScreen');
+    const adminScreen = document.getElementById('adminScreen');
+    const loginError = document.getElementById('loginError');
+    const userLabel = document.getElementById('userLabel');
+    const pendingList = document.getElementById('pendingList');
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        loginError.style.display = 'none';
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+            loginError.textContent = 'ログインに失敗しました。メールアドレス/パスワードを確認してください';
+            loginError.style.display = 'block';
+        }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            loginScreen.style.display = 'none';
+            adminScreen.style.display = 'block';
+            userLabel.textContent = user.email;
+            loadPending();
+        } else {
+            loginScreen.style.display = 'block';
+            adminScreen.style.display = 'none';
+        }
+    });
+
+    async function loadPending() {
+        pendingList.innerHTML = '<div class="empty">読み込み中...</div>';
+        const q = query(collection(db, "pendingFiles"), where("status", "==", "pending"));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+            pendingList.innerHTML = '<div class="empty">審査待ちの投稿はありません</div>';
+            return;
+        }
+
+        pendingList.innerHTML = '';
+        snapshot.forEach(docSnap => {
+            const item = docSnap.data();
+            const id = docSnap.id;
+            const card = document.createElement('div');
+            card.className = 'pending-card';
+            card.innerHTML = `
+                <img src="${item.thumbnailUrl || ''}" alt="">
+                <div>
+                    <span class="type-badge">${item.type}</span>
+                    <h3>${escapeHtml(item.title)}</h3>
+                    <div class="meta">by ${escapeHtml(item.author)} ・ ${escapeHtml(item.fileName)}</div>
+                    <div class="desc">${escapeHtml(item.description || '')}</div>
+                    <div class="meta" style="margin-top:8px;"><a href="${item.downloadUrl}" target="_blank" style="color:var(--accent2);">ファイルを確認する →</a></div>
+                </div>
+                <div class="actions">
+                    <button class="btn-approve" data-id="${id}">承認する</button>
+                    <button class="btn-reject" data-id="${id}">却下する</button>
+                </div>
+            `;
+            pendingList.appendChild(card);
+        });
+
+        pendingList.querySelectorAll('.btn-approve').forEach(btn => {
+            btn.addEventListener('click', () => approveItem(btn.dataset.id, btn));
+        });
+        pendingList.querySelectorAll('.btn-reject').forEach(btn => {
+            btn.addEventListener('click', () => rejectItem(btn.dataset.id, btn));
+        });
+    }
+
+    async function approveItem(id, btn) {
+        btn.disabled = true;
+        btn.textContent = '承認中...';
+        try {
+            const snap = await getDoc(doc(db, "pendingFiles", id));
+            if (!snap.exists()) throw new Error('not found');
+            const item = snap.data();
+
+            // 承認済みの files コレクションに、同じIDでコピーする
+            await setDoc(doc(db, "files", id), {
+                title: item.title,
+                author: item.author,
+                description: item.description,
+                type: item.type,
+                downloadUrl: item.downloadUrl,
+                thumbnailUrl: item.thumbnailUrl,
+                approvedAt: new Date()
+            });
+
+            await deleteDoc(doc(db, "pendingFiles", id));
+            loadPending();
+        } catch (err) {
+            console.error(err);
+            alert('承認処理に失敗しました');
+            btn.disabled = false;
+            btn.textContent = '承認する';
+        }
+    }
+
+    async function rejectItem(id, btn) {
+        if (!confirm('この投稿を却下します。よろしいですか?')) return;
+        btn.disabled = true;
+        btn.textContent = '却下中...';
+        try {
+            await deleteDoc(doc(db, "pendingFiles", id));
+            loadPending();
+        } catch (err) {
+            console.error(err);
+            alert('却下処理に失敗しました');
+            btn.disabled = false;
+            btn.textContent = '却下する';
+        }
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+</script>
+
+</body>
+</html>

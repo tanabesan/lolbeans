@@ -167,28 +167,40 @@
         }
 
         .download-item-card {
-            background: var(--panel);
-            border: 2px solid var(--panel-line);
-            transition: border-color 0.2s ease, transform 0.15s ease;
-            overflow: hidden;
             position: relative;
             width: 100%;
+            aspect-ratio: 4 / 5;
+            border: 2px solid var(--panel-line);
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            transition: border-color 0.2s ease, transform 0.15s ease;
+            text-decoration: none;
+            display: block;
+            color: var(--text);
         }
         .download-item-card:hover {
             border-color: var(--accent2);
             transform: translate(-2px, -2px);
         }
-        .download-item-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            display: block;
-            filter: saturate(1.1);
+
+        .card-scrim {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(6,7,14,0.92) 0%, rgba(6,7,14,0.55) 32%, rgba(6,7,14,0) 60%);
         }
-        .file-info-badge {
+
+        .card-top {
             position: absolute;
             top: 12px;
+            left: 12px;
             right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .file-info-badge {
             padding: 4px 10px;
             font-size: 10px;
             font-weight: 700;
@@ -199,36 +211,56 @@
         .badge-glol { background-color: var(--accent); }
         .badge-glol-template { background-color: #ffe066; }
 
-        .download-item-content { padding: 20px; }
-        .download-item-content h3 {
-            font-size: 1em;
-            font-weight: 700;
-            color: var(--text);
-            margin: 0 0 6px;
+        .card-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            border: 2px solid var(--accent2);
+            background: var(--panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            overflow: hidden;
         }
-        .author-name {
+
+        .card-bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 16px;
+        }
+        .card-bottom h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 4px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+        }
+        .card-bottom .author-name {
             font-size: 11px;
-            color: var(--text-dim);
-            margin-bottom: 12px;
+            color: var(--accent2);
+            margin-bottom: 10px;
+        }
+
+        .card-stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .download-count {
             font-size: 11px;
-            color: var(--accent2);
-            margin-bottom: 12px;
-        }
-        .download-item-content p {
-            font-size: 12px;
             color: var(--text-dim);
-            margin-bottom: 16px;
         }
         .download-button-small {
             display: inline-block;
-            padding: 10px 20px;
+            padding: 7px 16px;
             background-color: var(--accent2);
             color: #0b0715;
             font-weight: 700;
             text-decoration: none;
-            font-size: 12px;
+            font-size: 11px;
             transition: background-color 0.2s ease;
         }
         .download-button-small:hover { background-color: #66ffff; }
@@ -502,16 +534,21 @@
                 files.forEach(item => {
                     const typeLabel = item.type === 'glol-template' ? 'GLOL-T' : item.type.toUpperCase();
                     const count = (window.__downloadCounts && window.__downloadCounts[item.id]) || 0;
+                    const initial = (item.author || '?').trim().charAt(0).toUpperCase();
                     const cardHtml = `
-                        <div class="download-item-card">
-                            <img src="${item.thumbnailUrl}" alt="${item.title}のサムネイル">
-                            <span class="file-info-badge badge-${item.type}">${typeLabel}</span>
-                            <div class="download-item-content">
+                        <div class="download-item-card" style="background-image: url('${item.thumbnailUrl}');">
+                            <div class="card-scrim"></div>
+                            <div class="card-top">
+                                <span class="file-info-badge badge-${item.type}">${typeLabel}</span>
+                                <div class="card-avatar">${initial}</div>
+                            </div>
+                            <div class="card-bottom">
                                 <h3>${item.title}</h3>
-                                <p class="author-name">by ${item.author}</p>
-                                <p class="download-count">⬇ ${count} 回ダウンロード</p>
-                                <p>${item.description}</p>
-                                <a href="${item.downloadUrl}" class="download-button-small" data-file-id="${item.id || ''}">${langData.downloadButton}</a>
+                                <p class="author-name">${item.author}</p>
+                                <div class="card-stats-row">
+                                    <span class="download-count">⬇ ${count}</span>
+                                    <a href="${item.downloadUrl}" class="download-button-small" data-file-id="${item.id || ''}">${langData.downloadButton}</a>
+                                </div>
                             </div>
                         </div>
                     `;

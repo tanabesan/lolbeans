@@ -2,7 +2,7 @@
 // @name         LOL.ex ver0.85
 // @namespace    http://tampermonkey.net/
 // @version      0.85
-// @description  LOLBeans extension - Added: Key/Mouse input display overlay (real keyboard layout)
+// @description  LOLBeans extension
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
 // @match        https://bean.lol/*

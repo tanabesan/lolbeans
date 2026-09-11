@@ -13,23 +13,25 @@
     const BASE = "https://tanabesan.github.io/lolbeans/";
 
     const links = [
-        { group: "ホーム", items: [
+        { id: "home", group: "ホーム", items: [
             { id: "home", label: "トップページ", href: BASE }
         ]},
-        { group: "ツール", items: [
-            { id: "lolex", label: "LOL.ex", href: BASE + "lolex/lolex.html" },
-            { id: "community", label: "コース一覧", href: BASE + "community/community.html" },
-            { id: "ranking", label: "WRランキング", href: BASE + "community/ranking.html" },
+        { id: "tools", group: "ツール", items: [
             { id: "template", label: "IMAGE → GLOL", href: BASE + "conversion/template.html" },
             { id: "block-forge", label: "BLOCK FORGE", href: BASE + "blockforge/programatic.html" }
         ]},
-        { group: "ファイルライブラリ", items: [
-            { id: "file-library", label: "ファイルライブラリ", href: BASE + "library/file.html" },
-            { id: "submit", label: "ファイルを投稿する", href: BASE + "library/submit.html" }
+        { id: "community", group: "コミュニティ", items: [
+            { id: "community", label: "コース一覧", href: BASE + "community/community.html" },
+            { id: "ranking", label: "WRランキング", href: BASE + "community/ranking.html" }
         ]},
-        { group: "その他", items: [
+        { id: "lolex", group: "LOL.ex", items: [
+            { id: "lolex", label: "LOL.ex", href: BASE + "lolex/lolex.html" },
             { id: "faq", label: "よくある質問", href: BASE + "lolex/faq.html" },
             { id: "contact", label: "お問い合わせ", href: BASE + "lolex/contact.html" }
+        ]},
+        { id: "library", group: "ファイルライブラリ", items: [
+            { id: "file-library", label: "ファイルライブラリ", href: BASE + "library/file.html" },
+            { id: "submit", label: "ファイルを投稿する", href: BASE + "library/submit.html" }
         ]}
     ];
 

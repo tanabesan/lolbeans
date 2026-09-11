@@ -86,44 +86,15 @@
             color: var(--text-dim);
         }
 
-        .navbar {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            background-color: rgba(23, 26, 41, 0.92);
-            border: 2px solid var(--panel-line);
-            padding: 8px 16px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-        }
-        .navbar a {
-            color: var(--text-dim);
-            text-decoration: none;
-            margin: 0 12px;
-            font-size: 12px;
-            transition: color 0.2s ease;
-            display: inline-block;
-        }
-        .navbar a:hover { color: var(--accent2); }
-
         #language-switcher {
-            padding: 6px 8px;
+            display: inline-block;
+            padding: 8px 10px;
             border: 2px solid var(--panel-line);
             background: var(--bg);
             color: var(--text);
             font-family: 'JetBrains Mono', monospace;
-            margin-left: 12px;
             cursor: pointer;
             font-size: 12px;
-        }
-
-        .hamburger-menu {
-            display: none;
-            cursor: pointer;
-            font-size: 1.3em;
-            color: var(--text);
-            padding: 5px;
         }
 
         .container {
@@ -307,28 +278,12 @@
         }
 
         @media (max-width: 768px) {
-            .navbar a { display: none; }
-            #language-switcher { margin-left: 0; }
-            .navbar {
-                background-color: transparent;
-                border: none;
-                padding: 10px;
-                flex-direction: column-reverse;
-                align-items: flex-end;
-            }
-            .hamburger-menu { display: block; margin-bottom: 10px; }
-            .navbar.open a { display: block; margin: 10px 0; }
-            .navbar.open {
-                background-color: rgba(23, 26, 41, 0.96);
-                border: 2px solid var(--panel-line);
-                padding: 20px;
-                display: flex;
-            }
-            .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
         }
     </style>
 </head>
-<body>
+<body data-nav-current="file-library">
+
+    <script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 
     <div class="pixel-noise"></div>
 
@@ -337,21 +292,14 @@
         <p id="hero-subtitle">エディター用ファイルをダウンロード</p>
     </header>
 
-    <nav class="navbar">
-        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
-        <a id="nav-main-page" href="https://tanabesan.github.io/lolbeans/">メインページ</a>
-        <a id="nav-file-library" href="https://tanabesan.github.io/lolbeans/library/file.html">ファイルライブラリ</a>
-        <a id="nav-community" href="../community.html">コミュ一覧</a>
-        <a id="nav-faq" href="https://tanabesan.github.io/lolbeans/faq.html">よくある質問</a>
-        <a id="nav-contact" href="https://tanabesan.github.io/lolbeans/contact.html">お問い合わせ</a>
-        <select id="language-switcher">
-            <option value="ja">日本語</option>
-            <option value="en">English</option>
-        </select>
-    </nav>
-
     <main class="container">
         <section id="download-items" style="text-align: center;">
+            <div style="text-align:right; margin-bottom: 16px;">
+                <select id="language-switcher">
+                    <option value="ja">日本語</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
             <h2 id="available-files-title" style="font-family:'Press Start 2P',monospace; font-size:14px; font-weight:normal; color:var(--accent2);">利用可能なファイル</h2>
             <p id="description-text" style="max-width: 700px; margin: 16px auto 32px; font-size: 12px; color: var(--text-dim);">
                 ここでは、ゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
@@ -477,12 +425,6 @@
 
             document.title = langData.heroTitle;
 
-            document.getElementById('nav-main-page').textContent = langData.mainPage;
-            document.getElementById('nav-community').textContent = langData.community;
-            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
-            document.getElementById('nav-faq').textContent = langData.faq;
-            document.getElementById('nav-contact').textContent = langData.contact;
-
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
             document.getElementById('available-files-title').textContent = langData.availableFiles;
@@ -496,8 +438,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             const fileListContainer = document.getElementById('file-list');
             const searchInput = document.getElementById('search-input');
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            const navbar = document.querySelector('.navbar');
             const filterButtons = document.querySelectorAll('.filter-button');
             const languageSwitcher = document.getElementById('language-switcher');
             let allFiles = [];
@@ -596,10 +536,6 @@
             languageSwitcher.addEventListener('change', (event) => {
                 applyLanguage(event.target.value);
                 filterAndDisplayFiles();
-            });
-
-            hamburgerIcon.addEventListener('click', () => {
-                navbar.classList.toggle('open');
             });
         });
     </script>

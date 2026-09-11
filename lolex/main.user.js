@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         LOL.ex ver0.83
+// @name         LOL.ex ver0.85
 // @namespace    http://tampermonkey.net/
-// @version      0.83
-// @description  LOLBeans extension - Added: Best time calculator & PNG save
+// @version      0.85
+// @description  LOLBeans extension - Added: Key/Mouse input display overlay (real keyboard layout)
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
 // @match        https://bean.lol/*
@@ -12,14 +12,14 @@
 // @grant        GM_xmlhttpRequest
 // @connect      s.lolbeans.io
 // @run-at       document-start
-// @updateURL    https://tanabesan.github.io//lolex/extension/main.user.js
-// @downloadURL  https://tanabesan.github.io/lolex/extension/main.user.js
+// @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
+// @downloadURL  https://tanabesan.github.io/lolbeans/lolex//main.user.js
 // ==/UserScript==
 
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '0.83';
+    const SCRIPT_VERSION = '0.85';
 
     const STORAGE = {
         VIDEO:          'yt-videoId',
@@ -39,6 +39,10 @@
         BAR_VISIBLE:    'yt-card-visible',
         YT_HOTKEY:      'lolex-yt-hotkey',
         FLOAT_BTN:      'lolex-yt-float-btn',
+        // ★ キー表示機能
+        KEYDISPLAY_ENABLED: 'lolex-keydisplay-enabled',
+        KEYDISPLAY_KEYS:    'lolex-keydisplay-keys',
+        KEYDISPLAY_POS:     'lolex-keydisplay-pos',
     };
 
     const DEFAULT = {
@@ -52,13 +56,23 @@
             'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1280&q=80',
             'https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1280&q=80',
         ],
+        // ★ キー表示機能のデフォルトキー一覧 (WASD + Space + マウス左右)
+        KEYDISPLAY_KEYS: [
+            { code: 'KeyW',      label: 'W' },
+            { code: 'KeyA',      label: 'A' },
+            { code: 'KeyS',      label: 'S' },
+            { code: 'KeyD',      label: 'D' },
+            { code: 'Space',     label: 'SPACE' },
+            { code: 'MouseLeft', label: 'L' },
+            { code: 'MouseRight',label: 'R' },
+        ],
     };
 
     const LOLEX_KEYS = [
         'yt-videoId','yt-playlistId','yt-last-time','customBackgroundUrl','customBackgroundList',
         'yt-is-visible','yt-loop','yt-shuffle','airMoveAutoSwitchEnabled','lolex-language',
         'lolex-primary-color','lolex-secondary-color','yt-collapsed','yt-volume','yt-card-visible',
-        'lolex-yt-hotkey','lolex-yt-float-btn',
+        'lolex-yt-hotkey','lolex-yt-float-btn','lolex-keydisplay-enabled','lolex-keydisplay-keys','lolex-keydisplay-pos',
     ];
     ['beacon-bay','boulder-hill','circus-contest','devils-trick','dash-cup','escape-tsunami',
      'gravity-gates','hammer-ville','jungle-temple','kittie-kegs','lava-lake','mecha-maze',
@@ -122,7 +136,7 @@
             tabTitle:            `LOL.ex v${SCRIPT_VERSION}`,
             discordInvite:       'Discordサーバーに参加する',
             latestUpdates:       '最新アップデート情報',
-            updateInfo:          '・ベストタイム計算機能を追加しました。<br>・サムネイル付きタイム一覧のPNG保存機能を追加しました。<br>・全体的な安定性を向上させました。',
+            updateInfo:          '・キー/マウス入力表示を実際のキーボード配列風レイアウトに対応しました。<br>・ベストタイム計算機能を追加しました。<br>・サムネイル付きタイム一覧のPNG保存機能を追加しました。<br>・全体的な安定性を向上させました。',
             language:            '言語',
             airMoveAutoSwitch:   'Air Move 自動切り替え全体制御',
             enableAutoSwitch:    'Air Move 自動切り替え機能を有効化',
@@ -177,12 +191,26 @@
             bestTimesNoSession:  'sessionID不明',
             bestTimesSaving:     '生成中...',
             bestTimesNote:       'APIからベストタイムを取得して合計を計算します。同名コースは最速タイムのみ使用。',
+            // ★ キー表示機能
+            keyDisplaySettings:  'キー/マウス入力表示',
+            keyDisplayEnable:    '入力表示を有効化',
+            keyDisplayEnableNote:'ゲーム画面に押しているキー・マウスボタンをリアルタイム表示します。',
+            keyDisplayKeysLabel: '表示するキー一覧',
+            keyDisplayAddKey:    'キーを追加',
+            keyDisplayWaiting:   'キー入力待ち... (Escで中止)',
+            keyDisplayMouseHint: 'マウスの左右クリックもキーの代わりに登録できます。',
+            keyDisplayResetDefault: 'デフォルトに戻す',
+            keyDisplayPosition:  '表示位置',
+            posBottomLeft:       '左下',
+            posBottomRight:      '右下',
+            posTopLeft:          '左上',
+            posTopRight:         '右上',
         },
         en: {
             tabTitle:            `LOL.ex v${SCRIPT_VERSION}`,
             discordInvite:       'Join Discord Server',
             latestUpdates:       'Latest Updates',
-            updateInfo:          '・Added best time calculator feature.<br>・Added PNG save for time list with thumbnails.<br>・Improved overall stability.',
+            updateInfo:          '・Key/mouse input display now uses a real keyboard-layout arrangement.<br>・Added best time calculator feature.<br>・Added PNG save for time list with thumbnails.<br>・Improved overall stability.',
             language:            'Language',
             airMoveAutoSwitch:   'Air Move Auto Switch Control',
             enableAutoSwitch:    'Enable Air Move Auto Switch',
@@ -237,6 +265,20 @@
             bestTimesNoSession:  'Session not found',
             bestTimesSaving:     'Generating...',
             bestTimesNote:       'Fetches best times from API. For duplicate courses, only the fastest time is used.',
+            // ★ Key display feature
+            keyDisplaySettings:  'Key / Mouse Input Display',
+            keyDisplayEnable:    'Enable Input Display',
+            keyDisplayEnableNote:'Shows the keys and mouse buttons you press in real time on screen.',
+            keyDisplayKeysLabel: 'Keys to Display',
+            keyDisplayAddKey:    'Add Key',
+            keyDisplayWaiting:   'Waiting for input... (Esc to cancel)',
+            keyDisplayMouseHint: 'You can also register left/right mouse clicks instead of a key.',
+            keyDisplayResetDefault: 'Reset to Default',
+            keyDisplayPosition:  'Display Position',
+            posBottomLeft:       'Bottom Left',
+            posBottomRight:      'Bottom Right',
+            posTopLeft:          'Top Left',
+            posTopRight:         'Top Right',
         },
     };
 
@@ -607,6 +649,245 @@
     }
 
     // ------------------------------------------------------------------------------------------------
+    //  ★ キー/マウス入力表示機能
+    // ------------------------------------------------------------------------------------------------
+    function getKeyDisplayKeys() {
+        try {
+            const raw = localStorage.getItem(STORAGE.KEYDISPLAY_KEYS);
+            if (!raw) return DEFAULT.KEYDISPLAY_KEYS.map(k => ({ ...k }));
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            return DEFAULT.KEYDISPLAY_KEYS.map(k => ({ ...k }));
+        } catch (_) { return DEFAULT.KEYDISPLAY_KEYS.map(k => ({ ...k })); }
+    }
+
+    function setKeyDisplayKeys(list) {
+        localStorage.setItem(STORAGE.KEYDISPLAY_KEYS, JSON.stringify(list));
+    }
+
+    function getKeyDisplayPos() { return localStorage.getItem(STORAGE.KEYDISPLAY_POS) || 'bottom-left'; }
+
+    // code(KeyboardEvent.code / 'MouseLeft' / 'MouseRight' / 'MouseMiddle') → 表示ラベル
+    function labelForCode(code) {
+        if (code === 'MouseLeft')   return 'L';
+        if (code === 'MouseRight')  return 'R';
+        if (code === 'MouseMiddle') return 'M';
+        if (code === 'Space')       return 'SPACE';
+        if (code.startsWith('Key'))   return code.slice(3);
+        if (code.startsWith('Digit')) return code.slice(5);
+        if (code.startsWith('Arrow')) return { ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' }[code] || code;
+        const map = {
+            ShiftLeft: 'SHIFT', ShiftRight: 'SHIFT', ControlLeft: 'CTRL', ControlRight: 'CTRL',
+            AltLeft: 'ALT', AltRight: 'ALT', Tab: 'TAB', Enter: 'ENTER', Escape: 'ESC',
+            CapsLock: 'CAPS', Backquote: '`',
+        };
+        return map[code] || code.replace(/^Key|^Digit/, '').toUpperCase();
+    }
+
+    function isMouseCode(code) { return code === 'MouseLeft' || code === 'MouseRight' || code === 'MouseMiddle'; }
+
+    // ★ 実際のキーボード配列に近い座標テーブル (row: 段, col: 列 [1キー=1単位, 段ズレ込み], w: 幅[単位])
+    const KEY_GRID_POS = (() => {
+        const map = {};
+        const set = (code, row, col, w = 1) => { map[code] = { row, col, w }; };
+        // 数字段
+        ['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9','Digit0'].forEach((c, i) => set(c, 0, i));
+        // QWERTY段
+        ['KeyQ','KeyW','KeyE','KeyR','KeyT','KeyY','KeyU','KeyI','KeyO','KeyP'].forEach((c, i) => set(c, 1, 0.5 + i));
+        // ASDF段
+        ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'].forEach((c, i) => set(c, 2, 0.8 + i));
+        // ZXCV段
+        ['KeyZ','KeyX','KeyC','KeyV','KeyB','KeyN','KeyM'].forEach((c, i) => set(c, 3, 1.3 + i));
+        // モディファイア・特殊キー
+        set('Tab',         1, -0.8, 1.3);
+        set('CapsLock',    2, -0.5, 1.5);
+        set('Enter',       2, 9.3,  1.6);
+        set('ShiftLeft',   3, -0.7, 1.6);
+        set('ShiftRight',  3, 8.3,  1.6);
+        set('ControlLeft', 4, -0.7, 1.2);
+        set('AltLeft',     4, 0.7,  1.2);
+        set('AltRight',    4, 5.5,  1.2);
+        set('ControlRight',4, 6.9,  1.2);
+        set('Space',       4, 2.1,  6);
+        set('Backquote',   0, -1.2, 1);
+        set('Minus',       0, 10,   1);
+        set('Equal',       0, 11,   1);
+        set('Escape',      -1, -0.8, 1.2);
+        // 矢印キー (右下クラスタ)
+        set('ArrowUp',    3, 13.6, 1);
+        set('ArrowLeft',  4, 12.6, 1);
+        set('ArrowDown',  4, 13.6, 1);
+        set('ArrowRight', 4, 14.6, 1);
+        return map;
+    })();
+
+    function addKeyDisplayStyleSheet() {
+        if (document.getElementById('lolex-keydisplay-style')) return;
+        const style = document.createElement('style');
+        style.id = 'lolex-keydisplay-style';
+        style.textContent = `
+            #lolex-keydisplay { position: fixed; z-index: 9996; display: flex; gap: 14px; align-items: flex-end; pointer-events: none; user-select: none; }
+            #lolex-keydisplay.pos-bottom-left  { left: 18px; bottom: 18px; }
+            #lolex-keydisplay.pos-bottom-right { right: 18px; bottom: 18px; flex-direction: row-reverse; }
+            #lolex-keydisplay.pos-top-left     { left: 18px; top: 70px; }
+            #lolex-keydisplay.pos-top-right    { right: 18px; top: 70px; flex-direction: row-reverse; }
+            #lolex-keydisplay.lolex-kd-hidden  { display: none !important; }
+
+            #lolex-kd-grid { position: relative; }
+            #lolex-kd-loose { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-width: 120px; }
+
+            .lolex-key-box {
+                position: absolute; box-sizing: border-box; border-radius: 7px;
+                background: rgba(10,10,18,0.72); border: 1.5px solid rgba(255,255,255,0.18);
+                color: rgba(255,255,255,0.72); font-family: 'Segoe UI', sans-serif; font-weight: 800;
+                font-size: 12px; display: flex; align-items: center; justify-content: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.45); backdrop-filter: blur(3px);
+                transition: transform 0.08s ease, background 0.08s ease, border-color 0.08s ease, box-shadow 0.08s ease, color 0.08s ease;
+            }
+            .lolex-key-box.lolex-key-loose { position: static; min-width: 30px; height: 30px; padding: 0 5px; }
+            .lolex-key-box.lolex-key-pressed {
+                background: var(--secondary-color, #03DAC6); color: #05050a;
+                border-color: var(--secondary-color, #03DAC6); transform: scale(0.90) translateY(2px);
+                box-shadow: 0 0 14px var(--secondary-color, #03DAC6), 0 0 2px #fff inset;
+            }
+
+            /* マウス型シルエット表示 */
+            .lolex-mouse-body {
+                position: relative; width: 46px; height: 68px; border-radius: 23px 23px 12px 12px;
+                background: rgba(10,10,18,0.55); border: 1.5px solid rgba(255,255,255,0.18);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.45); backdrop-filter: blur(3px);
+                display: flex; overflow: hidden;
+            }
+            .lolex-mouse-half {
+                flex: 1; display: flex; align-items: flex-start; justify-content: center;
+                padding-top: 7px; color: rgba(255,255,255,0.6); font-weight: 800; font-size: 11px;
+                font-family: 'Segoe UI', sans-serif; transition: background 0.08s ease, color 0.08s ease;
+            }
+            .lolex-mouse-half.lolex-key-pressed { background: var(--secondary-color, #03DAC6); color: #05050a; }
+            .lolex-mouse-half:first-child { border-right: 1px solid rgba(255,255,255,0.14); border-radius: 23px 0 0 0; }
+            .lolex-mouse-half:last-child  { border-radius: 0 23px 0 0; }
+            .lolex-mouse-wheel { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 6px; height: 14px; border-radius: 3px; background: rgba(255,255,255,0.25); transition: background 0.08s ease; }
+            .lolex-mouse-wheel.lolex-key-pressed { background: var(--secondary-color, #03DAC6); }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const _keyDisplayPressed = new Set();
+
+    const KD_UNIT_X = 34, KD_UNIT_Y = 34, KD_GAP = 3;
+
+    function buildKeyDisplayUI() {
+        addKeyDisplayStyleSheet();
+        let container = $('lolex-keydisplay');
+        if (container) container.remove();
+        container = el('div', { id: 'lolex-keydisplay' });
+        container.classList.add('pos-' + getKeyDisplayPos());
+        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true)) container.classList.add('lolex-kd-hidden');
+
+        const keys = getKeyDisplayKeys();
+        const mouseKeys = keys.filter(k => isMouseCode(k.code));
+        const gridKeys  = keys.filter(k => !isMouseCode(k.code) && KEY_GRID_POS[k.code]);
+        const looseKeys = keys.filter(k => !isMouseCode(k.code) && !KEY_GRID_POS[k.code]);
+
+        // ── キーボード配列クラスター ──
+        if (gridKeys.length > 0) {
+            const positions = gridKeys.map(k => ({ k, pos: KEY_GRID_POS[k.code] }));
+            const minCol = Math.min(...positions.map(p => p.pos.col));
+            const minRow = Math.min(...positions.map(p => p.pos.row));
+            const maxColEdge = Math.max(...positions.map(p => p.pos.col + p.pos.w));
+            const maxRow = Math.max(...positions.map(p => p.pos.row));
+            const gridEl = el('div', { id: 'lolex-kd-grid' }, {
+                width: `${(maxColEdge - minCol) * KD_UNIT_X}px`,
+                height: `${(maxRow - minRow + 1) * KD_UNIT_Y}px`,
+            });
+            positions.forEach(({ k, pos }) => {
+                const box = el('div', { className: 'lolex-key-box', textContent: k.label }, {
+                    left:   `${(pos.col - minCol) * KD_UNIT_X}px`,
+                    top:    `${(pos.row - minRow) * KD_UNIT_Y}px`,
+                    width:  `${pos.w * KD_UNIT_X - KD_GAP}px`,
+                    height: `${KD_UNIT_Y - KD_GAP}px`,
+                });
+                box.dataset.code = k.code;
+                if (_keyDisplayPressed.has(k.code)) box.classList.add('lolex-key-pressed');
+                gridEl.appendChild(box);
+            });
+            container.appendChild(gridEl);
+        }
+
+        // ── マウス型クラスター ──
+        if (mouseKeys.length > 0) {
+            const mouseBody = el('div', { className: 'lolex-mouse-body' });
+            const hasMiddle = mouseKeys.some(k => k.code === 'MouseMiddle');
+            const left = mouseKeys.find(k => k.code === 'MouseLeft');
+            const right = mouseKeys.find(k => k.code === 'MouseRight');
+            if (left) {
+                const half = el('div', { className: 'lolex-mouse-half', textContent: left.label });
+                half.dataset.code = 'MouseLeft';
+                if (_keyDisplayPressed.has('MouseLeft')) half.classList.add('lolex-key-pressed');
+                mouseBody.appendChild(half);
+            }
+            if (hasMiddle) {
+                const wheelK = mouseKeys.find(k => k.code === 'MouseMiddle');
+                const wheel = el('div', { className: 'lolex-mouse-wheel' });
+                wheel.dataset.code = 'MouseMiddle';
+                if (_keyDisplayPressed.has('MouseMiddle')) wheel.classList.add('lolex-key-pressed');
+                mouseBody.appendChild(wheel);
+            }
+            if (right) {
+                const half = el('div', { className: 'lolex-mouse-half', textContent: right.label });
+                half.dataset.code = 'MouseRight';
+                if (_keyDisplayPressed.has('MouseRight')) half.classList.add('lolex-key-pressed');
+                mouseBody.appendChild(half);
+            }
+            container.appendChild(mouseBody);
+        }
+
+        // ── 配列表に無いキー (フォールバック: 横並び) ──
+        if (looseKeys.length > 0) {
+            const looseEl = el('div', { id: 'lolex-kd-loose' });
+            looseKeys.forEach(k => {
+                const box = el('div', { className: 'lolex-key-box lolex-key-loose', textContent: k.label });
+                box.dataset.code = k.code;
+                if (_keyDisplayPressed.has(k.code)) box.classList.add('lolex-key-pressed');
+                looseEl.appendChild(box);
+            });
+            container.appendChild(looseEl);
+        }
+
+        document.body.appendChild(container);
+    }
+
+    function refreshKeyDisplayVisibility() {
+        const el2 = $('lolex-keydisplay'); if (!el2) return;
+        el2.classList.toggle('lolex-kd-hidden', !getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true));
+    }
+
+    function refreshKeyDisplayPosition() {
+        const el2 = $('lolex-keydisplay'); if (!el2) return;
+        el2.className = '';
+        el2.classList.add('pos-' + getKeyDisplayPos());
+        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true)) el2.classList.add('lolex-kd-hidden');
+    }
+
+    function setKeyPressedVisual(code, pressed) {
+        if (pressed) _keyDisplayPressed.add(code); else _keyDisplayPressed.delete(code);
+        const box = document.querySelector(`#lolex-keydisplay [data-code="${CSS.escape(code)}"]`);
+        if (box) box.classList.toggle('lolex-key-pressed', pressed);
+    }
+
+    let _keyDisplayListenersBound = false;
+    function bindKeyDisplayInputListeners() {
+        if (_keyDisplayListenersBound) return;
+        _keyDisplayListenersBound = true;
+        const mouseCodeForButton = (btn) => btn === 0 ? 'MouseLeft' : btn === 2 ? 'MouseRight' : btn === 1 ? 'MouseMiddle' : null;
+        document.addEventListener('keydown', e => { if (e.code) setKeyPressedVisual(e.code, true); }, true);
+        document.addEventListener('keyup',   e => { if (e.code) setKeyPressedVisual(e.code, false); }, true);
+        document.addEventListener('mousedown', e => { const c = mouseCodeForButton(e.button); if (c) setKeyPressedVisual(c, true); }, true);
+        document.addEventListener('mouseup',   e => { const c = mouseCodeForButton(e.button); if (c) setKeyPressedVisual(c, false); }, true);
+        window.addEventListener('blur', () => { _keyDisplayPressed.forEach(code => setKeyPressedVisual(code, false)); });
+    }
+
+    // ------------------------------------------------------------------------------------------------
     //  スタイルシート
     // ------------------------------------------------------------------------------------------------
     function addModernStyleSheet() {
@@ -668,6 +949,9 @@
             .lb-total-display { font-size: 0.88em; font-weight: 700; padding: 6px 10px 4px; min-height: 22px; }
             .tab5 h3, .tab5 .setting-section, .tab5 .youtube-container, .tab5 .youtube-input-group, .tab5 .setting-row { display: none !important; }
             .tab5 .lolex-settings { display: block !important; }
+            .lolex-kd-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px 4px; }
+            .lolex-kd-chip { display: flex; align-items: center; gap: 5px; background: var(--input-bg); border: 1px solid var(--col-border); border-radius: 14px; padding: 3px 6px 3px 10px; font-size: 0.78em; font-weight: 700; color: var(--col-text); }
+            .lolex-kd-chip button { background: rgba(180,0,30,0.65); color: #fff; border: none; border-radius: 50%; width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; font-size: 0.72em; line-height: 16px; text-align: center; padding: 0; }
         `;
         document.head.appendChild(style);
     }
@@ -901,6 +1185,61 @@
     }
 
     // ------------------------------------------------------------------------------------------------
+    //  ★ キー表示 設定UI 描画
+    // ------------------------------------------------------------------------------------------------
+    let _kdWaitingForInput = false;
+    let _kdCaptureHandlerKey = null;
+    let _kdCaptureHandlerMouse = null;
+
+    function renderKeyDisplayChips() {
+        const wrap = $('lolex-kd-chips'); if (!wrap) return;
+        wrap.innerHTML = '';
+        getKeyDisplayKeys().forEach((k, idx) => {
+            const chip = document.createElement('div'); chip.className = 'lolex-kd-chip';
+            const span = document.createElement('span'); span.textContent = k.label;
+            const del = document.createElement('button'); del.textContent = '×';
+            del.addEventListener('click', () => {
+                const list = getKeyDisplayKeys(); list.splice(idx, 1);
+                setKeyDisplayKeys(list); renderKeyDisplayChips(); buildKeyDisplayUI();
+            });
+            chip.appendChild(span); chip.appendChild(del); wrap.appendChild(chip);
+        });
+    }
+
+    function stopKdCapture(addBtn) {
+        _kdWaitingForInput = false;
+        if (_kdCaptureHandlerKey)   document.removeEventListener('keydown', _kdCaptureHandlerKey, true);
+        if (_kdCaptureHandlerMouse) document.removeEventListener('mousedown', _kdCaptureHandlerMouse, true);
+        _kdCaptureHandlerKey = null; _kdCaptureHandlerMouse = null;
+        if (addBtn) addBtn.textContent = t('keyDisplayAddKey');
+    }
+
+    function startKdCapture(addBtn) {
+        if (_kdWaitingForInput) return;
+        _kdWaitingForInput = true;
+        addBtn.textContent = t('keyDisplayWaiting');
+        _kdCaptureHandlerKey = (e) => {
+            if (e.key === 'Escape') { stopKdCapture(addBtn); return; }
+            e.preventDefault(); e.stopImmediatePropagation();
+            const code = e.code;
+            const list = getKeyDisplayKeys();
+            if (!list.find(k => k.code === code)) { list.push({ code, label: labelForCode(code) }); setKeyDisplayKeys(list); renderKeyDisplayChips(); buildKeyDisplayUI(); }
+            stopKdCapture(addBtn);
+        };
+        _kdCaptureHandlerMouse = (e) => {
+            e.preventDefault(); e.stopImmediatePropagation();
+            const code = e.button === 0 ? 'MouseLeft' : e.button === 2 ? 'MouseRight' : e.button === 1 ? 'MouseMiddle' : null;
+            if (code) {
+                const list = getKeyDisplayKeys();
+                if (!list.find(k => k.code === code)) { list.push({ code, label: labelForCode(code) }); setKeyDisplayKeys(list); renderKeyDisplayChips(); buildKeyDisplayUI(); }
+            }
+            stopKdCapture(addBtn);
+        };
+        document.addEventListener('keydown', _kdCaptureHandlerKey, true);
+        document.addEventListener('mousedown', _kdCaptureHandlerMouse, true);
+    }
+
+    // ------------------------------------------------------------------------------------------------
     //  設定画面 構築
     // ------------------------------------------------------------------------------------------------
     function createSettings() {
@@ -1002,7 +1341,44 @@
         `;
         container.appendChild(visualFs);
 
-        // ── 5. YouTube ──
+        // ── 5. キー/マウス入力表示 ──
+        const kdFs = document.createElement('fieldset');
+        const kdLegend = document.createElement('legend'); kdLegend.innerHTML = `<i class="fas fa-keyboard"></i> ${t('keyDisplaySettings')}`;
+        kdFs.appendChild(kdLegend);
+
+        const kdEnableRow = makeToggleRow('keyDisplayEnableToggle', `<i class="fas fa-eye"></i>${t('keyDisplayEnable')}`, getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true));
+        kdFs.appendChild(kdEnableRow);
+
+        const kdPosRow = document.createElement('div'); kdPosRow.className = 'lolex-setting-row';
+        const kdPosLabel = document.createElement('label'); kdPosLabel.className = 'setting-name'; kdPosLabel.innerHTML = `<i class="fas fa-arrows-alt"></i>${t('keyDisplayPosition')}`;
+        const kdPosSelect = document.createElement('select'); kdPosSelect.id = 'keyDisplayPosSelect';
+        [['bottom-left', t('posBottomLeft')], ['bottom-right', t('posBottomRight')], ['top-left', t('posTopLeft')], ['top-right', t('posTopRight')]].forEach(([val, label]) => {
+            const opt = document.createElement('option'); opt.value = val; opt.textContent = label;
+            if (getKeyDisplayPos() === val) opt.selected = true;
+            kdPosSelect.appendChild(opt);
+        });
+        kdPosRow.appendChild(kdPosLabel); kdPosRow.appendChild(kdPosSelect); kdFs.appendChild(kdPosRow);
+
+        const kdKeysLabelRow = document.createElement('div'); kdKeysLabelRow.className = 'lolex-setting-row'; kdKeysLabelRow.style.borderBottom = 'none';
+        kdKeysLabelRow.innerHTML = `<span class="setting-name"><i class="fas fa-list"></i>${t('keyDisplayKeysLabel')}</span>`;
+        kdFs.appendChild(kdKeysLabelRow);
+
+        const kdChips = document.createElement('div'); kdChips.id = 'lolex-kd-chips'; kdChips.className = 'lolex-kd-chips';
+        kdFs.appendChild(kdChips);
+
+        const kdBtnGroup = document.createElement('div'); kdBtnGroup.className = 'lolex-btn-group';
+        const kdAddBtn = document.createElement('button'); kdAddBtn.id = 'keyDisplayAddBtn'; kdAddBtn.className = 'accent'; kdAddBtn.textContent = t('keyDisplayAddKey');
+        const kdResetBtn = document.createElement('button'); kdResetBtn.id = 'keyDisplayResetBtn'; kdResetBtn.className = 'muted'; kdResetBtn.textContent = t('keyDisplayResetDefault');
+        kdBtnGroup.appendChild(kdAddBtn); kdBtnGroup.appendChild(kdResetBtn);
+        kdFs.appendChild(kdBtnGroup);
+
+        const kdNote = document.createElement('div'); kdNote.className = 'lolex-note';
+        kdNote.innerHTML = `${t('keyDisplayEnableNote')}<br>${t('keyDisplayMouseHint')}`;
+        kdFs.appendChild(kdNote);
+
+        container.appendChild(kdFs);
+
+        // ── 6. YouTube ──
         const ytFs = document.createElement('fieldset');
         const ytLegend = document.createElement('legend'); ytLegend.innerHTML = `<i class="fab fa-youtube"></i> ${t('ytSettings')}`;
         ytFs.appendChild(ytLegend);
@@ -1044,7 +1420,7 @@
         const ytNote = document.createElement('div'); ytNote.className = 'lolex-note'; ytNote.textContent = t('ytNote'); ytFs.appendChild(ytNote);
         container.appendChild(ytFs);
 
-        // ── 6. ベストタイム計算 ──
+        // ── 7. ベストタイム計算 ──
         const btFs = document.createElement('fieldset');
         const btLegend = document.createElement('legend'); btLegend.innerHTML = `<i class="fas fa-stopwatch"></i> ${t('bestTimes')}`;
         btFs.appendChild(btLegend);
@@ -1063,9 +1439,10 @@
         btFs.appendChild(btNote);
         container.appendChild(btFs);
 
-        [[updateFs,'update'],[langFs,'lang'],[gameFs,'airmove'],[courseFs,'course'],[visualFs,'visual'],[ytFs,'yt'],[btFs,'besttimes']].forEach(([fs, key]) => makeCollapsibleFieldset(fs, key));
+        [[updateFs,'update'],[langFs,'lang'],[gameFs,'airmove'],[courseFs,'course'],[visualFs,'visual'],[kdFs,'keydisplay'],[ytFs,'yt'],[btFs,'besttimes']].forEach(([fs, key]) => makeCollapsibleFieldset(fs, key));
 
         panel.appendChild(container);
+        renderKeyDisplayChips();
         bindSettingsEvents();
     }
 
@@ -1082,6 +1459,14 @@
         $('primary-color-picker')?.addEventListener('input', (e) => { localStorage.setItem(STORAGE.PRIMARY_COLOR, e.target.value); applyColorTheme(e.target.value, getSecondaryColor()); updateCourseLabels(); });
         $('secondary-color-picker')?.addEventListener('input', (e) => { localStorage.setItem(STORAGE.SECONDARY_COLOR, e.target.value); applyColorTheme(getPrimaryColor(), e.target.value); updateCourseLabels(); });
         $('color-reset-button')?.addEventListener('click', resetColors);
+        // ★ キー表示
+        $('keyDisplayEnableToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.KEYDISPLAY_ENABLED, e.target.checked); refreshKeyDisplayVisibility(); });
+        $('keyDisplayPosSelect')?.addEventListener('change', (e) => { localStorage.setItem(STORAGE.KEYDISPLAY_POS, e.target.value); refreshKeyDisplayPosition(); });
+        $('keyDisplayAddBtn')?.addEventListener('click', (e) => { startKdCapture(e.target); });
+        $('keyDisplayResetBtn')?.addEventListener('click', () => {
+            setKeyDisplayKeys(DEFAULT.KEYDISPLAY_KEYS.map(k => ({ ...k })));
+            renderKeyDisplayChips(); buildKeyDisplayUI();
+        });
         $('ytLoopToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.LOOP, e.target.checked); try { if (player) player.setLoop(e.target.checked); } catch (_) {} });
         $('ytShuffleToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.SHUFFLE, e.target.checked); });
         $('lb-calc-btn')?.addEventListener('click', fetchBestTimes);
@@ -1177,6 +1562,8 @@
         setupHotkey();
         createSettings();
         createBackgroundModal();
+        buildKeyDisplayUI();
+        bindKeyDisplayInputListeners();
         setTimeout(() => { initYouTubePlayerUI(); }, 1000);
         window.addEventListener('beforeunload', saveTime);
         document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveTime(); });

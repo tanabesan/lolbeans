@@ -17,10 +17,10 @@
             { id: "home", label: "トップページ", href: BASE }
         ]},
         { group: "ツール", items: [
-            { id: "lolex", label: "LOL.ex", href: BASE + "lolex.html" },
-            { id: "community", label: "コース一覧", href: BASE + "community.html" },
-            { id: "ranking", label: "WRランキング", href: BASE + "ranking.html" },
-            { id: "template", label: "IMAGE → GLOL", href: BASE + "template.html" },
+            { id: "lolex", label: "LOL.ex", href: BASE + "lolex/lolex.html" },
+            { id: "community", label: "コース一覧", href: BASE + "community/community.html" },
+            { id: "ranking", label: "WRランキング", href: BASE + "community/ranking.html" },
+            { id: "template", label: "IMAGE → GLOL", href: BASE + "conversion/template.html" },
             { id: "block-forge", label: "BLOCK FORGE", href: BASE + "blockforge/programatic.html" }
         ]},
         { group: "ファイルライブラリ", items: [
@@ -28,8 +28,8 @@
             { id: "submit", label: "ファイルを投稿する", href: BASE + "library/submit.html" }
         ]},
         { group: "その他", items: [
-            { id: "faq", label: "よくある質問", href: BASE + "faq.html" },
-            { id: "contact", label: "お問い合わせ", href: BASE + "contact.html" }
+            { id: "faq", label: "よくある質問", href: BASE + "lolex/faq.html" },
+            { id: "contact", label: "お問い合わせ", href: BASE + "lolex/contact.html" }
         ]}
     ];
 

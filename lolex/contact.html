@@ -6,27 +6,33 @@
     <title id="page-title">LOL.ex - お問い合わせ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon.png">
+    <script src="/nav-menu.js" defer></script>
     
     <style>
         :root {
-            --primary-color: #5D54A4;
-            --secondary-color: #6A799E;
-            --background-color: #F4F7FB;
-            --card-color: #FFFFFF;
-            --text-color-dark: #2C3E50;
-            --text-color-light: #F4F7FB;
-            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
+            --primary-color: #ff00ff;
+            --secondary-color: #00ffff;
+            --background-color: #12141f;
+            --card-color: #1a1d2b;
+            --panel-line: #2c3044;
+            --text-color-dark: #d8dce8;
+            --text-color-light: #d8dce8;
+            --shadow-light: 0 0 10px rgba(255, 0, 255, 0.12);
+            --shadow-hover: 0 0 22px rgba(255, 0, 255, 0.32);
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'JetBrains Mono', monospace;
             margin: 0;
             padding: 0;
             background-color: var(--background-color);
+            background-image:
+                linear-gradient(var(--panel-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
+            background-size: 28px 28px;
             color: var(--text-color-dark);
             line-height: 1.8;
             scroll-behavior: smooth;
@@ -34,7 +40,7 @@
 
         /* Hero Section - 背景画像 */
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+            background: linear-gradient(rgba(18, 20, 31, 0.82), rgba(13, 15, 26, 0.9)), 
                         url('https://tanabesan.github.io/lolbeans/file/page/icon2.png');
             background-size: cover;
             background-position: center;
@@ -47,46 +53,24 @@
             font-size: 3em;
             font-weight: 700;
             margin: 0 0 10px;
+            color: var(--secondary-color);
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0 var(--primary-color);
         }
 
-        /* Navbar Section (流用) */
-        .navbar {
+        /* 言語セレクタのスタイル（ナビゲーションとは独立して右上に固定） */
+        #language-switcher {
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            padding: 10px 20px;
-            border-radius: 30px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-        }
-        .navbar a {
-            color: var(--text-color-dark);
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: 500;
-            transition: color 0.3s ease;
-            display: inline-block;
-        }
-        .navbar a:hover {
-            color: var(--primary-color);
-        }
-        #language-switcher {
             padding: 8px 10px;
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            margin-left: 15px;
+            border-radius: 0;
+            border: 1px solid var(--panel-line);
+            background-color: rgba(26, 29, 43, 0.92);
+            color: var(--text-color-dark);
             cursor: pointer;
             font-size: 14px;
-        }
-        .hamburger-menu {
-            display: none;
-            cursor: pointer;
-            font-size: 1.5em;
-            color: var(--text-color-dark);
-            padding: 5px;
+            z-index: 1000;
         }
 
         /* Contact Content - フォームの削除によりシンプルなデザインに変更 */
@@ -98,8 +82,9 @@
         }
         .contact-info-container {
             background-color: var(--card-color);
+            border: 2px solid var(--panel-line);
             padding: 40px;
-            border-radius: 10px;
+            border-radius: 0;
             box-shadow: var(--shadow-light);
             text-align: left; /* コンテンツは左寄せに */
         }
@@ -120,12 +105,12 @@
             display: flex;
             align-items: center;
             padding: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--panel-line);
             transition: background-color 0.3s ease;
         }
         .contact-info-item:hover {
             background-color: var(--background-color);
-            border-radius: 5px;
+            border-radius: 0;
         }
         .contact-info-item:last-child {
             border-bottom: none;
@@ -160,7 +145,7 @@
         
         /* Footer (流用) */
         .footer-section {
-            background-color: var(--text-color-dark);
+            background-color: #0d0f1a;
             color: var(--text-color-light);
             padding: 40px 20px;
             text-align: center;
@@ -181,36 +166,19 @@
         }
 
         /* Media Queries (流用) */
-        @media (max-width: 768px) {
-            .navbar a { display: none; }
-            #language-switcher { margin-left: 0; }
-            .navbar { background-color: transparent; box-shadow: none; padding: 10px; flex-direction: column-reverse; align-items: flex-end; }
-            .hamburger-menu { display: block; margin-bottom: 10px; }
-            .navbar.open a { display: block; margin: 10px 0; }
-            .navbar.open { background-color: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 5px rgba(0,0,0,0.05); padding: 20px; border-radius: 12px; display: flex; }
-            .navbar.open #language-switcher { display: block; width: 100%; margin: 10px 0; }
-        }
     </style>
 </head>
-<body>
+<body data-nav-current="contact">
 
     <header class="hero-section">
         <h1 id="hero-title">お問い合わせ</h1>
         <p id="hero-subtitle">ご質問、ご意見、不具合報告など、お気軽にご連絡ください。</p>
     </header>
 
-    <nav class="navbar">
-        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
-        <a id="nav-main-page" href="index.html">メインページ</a>
-        <a id="nav-file-library" href="file.html">ファイルライブラリ</a>
-        <a id="nav-community" href="community.html">コミュ一覧</a> 
-        <a id="nav-faq" href="faq.html">よくある質問</a>
-        <a id="nav-contact" href="contact.html">お問い合わせ</a>
-        <select id="language-switcher">
-            <option value="ja">日本語</option>
-            <option value="en">English</option>
-        </select>
-    </nav>
+    <select id="language-switcher">
+        <option value="ja">日本語</option>
+        <option value="en">English</option>
+    </select>
 
     <main class="container">
         <div class="contact-info-container">
@@ -285,11 +253,6 @@
 
             // ページタイトルとナビゲーション
             document.getElementById('page-title').textContent = `LOL.ex - ${langData.contact}`;
-            document.getElementById('nav-main-page').textContent = langData.mainPage;
-            document.getElementById('nav-community').textContent = langData.community; // ★ 新規追加 ★
-            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
-            document.getElementById('nav-faq').textContent = langData.faq;
-            document.getElementById('nav-contact').textContent = langData.contact;
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
             
@@ -309,13 +272,6 @@
             const savedLang = localStorage.getItem('language') || 'ja';
             applyLanguage(savedLang);
 
-            // ハンバーガーメニューの開閉
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            const navbar = document.querySelector('.navbar');
-            hamburgerIcon.addEventListener('click', () => {
-                navbar.classList.toggle('open');
-            });
-            
             // 言語切り替えイベント
             const languageSwitcher = document.getElementById('language-switcher');
             languageSwitcher.addEventListener('change', (event) => {
@@ -326,5 +282,3 @@
 </body>
 
 </html>
-
-

@@ -6,26 +6,32 @@
     <title id="page-title">LOL.ex 次世代のゲーム体験</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/nav-menu.js" defer></script>
     <style>
         /* ダークモードのカラーパレット定義 */
         :root {
-            --primary-color: #BB86FC; /* メインアクセント (紫) */
-            --secondary-color: #03DAC6; /* サブアクセント (シアン) */
-            --background-color: #121212; /* メイン背景 */
-            --card-color: #1F1F1F; /* カード/要素背景 */
-            --text-color-dark: #E0E0E0; /* 明るいテキスト */
-            --text-color-light: #E0E0E0; /* ヒーローセクション用テキスト */
-            --shadow-light: 0 0 10px rgba(0, 0, 0, 0.5); /* 影 */
-            --shadow-hover: 0 0 20px rgba(187, 134, 252, 0.3); /* ホバー時の影 */
+            --primary-color: #ff00ff;
+            --secondary-color: #00ffff;
+            --background-color: #12141f;
+            --card-color: #1a1d2b;
+            --panel-line: #2c3044;
+            --text-color-dark: #d8dce8;
+            --text-color-light: #d8dce8;
+            --shadow-light: 0 0 10px rgba(255, 0, 255, 0.12);
+            --shadow-hover: 0 0 22px rgba(255, 0, 255, 0.32);
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'JetBrains Mono', monospace;
             margin: 0;
             padding: 0;
             background-color: var(--background-color);
+            background-image:
+                linear-gradient(var(--panel-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
+            background-size: 28px 28px;
             color: var(--text-color-dark);
             line-height: 1.8;
             scroll-behavior: smooth;
@@ -57,7 +63,7 @@
 
         /* Hero Section - ピクセルアニメーション背景の適用 */
         .hero-section {
-            background: #121212;
+            background: #12141f;
             color: var(--text-color-light);
             padding: 120px 20px;
             text-align: center;
@@ -89,6 +95,9 @@
             font-size: 4.5em;
             font-weight: 700;
             margin: 0 0 10px;
+            color: var(--secondary-color);
+            letter-spacing: 2px;
+            text-shadow: 4px 4px 0 var(--primary-color);
         }
         .hero-content p {
             font-size: 1.5em;
@@ -119,13 +128,13 @@
             color: #121212;
             font-weight: 700;
             text-decoration: none;
-            border-radius: 50px;
+            border-radius: 0;
             transition: transform 0.3s ease, background-color 0.3s ease;
             white-space: nowrap;
         }
         .cta-button:hover {
             transform: translateY(-5px);
-            background-color: #D6A4FF;
+            background-color: #ff66ff;
         }
         /* Lite Button Style */
         .cta-button.lite {
@@ -143,47 +152,19 @@
             display: block;
         }
 
-        /* Navbar Section */
-        .navbar {
-            background-color: rgba(31, 31, 31, 0.9);
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        /* 言語セレクタのスタイル（ナビゲーションとは独立して右上に固定） */
+        #language-switcher {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 10px 20px;
-            border-radius: 30px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-        }
-        .navbar a {
-            color: var(--text-color-dark);
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: 500;
-            transition: color 0.3s ease;
-            display: inline-block;
-        }
-        .navbar a:hover {
-            color: var(--primary-color);
-        }
-        .hamburger-menu {
-            display: none;
-            cursor: pointer;
-            font-size: 1.5em;
-            color: var(--text-color-dark);
-            padding: 5px;
-        }
-        /* 言語セレクタのスタイル */
-        #language-switcher {
             padding: 8px 10px;
-            border-radius: 20px;
-            border: 1px solid #444;
-            background-color: #2b2b2b;
+            border-radius: 0;
+            border: 1px solid var(--panel-line);
+            background-color: rgba(26, 29, 43, 0.92);
             color: var(--text-color-dark);
-            margin-left: 15px;
             cursor: pointer;
             font-size: 14px;
+            z-index: 1000;
         }
 
         /* Main Content */
@@ -206,10 +187,11 @@
         }
         .feature-card {
             background: var(--card-color);
-            border-radius: 12px;
+            border: 2px solid var(--panel-line);
+            border-radius: 0;
             padding: 40px;
             box-shadow: var(--shadow-light);
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
             text-align: center;
             opacity: 0;
             transform: translateY(20px);
@@ -226,6 +208,7 @@
         .feature-card:hover {
             transform: translateY(-10px);
             box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
         }
         .feature-card i {
             font-size: 3em;
@@ -251,7 +234,8 @@
             margin: 20px 0;
             box-shadow: var(--shadow-light);
             background: var(--card-color);
-            border-radius: 12px;
+            border: 2px solid var(--panel-line);
+            border-radius: 0;
             overflow: hidden;
         }
         .version-table th, .version-table td {
@@ -280,7 +264,7 @@
 
         /* Footer */
         .footer-section {
-            background-color: #000000;
+            background-color: #0d0f1a;
             color: var(--text-color-light);
             padding: 60px 20px;
             text-align: center;
@@ -300,7 +284,8 @@
             text-align: center;
             padding: 80px 0;
             background-color: var(--card-color); /* 目立たせるためにカード色を使用 */
-            border-radius: 12px;
+            border: 2px solid var(--panel-line);
+            border-radius: 0;
             margin-top: 40px;
             box-shadow: var(--shadow-light);
             opacity: 0;
@@ -326,7 +311,7 @@
             height: 150px;
             border-radius: 50%;
             border: 5px solid var(--secondary-color);
-            box-shadow: 0 0 30px rgba(3, 218, 198, 0.5); /* シアンの強い影 */
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5); /* シアンの強い影 */
             transition: transform 0.4s ease;
         }
         .dev-icon:hover {
@@ -359,31 +344,6 @@
                 width: 60px;
                 height: 60px;
             }
-            .navbar a {
-                display: none;
-            }
-            #language-switcher {
-                margin-left: 0;
-            }
-            .navbar {
-                background-color: transparent;
-                box-shadow: none;
-                padding: 10px;
-                flex-direction: column-reverse;
-                align-items: flex-end;
-            }
-            .navbar.open {
-                background-color: rgba(31, 31, 31, 0.9);
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            }
-            .hamburger-menu {
-                display: block;
-                margin-bottom: 10px;
-            }
-            .navbar.open a {
-                display: block;
-                margin: 10px 0;
-            }
             .version-table th, .version-table td {
                 padding: 10px 8px;
             }
@@ -404,7 +364,7 @@
         }
     </style>
 </head>
-<body>
+<body data-nav-current="lolex">
 
     <header class="hero-section">
         <div class="hero-content">
@@ -426,18 +386,10 @@
         </div>
     </header>
 
-    <nav class="navbar">
-        <div class="hamburger-menu" id="hamburger-icon"><i class="fas fa-bars"></i></div>
-        <a id="nav-main-page" href="https://tanabesan.github.io/lolbeans/">メインページ</a>
-        <a id="nav-file-library" href="https://tanabesan.github.io/lolbeans/file.html">ファイルライブラリ</a>
-        <a id="nav-community" href="community.html">コミュ一覧</a> 
-        <a id="nav-faq" href="https://tanabesan.github.io/lolbeans/faq.html">よくある質問</a>
-        <a id="nav-contact" href="https://tanabesan.github.io/lolbeans/contact.html">お問い合わせ</a>
-        <select id="language-switcher">
-            <option value="ja">日本語</option>
-            <option value="en">English</option>
-        </select>
-    </nav>
+    <select id="language-switcher">
+        <option value="ja">日本語</option>
+        <option value="en">English</option>
+    </select>
 
     <main class="container">
         <section id="features" class="features-section">
@@ -511,7 +463,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <p id="lite-note" style="font-size: 0.9em; margin-top: 15px; color: #6A799E;">
+                <p id="lite-note" style="font-size: 0.9em; margin-top: 15px; color: var(--secondary-color);">
                     軽量版 (Lite) は、オートエアスイッチ機能とラウンドスコープ機能を除外することで、最高の動作速度と軽快な操作感を実現しています。
                 </p>
             </div>
@@ -522,7 +474,7 @@
             <p id="demo-desc">
                 LOL.exがもたらす革新的な体験を、以下のデモ動画でご覧ください。
             </p>
-            <div id="demo-placeholder" style="margin-top: 30px; background: #333; height: 400px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">
+            <div id="demo-placeholder" style="margin-top: 30px; background: var(--card-color); border: 2px solid var(--panel-line); height: 400px; display: flex; align-items: center; justify-content: center; font-size: 1.2em;">
                 現在デモ動画は準備中です。
             </div>
         </section>
@@ -645,12 +597,7 @@
 
             // HTML要素に翻訳を適用
             document.getElementById('page-title').textContent = langData.pageTitle;
-            document.getElementById('nav-main-page').textContent = langData.mainPage;
-            document.getElementById('nav-community').textContent = langData.community;
-            document.getElementById('nav-file-library').textContent = langData.fileLibrary;
-            document.getElementById('nav-faq').textContent = langData.faq;
-            document.getElementById('nav-contact').textContent = langData.contact;
-            
+
             document.getElementById('hero-title').textContent = langData.heroTitle;
             document.getElementById('hero-subtitle').textContent = langData.heroSubtitle;
 
@@ -696,8 +643,6 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            const hamburgerIcon = document.getElementById('hamburger-icon');
-            const navbar = document.querySelector('.navbar');
             const languageSwitcher = document.getElementById('language-switcher');
             const cards = document.querySelectorAll('.feature-card');
             const developerSection = document.getElementById('developer-info'); // 開発者セクションを取得
@@ -711,12 +656,7 @@
                 applyLanguage(event.target.value);
             });
 
-            // 3. ハンバーガーメニューの開閉機能
-            hamburgerIcon.addEventListener('click', () => {
-                navbar.classList.toggle('open');
-            });
-            
-            // 4. スクロール時のアニメーション
+            // 3. スクロール時のアニメーション
             const observer = new IntersectionObserver(entries => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {

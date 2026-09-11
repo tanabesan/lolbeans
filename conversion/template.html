@@ -8,14 +8,15 @@
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
   :root {
-    --bg: #12141f;
-    --panel: #1a1d2b;
+    --bg: #0d0e17;
+    --panel: #171a29;
     --panel-line: #2c3044;
     --text: #d8dce8;
     --text-dim: #6b7189;
-    --accent: #7dfab0;
-    --accent-dim: #3f7a5c;
-    --warn: #ff5fa8;
+    --accent: #ff00ff;
+    --accent2: #00ffff;
+    --accent-dim: #a3009e;
+    --warn: #ff2d55;
   }
 
   * { box-sizing: border-box; }
@@ -28,22 +29,27 @@
     min-height: 100vh;
   }
 
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);
+  }
+
   .pixel-noise {
     position: fixed;
     inset: 0;
     pointer-events: none;
     background-image:
-      linear-gradient(var(--panel-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
+      linear-gradient(rgba(0,255,255,.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,255,.15) 1px, transparent 1px);
     background-size: 24px 24px;
-    opacity: 0.15;
+    opacity: 0.3;
     z-index: 0;
   }
 
   header {
     position: relative;
     z-index: 1;
-    padding: 28px 32px 20px;
+    padding: 28px 32px 20px 78px;
     border-bottom: 2px solid var(--panel-line);
   }
 
@@ -53,13 +59,17 @@
     color: var(--accent);
     margin: 0 0 8px;
     letter-spacing: 1px;
-    text-shadow: 3px 3px 0 var(--accent-dim);
+    text-shadow: 3px 3px 0 var(--accent-dim), 0 0 16px rgba(255,0,255,.4);
   }
 
   header p {
     margin: 0;
     color: var(--text-dim);
     font-size: 13px;
+  }
+  header p::before {
+    content: '▸ ';
+    color: var(--accent2);
   }
 
   main {
@@ -79,6 +89,8 @@
     padding: 28px;
     border-right: 2px solid var(--panel-line);
     background: var(--panel);
+    position: relative;
+    z-index: 1;
   }
 
   .field { margin-bottom: 22px; }
@@ -98,9 +110,9 @@
     cursor: pointer;
     font-size: 12px;
     color: var(--text-dim);
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
   }
-  #drop:hover, #drop.drag { border-color: var(--accent); color: var(--accent); }
+  #drop:hover, #drop.drag { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 12px rgba(255,0,255,.25); }
   #fileInput { display: none; }
 
   .field input[type="number"] {
@@ -112,7 +124,7 @@
     font-size: 14px;
     padding: 8px 10px;
   }
-  .field input[type="number"]:focus { outline: none; border-color: var(--accent); }
+  .field input[type="number"]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 8px rgba(255,0,255,.3); }
 
   .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
@@ -124,21 +136,25 @@
     color: var(--text-dim);
   }
   .checkbox-row input { accent-color: var(--accent); width: 16px; height: 16px; }
+  input[type="range"] { accent-color: var(--accent2); width: 100%; }
+  #keepTransparent { accent-color: var(--accent2); }
 
   button#convertBtn {
     width: 100%;
     padding: 14px;
     background: var(--accent);
-    color: #0b1410;
-    border: none;
+    color: #0b0715;
+    border: 2px solid var(--accent);
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
     letter-spacing: 0.5px;
+    box-shadow: 4px 4px 0 rgba(255,0,255,.4);
+    transition: all .15s;
   }
-  button#convertBtn:hover { background: #97ffc2; }
-  button#convertBtn:disabled { background: var(--panel-line); color: var(--text-dim); cursor: not-allowed; }
+  button#convertBtn:hover { background: transparent; color: var(--accent); box-shadow: 0 0 10px 1px rgba(255,0,255,.5), 4px 4px 0 var(--accent); }
+  button#convertBtn:disabled { background: var(--panel-line); border-color: var(--panel-line); color: var(--text-dim); cursor: not-allowed; box-shadow: none; }
 
   .stats {
     margin-top: 16px;
@@ -161,6 +177,7 @@
   .canvas-wrap {
     max-width: 100%;
     border: 2px solid var(--panel-line);
+    box-shadow: 0 0 24px -6px rgba(0,255,255,.2);
     background:
       linear-gradient(45deg, #1f2233 25%, transparent 25%) -8px 0/16px 16px,
       linear-gradient(-45deg, #1f2233 25%, transparent 25%) -8px 0/16px 16px,
@@ -188,8 +205,8 @@
   #downloadBtn {
     padding: 12px 28px;
     background: transparent;
-    border: 2px solid var(--accent);
-    color: var(--accent);
+    border: 2px solid var(--accent2);
+    color: var(--accent2);
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
     font-size: 13px;
@@ -197,8 +214,9 @@
     display: none;
     width: 100%;
     max-width: 320px;
+    transition: all .15s;
   }
-  #downloadBtn:hover { background: var(--accent); color: #0b1410; }
+  #downloadBtn:hover { background: var(--accent2); color: #0b0715; box-shadow: 0 0 14px 1px rgba(0,255,255,.5); }
 
   #err {
     color: var(--warn);
@@ -208,7 +226,7 @@
   }
 
   @media (max-width: 860px) {
-    header { padding: 20px 18px 16px; }
+    header { padding: 20px 18px 16px 70px; }
     h1 { font-size: 14px; }
     header p { font-size: 12px; }
 
@@ -235,7 +253,8 @@
   }
 </style>
 </head>
-<body>
+<body data-nav-current="template">
+<script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 
 <div class="pixel-noise"></div>
 

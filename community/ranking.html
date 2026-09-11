@@ -253,44 +253,73 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 
 /* ── MODAL ── */
 .modal-overlay{
-  position:fixed;inset:0;background:rgba(13,14,23,.88);
-  backdrop-filter:blur(4px);z-index:500;
+  position:fixed;inset:0;background:rgba(5,5,10,.92);
+  backdrop-filter:blur(6px);z-index:500;
   display:flex;align-items:center;justify-content:center;padding:1rem;
   opacity:0;pointer-events:none;transition:opacity .25s;
 }
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal{
-  background:var(--panel);border:2px solid var(--acc3);
-  box-shadow:8px 8px 0 var(--acc3),var(--glow-b);
-  width:100%;max-width:480px;padding:24px 22px;position:relative;
+  --pc:var(--acc3);--pg:rgba(0,255,255,.5);
+  background:
+    repeating-linear-gradient(135deg,rgba(255,255,255,.015) 0 2px,transparent 2px 14px),
+    linear-gradient(160deg,var(--panel) 0%,var(--bg2) 100%);
+  border:2px solid var(--pc);
+  box-shadow:0 0 0 1px rgba(0,0,0,.6),8px 8px 0 var(--pc),0 0 30px -4px var(--pg);
+  clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);
+  width:100%;max-width:520px;padding:0 0 22px;position:relative;
   transform:translateY(20px) scale(.96);transition:transform .28s cubic-bezier(.175,.885,.32,1.275);
   max-height:90vh;overflow-y:auto;
 }
 .modal-overlay.open .modal{transform:none}
+.modal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:3;
+  background:linear-gradient(90deg,transparent,var(--pc),transparent);
+  box-shadow:0 0 12px 1px var(--pg);
+}
+.modal-corner{position:absolute;width:22px;height:22px;pointer-events:none;z-index:3;opacity:.85}
+.modal-corner.tl{top:8px;left:8px;border-top:2px solid var(--pc);border-left:2px solid var(--pc)}
+.modal-corner.br{bottom:8px;right:8px;border-bottom:2px solid var(--pc);border-right:2px solid var(--pc)}
 .modal-close{
-  position:absolute;top:10px;right:10px;
-  background:rgba(13,14,23,.6);border:2px solid var(--acc2);color:var(--acc2);
+  position:absolute;top:10px;right:10px;z-index:4;
+  background:rgba(13,14,23,.7);border:2px solid var(--acc2);color:var(--acc2);
   width:32px;height:32px;font-size:1rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;transition:all .15s;
-  box-shadow:2px 2px 0 var(--acc2);
+  clip-path:polygon(0 6px,6px 0,100% 0,100% 100%,calc(100% - 6px) 100%,0 calc(100% - 6px));
 }
 .modal-close:hover{background:var(--acc2);color:#0b0715;box-shadow:var(--glow-r)}
+.modal-inner{padding:24px 22px 0}
 
 /* modal header */
-.mh{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid var(--line2)}
-.mh-shield{height:72px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
-.mh-name{font-family:var(--ffh);font-size:clamp(.65rem,2.5vw,.9rem);line-height:1.4}
-.mh-rank{font-family:var(--ffh);font-size:.42rem;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase;margin-top:5px;display:inline-block}
+.mh-banner{
+  position:relative;padding:26px 22px 20px;margin-bottom:20px;overflow:hidden;
+  background:linear-gradient(120deg,var(--pb1,#222) 0%,var(--pb2,#333) 55%,transparent 100%);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 16px),calc(100% - 24px) 100%,0 100%);
+}
+.mh-banner::before{
+  content:'';position:absolute;inset:0;opacity:.35;pointer-events:none;
+  background-image:linear-gradient(var(--pc) 1px,transparent 1px),linear-gradient(90deg,var(--pc) 1px,transparent 1px);
+  background-size:14px 14px;
+  mask-image:linear-gradient(115deg,black,transparent 65%);
+}
+.mh-banner::after{
+  content:'';position:absolute;right:-30%;top:-40%;width:140%;height:220%;pointer-events:none;
+  background:radial-gradient(circle,var(--pg) 0%,transparent 60%);opacity:.4;
+}
+.mh{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+.mh-shield{height:76px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
+.mh-name{font-family:var(--ffh);font-size:clamp(.68rem,2.6vw,.95rem);line-height:1.4;text-shadow:0 0 14px var(--pg),2px 2px 0 rgba(0,0,0,.5)}
+.mh-rank{font-family:var(--ffh);font-size:.42rem;padding:3px 9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;display:inline-block;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
 
 /* rank position bar */
 .rank-pos-wrap{margin-bottom:16px}
 .rp-label{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
-.rp-bar-bg{background:var(--edge);border:1px solid var(--line2);height:12px;overflow:visible;position:relative;margin-bottom:20px}
-.rp-bar-track{position:absolute;inset:0;overflow:hidden}
-.rp-bar-fill{height:12px;transition:width .8s cubic-bezier(.22,1,.36,1);position:relative;min-width:4px}
-.rp-bar-fill::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(0,0,0,.2) 6px,rgba(0,0,0,.2) 7px)}
-.rp-div{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.5);z-index:2}
-.rp-tip{position:absolute;top:-26px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--tipcolor,#fff);padding:2px 6px;font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t0);white-space:nowrap;transition:left .8s cubic-bezier(.22,1,.36,1);pointer-events:none;z-index:10}
+.rp-bar-bg{background:var(--edge);border:1px solid var(--line2);height:14px;overflow:visible;position:relative;margin-bottom:20px;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.rp-bar-track{position:absolute;inset:0;overflow:hidden;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.rp-bar-fill{height:14px;transition:width .8s cubic-bezier(.22,1,.36,1);position:relative;min-width:4px;box-shadow:0 0 10px 0 var(--pg)}
+.rp-bar-fill::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(0,0,0,.25) 6px,rgba(0,0,0,.25) 7px)}
+.rp-div{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.6);z-index:2}
+.rp-tip{position:absolute;top:-26px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--tipcolor,#fff);padding:2px 6px;font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t0);white-space:nowrap;transition:left .8s cubic-bezier(.22,1,.36,1);pointer-events:none;z-index:10;clip-path:polygon(4px 0,100% 0,100% 100%,0 100%,0 4px)}
 .rp-tip::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--tipcolor,#fff)}
 .rp-seg-labels{display:flex;margin-top:4px}
 .rp-seg-lbl{flex:1;font-size:.5rem;font-weight:800;color:var(--t3);text-align:center;letter-spacing:.02em}
@@ -300,21 +329,21 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .stier-wrap{margin-bottom:16px}
 .stier-title{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
 .stier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.stier-card{background:var(--edge);border:1px solid var(--line2);padding:8px 6px;text-align:center;transition:border-color .2s}
-.stier-card.current{border-color:var(--pc,#fff);box-shadow:2px 2px 0 var(--pc,#fff)}
+.stier-card{background:var(--edge);border:1px solid var(--line2);padding:8px 6px;text-align:center;transition:border-color .2s;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.stier-card.current{border-color:var(--pc,#fff);box-shadow:2px 2px 0 var(--pc,#fff),0 0 10px -2px var(--pg)}
 .stier-card-name{font-family:var(--ffh);font-size:.5rem;letter-spacing:.03em}
 .stier-card-range{font-size:.55rem;opacity:.5;margin-top:2px}
 .stier-card-you{font-family:var(--ffh);font-size:.42rem;font-weight:800;margin-top:4px;color:var(--acc)}
 
 /* stats grid */
 .mstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
-.mstat{background:var(--edge);border:1px solid var(--line2);border-left:3px solid var(--acc3);padding:10px 12px}
+.mstat{background:var(--edge);border:1px solid var(--line2);border-left:3px solid var(--pc);padding:10px 12px;position:relative;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
 .mstat-lbl{font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
-.mstat-val{font-family:var(--ffh);font-size:1rem}
+.mstat-val{font-family:var(--ffh);font-size:1.05rem;text-shadow:0 0 10px var(--pg)}
 .mchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
 
 /* calc section */
-.calc-wrap{background:var(--edge);border:1px solid var(--line2);overflow:hidden;margin-bottom:14px}
+.calc-wrap{background:var(--edge);border:1px solid var(--line2);overflow:hidden;margin-bottom:14px;clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
 .calc-summary{padding:10px 14px;font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;letter-spacing:.04em}
 .calc-summary::-webkit-details-marker{display:none}
 .calc-summary::after{content:'▶';margin-left:auto;font-size:.55rem;color:var(--t3);transition:transform .2s}
@@ -481,6 +510,7 @@ body.eco .logo-sub::after{content:''}
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modalBox">
+    <div class="modal-corner tl"></div><div class="modal-corner br"></div>
     <button class="modal-close" onclick="closeModalDirect()">✕</button>
     <div id="modalContent"></div>
   </div>
@@ -692,14 +722,20 @@ function openModal(idx){
   const divHtml=seg3?`<div class="rp-div" style="left:${seg3.p1}%"></div><div class="rp-div" style="left:${seg3.p2}%"></div>`:'';
   const segLblHtml=seg3?`<div class="rp-seg-labels"><div class="rp-seg-lbl" style="flex:${seg3.p1}">${lang==='jp'?rk.jp+' I':rk.en+' I'}<br>${prevMin}–${seg3.b1-1}pt</div><div class="rp-seg-lbl" style="flex:${seg3.p2-seg3.p1}">${lang==='jp'?rk.jp+' II':rk.en+' II'}<br>${seg3.b1}–${seg3.b2-1}pt</div><div class="rp-seg-lbl" style="flex:${100-seg3.p2}">${lang==='jp'?rk.jp+' III':rk.en+' III'}<br>${seg3.b2}–${nextMin-1}pt</div></div>`:'';
   const calcHtml=`<details class="calc-wrap"><summary class="calc-summary"><span class="ms" style="font-size:1rem;vertical-align:middle;color:var(--acc)">calculate</span>${t?'ポイント計算方法':'How Points Work'}</summary><div class="calc-body"><div class="calc-section-title">${t?'WR カテゴリポイント':'WR Category Points'}</div><div class="calc-table"><div class="ct-row"><span class="ct-tag c1000">1000+</span><span class="ct-desc">${t?'平均フィニッシュタイム 1000秒以上':'avg finish time ≥ 1000s'}</span><span class="ct-pts">+15 pt</span></div><div class="ct-row"><span class="ct-tag c750">750+</span><span class="ct-desc">${t?'平均フィニッシュタイム 750秒以上':'avg finish time ≥ 750s'}</span><span class="ct-pts">+10 pt</span></div><div class="ct-row"><span class="ct-tag c500">500+</span><span class="ct-desc">${t?'平均フィニッシュタイム 500秒以上':'avg finish time ≥ 500s'}</span><span class="ct-pts">+5 pt</span></div><div class="ct-row"><span class="ct-tag c100">100+</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒以上':'avg finish time ≥ 100s'}</span><span class="ct-pts">+2 pt</span></div><div class="ct-row"><span class="ct-tag cu100">&lt;100</span><span class="ct-desc">${t?'平均フィニッシュタイム 100秒未満':'avg finish time &lt; 100s'}</span><span class="ct-pts">+1 pt</span></div></div><div class="calc-note">${t?'WR を 1 つ取得するごとに、そのコースの平均フィニッシュタイムに応じたポイントが加算されます。':'Each WR grants points based on that level\'s average finish time.'}</div><div class="calc-section-title" style="margin-top:.9rem">${t?'ランク昇格条件':'Rank Thresholds'}</div><div class="calc-table">${RANKS.slice().reverse().map(r=>{const nm=t?r.jp:r.en;const nxt=RANKS[RANKS.indexOf(r)-1];const rng=nxt?`${r.minPts}–${nxt.minPts-1} pt`:`${r.minPts}+ pt`;return`<div class="ct-row"><span class="ct-rank-dot" style="background:${r.col}"></span><span class="ct-desc" style="color:${r.col};font-weight:800">${nm}</span><span class="ct-pts">${rng}</span></div>`;}).join('')}</div></div></details>`;
+  document.getElementById('modalBox').style.setProperty('--pc',rk.col);
+  document.getElementById('modalBox').style.setProperty('--pg',rk.glow);
+  document.getElementById('modalBox').style.setProperty('--pb1',rk.bg);
+  document.getElementById('modalBox').style.setProperty('--pb2',rk.b1);
   document.getElementById('modalContent').innerHTML=`
-    <div class="mh"><img class="mh-shield" src="${url}" alt="${rkName}" style="--mg:${rk.glow}"><div><div class="mh-name" style="color:${rk.col}">${esc(d.name)}</div><span class="mh-rank" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}30">${rkName} ${subName}</span></div></div>
+    <div class="mh-banner"><div class="mh"><img class="mh-shield" src="${url}" alt="${rkName}" style="--mg:${rk.glow}"><div><div class="mh-name" style="color:${rk.col}">${esc(d.name)}</div><span class="mh-rank" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}30">${rkName} ${subName}</span></div></div></div>
+    <div class="modal-inner">
     <div class="rank-pos-wrap"><div class="rp-label">${t?'全体順位':'Overall Ranking'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div></div></div><div class="rp-pct">${t?`全${total}人中 ${pos}位 (上位${100-pct}%)`:`#${pos} of ${total} players (Top ${100-pct}%)`}</div></div>
     <div class="rank-pos-wrap"><div class="rp-label">${t?'次のランクまで':'Progress to Next Rank'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${progressPct}%;background:linear-gradient(90deg,${rk.b2},${rk.b3})"></div>${divHtml}</div>${tipHtml}</div>${segLblHtml}<div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'最高ランク到達！':'Max Rank Achieved!')}</div></div>
     <div class="stier-wrap"><div class="stier-title">${t?'ランク内の階級':'Rank Divisions'}</div><div class="stier-grid">${stCards}</div></div>
     <div class="mstats"><div class="mstat"><div class="mstat-lbl">${t?'ポイント':'Points'}</div><div class="mstat-val" style="color:${rk.col}">${d.totalPoints}</div></div><div class="mstat"><div class="mstat-lbl">${t?'WR数':'WR Count'}</div><div class="mstat-val" style="color:var(--acc3)">${d.wrCount}</div></div><div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div><div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div></div>
     ${chips?`<div class="mchips">${chips}</div>`:''}
-    ${calcHtml}`;
+    ${calcHtml}
+    </div>`;
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow='hidden';
 }

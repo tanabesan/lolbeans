@@ -220,7 +220,7 @@
                     <div class="fname" id="fname"></div>
                 </div>
                 <input type="file" id="fileInput" accept=".lol,.glol">
-                <div class="hint">最大 2MB。中身がJSONとして正しいか自動でチェックされます。</div>
+                <div class="hint">最大 2MB。</div>
             </div>
 
             <button id="submitBtn">投稿する(審査待ちになります)</button>
@@ -324,29 +324,13 @@
                 return;
             }
 
-            // JSONとして正しいか、最低限のスキーマ(blocks/groups/version)を満たしているか検証
-            const reader = new FileReader();
-            reader.onload = ev => {
-                try {
-                    const json = JSON.parse(ev.target.result);
-                    if (!json.blocks || !json.groups || json.version === undefined) {
-                        showStatus('error', 'JSONは読めましたが、blocks / groups / version のいずれかが欠けています');
-                        selectedFile = null;
-                        return;
-                    }
-                    selectedFile = file;
-                    fnameEl.textContent = file.name + ` (${json.blocks.length} blocks)`;
-                    const typeSelect = document.getElementById('fileType');
-                    const currentBase = typeSelect.value.startsWith('glol') ? 'glol' : typeSelect.value;
-                    if (currentBase !== ext) {
-                        typeSelect.value = ext;
-                    }
-                } catch (err) {
-                    showStatus('error', 'JSONとして読み込めませんでした。ファイルが壊れている可能性があります');
-                    selectedFile = null;
-                }
-            };
-            reader.readAsText(file);
+            selectedFile = file;
+            fnameEl.textContent = file.name;
+            const typeSelect = document.getElementById('fileType');
+            const currentBase = typeSelect.value.startsWith('glol') ? 'glol' : typeSelect.value;
+            if (currentBase !== ext) {
+                typeSelect.value = ext;
+            }
         }
 
         submitBtn.addEventListener('click', async () => {

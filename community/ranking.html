@@ -283,24 +283,25 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .modal-corner{position:absolute;width:22px;height:22px;pointer-events:none;z-index:5;opacity:.85}
 .modal-corner.tl{top:8px;left:8px;border-top:2px solid var(--pc);border-left:2px solid var(--pc)}
 .modal-corner.br{bottom:8px;right:8px;border-bottom:2px solid var(--pc);border-right:2px solid var(--pc)}
+.modal-actions{position:absolute;top:10px;right:10px;z-index:6;display:flex;align-items:center;gap:10px}
 .modal-close{
-  position:absolute;top:10px;right:10px;z-index:6;
+  position:static;
   background:rgba(13,14,23,.7);border:2px solid var(--acc2);color:var(--acc2);
-  width:32px;height:32px;font-size:1rem;cursor:pointer;
+  width:32px;height:32px;font-size:1rem;cursor:pointer;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;transition:all .15s;
   clip-path:polygon(0 6px,6px 0,100% 0,100% 100%,calc(100% - 6px) 100%,0 calc(100% - 6px));
 }
 .modal-close:hover{background:var(--acc2);color:#0b0715;box-shadow:var(--glow-r)}
 .modal-dl{
-  position:absolute;top:10px;right:52px;z-index:6;
+  position:static;
   background:rgba(13,14,23,.7);border:2px solid var(--pc);color:var(--pc);
-  width:32px;height:32px;font-size:1rem;cursor:pointer;
+  width:32px;height:32px;font-size:1rem;cursor:pointer;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;transition:all .15s;
-  clip-path:polygon(0 6px,6px 0,100% 0,100% 100%,calc(100% - 6px) 100%,0 calc(100% - 6px));
+  clip-path:polygon(6px 0,100% 0,100% 100%,calc(100% - 6px) 100%,0 100%,0 6px);
 }
 .modal-dl:hover{background:var(--pc);color:#0b0715;box-shadow:0 0 10px var(--pg)}
 .modal-dl.busy{animation:sp .8s linear infinite}
-.modal.capturing .modal-close,.modal.capturing .modal-dl,.modal.capturing .modal-corner{visibility:hidden}
+.modal.capturing .modal-close,.modal.capturing .modal-dl,.modal.capturing .modal-actions,.modal.capturing .modal-corner{visibility:hidden}
 .modal-inner{padding:24px 22px 0}
 
 /* modal header */
@@ -525,8 +526,10 @@ body.eco .logo-sub::after{content:''}
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modalBox">
     <div class="modal-corner tl"></div><div class="modal-corner br"></div>
-    <button class="modal-dl" id="modalDlBtn" onclick="downloadModalCard()" title="画像として保存"><span class="ms" style="font-size:1rem">download</span></button>
-    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-actions">
+      <button class="modal-dl" id="modalDlBtn" onclick="downloadModalCard()" title="画像として保存"><span class="ms" style="font-size:1rem">download</span></button>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
     <div class="modal-scroll" id="modalScroll"><div id="modalContent"></div></div>
   </div>
 </div>

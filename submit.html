@@ -261,6 +261,41 @@
         const submitBtn = document.getElementById('submitBtn');
         const statusEl = document.getElementById('statusMsg');
 
+        // 入力中の文字列(ファイル以外)をsessionStorageに保存/復元する
+        const DRAFT_KEY = 'submitDraft';
+        const draftFields = ['title', 'author', 'description', 'fileType'];
+
+        function saveDraft() {
+            const draft = {};
+            draftFields.forEach(id => {
+                draft[id] = document.getElementById(id).value;
+            });
+            sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        }
+
+        function restoreDraft() {
+            const raw = sessionStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            try {
+                const draft = JSON.parse(raw);
+                draftFields.forEach(id => {
+                    if (draft[id]) document.getElementById(id).value = draft[id];
+                });
+            } catch (err) {
+                sessionStorage.removeItem(DRAFT_KEY);
+            }
+        }
+
+        function clearDraft() {
+            sessionStorage.removeItem(DRAFT_KEY);
+        }
+
+        restoreDraft();
+        draftFields.forEach(id => {
+            document.getElementById(id).addEventListener('input', saveDraft);
+            document.getElementById(id).addEventListener('change', saveDraft);
+        });
+
         let selectedFile = null;
         let selectedThumb = null;
 
@@ -375,6 +410,8 @@
                 });
 
                 showStatus('success', '投稿ありがとうございます!審査後に公開されます。');
+                clearDraft();
+                alert('投稿しました!審査後に公開されます。');
                 document.getElementById('title').value = '';
                 document.getElementById('author').value = '';
                 document.getElementById('description').value = '';
@@ -391,4 +428,4 @@
         });
     </script>
 </body>
-</html>
+</html>ｓ

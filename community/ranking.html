@@ -267,27 +267,40 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   border:2px solid var(--pc);
   box-shadow:0 0 0 1px rgba(0,0,0,.6),8px 8px 0 var(--pc),0 0 30px -4px var(--pg);
   clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);
-  width:100%;max-width:520px;padding:0 0 22px;position:relative;
+  width:100%;max-width:520px;padding:0;position:relative;
   transform:translateY(20px) scale(.96);transition:transform .28s cubic-bezier(.175,.885,.32,1.275);
-  max-height:90vh;overflow-y:auto;
+  max-height:min(88vh,88dvh);
+  display:flex;flex-direction:column;
 }
+.modal-overlay{padding:2.2rem 1rem}
 .modal-overlay.open .modal{transform:none}
 .modal::before{
   content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:3;
   background:linear-gradient(90deg,transparent,var(--pc),transparent);
-  box-shadow:0 0 12px 1px var(--pg);
+  box-shadow:0 0 12px 1px var(--pg);pointer-events:none;
 }
-.modal-corner{position:absolute;width:22px;height:22px;pointer-events:none;z-index:3;opacity:.85}
+.modal-scroll{overflow-y:auto;flex:1;min-height:0;padding-bottom:22px}
+.modal-corner{position:absolute;width:22px;height:22px;pointer-events:none;z-index:5;opacity:.85}
 .modal-corner.tl{top:8px;left:8px;border-top:2px solid var(--pc);border-left:2px solid var(--pc)}
 .modal-corner.br{bottom:8px;right:8px;border-bottom:2px solid var(--pc);border-right:2px solid var(--pc)}
 .modal-close{
-  position:absolute;top:10px;right:10px;z-index:4;
+  position:absolute;top:10px;right:10px;z-index:6;
   background:rgba(13,14,23,.7);border:2px solid var(--acc2);color:var(--acc2);
   width:32px;height:32px;font-size:1rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;transition:all .15s;
   clip-path:polygon(0 6px,6px 0,100% 0,100% 100%,calc(100% - 6px) 100%,0 calc(100% - 6px));
 }
 .modal-close:hover{background:var(--acc2);color:#0b0715;box-shadow:var(--glow-r)}
+.modal-dl{
+  position:absolute;top:10px;right:52px;z-index:6;
+  background:rgba(13,14,23,.7);border:2px solid var(--pc);color:var(--pc);
+  width:32px;height:32px;font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  clip-path:polygon(0 6px,6px 0,100% 0,100% 100%,calc(100% - 6px) 100%,0 calc(100% - 6px));
+}
+.modal-dl:hover{background:var(--pc);color:#0b0715;box-shadow:0 0 10px var(--pg)}
+.modal-dl.busy{animation:sp .8s linear infinite}
+.modal.capturing .modal-close,.modal.capturing .modal-dl,.modal.capturing .modal-corner{visibility:hidden}
 .modal-inner{padding:24px 22px 0}
 
 /* modal header */
@@ -418,6 +431,7 @@ body.eco .logo-sub::after{content:''}
   header{padding:40px 12px 24px}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body data-nav-current="ranking">
 <script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
@@ -511,8 +525,9 @@ body.eco .logo-sub::after{content:''}
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modalBox">
     <div class="modal-corner tl"></div><div class="modal-corner br"></div>
+    <button class="modal-dl" id="modalDlBtn" onclick="downloadModalCard()" title="画像として保存"><span class="ms" style="font-size:1rem">download</span></button>
     <button class="modal-close" onclick="closeModalDirect()">✕</button>
-    <div id="modalContent"></div>
+    <div class="modal-scroll" id="modalScroll"><div id="modalContent"></div></div>
   </div>
 </div>
 
@@ -705,6 +720,7 @@ function renderTable(){
 /* ── MODAL ── */
 function openModal(idx){
   const d=all[idx];if(!d)return;
+  currentModalName=d.name;
   const rk=getRank(d.totalPoints);const subIdx=getSubTier(rk,d.totalPoints);
   const rkName=lang==='jp'?rk.jp:rk.en;const subName=rk.subs[subIdx][lang];
   const url=s2u(mkShield(rk,64,subIdx));
@@ -741,6 +757,36 @@ function openModal(idx){
 }
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect();}
 function closeModalDirect(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+
+/* ── CARD DOWNLOAD ── */
+let currentModalName='player';
+function downloadModalCard(){
+  const modal=document.getElementById('modalBox');
+  const scroller=document.getElementById('modalScroll');
+  const btn=document.getElementById('modalDlBtn');
+  if(typeof html2canvas==='undefined'){alert(lang==='jp'?'画像生成ライブラリの読み込みに失敗しました':'Failed to load image library');return;}
+  btn.classList.add('busy');
+  modal.classList.add('capturing');
+  const prevMaxH=modal.style.maxHeight,prevScrollMaxH=scroller.style.maxHeight,prevOverflow=scroller.style.overflow;
+  modal.style.maxHeight='none';
+  scroller.style.overflow='visible';
+  scroller.style.maxHeight='none';
+  html2canvas(modal,{backgroundColor:'#0d0e17',scale:2,useCORS:true}).then(canvas=>{
+    const a=document.createElement('a');
+    a.download=`${currentModalName}_profile.png`;
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+  }).catch(err=>{
+    console.error(err);
+    alert(lang==='jp'?'画像の生成に失敗しました':'Failed to generate image');
+  }).finally(()=>{
+    modal.style.maxHeight=prevMaxH;
+    scroller.style.maxHeight=prevScrollMaxH;
+    scroller.style.overflow=prevOverflow;
+    modal.classList.remove('capturing');
+    btn.classList.remove('busy');
+  });
+}
 
 /* ── PAGER ── */
 function renderPager(){

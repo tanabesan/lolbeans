@@ -6,7 +6,7 @@
 <title>LOLBeans WR ランキング</title>
 <link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon-128.png">
 <meta name="description" content="LOLBeans コミュニティ WR ランキング。ワールドレコード保持者のポイントランキングを確認しよう。">
-<meta name="theme-color" content="#000408">
+<meta name="theme-color" content="#0d0e17">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tanabesan.github.io/lolbeans/file/page/">
 <meta property="og:title" content="LOLBeans 🫘 WR ランキング">
@@ -19,8 +19,7 @@
 <meta name="twitter:title" content="LOLBeans 🫘 WR ランキング">
 <meta name="twitter:description" content="LOLBeans コミュニティ WR ランキング。ワールドレコード保持者のポイント・階級を一覧で確認！">
 <meta name="twitter:image" content="https://tanabesan.github.io/lolbeans/file/page/ogp.png">
-<link rel="stylesheet" href="https://tanabesan.github.io/lolbeans/tool-menu.css">
-<link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -28,14 +27,14 @@ html{scroll-behavior:smooth}
 
 /* ── TOKENS (コース一覧と統一) ── */
 :root{
-  --bg:#000408;--bg2:#010c0f;--panel:#001a1f;--card:#001014;
-  --edge:#002830;--line:#004050;--line2:#006070;
-  --t0:#e0fff8;--t1:#80c8be;--t2:#3a7870;--t3:#1a4840;
-  --acc:#00ff41;--acc2:#ff2d55;--acc3:#00d4ff;--acc4:#ffcc00;
-  --glow-g:0 0 8px #00ff41,0 0 20px rgba(0,255,65,.4);
-  --glow-b:0 0 8px #00d4ff,0 0 20px rgba(0,212,255,.4);
-  --glow-r:0 0 8px #ff2d55,0 0 20px rgba(255,45,85,.4);
-  --ff:'Share Tech Mono',monospace;
+  --bg:#0d0e17;--bg2:#12141f;--panel:#171a29;--card:#12141f;
+  --edge:#2c3044;--line:#2c3044;--line2:#3a3f5c;
+  --t0:#d8dce8;--t1:#a8adc4;--t2:#6b7189;--t3:#3f4460;
+  --acc:#00ffff;--acc2:#ff00ff;--acc3:#00ffff;--acc4:#ffe066;
+  --glow-g:0 0 8px #00ffff,0 0 20px rgba(0,255,255,.4);
+  --glow-b:0 0 8px #00ffff,0 0 20px rgba(0,255,255,.4);
+  --glow-r:0 0 8px #ff00ff,0 0 20px rgba(255,0,255,.4);
+  --ff:'JetBrains Mono',monospace;
   --ffj:'M PLUS Rounded 1c',sans-serif;
   --ffh:'Press Start 2P',cursive;
 }
@@ -51,7 +50,7 @@ body::before{
 
 /* ── BG ── */
 .bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.3;
-  background-image:linear-gradient(rgba(0,212,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.15) 1px,transparent 1px);
+  background-image:linear-gradient(rgba(0,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,255,.15) 1px,transparent 1px);
   background-size:32px 32px}
 .bg-corner-tl,.bg-corner-tr,.bg-corner-bl,.bg-corner-br{position:fixed;width:120px;height:120px;pointer-events:none;z-index:0;opacity:.4}
 .bg-corner-tl{top:0;left:0;border-top:2px solid var(--acc3);border-left:2px solid var(--acc3)}
@@ -142,11 +141,11 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   padding:8px 14px;color:var(--t2);font-family:var(--ffh);font-size:.45rem;
   font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.04em;
 }
-.cbtn:hover,.cbtn.on{border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,204,0,.4),0 0 8px rgba(255,204,0,.2)}
+.cbtn:hover,.cbtn.on{border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,224,102,.4),0 0 8px rgba(255,224,102,.2)}
 .rbtn{
   background:var(--acc2);border:2px solid var(--acc2);
-  padding:8px 16px;color:#fff;font-family:var(--ffh);font-size:.45rem;
-  font-weight:900;cursor:pointer;box-shadow:4px 4px 0 rgba(255,45,85,.5);
+  padding:8px 16px;color:#0b0715;font-family:var(--ffh);font-size:.45rem;
+  font-weight:900;cursor:pointer;box-shadow:4px 4px 0 rgba(255,0,255,.5);
   transition:all .15s;letter-spacing:.04em;
 }
 .rbtn:hover{background:transparent;color:var(--acc2);box-shadow:var(--glow-r),4px 4px 0 var(--acc2)}
@@ -238,8 +237,8 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   font-family:var(--ffh);font-weight:700;font-size:.5rem;
   cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;
 }
-.pgb:hover{border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,204,0,.4)}
-.pgb.on{background:var(--acc4);border-color:var(--acc4);color:var(--bg);box-shadow:2px 2px 0 rgba(255,204,0,.5)}
+.pgb:hover{border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,224,102,.4)}
+.pgb.on{background:var(--acc4);border-color:var(--acc4);color:var(--bg);box-shadow:2px 2px 0 rgba(255,224,102,.5)}
 .pgb:disabled{opacity:.25;cursor:not-allowed}
 
 #toast{
@@ -254,7 +253,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 
 /* ── MODAL ── */
 .modal-overlay{
-  position:fixed;inset:0;background:rgba(0,4,8,.88);
+  position:fixed;inset:0;background:rgba(13,14,23,.88);
   backdrop-filter:blur(4px);z-index:500;
   display:flex;align-items:center;justify-content:center;padding:1rem;
   opacity:0;pointer-events:none;transition:opacity .25s;
@@ -270,12 +269,12 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .modal-overlay.open .modal{transform:none}
 .modal-close{
   position:absolute;top:10px;right:10px;
-  background:rgba(0,4,8,.6);border:2px solid var(--acc2);color:var(--acc2);
+  background:rgba(13,14,23,.6);border:2px solid var(--acc2);color:var(--acc2);
   width:32px;height:32px;font-size:1rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;transition:all .15s;
   box-shadow:2px 2px 0 var(--acc2);
 }
-.modal-close:hover{background:var(--acc2);color:#fff;box-shadow:var(--glow-r)}
+.modal-close:hover{background:var(--acc2);color:#0b0715;box-shadow:var(--glow-r)}
 
 /* modal header */
 .mh{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid var(--line2)}
@@ -391,7 +390,8 @@ body.eco .logo-sub::after{content:''}
 }
 </style>
 </head>
-<body>
+<body data-nav-current="ranking">
+<script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 <div class="bg-grid"></div>
 <div class="bg-corner-tl"></div>
 <div class="bg-corner-tr"></div>
@@ -575,7 +575,7 @@ const s2u=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
 /* ── PARTICLES (8bit文字) ── */
 (function(){
   const chars=['0','1','▶','■','★','◆','▲','WR'];
-  const cols=['#00ff41','#00d4ff','#ff2d55','#ffcc00'];
+  const cols=['#00ffff','#ff00ff','#ffe066'];
   const c=document.getElementById('particles');
   for(let i=0;i<24;i++){
     const p=document.createElement('div');p.className='pt';
@@ -727,6 +727,5 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModalDirect()})
 buildLegend();
 loadData();
 </script>
-<script src="https://tanabesan.github.io/lolbeans/tool-menu.js"></script>
 </body>
 </html>

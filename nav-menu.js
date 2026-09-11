@@ -21,7 +21,7 @@
             { id: "community", label: "コース一覧", href: BASE + "community.html" },
             { id: "ranking", label: "WRランキング", href: BASE + "ranking.html" },
             { id: "template", label: "IMAGE → GLOL", href: BASE + "template.html" },
-            { id: "block-forge", label: "BLOCK FORGE", href: BASE + "programatic.html" }
+            { id: "block-forge", label: "BLOCK FORGE", href: BASE + "blockforge/programatic.html" }
         ]},
         { group: "ファイルライブラリ", items: [
             { id: "file-library", label: "ファイルライブラリ", href: BASE + "library/file.html" },

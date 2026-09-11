@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="page-title">LOLBeans コース一覧</title>
 <link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon-128.png">
-<link rel="stylesheet" href="https://tanabesan.github.io/lolbeans/tool-menu.css">
-<link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -14,24 +13,24 @@ html{scroll-behavior:smooth}
 
 /* ── TOKENS ── */
 :root{
-  --bg:#000408;
-  --bg2:#010c0f;
-  --panel:#001a1f;
-  --card:#001014;
-  --edge:#002830;
-  --line:#004050;
-  --line2:#006070;
-  --t0:#e0fff8;
-  --t1:#80c8be;
-  --t2:#3a7870;
-  --acc:#00ff41;   /* ターミナル緑 */
-  --acc2:#ff2d55;  /* グリッチ赤 */
-  --acc3:#00d4ff;  /* CRT青 */
-  --acc4:#ffcc00;  /* ピクセルイエロー */
-  --glow-g:0 0 8px #00ff41,0 0 20px rgba(0,255,65,.4);
-  --glow-b:0 0 8px #00d4ff,0 0 20px rgba(0,212,255,.4);
-  --glow-r:0 0 8px #ff2d55,0 0 20px rgba(255,45,85,.4);
-  --ff:'Share Tech Mono',monospace;
+  --bg:#0d0e17;
+  --bg2:#12141f;
+  --panel:#171a29;
+  --card:#12141f;
+  --edge:#2c3044;
+  --line:#2c3044;
+  --line2:#3a3f5c;
+  --t0:#d8dce8;
+  --t1:#a8adc4;
+  --t2:#6b7189;
+  --acc:#00ffff;   /* シアン(メイン) */
+  --acc2:#ff00ff;  /* マゼンタ(アクション/警告) */
+  --acc3:#00ffff;  /* シアン(情報系・見出し) */
+  --acc4:#ffe066;  /* イエロー(DEV/ハイライト) */
+  --glow-g:0 0 8px #00ffff,0 0 20px rgba(0,255,255,.4);
+  --glow-b:0 0 8px #00ffff,0 0 20px rgba(0,255,255,.4);
+  --glow-r:0 0 8px #ff00ff,0 0 20px rgba(255,0,255,.4);
+  --ff:'JetBrains Mono',monospace;
   --ffj:'M PLUS Rounded 1c',sans-serif;
   --ffh:'Press Start 2P',cursive;
   --px:image-rendering:pixelated;
@@ -58,8 +57,8 @@ body::before{
   position:fixed;inset:0;pointer-events:none;z-index:0;
   opacity:.3;
   background-image:
-    linear-gradient(rgba(0,212,255,.15) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,212,255,.15) 1px,transparent 1px);
+    linear-gradient(rgba(0,255,255,.15) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,255,.15) 1px,transparent 1px);
   background-size:32px 32px;
 }
 .bg-corner-tl,.bg-corner-tr,.bg-corner-bl,.bg-corner-br{
@@ -123,7 +122,7 @@ body::before{
 .filter-panel{
   background:var(--panel);
   border:2px solid var(--line2);
-  box-shadow:4px 4px 0 var(--edge),inset 0 0 30px rgba(0,212,255,.04);
+  box-shadow:4px 4px 0 var(--edge),inset 0 0 30px rgba(0,255,255,.04);
   padding:18px 20px;margin-bottom:28px;
   display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;
 }
@@ -157,9 +156,9 @@ body::before{
 
 .search-btn{
   background:var(--acc2);border:2px solid var(--acc2);
-  color:#fff;font-family:var(--ffh);font-size:.55rem;
+  color:#0b0715;font-family:var(--ffh);font-size:.55rem;
   letter-spacing:.08em;padding:9px 18px;cursor:pointer;height:40px;
-  transition:all .15s;box-shadow:4px 4px 0 rgba(255,45,85,.5);
+  transition:all .15s;box-shadow:4px 4px 0 rgba(255,0,255,.5);
   white-space:nowrap;
 }
 .search-btn:hover{
@@ -172,12 +171,12 @@ body::before{
   display:flex;align-items:center;gap:14px;
   background:var(--panel);
   border:2px solid var(--acc4);
-  box-shadow:4px 4px 0 rgba(255,204,0,.3);
+  box-shadow:4px 4px 0 rgba(255,224,102,.3);
   padding:14px 18px;margin-bottom:22px;
 }
 .pb-icon{font-size:1.5em;flex-shrink:0}
 .pb-text{flex:1}
-.pb-text strong{font-family:var(--ffh);font-size:.7rem;color:var(--acc4);display:block;margin-bottom:4px;text-shadow:0 0 8px #ffcc00}
+.pb-text strong{font-family:var(--ffh);font-size:.7rem;color:var(--acc4);display:block;margin-bottom:4px;text-shadow:0 0 8px #ffe066}
 .pb-text span{font-size:.72rem;color:var(--t2)}
 .pb-close{
   background:none;border:2px solid var(--line2);color:var(--t2);
@@ -219,9 +218,9 @@ body::before{
 }
 .new-badge{
   position:absolute;top:8px;left:8px;z-index:20;
-  background:var(--acc2);color:#fff;font-family:var(--ffh);
+  background:var(--acc2);color:#0b0715;font-family:var(--ffh);
   font-size:.45rem;letter-spacing:.08em;padding:3px 7px;
-  box-shadow:2px 2px 0 rgba(255,45,85,.6);
+  box-shadow:2px 2px 0 rgba(255,0,255,.6);
 }
 .card-display{position:relative;padding-top:100%;width:100%;overflow:hidden}
 .card-thumb{
@@ -250,7 +249,7 @@ body::before{
 .card-overlay{
   position:absolute;bottom:0;left:0;width:100%;
   padding:20px 12px 10px;color:#fff;z-index:10;
-  background:linear-gradient(to top,rgba(0,4,8,.97) 0%,rgba(0,4,8,.7) 60%,transparent 100%);
+  background:linear-gradient(to top,rgba(13,14,23,.97) 0%,rgba(13,14,23,.7) 60%,transparent 100%);
 }
 .ov-title{
   font-family:var(--ffh);font-size:.6rem;letter-spacing:.04em;
@@ -310,13 +309,13 @@ body::before{
 .page-btn:disabled{opacity:.3;cursor:not-allowed}
 .page-btn.active{
   background:var(--acc3);border-color:var(--acc3);
-  color:var(--bg);cursor:default;box-shadow:2px 2px 0 rgba(0,212,255,.5);
+  color:var(--bg);cursor:default;box-shadow:2px 2px 0 rgba(0,255,255,.5);
 }
 .page-info{font-family:var(--ffh);font-size:.5rem;color:var(--t1);padding:0 10px}
 
 /* ── MODAL ── */
 #modal-backdrop{
-  position:fixed;inset:0;background:rgba(0,4,8,.88);
+  position:fixed;inset:0;background:rgba(13,14,23,.88);
   backdrop-filter:blur(4px);z-index:1999;
   opacity:0;visibility:hidden;transition:all .3s ease;
 }
@@ -345,21 +344,21 @@ body::before{
 .card-details::before{
   content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
   background:
-    linear-gradient(to bottom,rgba(0,4,8,.55) 0%,rgba(0,4,8,.88) 100%),
+    linear-gradient(to bottom,rgba(13,14,23,.55) 0%,rgba(13,14,23,.88) 100%),
     repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px);
 }
 .modal-banner{display:none}
 .modal-banner-overlay{display:none}
 .modal-close-btn{
   position:absolute;top:12px;right:12px;
-  background:rgba(0,4,8,.6);color:var(--acc2);
+  background:rgba(13,14,23,.6);color:var(--acc2);
   border:2px solid var(--acc2);
   width:32px;height:32px;cursor:pointer;z-index:10;
   display:flex;align-items:center;justify-content:center;
   transition:all .2s;font-size:1rem;
   box-shadow:2px 2px 0 var(--acc2);
 }
-.modal-close-btn:hover{background:var(--acc2);color:#fff;box-shadow:var(--glow-r)}
+.modal-close-btn:hover{background:var(--acc2);color:#0b0715;box-shadow:var(--glow-r)}
 .modal-cw{
   position:relative;z-index:1;
   padding:20px 24px 24px;
@@ -437,19 +436,19 @@ body::before{
 }
 .fav-filter-btn:hover{border-color:var(--acc2);color:var(--acc2)}
 .fav-filter-btn.active{
-  background:rgba(255,45,85,.12);border-color:var(--acc2);
-  color:var(--acc2);box-shadow:2px 2px 0 rgba(255,45,85,.4);
+  background:rgba(255,0,255,.12);border-color:var(--acc2);
+  color:var(--acc2);box-shadow:2px 2px 0 rgba(255,0,255,.4);
 }
 /* カード上のハートボタン */
 .card-fav-btn{
   position:absolute;bottom:10px;right:10px;z-index:20;
-  background:rgba(0,4,8,.6);border:1px solid var(--line2);
+  background:rgba(13,14,23,.6);border:1px solid var(--line2);
   color:var(--t2);width:28px;height:28px;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;font-size:.9rem;transition:all .15s;
   border-radius:2px;
 }
-.card-fav-btn:hover,.card-fav-btn.active{color:var(--acc2);border-color:var(--acc2);background:rgba(255,45,85,.15)}
+.card-fav-btn:hover,.card-fav-btn.active{color:var(--acc2);border-color:var(--acc2);background:rgba(255,0,255,.15)}
 .card-fav-btn.active{text-shadow:0 0 8px var(--acc2)}
 /* モーダル内ハートボタン */
 .modal-fav-btn{
@@ -461,8 +460,8 @@ body::before{
 }
 .modal-fav-btn:hover{border-color:var(--acc2);color:var(--acc2)}
 .modal-fav-btn.active{
-  background:rgba(255,45,85,.1);border-color:var(--acc2);
-  color:var(--acc2);box-shadow:2px 2px 0 rgba(255,45,85,.4);
+  background:rgba(255,0,255,.1);border-color:var(--acc2);
+  color:var(--acc2);box-shadow:2px 2px 0 rgba(255,0,255,.4);
 }
 
 /* ── DIFFICULTY GAUGE ── */
@@ -507,7 +506,7 @@ body::before{
   font-family:var(--ffh);font-size:.6rem;letter-spacing:.1em;
   cursor:pointer;text-decoration:none;
   transition:all .15s;
-  box-shadow:4px 4px 0 rgba(0,255,65,.5),var(--glow-g);
+  box-shadow:4px 4px 0 rgba(0,255,255,.5),var(--glow-g);
 }
 .modal-play-btn:hover{
   background:transparent;color:var(--acc);
@@ -524,7 +523,7 @@ body::before{
   display:flex;flex-direction:column;
   transition:border-color .2s,box-shadow .2s;
 }
-.detail-item:hover{border-left-color:var(--acc);box-shadow:inset 0 0 12px rgba(0,255,65,.05)}
+.detail-item:hover{border-left-color:var(--acc);box-shadow:inset 0 0 12px rgba(0,255,255,.05)}
 .detail-item strong{
   color:var(--t2);display:flex;align-items:center;
   font-family:var(--ffh);font-size:.45rem;
@@ -542,9 +541,9 @@ body::before{
   transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;
 }
 .dev-toggle:hover{color:var(--acc4);border-color:var(--acc4)}
-.dev-toggle.dev-on{background:rgba(255,204,0,.1);border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,204,0,.4)}
-.dev-section{margin-top:14px;border:1px solid rgba(255,204,0,.3);overflow:hidden}
-.dev-section-hdr{background:rgba(255,204,0,.07);padding:8px 12px;font-family:var(--ffh);font-size:.5rem;color:var(--acc4);letter-spacing:.06em}
+.dev-toggle.dev-on{background:rgba(255,224,102,.1);border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,224,102,.4)}
+.dev-section{margin-top:14px;border:1px solid rgba(255,224,102,.3);overflow:hidden}
+.dev-section-hdr{background:rgba(255,224,102,.07);padding:8px 12px;font-family:var(--ffh);font-size:.5rem;color:var(--acc4);letter-spacing:.06em}
 .dev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:10px}
 .dev-item{background:var(--bg);padding:6px 8px;border-left:2px solid var(--acc4)}
 .dev-item strong{display:block;font-size:.5rem;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;font-family:var(--ffh)}
@@ -627,12 +626,13 @@ body.eco .site-header h1::after{box-shadow:none}
 }
 .eco-toggle:hover{color:var(--acc3);border-color:var(--acc3)}
 .eco-toggle.eco-on{
-  background:rgba(0,255,65,.08);border-color:var(--acc);
+  background:rgba(0,255,255,.08);border-color:var(--acc);
   color:var(--acc);
 }
 </style>
 </head>
-<body>
+<body data-nav-current="community">
+<script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 <div class="bg-grid"></div>
 <div class="bg-corner-tl"></div>
 <div class="bg-corner-tr"></div>
@@ -770,8 +770,8 @@ function mkDiffGauge(lv){
   if(fp==null||lv.type===0)return''; // サンドボックスはなし
   const pct=Math.round(fp*100);
   // 色: 低→赤、中→黄、高→緑
-  const color=pct<=20?'#ff2d55':pct<=50?'#ffcc00':'#00ff41';
-  const glow=pct<=20?'rgba(255,45,85,.5)':pct<=50?'rgba(255,204,0,.5)':'rgba(0,255,65,.5)';
+  const color=pct<=20?'#ff00ff':pct<=50?'#ffe066':'#00ffff';
+  const glow=pct<=20?'rgba(255,0,255,.5)':pct<=50?'rgba(255,224,102,.5)':'rgba(0,255,255,.5)';
   const label=lang==='ja'
     ?(pct<=10?'超激ムズ':pct<=30?'難しい':pct<=60?'普通':pct<=85?'簡単':'ヌルゲー')
     :(pct<=10?'Extreme':pct<=30?'Hard':pct<=60?'Normal':pct<=85?'Easy':'Very Easy');
@@ -980,7 +980,7 @@ window.TM_LANG_HOOK=l=>applyLang(l);
   for(let i=0;i<24;i++){
     const p=document.createElement('div');p.className='pt';
     const sz=Math.random()<.5?10:8;
-    const col=['#00ff41','#00d4ff','#ff2d55','#ffcc00'][Math.floor(Math.random()*4)];
+    const col=['#00ffff','#ff00ff','#ffe066'][Math.floor(Math.random()*3)];
     p.style.cssText=`left:${Math.random()*100}%;bottom:-20px;font-family:'Press Start 2P',monospace;font-size:${sz}px;color:${col};text-shadow:0 0 8px ${col};--dur:${8+Math.random()*12}s;--del:${-Math.random()*15}s`;
     p.textContent=chars[Math.floor(Math.random()*chars.length)];
     c.appendChild(p);
@@ -1067,6 +1067,5 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 });
 </script>
-<script src="https://tanabesan.github.io/lolbeans/tool-menu.js"></script>
 </body>
 </html>

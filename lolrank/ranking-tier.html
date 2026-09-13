@@ -217,12 +217,14 @@ const RANK_POINT = { S:5, A:4, B:3, C:2, D:1 };
 const RANK_POINT_CONVEX = { S:5, A:3.5, B:3, C:2.5, D:1 };
 // Bを1点とし、離れた分×2を加点する対称配点(総合ランキング=尖り度評価用。S/Dどちらも同点)
 const RANK_POINT_EXTREME = { S:5, A:3, B:1, C:3, D:5 };
+// 総合ランキングの中で、extreme配点(尖り度)を使う項目=狂暴・優しさに関わる項目
+const OVERALL_EXTREME_ITEMS = new Set(["aggression","harmony","devotion"]);
 const MIN_VOTES = 3;
 
 // カテゴリ別ランキング定義: どの項目を合算するか
-// pointMode: "linear"(通常) / "convex"(B中心・方向あり) / "extreme"(B中心・対称)
+// pointMode: "linear"(通常) / "convex"(B中心・方向あり) / "extreme"(B中心・対称) / "mixed"(項目ごとに切り替え。overall専用)
 const CATEGORIES = {
-  overall: { label:"総合ランキング", itemKeys:["aggression","chat","madness","devotion","influence","harmony"], pointMode:"extreme" },
+  overall: { label:"総合ランキング", itemKeys:["aggression","chat","madness","devotion","influence","harmony"], pointMode:"mixed" },
   violence: { label:"狂暴ランキング", itemKeys:["aggression"], pointMode:"convex" },
   kindness: { label:"優しさランキング", itemKeys:["harmony","devotion"], pointMode:"convex" },
 };
@@ -277,7 +279,12 @@ function aggregate(byTarget, playersMap){
         : cat.pointMode === "convex" ? RANK_POINT_CONVEX
         : RANK_POINT;
       const perVoteSums = votes.map(v => {
-        const vals = cat.itemKeys.map(k => pointMap[v[k]]).filter(p => p !== undefined);
+        const vals = cat.itemKeys.map(k => {
+          const map = cat.pointMode === "mixed"
+            ? (OVERALL_EXTREME_ITEMS.has(k) ? RANK_POINT_EXTREME : RANK_POINT)
+            : pointMap;
+          return map[v[k]];
+        }).filter(p => p !== undefined);
         return vals.length ? vals.reduce((a,b)=>a+b,0) : null;
       }).filter(s => s !== null);
       categoryScores[catId] = perVoteSums.length

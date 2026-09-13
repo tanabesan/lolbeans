@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ビーンズランク | LOLBeans</title>
+<style>
+  :root{
+    --bg:#05070c;
+    --panel:#0d111a;
+    --panel2:#11151f;
+    --line:#1c2230;
+    --accent:#5865F2;
+    --text:#e7ecf5;
+    --dim:#7a8499;
+    --dim2:#4d5567;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    font-size:14px;
+  }
+  header{
+    display:flex; align-items:center; gap:16px;
+    padding:14px 24px; border-bottom:1px solid var(--line);
+  }
+  header img{ width:36px; height:36px; border-radius:50%; }
+  header .brand{ font-weight:700; font-size:16px; }
+  header nav{ display:flex; gap:18px; margin-left:12px; flex-wrap:wrap; }
+  header nav a{ color:var(--dim); text-decoration:none; font-size:13px; }
+  header nav a:hover{ color:var(--text); }
+
+  .lead{
+    max-width:900px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+    color: var(--dim);
+    font-size:13px;
+    line-height:1.8;
+  }
+  .lead a{ color:#8ab4ff; }
+
+  .wrap{
+    max-width:900px;
+    margin: 18px auto 60px;
+    padding: 0 20px;
+  }
+
+  .tier-row{
+    display:grid;
+    grid-template-columns: 84px 1fr;
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:10px;
+  }
+  .tier-label{
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; font-weight:800;
+    color:#05070c;
+  }
+  .tier-cards{
+    background: var(--panel);
+    padding:12px;
+    display:flex; flex-wrap:wrap; gap:10px;
+    min-height:58px;
+    align-items:center;
+  }
+  .tier-empty{ color:var(--dim2); font-size:12px; padding-left:4px; }
+
+  .player-card{
+    display:flex; align-items:center; gap:8px;
+    background: var(--panel2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:7px 10px;
+    cursor:pointer;
+  }
+  .player-card img{ width:30px; height:30px; border-radius:50%; object-fit:cover; background:#222; }
+  .player-card .pname{ font-size:13px; }
+  .player-card .pscore{ font-size:11px; color:var(--dim); }
+
+  /* tier colors */
+  .t-Sp{ background:#ffd23f; } .t-S{ background:#ffc93f; } .t-Sm{ background:#ffbf3f; }
+  .t-Ap{ background:#7cf29c; } .t-A{ background:#63e389; } .t-Am{ background:#4dd479; }
+  .t-Bp{ background:#5ec8ff; } .t-B{ background:#4ab8f0; } .t-Bm{ background:#38a8e0; }
+  .t-C{ background:#c9c9c9; } .t-D{ background:#ff9d5c; } .t-E{ background:#ff7b6b; } .t-F{ background:#ff5f5f; }
+
+  .empty-msg{ text-align:center; color:var(--dim2); font-size:12.5px; padding:30px 0; }
+
+  /* モーダル */
+  .modal-bg{
+    display:none;
+    position:fixed; inset:0; background:rgba(0,0,0,.6);
+    align-items:center; justify-content:center; z-index:50;
+  }
+  .modal-bg.show{ display:flex; }
+  .modal{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:22px;
+    width:320px;
+    max-width:90vw;
+  }
+  .modal h3{ margin:0 0 4px; font-size:16px; }
+  .modal .sub{ font-size:12px; color:var(--dim); margin-bottom:14px; }
+  .modal .item-line{
+    display:flex; justify-content:space-between;
+    padding:6px 0; border-top:1px solid var(--line); font-size:13px;
+  }
+  .modal .item-line:first-of-type{ border-top:none; }
+  .modal .close{
+    margin-top:16px; width:100%; padding:9px;
+    background: var(--accent); border:none; border-radius:7px;
+    color:#fff; font-size:13px; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://cdn.discordapp.com/embed/avatars/4.png" alt="">
+  <div class="brand">&amp;LOLBEANS</div>
+  <nav>
+    <a href="./index.html">概要</a>
+    <a href="./romerank-survey-v2.html">評価する</a>
+    <a href="./community.html">コース一覧</a>
+  </nav>
+</header>
+
+<p class="lead">
+  👑 ビーンズランク Tier List<br>
+  攻撃性・雑談力・狂気度・献身度・影響力・調和力、6項目をみんなで評価するランキングです。<br>
+  <a href="./romerank-survey-v2.html">📊 あなたも評価する</a> ※3人以上から評価された人だけがランキングに表示されます(評価人数も併記)
+</p>
+
+<div class="wrap" id="tierWrap">
+  <div class="empty-msg">読み込み中...</div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalName"></h3>
+    <div class="sub" id="modalSub"></div>
+    <div id="modalItems"></div>
+    <button class="close" id="modalClose">閉じる</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collectionGroup, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
+  authDomain: "lolex0204.firebaseapp.com",
+  projectId: "lolex0204",
+  storageBucket: "lolex0204.firebasestorage.app",
+  messagingSenderId: "940620254622",
+  appId: "1:940620254622:web:edca80d191423cd460da8f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const ITEM_DEFS = [
+  { key:"aggression", name:"攻撃性" },
+  { key:"chat", name:"雑談力" },
+  { key:"madness", name:"狂気度" },
+  { key:"devotion", name:"献身度" },
+  { key:"influence", name:"影響力" },
+  { key:"harmony", name:"調和力" },
+];
+const RANK_POINT = { S:5, A:4, B:3, C:2, D:1 };
+const MIN_VOTES = 3;
+
+// tier定義: [ラベル, cssクラス, 最小合計スコア(6項目合計・最大30)]
+const TIERS = [
+  ["S+","t-Sp",28.15], ["S","t-S",26.31], ["S-","t-Sm",24.46],
+  ["A+","t-Ap",22.62], ["A","t-A",20.77], ["A-","t-Am",18.92],
+  ["B+","t-Bp",17.08], ["B","t-B",15.23], ["B-","t-Bm",13.38],
+  ["C","t-C",9.69], ["D","t-D",7.85], ["E","t-E",6.0], ["F","t-F",0],
+];
+function tierOf(score){
+  for (const t of TIERS){ if (score >= t[2]) return t; }
+  return TIERS[TIERS.length-1];
+}
+
+async function loadPlayers(){
+  const snap = await getDocs(collection(db, "players"));
+  const map = {};
+  snap.docs.forEach(d => { map[d.id] = { name: d.data().name || d.id, iconUrl: d.data().iconUrl || null }; });
+  return map;
+}
+
+async function loadVotes(){
+  // collectionGroup: すべての ratings/*/votes/* を横断取得
+  const snap = await getDocs(collectionGroup(db, "votes"));
+  const byTarget = {}; // targetId -> [voteData, ...]
+  snap.forEach(d => {
+    const targetId = d.ref.parent.parent.id;
+    if (!byTarget[targetId]) byTarget[targetId] = [];
+    byTarget[targetId].push(d.data());
+  });
+  return byTarget;
+}
+
+function aggregate(byTarget, playersMap){
+  const results = [];
+  for (const targetId of Object.keys(byTarget)){
+    const votes = byTarget[targetId];
+    const voteCount = votes.length;
+    const itemAvg = {};
+    ITEM_DEFS.forEach(item => {
+      const pts = votes.map(v => RANK_POINT[v[item.key]]).filter(p => p !== undefined);
+      itemAvg[item.key] = pts.length ? pts.reduce((a,b)=>a+b,0) / pts.length : 0;
+    });
+    const totalScore = ITEM_DEFS.reduce((sum, item) => sum + itemAvg[item.key], 0);
+    const player = playersMap[targetId];
+    const name = player ? player.name : (votes[0].targetName || targetId);
+    const iconUrl = player ? player.iconUrl : null;
+    results.push({ targetId, name, iconUrl, voteCount, itemAvg, totalScore });
+  }
+  return results;
+}
+
+function renderTierList(results){
+  const wrap = document.getElementById("tierWrap");
+  const shown = results.filter(r => r.voteCount >= MIN_VOTES);
+
+  if (shown.length === 0){
+    wrap.innerHTML = `<div class="empty-msg">まだ${MIN_VOTES}人以上から評価されたプレイヤーがいません</div>`;
+    return;
+  }
+
+  const grouped = {};
+  TIERS.forEach(t => grouped[t[0]] = []);
+  shown.forEach(r => {
+    const t = tierOf(r.totalScore);
+    grouped[t[0]].push(r);
+  });
+  Object.values(grouped).forEach(list => list.sort((a,b) => b.totalScore - a.totalScore));
+
+  wrap.innerHTML = TIERS.map(t => {
+    const [label, cls] = t;
+    const list = grouped[label];
+    return `
+      <div class="tier-row">
+        <div class="tier-label ${cls}">${label}</div>
+        <div class="tier-cards">
+          ${list.length === 0
+            ? `<span class="tier-empty">まだ採点対象なし</span>`
+            : list.map(r => `
+                <div class="player-card" data-id="${r.targetId}">
+                  <img src="${r.iconUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(r.name)}`}" alt="">
+                  <div>
+                    <div class="pname">${r.name}</div>
+                    <div class="pscore">${r.totalScore.toFixed(1)} ${r.voteCount}人</div>
+                  </div>
+                </div>
+              `).join("")
+          }
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // モーダル用にデータを保持
+  window.__resultsById = {};
+  shown.forEach(r => window.__resultsById[r.targetId] = r);
+
+  [...wrap.querySelectorAll(".player-card")].forEach(card => {
+    card.addEventListener("click", () => openModal(card.dataset.id));
+  });
+}
+
+function openModal(id){
+  const r = window.__resultsById[id];
+  if (!r) return;
+  document.getElementById("modalName").textContent = r.name;
+  document.getElementById("modalSub").textContent =
+    `合計 ${r.totalScore.toFixed(1)} / 30　評価人数 ${r.voteCount}人`;
+  document.getElementById("modalItems").innerHTML = ITEM_DEFS.map(item => `
+    <div class="item-line"><span>${item.name}</span><span>${r.itemAvg[item.key].toFixed(1)}</span></div>
+  `).join("");
+  document.getElementById("modalBg").classList.add("show");
+}
+document.getElementById("modalClose").addEventListener("click", () => {
+  document.getElementById("modalBg").classList.remove("show");
+});
+document.getElementById("modalBg").addEventListener("click", (e) => {
+  if (e.target.id === "modalBg") document.getElementById("modalBg").classList.remove("show");
+});
+
+async function init(){
+  try {
+    const [playersMap, byTarget] = await Promise.all([loadPlayers(), loadVotes()]);
+    const results = aggregate(byTarget, playersMap);
+    renderTierList(results);
+  } catch(e){
+    console.error(e);
+    document.getElementById("tierWrap").innerHTML =
+      `<div class="empty-msg">ランキングの読み込みに失敗しました</div>`;
+  }
+}
+init();
+</script>
+</body>
+</html>

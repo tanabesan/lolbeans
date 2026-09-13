@@ -3,219 +3,295 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LOLビーンズ評価アンケート</title>
+<title>ビーンズを評価 | LOLBeans</title>
 <style>
   :root{
-    --bg:#0a0e14;
-    --bg2:#0f1623;
-    --panel:#121a2b;
-    --line:#1f2b42;
-    --neon:#39ff88;
-    --neon2:#ff2fb0;
-    --neon3:#2fd8ff;
-    --text:#d8e6f2;
-    --dim:#5b7091;
-    --px: 4px;
+    --bg:#05070c;
+    --panel:#0d111a;
+    --panel2:#11151f;
+    --line:#1c2230;
+    --accent:#5865F2;
+    --text:#e7ecf5;
+    --dim:#7a8499;
+    --dim2:#4d5567;
+    --s-color:#ffb454;
+    --a-color:#7cf29c;
+    --b-color:#5ec8ff;
+    --c-color:#c9c9c9;
+    --d-color:#ff6b6b;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:
-      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px),
-      radial-gradient(ellipse at top, var(--bg2), var(--bg) 70%);
-    color:var(--text);
-    font-family: 'Courier New', ui-monospace, monospace;
-    min-height:100vh;
-    padding:24px 16px 60px;
-  }
-  .wrap{ max-width:640px; margin:0 auto; }
-
-  .title{
-    text-align:center;
-    margin: 8px 0 4px;
-  }
-  .title h1{
-    font-size: 22px;
-    letter-spacing: 2px;
-    color: var(--neon);
-    text-shadow: 0 0 6px rgba(57,255,136,.6), 0 0 18px rgba(57,255,136,.25);
-    margin: 0 0 6px;
-  }
-  .title p{
-    color: var(--dim);
-    font-size: 13px;
-    margin: 0;
-    line-height:1.6;
-  }
-
-  .panel{
-    background: var(--panel);
-    border: var(--px) solid var(--line);
-    box-shadow: 0 0 0 var(--px) #000 inset, 6px 6px 0 rgba(0,0,0,.35);
-    padding: 20px;
-    margin-top: 22px;
-  }
-
-  label.field-label{
-    display:block;
-    font-size: 12px;
-    color: var(--neon3);
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-
-  input[type=text]{
-    width:100%;
-    background: #0a0f1a;
-    border: 2px solid var(--line);
+    background: var(--bg);
     color: var(--text);
-    font-family: inherit;
-    font-size: 15px;
-    padding: 10px 12px;
-    outline: none;
-  }
-  input[type=text]:focus{
-    border-color: var(--neon3);
-    box-shadow: 0 0 0 2px rgba(47,216,255,.2);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    font-size:14px;
   }
 
-  .item{
-    border-top: 1px dashed var(--line);
-    padding: 16px 0;
-  }
-  .item:first-of-type{ border-top:none; padding-top:4px; }
-
-  .item-head{
+  header{
     display:flex;
-    justify-content:space-between;
-    align-items:baseline;
+    align-items:center;
+    gap:16px;
+    padding:14px 24px;
+    border-bottom:1px solid var(--line);
+  }
+  header img{ width:36px; height:36px; border-radius:50%; }
+  header .brand{ font-weight:700; font-size:16px; letter-spacing:.5px; }
+  header nav{ display:flex; gap:18px; margin-left:12px; flex-wrap:wrap; }
+  header nav a{ color:var(--dim); text-decoration:none; font-size:13px; }
+  header nav a:hover{ color:var(--text); }
+
+  .lead{
+    max-width:1160px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+    color: var(--dim);
+    font-size:13px;
+    line-height:1.8;
+  }
+  .lead a{ color:#8ab4ff; }
+
+  .layout{
+    max-width:1160px;
+    margin: 18px auto 60px;
+    padding: 0 20px;
+    display:grid;
+    grid-template-columns: 340px 1fr;
+    gap:20px;
+    align-items:start;
+  }
+  @media (max-width: 860px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  /* ---- 左カラム ---- */
+  .left{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px;
+  }
+  input.search{
+    width:100%;
+    background: var(--panel2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--text);
+    padding:10px 12px;
+    font-size:13px;
+    outline:none;
     margin-bottom:10px;
   }
-  .item-head .name{
-    font-size:15px;
-    color:var(--text);
-    font-weight:bold;
+  input.search:focus{ border-color:var(--accent); }
+
+  .voted-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    color:var(--dim);
+    margin-bottom:8px;
   }
-  .item-head button.info{
-    background:none;
+  .voted-toggle .badge{
+    background: rgba(124,242,156,.12);
+    color:#7cf29c;
+    border-radius:5px;
+    padding:1px 6px;
+    font-size:11px;
+  }
+
+  .sort-row{ display:flex; gap:6px; margin-bottom:12px; }
+  .sort-btn{
+    flex:1;
+    background: var(--panel2);
     border:1px solid var(--line);
     color:var(--dim);
-    font-family:inherit;
-    font-size:11px;
-    padding:2px 8px;
-    cursor:pointer;
-  }
-  .item-head button.info:hover{ color:var(--neon3); border-color:var(--neon3); }
-
-  .desc{
+    padding:7px 0;
+    border-radius:7px;
     font-size:12px;
-    color:var(--dim);
-    line-height:1.6;
-    margin: -4px 0 10px;
-  }
-
-  .rank-row{
-    display:grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap:8px;
-  }
-  .rank-btn{
-    background:#0a0f1a;
-    border:2px solid var(--line);
-    color:var(--text);
-    font-family:inherit;
-    font-size:16px;
-    font-weight:bold;
-    padding:12px 0;
     cursor:pointer;
+  }
+  .sort-btn.active{ background: var(--accent); color:#fff; border-color:var(--accent); }
+
+  .player-list{
+    max-height: 560px;
+    overflow-y:auto;
+    border-top:1px solid var(--line);
+  }
+  .player-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 4px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    border-radius:6px;
+  }
+  .player-row:hover{ background: var(--panel2); }
+  .player-row.active{ background: rgba(88,101,242,.15); }
+  .player-row img{
+    width:28px; height:28px; border-radius:50%;
+    background:#222; object-fit:cover; flex-shrink:0;
+  }
+  .player-row .pname{ flex:1; font-size:13.5px; }
+  .player-row .ptag{ font-size:11px; color:var(--dim2); }
+  .player-row .done-mark{ color:#7cf29c; font-size:12px; }
+
+  .empty-msg{ text-align:center; color:var(--dim2); font-size:12px; padding:24px 0; }
+
+  /* ---- 右カラム ---- */
+  .right{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px;
+    min-height:400px;
+  }
+  .right .placeholder{
+    color:var(--dim2);
     text-align:center;
-    transition: transform .05s ease;
+    padding:100px 0;
+    font-size:13px;
   }
-  .rank-btn:active{ transform: scale(0.94); }
-  .rank-btn[data-r="S"].selected{ background: var(--neon2); border-color: var(--neon2); color:#0a0e14; box-shadow:0 0 14px rgba(255,47,176,.6);}
-  .rank-btn[data-r="A"].selected{ background: var(--neon); border-color: var(--neon); color:#0a0e14; box-shadow:0 0 14px rgba(57,255,136,.6);}
-  .rank-btn[data-r="B"].selected{ background: var(--neon3); border-color: var(--neon3); color:#0a0e14; box-shadow:0 0 14px rgba(47,216,255,.6);}
-  .rank-btn[data-r="C"].selected{ background: #ffd23f; border-color: #ffd23f; color:#0a0e14; }
-  .rank-btn[data-r="D"].selected{ background: #ff5f5f; border-color: #ff5f5f; color:#0a0e14; }
 
-  .criteria-detail{
-    display:none;
-    font-size:11px;
+  .target-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .target-head h2{ margin:0; font-size:18px; }
+
+  .score-box{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background: var(--panel2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 16px;
+    margin-bottom:18px;
+  }
+  .score-box .total{ font-size:14px; }
+  .score-box .total b{ font-size:20px; color:var(--accent); }
+  .score-box .rank-preview{
+    font-size:13px;
     color:var(--dim);
-    border-left: 2px solid var(--line);
-    padding: 8px 0 0 10px;
-    margin-top:8px;
-    line-height:1.7;
   }
-  .criteria-detail.open{ display:block; }
-  .criteria-detail b{ color:var(--neon3); }
+  .score-box .rank-preview b{
+    font-size:16px;
+    color:var(--s-color);
+    margin-left:4px;
+  }
+  .score-box .note{ font-size:11px; color:var(--dim2); margin-top:2px; }
 
-  .submit-row{ margin-top:22px; }
+  .criterion{
+    border-top:1px solid var(--line);
+    padding:16px 0;
+  }
+  .criterion:first-of-type{ border-top:none; }
+  .crit-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+  }
+  .crit-head .cname{ font-size:14.5px; font-weight:600; }
+  select.rank-select{
+    background: var(--panel2);
+    border:1px solid var(--line);
+    color:var(--text);
+    border-radius:7px;
+    padding:6px 10px;
+    font-size:13px;
+    min-width:110px;
+  }
+  select.rank-select option[value=S]{ color: var(--s-color); }
+  select.rank-select option[value=A]{ color: var(--a-color); }
+  select.rank-select option[value=B]{ color: var(--b-color); }
+  select.rank-select option[value=C]{ color: var(--c-color); }
+  select.rank-select option[value=D]{ color: var(--d-color); }
+
+  .crit-detail{
+    margin-top:10px;
+    background: var(--panel2);
+    border-radius:8px;
+    padding:10px 14px;
+  }
+  .crit-detail div{ padding:4px 0; font-size:12px; color:var(--dim); line-height:1.6; }
+  .crit-detail b{
+    display:inline-block;
+    width:16px;
+    margin-right:6px;
+  }
+  .crit-detail div[data-r=S] b{ color:var(--s-color); }
+  .crit-detail div[data-r=A] b{ color:var(--a-color); }
+  .crit-detail div[data-r=B] b{ color:var(--b-color); }
+  .crit-detail div[data-r=C] b{ color:var(--c-color); }
+  .crit-detail div[data-r=D] b{ color:var(--d-color); }
+
+  .submit-row{ margin-top:20px; }
   button.submit{
     width:100%;
-    padding:14px;
-    background: var(--neon);
-    border: 2px solid var(--neon);
-    color:#0a0e14;
-    font-family:inherit;
-    font-size:15px;
-    font-weight:bold;
-    letter-spacing:1px;
+    padding:13px;
+    background: var(--accent);
+    border:none;
+    border-radius:8px;
+    color:#fff;
+    font-size:14.5px;
+    font-weight:700;
     cursor:pointer;
-    box-shadow: 4px 4px 0 rgba(0,0,0,.4);
   }
-  button.submit:disabled{
-    background:#1f2b42; border-color:#1f2b42; color:var(--dim); cursor:not-allowed; box-shadow:none;
-  }
-  button.submit:not(:disabled):active{ transform: translate(2px,2px); box-shadow:none; }
+  button.submit:disabled{ background:#262c3d; color:var(--dim2); cursor:not-allowed; }
 
-  .status{
-    margin-top:14px;
-    font-size:13px;
-    text-align:center;
-    min-height:18px;
-  }
-  .status.ok{ color: var(--neon); }
-  .status.err{ color: var(--neon2); }
+  .status{ margin-top:10px; font-size:12.5px; text-align:center; min-height:16px; }
+  .status.ok{ color:#7cf29c; }
+  .status.err{ color:#ff6b6b; }
   .status.info{ color: var(--dim); }
-
-  .nav{
-    text-align:center;
-    margin-top:26px;
-  }
-  .nav a{
-    color:var(--dim);
-    font-size:12px;
-    text-decoration:none;
-    border-bottom: 1px dotted var(--dim);
-  }
-  .nav a:hover{ color: var(--neon3); border-color: var(--neon3); }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="title">
-    <h1>&gt; ビーンズ評価アンケート_</h1>
-    <p>プレイヤーを6項目でS〜Dランク評価します。<br>
-    結果はランキングページのTierリストに反映されます。<br>
-    ※評価した相手は3人以上から評価されるまでランキングに表示されません。</p>
+<header>
+  <img src="https://cdn.discordapp.com/embed/avatars/4.png" alt="">
+  <div class="brand">&amp;LOLBEANS</div>
+  <nav>
+    <a href="./index.html">概要</a>
+    <a href="./ranking-tier.html">ビーンズランク</a>
+    <a href="./community.html">コース一覧</a>
+  </nav>
+</header>
+
+<p class="lead">
+  📊 ビーンズを評価<br>
+  攻撃性・雑談力・狂気度・献身度・影響力・調和力の6項目をS〜Dで評価できます。<br>
+  ※評価した相手は、あなたを含めて<b>3人以上</b>から評価されるまで<a href="./ranking-tier.html">ビーンズランク</a>のランキングには表示されません（少人数の偏った評価を防ぐため）。
+</p>
+
+<div class="layout">
+
+  <!-- 左: プレイヤーリスト -->
+  <div class="left">
+    <input type="text" class="search" id="searchInput" placeholder="評価したい人の名前で検索...">
+
+    <div class="voted-toggle">
+      <span>評価済み(<span id="votedCount">0</span>人) クリックで修正できます</span>
+    </div>
+
+    <div class="sort-row">
+      <button class="sort-btn active" data-sort="name">名前順</button>
+      <button class="sort-btn" data-sort="recent">更新順</button>
+    </div>
+
+    <div class="player-list" id="playerList">
+      <div class="empty-msg">読み込み中...</div>
+    </div>
   </div>
 
-  <div class="panel">
-    <label class="field-label">評価する相手のユーザー名</label>
-    <input type="text" id="targetName" placeholder="例: ぬーん" autocomplete="off">
-  </div>
-
-  <div class="panel" id="itemsPanel"></div>
-
-  <div class="submit-row">
-    <button class="submit" id="submitBtn" disabled>この内容で評価を送信する</button>
-    <div class="status info" id="statusMsg">全項目を選択してください</div>
-  </div>
-
-  <div class="nav">
-    <a href="./ranking-tier.html">&larr; ランキングを見る</a>
+  <!-- 右: 評価パネル -->
+  <div class="right" id="rightPanel">
+    <div class="placeholder">左のリストから評価したい相手を選んでください</div>
   </div>
 
 </div>
@@ -223,7 +299,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, doc, setDoc, getDoc, serverTimestamp
+  getFirestore, collection, doc, setDoc, getDoc, getDocs, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -240,185 +316,209 @@ const db = getFirestore(app);
 
 // ---- 評価項目定義(ロメダ準拠) ----
 const ITEMS = [
-  {
-    key: "aggression",
-    name: "攻撃性",
-    desc: "相手に絡んで喧嘩を売る・毒舌を放つ頻度と強度",
-    detail: {
-      S: "誰よりも頻繁かつ強烈に喧嘩を売る・毒を吐く。象徴的な存在",
-      A: "高い頻度で攻撃的な言動をする。煽り・毒舌が日常",
-      B: "時々毒舌や煽りを見せる。標準的な攻撃性",
-      C: "稀に強めの発言をする程度",
-      D: "攻撃的な言動はほとんど見られない"
-    }
-  },
-  {
-    key: "chat",
-    name: "雑談力",
-    desc: "1レスの雑談の中での言い回し・ネタのセンスで場を沸かせる力",
-    detail: {
-      S: "発言のたびに笑いが起きる、雑談を支配する存在",
-      A: "高い頻度で場を沸かせる面白い発言をする",
-      B: "時々センスのいい発言で笑いを取る",
-      C: "たまに面白いことを言う程度",
-      D: "雑談で目立つことはあまりない"
-    }
-  },
-  {
-    key: "madness",
-    name: "狂気度",
-    desc: "予測不能な言動・不気味さで存在感を残す力",
-    detail: {
-      S: "常に読めない言動で強烈な印象を残す、掴みどころのない存在",
-      A: "しばしば予測不能な行動を見せる",
-      B: "時々変わった一面を見せる",
-      C: "たまに独特な言動をする程度",
-      D: "言動は基本的に読みやすい"
-    }
-  },
-  {
-    key: "devotion",
-    name: "献身度",
-    desc: "プライドを捨て、自虐やハプニングで笑いを提供する力",
-    detail: {
-      S: "誰よりも体を張り、自虐やハプニングで常に笑いを提供するギバー",
-      A: "頻繁に自虐やハプニングでネタを提供する",
-      B: "時々自分を犠牲にして笑いを取る",
-      C: "たまに自虐的なことを言う程度",
-      D: "自分を犠牲にする場面はほぼない"
-    }
-  },
-  {
-    key: "influence",
-    name: "影響力",
-    desc: "発言が重い・その人発のノリが広がる力",
-    detail: {
-      S: "発言やノリが必ずと言っていいほど広まる、流行の発信源",
-      A: "発言力が強く、しばしば周りに影響を与える",
-      B: "時々その人発のネタが広がることがある",
-      C: "たまに発言が話題になる程度",
-      D: "発言が広がることはあまりない"
-    }
-  },
-  {
-    key: "harmony",
-    name: "調和力",
-    desc: "場に自然に馴染み、揉め事があれば収める力",
-    detail: {
-      S: "誰からも慕われ、揉め事を収める中心的存在",
-      A: "高い頻度で場を和ませたり仲裁したりする",
-      B: "時々場を落ち着かせる役割を果たす",
-      C: "たまに調和的な行動を見せる程度",
-      D: "調和役として目立つことはあまりない"
-    }
-  }
+  { key:"aggression", name:"攻撃性", desc:"相手に絡んで喧嘩を売る・毒舌を放つ頻度と強度",
+    detail:{S:"誰よりも頻繁かつ強烈に喧嘩を売る・毒を吐く。象徴的な存在",A:"高い頻度で攻撃的な言動をする。煽り・毒舌が日常",B:"時々毒舌や煽りを見せる。標準的な攻撃性",C:"稀に強めの発言をする程度",D:"攻撃的な言動はほとんど見られない"} },
+  { key:"chat", name:"雑談力", desc:"雑談の中での言い回し・ネタのセンスで場を沸かせる力",
+    detail:{S:"発言のたびに笑いが起きる、雑談を支配する存在",A:"高い頻度で場を沸かせる面白い発言をする",B:"時々センスのいい発言で笑いを取る",C:"たまに面白いことを言う程度",D:"雑談で目立つことはあまりない"} },
+  { key:"madness", name:"狂気度", desc:"予測不能な言動・不気味さで存在感を残す力",
+    detail:{S:"常に読めない言動で強烈な印象を残す、掴みどころのない存在",A:"しばしば予測不能な行動を見せる",B:"時々変わった一面を見せる",C:"たまに独特な言動をする程度",D:"言動は基本的に読みやすい"} },
+  { key:"devotion", name:"献身度", desc:"プライドを捨て、自虐やハプニングで笑いを提供する力",
+    detail:{S:"誰よりも体を張り、自虐やハプニングで常に笑いを提供するギバー",A:"頻繁に自虐やハプニングでネタを提供する",B:"時々自分を犠牲にして笑いを取る",C:"たまに自虐的なことを言う程度",D:"自分を犠牲にする場面はほぼない"} },
+  { key:"influence", name:"影響力", desc:"発言が重い・その人発のノリが広がる力",
+    detail:{S:"発言やノリが必ずと言っていいほど広まる、流行の発信源",A:"発言力が強く、しばしば周りに影響を与える",B:"時々その人発のネタが広がることがある",C:"たまに発言が話題になる程度",D:"発言が広がることはあまりない"} },
+  { key:"harmony", name:"調和力", desc:"場に自然に馴染み、揉め事があれば収める力",
+    detail:{S:"誰からも慕われ、揉め事を収める中心的存在",A:"高い頻度で場を和ませたり仲裁したりする",B:"時々場を落ち着かせる役割を果たす",C:"たまに調和的な行動を見せる程度",D:"調和役として目立つことはあまりない"} },
 ];
-
 const RANKS = ["S","A","B","C","D"];
-const votes = {}; // key -> rank
+const RANK_POINT = { S:5, A:4, B:3, C:2, D:1 };
 
-const itemsPanel = document.getElementById("itemsPanel");
-ITEMS.forEach(item => {
-  const el = document.createElement("div");
-  el.className = "item";
-  el.innerHTML = `
-    <div class="item-head">
-      <span class="name">${item.name}</span>
-      <button type="button" class="info" data-key="${item.key}">基準を見る</button>
-    </div>
-    <div class="desc">${item.desc}</div>
-    <div class="rank-row" data-key="${item.key}">
-      ${RANKS.map(r => `<button type="button" class="rank-btn" data-r="${r}">${r}</button>`).join("")}
-    </div>
-    <div class="criteria-detail" id="detail-${item.key}">
-      ${RANKS.map(r => `<div><b>${r}</b> ${item.detail[r]}</div>`).join("")}
-    </div>
-  `;
-  itemsPanel.appendChild(el);
-});
+let allPlayers = [];      // {id, name}
+let myVotesMap = {};      // targetId -> votes obj (自分がこのIPで投票済みのもの)
+let selectedPlayer = null;
+let currentVotes = {};
+let ipHashCache = null;
 
-itemsPanel.addEventListener("click", (e) => {
-  const infoBtn = e.target.closest("button.info");
-  if (infoBtn) {
-    document.getElementById(`detail-${infoBtn.dataset.key}`).classList.toggle("open");
-    return;
-  }
-  const rankBtn = e.target.closest(".rank-btn");
-  if (rankBtn) {
-    const row = rankBtn.closest(".rank-row");
-    const key = row.dataset.key;
-    votes[key] = rankBtn.dataset.r;
-    [...row.querySelectorAll(".rank-btn")].forEach(b => b.classList.toggle("selected", b === rankBtn));
-    updateSubmitState();
-  }
-});
-
-const targetInput = document.getElementById("targetName");
-const submitBtn = document.getElementById("submitBtn");
-const statusMsg = document.getElementById("statusMsg");
-
-function updateSubmitState(){
-  const allSelected = ITEMS.every(i => votes[i.key]);
-  const hasName = targetInput.value.trim().length > 0;
-  submitBtn.disabled = !(allSelected && hasName);
-  if (!hasName) {
-    statusMsg.textContent = "評価する相手のユーザー名を入力してください";
-    statusMsg.className = "status info";
-  } else if (!allSelected) {
-    statusMsg.textContent = "全項目を選択してください";
-    statusMsg.className = "status info";
-  } else {
-    statusMsg.textContent = "送信の準備ができました";
-    statusMsg.className = "status info";
-  }
-}
-targetInput.addEventListener("input", updateSubmitState);
-
-// ---- IPハッシュ取得(重複投票防止用) ----
 async function getIpHash(){
+  if (ipHashCache) return ipHashCache;
   const res = await fetch("https://api.ipify.org?format=json");
   const { ip } = await res.json();
   const enc = new TextEncoder().encode(ip);
   const buf = await crypto.subtle.digest("SHA-256", enc);
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+  ipHashCache = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+  return ipHashCache;
 }
 
-submitBtn.addEventListener("click", async () => {
-  const targetName = targetInput.value.trim();
-  if (!targetName) return;
+// ---- プレイヤー一覧読み込み(players コレクション。無ければ空表示) ----
+async function loadPlayers(){
+  try {
+    const snap = await getDocs(collection(db, "players"));
+    allPlayers = snap.docs.map(d => ({ id: d.id, name: d.data().name || d.id }));
+  } catch(e){
+    console.warn("players読み込み失敗", e);
+    allPlayers = [];
+  }
+  allPlayers.sort((a,b) => a.name.localeCompare(b.name, "ja"));
+  renderPlayerList(allPlayers);
+}
 
-  submitBtn.disabled = true;
-  statusMsg.textContent = "送信中...";
-  statusMsg.className = "status info";
+function renderPlayerList(list){
+  const el = document.getElementById("playerList");
+  if (list.length === 0){
+    el.innerHTML = `<div class="empty-msg">プレイヤーが見つかりません<br>(playersコレクション未登録の場合は追加が必要です)</div>`;
+    return;
+  }
+  el.innerHTML = list.map(p => `
+    <div class="player-row ${selectedPlayer?.id===p.id?'active':''}" data-id="${p.id}" data-name="${p.name}">
+      <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(p.name)}" alt="">
+      <span class="pname">${p.name}</span>
+      ${myVotesMap[p.id] ? '<span class="done-mark">✓</span>' : ''}
+    </div>
+  `).join("");
+  document.getElementById("votedCount").textContent = Object.keys(myVotesMap).length;
+
+  [...el.querySelectorAll(".player-row")].forEach(row=>{
+    row.addEventListener("click", () => selectPlayer(row.dataset.id, row.dataset.name));
+  });
+}
+
+document.getElementById("searchInput").addEventListener("input", (e)=>{
+  const q = e.target.value.trim().toLowerCase();
+  const filtered = allPlayers.filter(p => p.name.toLowerCase().includes(q));
+  renderPlayerList(filtered);
+});
+
+async function selectPlayer(id, name){
+  selectedPlayer = { id, name };
+  currentVotes = {};
+
+  // 既存の自分の投票があれば読み込む
+  try {
+    const ipHash = await getIpHash();
+    const voteRef = doc(db, "ratings", id, "votes", ipHash);
+    const snap = await getDoc(voteRef);
+    if (snap.exists()){
+      const data = snap.data();
+      ITEMS.forEach(i => { if (data[i.key]) currentVotes[i.key] = data[i.key]; });
+    }
+  } catch(e){ console.warn(e); }
+
+  renderRightPanel();
+  renderPlayerList(allPlayers.filter(p =>
+    p.name.toLowerCase().includes(document.getElementById("searchInput").value.trim().toLowerCase())
+  ));
+}
+
+function calcTotal(){
+  return ITEMS.reduce((sum, i) => sum + (currentVotes[i.key] ? RANK_POINT[currentVotes[i.key]] : 0), 0);
+}
+function calcRankPreview(){
+  const selectedCount = ITEMS.filter(i => currentVotes[i.key]).length;
+  if (selectedCount === 0) return "ー";
+  const avg = calcTotal() / selectedCount;
+  if (avg >= 4.5) return "S";
+  if (avg >= 3.5) return "A";
+  if (avg >= 2.5) return "B";
+  if (avg >= 1.5) return "C";
+  return "D";
+}
+
+function renderRightPanel(){
+  const el = document.getElementById("rightPanel");
+  const selectedCount = ITEMS.filter(i => currentVotes[i.key]).length;
+
+  el.innerHTML = `
+    <div class="target-head"><h2>${selectedPlayer.name} さんを評価</h2></div>
+    <div class="score-box">
+      <div class="total">合計 <b id="totalScore">${calcTotal()}</b> / ${ITEMS.length * 5}　ランク <b id="rankPreview" style="margin-left:6px;">${calcRankPreview()}</b>
+        <div class="note">(未選択 ${ITEMS.length - selectedCount} 項目は0点として計算中)</div>
+      </div>
+    </div>
+    ${ITEMS.map(item => `
+      <div class="criterion">
+        <div class="crit-head" data-key="${item.key}">
+          <span class="cname">${item.name}</span>
+          <select class="rank-select" data-key="${item.key}">
+            <option value="" ${!currentVotes[item.key] ? "selected" : ""}>未選択</option>
+            ${RANKS.map(r => `<option value="${r}" ${currentVotes[item.key]===r?"selected":""}>${r}</option>`).join("")}
+          </select>
+        </div>
+        <div class="crit-detail">
+          ${RANKS.map(r => `<div data-r="${r}"><b>${r}</b>${item.detail[r]}</div>`).join("")}
+        </div>
+      </div>
+    `).join("")}
+    <div class="submit-row">
+      <button class="submit" id="submitBtn">送信</button>
+      <div class="status info" id="statusMsg">全項目を選択してください</div>
+    </div>
+  `;
+
+  [...el.querySelectorAll("select.rank-select")].forEach(sel => {
+    sel.addEventListener("change", () => {
+      const key = sel.dataset.key;
+      if (sel.value) currentVotes[key] = sel.value; else delete currentVotes[key];
+      updateScoreBox();
+      updateSubmitState();
+    });
+  });
+
+  document.getElementById("submitBtn").addEventListener("click", submitVote);
+  updateSubmitState();
+}
+
+function updateScoreBox(){
+  document.getElementById("totalScore").textContent = calcTotal();
+  document.getElementById("rankPreview").textContent = calcRankPreview();
+  const selectedCount = ITEMS.filter(i => currentVotes[i.key]).length;
+  document.querySelector(".score-box .note").textContent =
+    `(未選択 ${ITEMS.length - selectedCount} 項目は0点として計算中)`;
+}
+
+function updateSubmitState(){
+  const allSelected = ITEMS.every(i => currentVotes[i.key]);
+  const btn = document.getElementById("submitBtn");
+  const status = document.getElementById("statusMsg");
+  btn.disabled = !allSelected;
+  if (!status.classList.contains("ok") && !status.classList.contains("err")){
+    status.textContent = allSelected ? "送信の準備ができました" : "全項目を選択してください";
+    status.className = "status info";
+  }
+}
+
+async function submitVote(){
+  const btn = document.getElementById("submitBtn");
+  const status = document.getElementById("statusMsg");
+  btn.disabled = true;
+  status.textContent = "送信中...";
+  status.className = "status info";
 
   try {
     const ipHash = await getIpHash();
-    const targetId = targetName; // 簡易的に名前をIDとして使用
-
-    // 自分自身への投票を軽く抑止(名前ベースなので完全ではない)
-    const voteRef = doc(db, "ratings", targetId, "votes", ipHash);
-
+    const voteRef = doc(db, "ratings", selectedPlayer.id, "votes", ipHash);
     const existing = await getDoc(voteRef);
     const isUpdate = existing.exists();
 
     await setDoc(voteRef, {
-      ...votes,
-      targetName,
+      ...currentVotes,
+      targetName: selectedPlayer.name,
       updatedAt: serverTimestamp(),
       ...(isUpdate ? {} : { createdAt: serverTimestamp() })
     });
 
-    statusMsg.textContent = isUpdate
-      ? `${targetName} への評価を更新しました`
-      : `${targetName} への評価を送信しました`;
-    statusMsg.className = "status ok";
-  } catch (err) {
+    myVotesMap[selectedPlayer.id] = true;
+    status.textContent = isUpdate ? "評価を更新しました" : "評価を送信しました";
+    status.className = "status ok";
+    document.getElementById("votedCount").textContent = Object.keys(myVotesMap).length;
+  } catch(err){
     console.error(err);
-    statusMsg.textContent = "送信に失敗しました。時間をおいて再度お試しください";
-    statusMsg.className = "status err";
-    submitBtn.disabled = false;
+    status.textContent = "送信に失敗しました。時間をおいて再度お試しください";
+    status.className = "status err";
+  } finally {
+    btn.disabled = false;
   }
-});
+}
+
+loadPlayers();
 </script>
 </body>
 </html>

@@ -153,6 +153,31 @@
   .status.info{ color:var(--dim); }
 
   .count-badge{ font-size:12px; color:var(--dim); font-weight:normal; }
+
+  .icon-picker{
+    display:flex; align-items:center; gap:8px;
+    background: var(--panel2);
+    border:1px dashed var(--line);
+    border-radius:7px;
+    padding:6px 12px;
+    cursor:pointer;
+    font-size:12.5px;
+    color:var(--dim);
+  }
+  .icon-picker:hover{ border-color:var(--accent); color:var(--text); }
+  .icon-picker img{
+    width:32px; height:32px; border-radius:50%; object-fit:cover;
+  }
+
+  .row-icon{ width:32px; height:32px; border-radius:50%; object-fit:cover; background:#222; vertical-align:middle; }
+  .icon-cell{ display:flex; align-items:center; gap:8px; }
+  .icon-cell label{
+    font-size:11px; color:var(--dim); border:1px solid var(--line);
+    border-radius:5px; padding:3px 8px; cursor:pointer;
+  }
+  .icon-cell label:hover{ border-color:var(--accent); color:var(--text); }
+  .icon-cell input[type=file]{ display:none; }
+  .upload-progress{ font-size:11px; color:var(--accent); }
 </style>
 </head>
 <body>
@@ -182,9 +207,16 @@
     <div class="form-row">
       <input type="text" id="newName" placeholder="表示名(例: ぬーん)">
       <input type="text" id="newId" placeholder="ID(空欄なら表示名から自動生成)">
+    </div>
+    <div class="form-row" style="align-items:center;">
+      <label class="icon-picker" for="newIcon">
+        <img id="newIconPreview" src="" alt="" style="display:none;">
+        <span id="newIconPlaceholder">＋ アイコン画像を選択</span>
+      </label>
+      <input type="file" id="newIcon" accept="image/*" style="display:none;">
       <button class="add" id="addBtn">追加する</button>
     </div>
-    <div class="hint">IDは投票データの紐付けに使われます。既存プレイヤーのIDと重複しないよう注意してください。</div>
+    <div class="hint">IDは投票データの紐付けに使われます。既存プレイヤーのIDと重複しないよう注意してください。アイコンは任意です(未設定の場合は自動生成アイコンが使われます)。</div>
     <div class="status info" id="addStatus"></div>
   </div>
 
@@ -193,8 +225,9 @@
     <table>
       <thead>
         <tr>
-          <th style="width:34%;">表示名</th>
-          <th style="width:34%;">ID</th>
+          <th style="width:70px;">アイコン</th>
+          <th style="width:28%;">表示名</th>
+          <th style="width:26%;">ID</th>
           <th>操作</th>
         </tr>
       </thead>
@@ -214,6 +247,9 @@ import {
 import {
   getFirestore, collection, doc, setDoc, deleteDoc, getDocs, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
@@ -227,6 +263,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
+const MAX_ICON_BYTES = 2 * 1024 * 1024; // 2MB
+
+async function uploadIcon(playerId, file){
+  if (file.size > MAX_ICON_BYTES){
+    throw new Error("ファイルサイズは2MB以内にしてください");
+  }
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  const iconRef = ref(storage, `player-icons/${playerId}.${ext}`);
+  await uploadBytes(iconRef, file);
+  return await getDownloadURL(iconRef);
+}
 
 const loginScreen = document.getElementById("loginScreen");
 const adminLayout = document.getElementById("adminLayout");
@@ -282,7 +330,7 @@ async function loadPlayers(){
   tbody.innerHTML = `<tr><td colspan="3" class="empty-msg">読み込み中...</td></tr>`;
   try {
     const snap = await getDocs(collection(db, "players"));
-    const players = snap.docs.map(d => ({ id: d.id, name: d.data().name || d.id }));
+    const players = snap.docs.map(d => ({ id: d.id, name: d.data().name || d.id, iconUrl: d.data().iconUrl || null }));
     players.sort((a,b) => a.name.localeCompare(b.name, "ja"));
     renderTable(players);
   } catch(e){
@@ -300,6 +348,12 @@ function renderTable(players){
   }
   tbody.innerHTML = players.map(p => `
     <tr data-id="${p.id}">
+      <td>
+        <div class="icon-cell">
+          <img class="row-icon" src="${p.iconUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(p.name)}`}" alt="">
+          <label>変更<input type="file" class="iconInput" accept="image/*"></label>
+        </div>
+      </td>
       <td><input type="text" class="nameInput" value="${escapeAttr(p.name)}"></td>
       <td style="color:var(--dim2);">${p.id}</td>
       <td>
@@ -307,12 +361,32 @@ function renderTable(players){
           <button class="save">保存</button>
           <button class="del">削除</button>
         </div>
+        <div class="upload-progress" style="display:none;">アップロード中...</div>
       </td>
     </tr>
   `).join("");
 
   [...tbody.querySelectorAll("tr")].forEach(tr => {
     const id = tr.dataset.id;
+    const iconInput = tr.querySelector(".iconInput");
+    const progressEl = tr.querySelector(".upload-progress");
+
+    iconInput.addEventListener("change", async () => {
+      const file = iconInput.files[0];
+      if (!file) return;
+      progressEl.style.display = "block";
+      try {
+        const iconUrl = await uploadIcon(id, file);
+        await setDoc(doc(db, "players", id), { iconUrl, updatedAt: serverTimestamp() }, { merge: true });
+        tr.querySelector(".row-icon").src = iconUrl;
+      } catch(e){
+        console.error(e);
+        alert(e.message || "アイコンのアップロードに失敗しました");
+      } finally {
+        progressEl.style.display = "none";
+      }
+    });
+
     tr.querySelector(".save").addEventListener("click", async () => {
       const newName = tr.querySelector(".nameInput").value.trim();
       if (!newName) return;
@@ -331,12 +405,23 @@ function escapeAttr(s){
   return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
+const newIconInput = document.getElementById("newIcon");
+newIconInput.addEventListener("change", () => {
+  const file = newIconInput.files[0];
+  if (!file) return;
+  const preview = document.getElementById("newIconPreview");
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+  document.getElementById("newIconPlaceholder").style.display = "none";
+});
+
 document.getElementById("addBtn").addEventListener("click", async () => {
   const nameInput = document.getElementById("newName");
   const idInput = document.getElementById("newId");
   const status = document.getElementById("addStatus");
   const name = nameInput.value.trim();
   const id = (idInput.value.trim() || slugify(name));
+  const iconFile = newIconInput.files[0] || null;
 
   if (!name){
     status.textContent = "表示名を入力してください";
@@ -351,23 +436,31 @@ document.getElementById("addBtn").addEventListener("click", async () => {
 
   const addBtn = document.getElementById("addBtn");
   addBtn.disabled = true;
-  status.textContent = "追加中...";
+  status.textContent = iconFile ? "アイコンをアップロード中..." : "追加中...";
   status.className = "status info";
 
   try {
+    let iconUrl = null;
+    if (iconFile){
+      iconUrl = await uploadIcon(id, iconFile);
+    }
     await setDoc(doc(db, "players", id), {
       name,
+      ...(iconUrl ? { iconUrl } : {}),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
     nameInput.value = "";
     idInput.value = "";
+    newIconInput.value = "";
+    document.getElementById("newIconPreview").style.display = "none";
+    document.getElementById("newIconPlaceholder").style.display = "inline";
     status.textContent = `「${name}」を追加しました`;
     status.className = "status ok";
     loadPlayers();
   } catch(e){
     console.error(e);
-    status.textContent = "追加に失敗しました";
+    status.textContent = e.message || "追加に失敗しました";
     status.className = "status err";
   } finally {
     addBtn.disabled = false;

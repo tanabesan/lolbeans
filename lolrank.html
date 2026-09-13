@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOLビーンズ評価アンケート</title>
+<style>
+  :root{
+    --bg:#0a0e14;
+    --bg2:#0f1623;
+    --panel:#121a2b;
+    --line:#1f2b42;
+    --neon:#39ff88;
+    --neon2:#ff2fb0;
+    --neon3:#2fd8ff;
+    --text:#d8e6f2;
+    --dim:#5b7091;
+    --px: 4px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at top, var(--bg2), var(--bg) 70%);
+    color:var(--text);
+    font-family: 'Courier New', ui-monospace, monospace;
+    min-height:100vh;
+    padding:24px 16px 60px;
+  }
+  .wrap{ max-width:640px; margin:0 auto; }
+
+  .title{
+    text-align:center;
+    margin: 8px 0 4px;
+  }
+  .title h1{
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--neon);
+    text-shadow: 0 0 6px rgba(57,255,136,.6), 0 0 18px rgba(57,255,136,.25);
+    margin: 0 0 6px;
+  }
+  .title p{
+    color: var(--dim);
+    font-size: 13px;
+    margin: 0;
+    line-height:1.6;
+  }
+
+  .panel{
+    background: var(--panel);
+    border: var(--px) solid var(--line);
+    box-shadow: 0 0 0 var(--px) #000 inset, 6px 6px 0 rgba(0,0,0,.35);
+    padding: 20px;
+    margin-top: 22px;
+  }
+
+  label.field-label{
+    display:block;
+    font-size: 12px;
+    color: var(--neon3);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  input[type=text]{
+    width:100%;
+    background: #0a0f1a;
+    border: 2px solid var(--line);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 10px 12px;
+    outline: none;
+  }
+  input[type=text]:focus{
+    border-color: var(--neon3);
+    box-shadow: 0 0 0 2px rgba(47,216,255,.2);
+  }
+
+  .item{
+    border-top: 1px dashed var(--line);
+    padding: 16px 0;
+  }
+  .item:first-of-type{ border-top:none; padding-top:4px; }
+
+  .item-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:10px;
+  }
+  .item-head .name{
+    font-size:15px;
+    color:var(--text);
+    font-weight:bold;
+  }
+  .item-head button.info{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--dim);
+    font-family:inherit;
+    font-size:11px;
+    padding:2px 8px;
+    cursor:pointer;
+  }
+  .item-head button.info:hover{ color:var(--neon3); border-color:var(--neon3); }
+
+  .desc{
+    font-size:12px;
+    color:var(--dim);
+    line-height:1.6;
+    margin: -4px 0 10px;
+  }
+
+  .rank-row{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap:8px;
+  }
+  .rank-btn{
+    background:#0a0f1a;
+    border:2px solid var(--line);
+    color:var(--text);
+    font-family:inherit;
+    font-size:16px;
+    font-weight:bold;
+    padding:12px 0;
+    cursor:pointer;
+    text-align:center;
+    transition: transform .05s ease;
+  }
+  .rank-btn:active{ transform: scale(0.94); }
+  .rank-btn[data-r="S"].selected{ background: var(--neon2); border-color: var(--neon2); color:#0a0e14; box-shadow:0 0 14px rgba(255,47,176,.6);}
+  .rank-btn[data-r="A"].selected{ background: var(--neon); border-color: var(--neon); color:#0a0e14; box-shadow:0 0 14px rgba(57,255,136,.6);}
+  .rank-btn[data-r="B"].selected{ background: var(--neon3); border-color: var(--neon3); color:#0a0e14; box-shadow:0 0 14px rgba(47,216,255,.6);}
+  .rank-btn[data-r="C"].selected{ background: #ffd23f; border-color: #ffd23f; color:#0a0e14; }
+  .rank-btn[data-r="D"].selected{ background: #ff5f5f; border-color: #ff5f5f; color:#0a0e14; }
+
+  .criteria-detail{
+    display:none;
+    font-size:11px;
+    color:var(--dim);
+    border-left: 2px solid var(--line);
+    padding: 8px 0 0 10px;
+    margin-top:8px;
+    line-height:1.7;
+  }
+  .criteria-detail.open{ display:block; }
+  .criteria-detail b{ color:var(--neon3); }
+
+  .submit-row{ margin-top:22px; }
+  button.submit{
+    width:100%;
+    padding:14px;
+    background: var(--neon);
+    border: 2px solid var(--neon);
+    color:#0a0e14;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:bold;
+    letter-spacing:1px;
+    cursor:pointer;
+    box-shadow: 4px 4px 0 rgba(0,0,0,.4);
+  }
+  button.submit:disabled{
+    background:#1f2b42; border-color:#1f2b42; color:var(--dim); cursor:not-allowed; box-shadow:none;
+  }
+  button.submit:not(:disabled):active{ transform: translate(2px,2px); box-shadow:none; }
+
+  .status{
+    margin-top:14px;
+    font-size:13px;
+    text-align:center;
+    min-height:18px;
+  }
+  .status.ok{ color: var(--neon); }
+  .status.err{ color: var(--neon2); }
+  .status.info{ color: var(--dim); }
+
+  .nav{
+    text-align:center;
+    margin-top:26px;
+  }
+  .nav a{
+    color:var(--dim);
+    font-size:12px;
+    text-decoration:none;
+    border-bottom: 1px dotted var(--dim);
+  }
+  .nav a:hover{ color: var(--neon3); border-color: var(--neon3); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="title">
+    <h1>&gt; ビーンズ評価アンケート_</h1>
+    <p>プレイヤーを6項目でS〜Dランク評価します。<br>
+    結果はランキングページのTierリストに反映されます。<br>
+    ※評価した相手は3人以上から評価されるまでランキングに表示されません。</p>
+  </div>
+
+  <div class="panel">
+    <label class="field-label">評価する相手のユーザー名</label>
+    <input type="text" id="targetName" placeholder="例: ぬーん" autocomplete="off">
+  </div>
+
+  <div class="panel" id="itemsPanel"></div>
+
+  <div class="submit-row">
+    <button class="submit" id="submitBtn" disabled>この内容で評価を送信する</button>
+    <div class="status info" id="statusMsg">全項目を選択してください</div>
+  </div>
+
+  <div class="nav">
+    <a href="./ranking-tier.html">&larr; ランキングを見る</a>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, doc, setDoc, getDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
+  authDomain: "lolex0204.firebaseapp.com",
+  projectId: "lolex0204",
+  storageBucket: "lolex0204.firebasestorage.app",
+  messagingSenderId: "940620254622",
+  appId: "1:940620254622:web:edca80d191423cd460da8f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ---- 評価項目定義(ロメダ準拠) ----
+const ITEMS = [
+  {
+    key: "aggression",
+    name: "攻撃性",
+    desc: "相手に絡んで喧嘩を売る・毒舌を放つ頻度と強度",
+    detail: {
+      S: "誰よりも頻繁かつ強烈に喧嘩を売る・毒を吐く。象徴的な存在",
+      A: "高い頻度で攻撃的な言動をする。煽り・毒舌が日常",
+      B: "時々毒舌や煽りを見せる。標準的な攻撃性",
+      C: "稀に強めの発言をする程度",
+      D: "攻撃的な言動はほとんど見られない"
+    }
+  },
+  {
+    key: "chat",
+    name: "雑談力",
+    desc: "1レスの雑談の中での言い回し・ネタのセンスで場を沸かせる力",
+    detail: {
+      S: "発言のたびに笑いが起きる、雑談を支配する存在",
+      A: "高い頻度で場を沸かせる面白い発言をする",
+      B: "時々センスのいい発言で笑いを取る",
+      C: "たまに面白いことを言う程度",
+      D: "雑談で目立つことはあまりない"
+    }
+  },
+  {
+    key: "madness",
+    name: "狂気度",
+    desc: "予測不能な言動・不気味さで存在感を残す力",
+    detail: {
+      S: "常に読めない言動で強烈な印象を残す、掴みどころのない存在",
+      A: "しばしば予測不能な行動を見せる",
+      B: "時々変わった一面を見せる",
+      C: "たまに独特な言動をする程度",
+      D: "言動は基本的に読みやすい"
+    }
+  },
+  {
+    key: "devotion",
+    name: "献身度",
+    desc: "プライドを捨て、自虐やハプニングで笑いを提供する力",
+    detail: {
+      S: "誰よりも体を張り、自虐やハプニングで常に笑いを提供するギバー",
+      A: "頻繁に自虐やハプニングでネタを提供する",
+      B: "時々自分を犠牲にして笑いを取る",
+      C: "たまに自虐的なことを言う程度",
+      D: "自分を犠牲にする場面はほぼない"
+    }
+  },
+  {
+    key: "influence",
+    name: "影響力",
+    desc: "発言が重い・その人発のノリが広がる力",
+    detail: {
+      S: "発言やノリが必ずと言っていいほど広まる、流行の発信源",
+      A: "発言力が強く、しばしば周りに影響を与える",
+      B: "時々その人発のネタが広がることがある",
+      C: "たまに発言が話題になる程度",
+      D: "発言が広がることはあまりない"
+    }
+  },
+  {
+    key: "harmony",
+    name: "調和力",
+    desc: "場に自然に馴染み、揉め事があれば収める力",
+    detail: {
+      S: "誰からも慕われ、揉め事を収める中心的存在",
+      A: "高い頻度で場を和ませたり仲裁したりする",
+      B: "時々場を落ち着かせる役割を果たす",
+      C: "たまに調和的な行動を見せる程度",
+      D: "調和役として目立つことはあまりない"
+    }
+  }
+];
+
+const RANKS = ["S","A","B","C","D"];
+const votes = {}; // key -> rank
+
+const itemsPanel = document.getElementById("itemsPanel");
+ITEMS.forEach(item => {
+  const el = document.createElement("div");
+  el.className = "item";
+  el.innerHTML = `
+    <div class="item-head">
+      <span class="name">${item.name}</span>
+      <button type="button" class="info" data-key="${item.key}">基準を見る</button>
+    </div>
+    <div class="desc">${item.desc}</div>
+    <div class="rank-row" data-key="${item.key}">
+      ${RANKS.map(r => `<button type="button" class="rank-btn" data-r="${r}">${r}</button>`).join("")}
+    </div>
+    <div class="criteria-detail" id="detail-${item.key}">
+      ${RANKS.map(r => `<div><b>${r}</b> ${item.detail[r]}</div>`).join("")}
+    </div>
+  `;
+  itemsPanel.appendChild(el);
+});
+
+itemsPanel.addEventListener("click", (e) => {
+  const infoBtn = e.target.closest("button.info");
+  if (infoBtn) {
+    document.getElementById(`detail-${infoBtn.dataset.key}`).classList.toggle("open");
+    return;
+  }
+  const rankBtn = e.target.closest(".rank-btn");
+  if (rankBtn) {
+    const row = rankBtn.closest(".rank-row");
+    const key = row.dataset.key;
+    votes[key] = rankBtn.dataset.r;
+    [...row.querySelectorAll(".rank-btn")].forEach(b => b.classList.toggle("selected", b === rankBtn));
+    updateSubmitState();
+  }
+});
+
+const targetInput = document.getElementById("targetName");
+const submitBtn = document.getElementById("submitBtn");
+const statusMsg = document.getElementById("statusMsg");
+
+function updateSubmitState(){
+  const allSelected = ITEMS.every(i => votes[i.key]);
+  const hasName = targetInput.value.trim().length > 0;
+  submitBtn.disabled = !(allSelected && hasName);
+  if (!hasName) {
+    statusMsg.textContent = "評価する相手のユーザー名を入力してください";
+    statusMsg.className = "status info";
+  } else if (!allSelected) {
+    statusMsg.textContent = "全項目を選択してください";
+    statusMsg.className = "status info";
+  } else {
+    statusMsg.textContent = "送信の準備ができました";
+    statusMsg.className = "status info";
+  }
+}
+targetInput.addEventListener("input", updateSubmitState);
+
+// ---- IPハッシュ取得(重複投票防止用) ----
+async function getIpHash(){
+  const res = await fetch("https://api.ipify.org?format=json");
+  const { ip } = await res.json();
+  const enc = new TextEncoder().encode(ip);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+submitBtn.addEventListener("click", async () => {
+  const targetName = targetInput.value.trim();
+  if (!targetName) return;
+
+  submitBtn.disabled = true;
+  statusMsg.textContent = "送信中...";
+  statusMsg.className = "status info";
+
+  try {
+    const ipHash = await getIpHash();
+    const targetId = targetName; // 簡易的に名前をIDとして使用
+
+    // 自分自身への投票を軽く抑止(名前ベースなので完全ではない)
+    const voteRef = doc(db, "ratings", targetId, "votes", ipHash);
+
+    const existing = await getDoc(voteRef);
+    const isUpdate = existing.exists();
+
+    await setDoc(voteRef, {
+      ...votes,
+      targetName,
+      updatedAt: serverTimestamp(),
+      ...(isUpdate ? {} : { createdAt: serverTimestamp() })
+    });
+
+    statusMsg.textContent = isUpdate
+      ? `${targetName} への評価を更新しました`
+      : `${targetName} への評価を送信しました`;
+    statusMsg.className = "status ok";
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = "送信に失敗しました。時間をおいて再度お試しください";
+    statusMsg.className = "status err";
+    submitBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

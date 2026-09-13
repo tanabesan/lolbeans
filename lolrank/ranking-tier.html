@@ -91,6 +91,18 @@
 
   .empty-msg{ text-align:center; color:var(--dim2); font-size:12.5px; padding:30px 0; }
 
+  .tab-row{ display:flex; gap:8px; margin-bottom:16px; }
+  .tab-btn{
+    background: var(--panel);
+    border:1px solid var(--line);
+    color:var(--dim);
+    padding:9px 18px;
+    border-radius:8px;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .tab-btn.active{ background: var(--accent); border-color:var(--accent); color:#fff; }
+
   /* モーダル */
   .modal-bg{
     display:none;
@@ -134,9 +146,16 @@
 
 <p class="lead">
   👑 ビーンズランク Tier List<br>
-  攻撃性・雑談力・狂気度・献身度・影響力・調和力、6項目をみんなで評価するランキングです。<br>
+  攻撃性(狂暴)、調和力・献身度(優しさ)を軸に、みんなの評価でTier分けするランキングです。<br>
   <a href="./lolrank.html">📊 あなたも評価する</a> ※3人以上から評価された人だけがランキングに表示されます(評価人数も併記)
 </p>
+
+<div class="wrap" style="margin-bottom:0; padding-bottom:0;">
+  <div class="tab-row">
+    <button class="tab-btn active" data-cat="violence">🐺 狂暴ランキング</button>
+    <button class="tab-btn" data-cat="kindness">🕊️ 優しさランキング</button>
+  </div>
+</div>
 
 <div class="wrap" id="tierWrap">
   <div class="empty-msg">読み込み中...</div>
@@ -180,16 +199,24 @@ const ITEM_DEFS = [
 const RANK_POINT = { S:5, A:4, B:3, C:2, D:1 };
 const MIN_VOTES = 3;
 
-// tier定義: [ラベル, cssクラス, 最小合計スコア(6項目合計・最大30)]
-const TIERS = [
-  ["S+","t-Sp",28.15], ["S","t-S",26.31], ["S-","t-Sm",24.46],
-  ["A+","t-Ap",22.62], ["A","t-A",20.77], ["A-","t-Am",18.92],
-  ["B+","t-Bp",17.08], ["B","t-B",15.23], ["B-","t-Bm",13.38],
-  ["C","t-C",9.69], ["D","t-D",7.85], ["E","t-E",6.0], ["F","t-F",0],
+// カテゴリ別ランキング定義: どの項目を合算するか
+const CATEGORIES = {
+  violence: { label:"狂暴ランキング", itemKeys:["aggression"] },
+  kindness: { label:"優しさランキング", itemKeys:["harmony","devotion"] },
+};
+let currentCategory = "violence";
+
+// tier定義: [ラベル, cssクラス, 最小スコアの割合(0〜1、満点に対する比率)]
+const TIER_RATIOS = [
+  ["S+","t-Sp",0.938], ["S","t-S",0.877], ["S-","t-Sm",0.815],
+  ["A+","t-Ap",0.754], ["A","t-A",0.692], ["A-","t-Am",0.631],
+  ["B+","t-Bp",0.569], ["B","t-B",0.508], ["B-","t-Bm",0.446],
+  ["C","t-C",0.323], ["D","t-D",0.262], ["E","t-E",0.2], ["F","t-F",0],
 ];
-function tierOf(score){
-  for (const t of TIERS){ if (score >= t[2]) return t; }
-  return TIERS[TIERS.length-1];
+function tierOf(score, maxScore){
+  const ratio = maxScore > 0 ? score / maxScore : 0;
+  for (const t of TIER_RATIOS){ if (ratio >= t[2]) return t; }
+  return TIER_RATIOS[TIER_RATIOS.length-1];
 }
 
 async function loadPlayers(){
@@ -221,11 +248,15 @@ function aggregate(byTarget, playersMap){
       const pts = votes.map(v => RANK_POINT[v[item.key]]).filter(p => p !== undefined);
       itemAvg[item.key] = pts.length ? pts.reduce((a,b)=>a+b,0) / pts.length : 0;
     });
-    const totalScore = ITEM_DEFS.reduce((sum, item) => sum + itemAvg[item.key], 0);
+    const categoryScores = {};
+    Object.keys(CATEGORIES).forEach(catId => {
+      const keys = CATEGORIES[catId].itemKeys;
+      categoryScores[catId] = keys.reduce((sum,k) => sum + itemAvg[k], 0);
+    });
     const player = playersMap[targetId];
     const name = player ? player.name : (votes[0].targetName || targetId);
     const iconUrl = player ? player.iconUrl : null;
-    results.push({ targetId, name, iconUrl, voteCount, itemAvg, totalScore });
+    results.push({ targetId, name, iconUrl, voteCount, itemAvg, categoryScores });
   }
   return results;
 }
@@ -239,15 +270,19 @@ function renderTierList(results){
     return;
   }
 
-  const grouped = {};
-  TIERS.forEach(t => grouped[t[0]] = []);
-  shown.forEach(r => {
-    const t = tierOf(r.totalScore);
-    grouped[t[0]].push(r);
-  });
-  Object.values(grouped).forEach(list => list.sort((a,b) => b.totalScore - a.totalScore));
+  const cat = CATEGORIES[currentCategory];
+  const maxScore = cat.itemKeys.length * 5;
 
-  wrap.innerHTML = TIERS.map(t => {
+  const grouped = {};
+  TIER_RATIOS.forEach(t => grouped[t[0]] = []);
+  shown.forEach(r => {
+    const score = r.categoryScores[currentCategory];
+    const t = tierOf(score, maxScore);
+    grouped[t[0]].push({ ...r, score });
+  });
+  Object.values(grouped).forEach(list => list.sort((a,b) => b.score - a.score));
+
+  wrap.innerHTML = TIER_RATIOS.map(t => {
     const [label, cls] = t;
     const list = grouped[label];
     return `
@@ -261,7 +296,7 @@ function renderTierList(results){
                   <img src="${r.iconUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(r.name)}`}" alt="">
                   <div>
                     <div class="pname">${r.name}</div>
-                    <div class="pscore">${r.totalScore.toFixed(1)} ${r.voteCount}人</div>
+                    <div class="pscore">${r.score.toFixed(1)} / ${maxScore}　${r.voteCount}人</div>
                   </div>
                 </div>
               `).join("")
@@ -280,14 +315,25 @@ function renderTierList(results){
   });
 }
 
+[...document.querySelectorAll(".tab-btn")].forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentCategory = btn.dataset.cat;
+    [...document.querySelectorAll(".tab-btn")].forEach(b => b.classList.toggle("active", b === btn));
+    if (window.__allResults) renderTierList(window.__allResults);
+  });
+});
+
 function openModal(id){
   const r = window.__resultsById[id];
   if (!r) return;
+  const cat = CATEGORIES[currentCategory];
   document.getElementById("modalName").textContent = r.name;
   document.getElementById("modalSub").textContent =
-    `合計 ${r.totalScore.toFixed(1)} / 30　評価人数 ${r.voteCount}人`;
+    `${cat.label}: ${r.categoryScores[currentCategory].toFixed(1)} / ${cat.itemKeys.length*5}　評価人数 ${r.voteCount}人`;
   document.getElementById("modalItems").innerHTML = ITEM_DEFS.map(item => `
-    <div class="item-line"><span>${item.name}</span><span>${r.itemAvg[item.key].toFixed(1)}</span></div>
+    <div class="item-line" style="${cat.itemKeys.includes(item.key) ? 'font-weight:700;' : 'color:var(--dim);'}">
+      <span>${item.name}${cat.itemKeys.includes(item.key) ? " ★" : ""}</span><span>${r.itemAvg[item.key].toFixed(1)}</span>
+    </div>
   `).join("");
   document.getElementById("modalBg").classList.add("show");
 }
@@ -302,6 +348,7 @@ async function init(){
   try {
     const [playersMap, byTarget] = await Promise.all([loadPlayers(), loadVotes()]);
     const results = aggregate(byTarget, playersMap);
+    window.__allResults = results;
     renderTierList(results);
   } catch(e){
     console.error(e);

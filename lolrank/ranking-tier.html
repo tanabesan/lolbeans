@@ -146,13 +146,14 @@
 
 <p class="lead">
   👑 ビーンズランク Tier List<br>
-  攻撃性(狂暴)、調和力・献身度(優しさ)を軸に、みんなの評価でTier分けするランキングです。<br>
+  総合(6項目合計)・攻撃性(狂暴)・調和力/献身度(優しさ)、3つの軸でTier分けするランキングです。<br>
   <a href="./lolrank.html">📊 あなたも評価する</a> ※3人以上から評価された人だけがランキングに表示されます(評価人数も併記)
 </p>
 
 <div class="wrap" style="margin-bottom:0; padding-bottom:0;">
   <div class="tab-row">
-    <button class="tab-btn active" data-cat="violence">🐺 狂暴ランキング</button>
+    <button class="tab-btn active" data-cat="overall">👑 総合ランキング</button>
+    <button class="tab-btn" data-cat="violence">🐺 狂暴ランキング</button>
     <button class="tab-btn" data-cat="kindness">🕊️ 優しさランキング</button>
   </div>
 </div>
@@ -201,10 +202,11 @@ const MIN_VOTES = 3;
 
 // カテゴリ別ランキング定義: どの項目を合算するか
 const CATEGORIES = {
+  overall: { label:"総合ランキング", itemKeys:["aggression","chat","madness","devotion","influence","harmony"] },
   violence: { label:"狂暴ランキング", itemKeys:["aggression"] },
   kindness: { label:"優しさランキング", itemKeys:["harmony","devotion"] },
 };
-let currentCategory = "violence";
+let currentCategory = "overall";
 
 // tier定義: [ラベル, cssクラス, 最小スコアの割合(0〜1、満点に対する比率)]
 const TIER_RATIOS = [

@@ -352,7 +352,7 @@ async function getIpHash(){
 async function loadPlayers(){
   try {
     const snap = await getDocs(collection(db, "players"));
-    allPlayers = snap.docs.map(d => ({ id: d.id, name: d.data().name || d.id }));
+    allPlayers = snap.docs.map(d => ({ id: d.id, name: d.data().name || d.id, iconUrl: d.data().iconUrl || null }));
   } catch(e){
     console.warn("players読み込み失敗", e);
     allPlayers = [];
@@ -369,7 +369,7 @@ function renderPlayerList(list){
   }
   el.innerHTML = list.map(p => `
     <div class="player-row ${selectedPlayer?.id===p.id?'active':''}" data-id="${p.id}" data-name="${p.name}">
-      <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(p.name)}" alt="">
+      <img src="${p.iconUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(p.name)}`}" alt="">
       <span class="pname">${p.name}</span>
       ${myVotesMap[p.id] ? '<span class="done-mark">✓</span>' : ''}
     </div>

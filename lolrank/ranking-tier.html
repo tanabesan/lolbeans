@@ -275,16 +275,21 @@ function aggregate(byTarget, playersMap){
     const categoryScores = {};
     Object.keys(CATEGORIES).forEach(catId => {
       const cat = CATEGORIES[catId];
+      if (cat.pointMode === "mixed"){
+        // 表示中の項目平均(itemAvg)をそのまま使い、狂暴・優しさ項目だけ
+        // 「3を1点、離れた距離×2を加算」の変換をかけて合算する
+        categoryScores[catId] = cat.itemKeys.reduce((sum, k) => {
+          const avg = itemAvg[k] || 0;
+          const val = OVERALL_EXTREME_ITEMS.has(k) ? (1 + 2 * Math.abs(avg - 3)) : avg;
+          return sum + val;
+        }, 0);
+        return;
+      }
       const pointMap = cat.pointMode === "extreme" ? RANK_POINT_EXTREME
         : cat.pointMode === "convex" ? RANK_POINT_CONVEX
         : RANK_POINT;
       const perVoteSums = votes.map(v => {
-        const vals = cat.itemKeys.map(k => {
-          const map = cat.pointMode === "mixed"
-            ? (OVERALL_EXTREME_ITEMS.has(k) ? RANK_POINT_EXTREME : RANK_POINT)
-            : pointMap;
-          return map[v[k]];
-        }).filter(p => p !== undefined);
+        const vals = cat.itemKeys.map(k => pointMap[v[k]]).filter(p => p !== undefined);
         return vals.length ? vals.reduce((a,b)=>a+b,0) : null;
       }).filter(s => s !== null);
       categoryScores[catId] = perVoteSums.length

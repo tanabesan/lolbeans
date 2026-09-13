@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>プレイヤー管理 | LOLBeans Admin</title>
+<style>
+  :root{
+    --bg:#05070c;
+    --panel:#0d111a;
+    --panel2:#11151f;
+    --line:#1c2230;
+    --accent:#5865F2;
+    --text:#e7ecf5;
+    --dim:#7a8499;
+    --dim2:#4d5567;
+    --danger:#ff6b6b;
+    --ok:#7cf29c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    font-size:14px;
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 24px; border-bottom:1px solid var(--line);
+  }
+  header .brand{ font-weight:700; font-size:16px; }
+  header .who{ font-size:12.5px; color:var(--dim); display:flex; align-items:center; gap:10px; }
+  header button.logout{
+    background:none; border:1px solid var(--line); color:var(--dim);
+    border-radius:6px; padding:5px 12px; cursor:pointer; font-size:12px;
+  }
+  header button.logout:hover{ border-color:var(--danger); color:var(--danger); }
+
+  /* ---- ログイン画面 ---- */
+  #loginScreen{
+    max-width:360px;
+    margin: 120px auto;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:28px;
+  }
+  #loginScreen h2{ margin:0 0 18px; font-size:17px; text-align:center; }
+  #loginScreen input{
+    width:100%;
+    background: var(--panel2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:7px;
+    font-size:13.5px;
+    margin-bottom:10px;
+    outline:none;
+  }
+  #loginScreen input:focus{ border-color:var(--accent); }
+  #loginScreen button{
+    width:100%;
+    background: var(--accent);
+    border:none;
+    color:#fff;
+    padding:11px;
+    border-radius:7px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  #loginError{ color:var(--danger); font-size:12px; margin-top:10px; text-align:center; min-height:16px; }
+
+  /* ---- 管理画面本体 ---- */
+  .layout{
+    max-width:900px;
+    margin: 24px auto 60px;
+    padding: 0 20px;
+    display:none;
+  }
+  .layout.show{ display:block; }
+
+  .panel{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:20px;
+  }
+  .panel h3{ margin:0 0 14px; font-size:15px; }
+
+  .form-row{ display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .form-row input{
+    flex:1;
+    min-width:160px;
+    background: var(--panel2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:7px;
+    font-size:13.5px;
+    outline:none;
+  }
+  .form-row input:focus{ border-color:var(--accent); }
+  button.add{
+    background: var(--accent);
+    border:none; color:#fff;
+    padding:10px 18px;
+    border-radius:7px;
+    font-size:13.5px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button.add:disabled{ background:#262c3d; color:var(--dim2); cursor:not-allowed; }
+
+  .hint{ font-size:11.5px; color:var(--dim2); margin-top:2px; }
+
+  table{ width:100%; border-collapse:collapse; }
+  th{
+    text-align:left; font-size:12px; color:var(--dim);
+    padding:8px 10px; border-bottom:1px solid var(--line);
+  }
+  td{
+    padding:9px 10px; border-bottom:1px solid var(--line); font-size:13.5px;
+  }
+  td input{
+    width:100%;
+    background: transparent;
+    border:1px solid transparent;
+    color:var(--text);
+    padding:5px 6px;
+    border-radius:5px;
+    font-size:13px;
+  }
+  td input:focus{ background: var(--panel2); border-color:var(--accent); outline:none; }
+
+  .row-actions{ display:flex; gap:6px; }
+  .row-actions button{
+    background:none; border:1px solid var(--line); color:var(--dim);
+    border-radius:6px; padding:5px 10px; cursor:pointer; font-size:12px;
+  }
+  .row-actions button.save{ color:var(--ok); }
+  .row-actions button.save:hover{ border-color:var(--ok); }
+  .row-actions button.del{ color:var(--danger); }
+  .row-actions button.del:hover{ border-color:var(--danger); }
+
+  .empty-msg{ text-align:center; color:var(--dim2); font-size:12.5px; padding:30px 0; }
+  .status{ font-size:12.5px; margin-top:8px; min-height:16px; }
+  .status.ok{ color:var(--ok); }
+  .status.err{ color:var(--danger); }
+  .status.info{ color:var(--dim); }
+
+  .count-badge{ font-size:12px; color:var(--dim); font-weight:normal; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">&amp;LOLBEANS Admin</div>
+  <div class="who" id="whoBox" style="display:none;">
+    <span id="whoEmail"></span>
+    <button class="logout" id="logoutBtn">ログアウト</button>
+  </div>
+</header>
+
+<!-- ログイン画面 -->
+<div id="loginScreen">
+  <h2>管理者ログイン</h2>
+  <input type="email" id="loginEmail" placeholder="メールアドレス" autocomplete="username">
+  <input type="password" id="loginPass" placeholder="パスワード" autocomplete="current-password">
+  <button id="loginBtn">ログイン</button>
+  <div id="loginError" class="status err"></div>
+</div>
+
+<!-- 管理画面本体 -->
+<div class="layout" id="adminLayout">
+
+  <div class="panel">
+    <h3>プレイヤーを追加</h3>
+    <div class="form-row">
+      <input type="text" id="newName" placeholder="表示名(例: ぬーん)">
+      <input type="text" id="newId" placeholder="ID(空欄なら表示名から自動生成)">
+      <button class="add" id="addBtn">追加する</button>
+    </div>
+    <div class="hint">IDは投票データの紐付けに使われます。既存プレイヤーのIDと重複しないよう注意してください。</div>
+    <div class="status info" id="addStatus"></div>
+  </div>
+
+  <div class="panel">
+    <h3>プレイヤー一覧 <span class="count-badge" id="countBadge"></span></h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:34%;">表示名</th>
+          <th style="width:34%;">ID</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="playerTbody">
+        <tr><td colspan="3" class="empty-msg">読み込み中...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, setDoc, deleteDoc, getDocs, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
+  authDomain: "lolex0204.firebaseapp.com",
+  projectId: "lolex0204",
+  storageBucket: "lolex0204.firebasestorage.app",
+  messagingSenderId: "940620254622",
+  appId: "1:940620254622:web:edca80d191423cd460da8f"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const loginScreen = document.getElementById("loginScreen");
+const adminLayout = document.getElementById("adminLayout");
+const whoBox = document.getElementById("whoBox");
+const whoEmail = document.getElementById("whoEmail");
+
+// ---- 認証状態の監視 ----
+onAuthStateChanged(auth, (user) => {
+  if (user){
+    loginScreen.style.display = "none";
+    adminLayout.classList.add("show");
+    whoBox.style.display = "flex";
+    whoEmail.textContent = user.email;
+    loadPlayers();
+  } else {
+    loginScreen.style.display = "block";
+    adminLayout.classList.remove("show");
+    whoBox.style.display = "none";
+  }
+});
+
+document.getElementById("loginBtn").addEventListener("click", doLogin);
+document.getElementById("loginPass").addEventListener("keydown", (e)=>{ if(e.key==="Enter") doLogin(); });
+
+async function doLogin(){
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPass").value;
+  const errEl = document.getElementById("loginError");
+  errEl.textContent = "";
+  if (!email || !pass){
+    errEl.textContent = "メールアドレスとパスワードを入力してください";
+    return;
+  }
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e){
+    console.error(e);
+    errEl.textContent = "ログインに失敗しました(メールアドレスまたはパスワードが違います)";
+  }
+}
+
+document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+
+// ---- プレイヤーCRUD ----
+function slugify(name){
+  return name.trim().toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-一-龠ぁ-んァ-ヶー]/g, "");
+}
+
+async function loadPlayers(){
+  const tbody = document.getElementById("playerTbody");
+  tbody.innerHTML = `<tr><td colspan="3" class="empty-msg">読み込み中...</td></tr>`;
+  try {
+    const snap = await getDocs(collection(db, "players"));
+    const players = snap.docs.map(d => ({ id: d.id, name: d.data().name || d.id }));
+    players.sort((a,b) => a.name.localeCompare(b.name, "ja"));
+    renderTable(players);
+  } catch(e){
+    console.error(e);
+    tbody.innerHTML = `<tr><td colspan="3" class="empty-msg">読み込みに失敗しました</td></tr>`;
+  }
+}
+
+function renderTable(players){
+  const tbody = document.getElementById("playerTbody");
+  document.getElementById("countBadge").textContent = `(${players.length}人)`;
+  if (players.length === 0){
+    tbody.innerHTML = `<tr><td colspan="3" class="empty-msg">まだプレイヤーが登録されていません</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = players.map(p => `
+    <tr data-id="${p.id}">
+      <td><input type="text" class="nameInput" value="${escapeAttr(p.name)}"></td>
+      <td style="color:var(--dim2);">${p.id}</td>
+      <td>
+        <div class="row-actions">
+          <button class="save">保存</button>
+          <button class="del">削除</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+
+  [...tbody.querySelectorAll("tr")].forEach(tr => {
+    const id = tr.dataset.id;
+    tr.querySelector(".save").addEventListener("click", async () => {
+      const newName = tr.querySelector(".nameInput").value.trim();
+      if (!newName) return;
+      await setDoc(doc(db, "players", id), { name: newName, updatedAt: serverTimestamp() }, { merge: true });
+      loadPlayers();
+    });
+    tr.querySelector(".del").addEventListener("click", async () => {
+      if (!confirm(`「${tr.querySelector(".nameInput").value}」を削除しますか？(評価データは残ります)`)) return;
+      await deleteDoc(doc(db, "players", id));
+      loadPlayers();
+    });
+  });
+}
+
+function escapeAttr(s){
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+document.getElementById("addBtn").addEventListener("click", async () => {
+  const nameInput = document.getElementById("newName");
+  const idInput = document.getElementById("newId");
+  const status = document.getElementById("addStatus");
+  const name = nameInput.value.trim();
+  const id = (idInput.value.trim() || slugify(name));
+
+  if (!name){
+    status.textContent = "表示名を入力してください";
+    status.className = "status err";
+    return;
+  }
+  if (!id){
+    status.textContent = "IDを生成できませんでした。IDを直接入力してください";
+    status.className = "status err";
+    return;
+  }
+
+  const addBtn = document.getElementById("addBtn");
+  addBtn.disabled = true;
+  status.textContent = "追加中...";
+  status.className = "status info";
+
+  try {
+    await setDoc(doc(db, "players", id), {
+      name,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    nameInput.value = "";
+    idInput.value = "";
+    status.textContent = `「${name}」を追加しました`;
+    status.className = "status ok";
+    loadPlayers();
+  } catch(e){
+    console.error(e);
+    status.textContent = "追加に失敗しました";
+    status.className = "status err";
+  } finally {
+    addBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

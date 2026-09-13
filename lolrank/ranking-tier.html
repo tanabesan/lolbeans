@@ -118,8 +118,16 @@
     width:360px;
     max-width:90vw;
   }
-  .modal h3{ margin:0 0 4px; font-size:16px; }
-  .modal .sub{ font-size:12px; color:var(--dim); margin-bottom:14px; }
+  .modal h3{ margin:0 0 2px; font-size:16px; }
+  .modal .sub{ font-size:12px; color:var(--dim); }
+  .modal-head{
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:14px;
+  }
+  .modal-head img{
+    width:52px; height:52px; border-radius:50%;
+    object-fit:cover; background:#222; flex-shrink:0;
+  }
   .modal .item-line{
     display:flex; justify-content:space-between;
     padding:6px 0; border-top:1px solid var(--line); font-size:13px;
@@ -164,8 +172,13 @@
 
 <div class="modal-bg" id="modalBg">
   <div class="modal">
-    <h3 id="modalName"></h3>
-    <div class="sub" id="modalSub"></div>
+    <div class="modal-head">
+      <img id="modalIcon" src="" alt="">
+      <div>
+        <h3 id="modalName"></h3>
+        <div class="sub" id="modalSub"></div>
+      </div>
+    </div>
     <div id="modalRadar" style="display:flex; justify-content:center; margin:8px 0 4px;"></div>
     <div id="modalItems"></div>
     <button class="close" id="modalClose">閉じる</button>
@@ -199,13 +212,15 @@ const ITEM_DEFS = [
   { key:"harmony", name:"調和力" },
 ];
 const RANK_POINT = { S:5, A:4, B:3, C:2, D:1 };
+// Bを中心に、離れるほど加点幅を広げた配点(狂暴・優しさランキング用)
+const RANK_POINT_CONVEX = { S:5, A:3.5, B:3, C:2.5, D:1 };
 const MIN_VOTES = 3;
 
-// カテゴリ別ランキング定義: どの項目を合算するか
+// カテゴリ別ランキング定義: どの項目を合算するか。convex:true で中心乖離強調の配点を使う
 const CATEGORIES = {
-  overall: { label:"総合ランキング", itemKeys:["aggression","chat","madness","devotion","influence","harmony"] },
-  violence: { label:"狂暴ランキング", itemKeys:["aggression"] },
-  kindness: { label:"優しさランキング", itemKeys:["harmony","devotion"] },
+  overall: { label:"総合ランキング", itemKeys:["aggression","chat","madness","devotion","influence","harmony"], convex:false },
+  violence: { label:"狂暴ランキング", itemKeys:["aggression"], convex:true },
+  kindness: { label:"優しさランキング", itemKeys:["harmony","devotion"], convex:true },
 };
 let currentCategory = "overall";
 
@@ -253,8 +268,15 @@ function aggregate(byTarget, playersMap){
     });
     const categoryScores = {};
     Object.keys(CATEGORIES).forEach(catId => {
-      const keys = CATEGORIES[catId].itemKeys;
-      categoryScores[catId] = keys.reduce((sum,k) => sum + itemAvg[k], 0);
+      const cat = CATEGORIES[catId];
+      const pointMap = cat.convex ? RANK_POINT_CONVEX : RANK_POINT;
+      const perVoteSums = votes.map(v => {
+        const vals = cat.itemKeys.map(k => pointMap[v[k]]).filter(p => p !== undefined);
+        return vals.length ? vals.reduce((a,b)=>a+b,0) : null;
+      }).filter(s => s !== null);
+      categoryScores[catId] = perVoteSums.length
+        ? perVoteSums.reduce((a,b)=>a+b,0) / perVoteSums.length
+        : 0;
     });
     const player = playersMap[targetId];
     const name = player ? player.name : (votes[0].targetName || targetId);
@@ -378,6 +400,8 @@ function openModal(id){
   const r = window.__resultsById[id];
   if (!r) return;
   const cat = CATEGORIES[currentCategory];
+  document.getElementById("modalIcon").src =
+    r.iconUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(r.name)}`;
   document.getElementById("modalName").textContent = r.name;
   document.getElementById("modalSub").textContent =
     `${cat.label}: ${r.categoryScores[currentCategory].toFixed(1)} / ${cat.itemKeys.length*5}　評価人数 ${r.voteCount}人`;

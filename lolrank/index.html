@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概要 | LOLBeans ビーンズランク</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,-50..200" />
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;line-height:1;font-size:1.15em;}</style>
+<style>
+  :root{
+    --bg:#05070c;
+    --panel:#0d111a;
+    --panel2:#11151f;
+    --line:#1c2230;
+    --accent:#5865F2;
+    --text:#e7ecf5;
+    --dim:#7a8499;
+    --dim2:#4d5567;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    font-size:14px;
+  }
+  header{
+    display:flex; align-items:center; gap:16px;
+    padding:14px 24px; border-bottom:1px solid var(--line);
+  }
+  header img{ width:36px; height:36px; border-radius:50%; }
+  header .brand{ font-weight:700; font-size:16px; }
+  header nav{ display:flex; gap:18px; margin-left:12px; flex-wrap:wrap; }
+  header nav a{ color:var(--dim); text-decoration:none; font-size:13px; }
+  header nav a:hover{ color:var(--text); }
+
+  .hero{
+    max-width:760px;
+    margin: 48px auto 8px;
+    padding: 0 20px;
+    text-align:center;
+  }
+  .hero h1{
+    font-size:26px;
+    margin:0 0 10px;
+  }
+  .hero p{
+    color:var(--dim);
+    font-size:13.5px;
+    line-height:1.9;
+    margin:0;
+  }
+
+  .wrap{
+    max-width:760px;
+    margin: 36px auto 60px;
+    padding: 0 20px;
+  }
+
+  .card-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:560px){
+    .card-grid{ grid-template-columns: 1fr; }
+  }
+
+  .action-card{
+    display:block;
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:22px;
+    text-decoration:none;
+    color: var(--text);
+    transition: border-color .15s ease;
+  }
+  .action-card:hover{ border-color: var(--accent); }
+  .action-card .emoji{ font-size:26px; }
+  .action-card h3{ margin:12px 0 6px; font-size:16px; }
+  .action-card p{ margin:0; font-size:12.5px; color:var(--dim); line-height:1.7; }
+
+  .section-title{
+    font-size:13px;
+    color:var(--dim);
+    letter-spacing:1px;
+    margin:36px 0 12px;
+    border-top:1px solid var(--line);
+    padding-top:20px;
+  }
+
+  .step-list{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:18px 22px;
+  }
+  .step-list div{
+    display:flex; gap:12px;
+    padding:10px 0;
+    border-top:1px solid var(--line);
+    font-size:13px;
+    color:var(--dim);
+  }
+  .step-list div:first-child{ border-top:none; }
+  .step-list .num{
+    flex-shrink:0;
+    width:22px; height:22px;
+    border-radius:50%;
+    background: var(--panel2);
+    color:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11.5px; font-weight:700;
+  }
+  .step-list b{ color:var(--text); }
+
+  .item-tags{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-top:14px;
+  }
+  .item-tags span{
+    background: var(--panel2);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:5px 12px;
+    font-size:12px;
+    color:var(--dim);
+  }
+
+  footer{
+    text-align:center;
+    color:var(--dim2);
+    font-size:11.5px;
+    padding:20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://cdn.discordapp.com/embed/avatars/4.png" alt="">
+  <div class="brand">&amp;LOLBEANS</div>
+  <nav>
+    <a href="./index.html">概要</a>
+    <a href="./lolrank.html">評価する</a>
+    <a href="./ranking-tier.html">ビーンズランク</a>
+    <a href="./community.html">コース一覧</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1><span class="material-symbols-outlined">workspace_premium</span> ビーンズランク</h1>
+  <p>
+    LOLBeansのプレイヤーを、みんなの評価で6項目・S〜Dランクで採点。<br>
+    平均スコアでTierに振り分けて、総合・狂暴・優しさの3つのランキングを見ることができます。
+  </p>
+</div>
+
+<div class="wrap">
+  <div class="card-grid">
+    <a class="action-card" href="./lolrank.html">
+      <div class="emoji"><span class="material-symbols-outlined">bar_chart</span></div>
+      <h3>ビーンズを評価する</h3>
+      <p>気になるプレイヤーを選んで、6項目をS〜Dで評価しよう。何度でも上書きして修正できます。</p>
+    </a>
+    <a class="action-card" href="./ranking-tier.html">
+      <div class="emoji"><span class="material-symbols-outlined">emoji_events</span></div>
+      <h3>ビーンズランクを見る</h3>
+      <p>みんなの評価から算出されたTierリスト。総合・狂暴・優しさの3タブで見られます。</p>
+    </a>
+  </div>
+
+  <div class="section-title">評価される6項目</div>
+  <div class="item-tags">
+    <span>攻撃性</span>
+    <span>雑談力</span>
+    <span>狂気度</span>
+    <span>献身度</span>
+    <span>影響力</span>
+    <span>調和力</span>
+  </div>
+
+  <div class="section-title">仕組み</div>
+  <div class="step-list">
+    <div><span class="num">1</span><span>プレイヤーを選んで、<b>6項目をS〜Dで評価</b>する</span></div>
+    <div><span class="num">2</span><span>同じ相手には<b>何度でも上書き投票</b>が可能(重複投票はIPで自動判定)</span></div>
+    <div><span class="num">3</span><span><b>3人以上</b>から評価が集まったプレイヤーだけ、ランキングに表示される</span></div>
+    <div><span class="num">4</span><span>総合・狂暴・優しさ、3つの基準でTier(S+〜F)に振り分けて表示</span></div>
+  </div>
+</div>
+
+<footer>LOLBeans非公式ファンサイト</footer>
+</body>
+</html>

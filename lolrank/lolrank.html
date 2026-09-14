@@ -44,9 +44,37 @@
   header nav a{ color:var(--dim); text-decoration:none; font-size:13px; }
   header nav a:hover{ color:var(--text); }
 
+  .page-hero{
+    position:relative;
+    min-height:220px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    padding: 56px 20px 32px;
+    background:
+      radial-gradient(circle at 25% 20%, rgba(88,101,242,0.28), transparent 55%),
+      radial-gradient(circle at 80% 75%, rgba(255,47,176,0.16), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 42px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 42px),
+      #05070c;
+    border-bottom:1px solid var(--line);
+  }
+  .page-hero h1{
+    font-size:24px;
+    margin:0 0 10px;
+    text-shadow: 0 0 18px rgba(88,101,242,0.55);
+  }
+  .page-hero p{
+    color:var(--dim);
+    font-size:12.5px;
+    line-height:1.8;
+    margin:0;
+    max-width:560px;
+  }
+  .page-hero p a{ color:#8ab4ff; }
+
   .lead{
     max-width:1160px;
-    margin: 68px auto 0;
+    margin: 16px auto 0;
     padding: 0 20px;
     color: var(--dim);
     font-size:13px;
@@ -258,9 +286,12 @@
 
 
 
+<div class="page-hero">
+  <h1><span class="material-symbols-outlined">bar_chart</span> ビーンズを評価</h1>
+  <p>攻撃性・雑談力・狂気度・献身度・影響力・調和力の6項目をS〜Dで評価できます。</p>
+</div>
+
 <p class="lead">
-  <span class="material-symbols-outlined">bar_chart</span> ビーンズを評価<br>
-  攻撃性・雑談力・狂気度・献身度・影響力・調和力の6項目をS〜Dで評価できます。<br>
   ※評価した相手は、あなたを含めて<b>3人以上</b>から評価されるまで<a href="./ranking-tier.html">ビーンズランク</a>のランキングには表示されません（少人数の偏った評価を防ぐため）。
 </p>
 

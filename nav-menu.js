@@ -7,7 +7,8 @@
  * 現在のページをハイライトしたい場合は、<body>タグに
  * data-nav-current="file-library" のように id を指定してください。
  * 対応する値: home, lolex, community, ranking, template, block-forge,
- *            file-library, submit, faq, contact
+ *            file-library, submit, faq, contact,
+ *            lolrank-home, lolrank-vote, lolrank-ranking
  */
 (function () {
     const BASE = "https://tanabesan.github.io/lolbeans/";
@@ -23,6 +24,11 @@
         { id: "community", group: "コミュニティ", items: [
             { id: "community", label: "コース一覧", href: BASE + "community/community.html" },
             { id: "ranking", label: "WRランキング", href: BASE + "community/ranking.html" }
+        ]},
+        { id: "lolrank", group: "ビーンズランク", items: [
+            { id: "lolrank-home", label: "概要", href: BASE + "lolrank/index.html" },
+            { id: "lolrank-vote", label: "評価する", href: BASE + "lolrank/lolrank.html" },
+            { id: "lolrank-ranking", label: "ランキング", href: BASE + "lolrank/ranking-tier.html" }
         ]},
         { id: "lolex", group: "LOL.ex", items: [
             { id: "lolex", label: "LOL.ex", href: BASE + "lolex/lolex.html" },

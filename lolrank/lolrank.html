@@ -299,7 +299,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, setDoc, getDoc, getDocs, serverTimestamp
+  getFirestore, collection, collectionGroup, query, where, doc, setDoc, getDoc, getDocs, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -346,6 +346,22 @@ async function getIpHash(){
   const buf = await crypto.subtle.digest("SHA-256", enc);
   ipHashCache = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
   return ipHashCache;
+}
+
+// ---- 自分(IPハッシュ)が投票済みの相手を一括取得 ----
+async function loadMyVotes(){
+  try {
+    const ipHash = await getIpHash();
+    const q = query(collectionGroup(db, "votes"), where("voterIp", "==", ipHash));
+    const snap = await getDocs(q);
+    myVotesMap = {};
+    snap.forEach(d => {
+      const targetId = d.ref.parent.parent.id;
+      myVotesMap[targetId] = true;
+    });
+  } catch(e){
+    console.warn("投票済み一覧の取得に失敗", e);
+  }
 }
 
 // ---- プレイヤー一覧読み込み(players コレクション。無ければ空表示) ----
@@ -501,6 +517,7 @@ async function submitVote(){
     await setDoc(voteRef, {
       ...currentVotes,
       targetName: selectedPlayer.name,
+      voterIp: ipHash,
       updatedAt: serverTimestamp(),
       ...(isUpdate ? {} : { createdAt: serverTimestamp() })
     });
@@ -518,7 +535,7 @@ async function submitVote(){
   }
 }
 
-loadPlayers();
+loadMyVotes().then(loadPlayers);
 </script>
 </body>
 </html>

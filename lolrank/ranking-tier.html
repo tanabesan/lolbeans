@@ -205,7 +205,7 @@
 
 <div class="page-hero">
   <h1><span class="material-symbols-outlined">workspace_premium</span> ビーンズランク Tier List</h1>
-  <p>総合(6項目の尖り度)・攻撃性(狂暴)・調和力/献身度(優しさ)、3つの軸でTier分けするランキングです。</p>
+  <p>総合(7項目の尖り度)・攻撃性(狂暴)・調和力/献身度(優しさ)・変態度、4つの軸でTier分けするランキングです。</p>
 </div>
 
 <p class="lead">
@@ -218,6 +218,7 @@
     <button class="tab-btn active" data-cat="overall"><span class="material-symbols-outlined">workspace_premium</span> 総合ランキング</button>
     <button class="tab-btn" data-cat="violence"><span class="material-symbols-outlined">bolt</span> 狂暴ランキング</button>
     <button class="tab-btn" data-cat="kindness"><span class="material-symbols-outlined">volunteer_activism</span> 優しさランキング</button>
+    <button class="tab-btn" data-cat="perversion"><span class="material-symbols-outlined">visibility</span> 変態ランキング</button>
   </div>
 </div>
 
@@ -267,6 +268,7 @@ const ITEM_DEFS = [
   { key:"devotion", name:"献身度" },
   { key:"influence", name:"影響力" },
   { key:"harmony", name:"調和力" },
+  { key:"perversion", name:"変態度" },
 ];
 const RANK_POINT = { S:5, A:4, B:3, C:2, D:1 };
 
@@ -338,6 +340,17 @@ const SCORE_DESC = {
     "1.5":"あまり調整役には回らない、マイペースタイプ",
     "1.0":"調和役として動くことはほぼない",
   },
+  perversion: {
+    "5.0":"もはや公認変態。誰も驚かなくなったレベル",
+    "4.5":"変態力が振り切れ気味。油断すると際どい発言が飛んでくる",
+    "4.0":"隙あらば下ネタ・きわどい発言を挟んでくる",
+    "3.5":"平均よりやや際どい。たまにギリギリを攻める",
+    "3.0":"たまに変態的な一面をのぞかせる",
+    "2.5":"控えめだが、たまに際どい発言をする",
+    "2.0":"滅多に見せないが、稀に本性が出る",
+    "1.5":"ほぼ紳士(淑女)寄り。ごく稀に片鱗が見える",
+    "1.0":"清廉潔白、変態要素はほぼ皆無",
+  },
 };
 function descFor(itemKey, avg){
   // 1.0〜5.0の範囲で0.5刻みに丸めて該当する説明文を返す
@@ -356,9 +369,10 @@ const MIN_VOTES = 3;
 // カテゴリ別ランキング定義: どの項目を合算するか
 // pointMode: "linear"(通常) / "convex"(B中心・方向あり) / "extreme"(B中心・対称) / "mixed"(項目ごとに切り替え。overall専用)
 const CATEGORIES = {
-  overall: { label:"総合ランキング", itemKeys:["aggression","chat","madness","devotion","influence","harmony"], pointMode:"mixed" },
+  overall: { label:"総合ランキング", itemKeys:["aggression","chat","madness","devotion","influence","harmony","perversion"], pointMode:"mixed" },
   violence: { label:"狂暴ランキング", itemKeys:["aggression"], pointMode:"linear" },
   kindness: { label:"優しさランキング", itemKeys:["harmony","devotion"], pointMode:"linear" },
+  perversion: { label:"変態ランキング", itemKeys:["perversion"], pointMode:"linear" },
 };
 let currentCategory = "overall";
 

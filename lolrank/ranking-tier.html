@@ -225,8 +225,8 @@ const MIN_VOTES = 3;
 // pointMode: "linear"(通常) / "convex"(B中心・方向あり) / "extreme"(B中心・対称) / "mixed"(項目ごとに切り替え。overall専用)
 const CATEGORIES = {
   overall: { label:"総合ランキング", itemKeys:["aggression","chat","madness","devotion","influence","harmony"], pointMode:"mixed" },
-  violence: { label:"狂暴ランキング", itemKeys:["aggression"], pointMode:"convex" },
-  kindness: { label:"優しさランキング", itemKeys:["harmony","devotion"], pointMode:"convex" },
+  violence: { label:"狂暴ランキング", itemKeys:["aggression"], pointMode:"linear" },
+  kindness: { label:"優しさランキング", itemKeys:["harmony","devotion"], pointMode:"linear" },
 };
 let currentCategory = "overall";
 

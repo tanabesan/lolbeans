@@ -285,16 +285,26 @@ function aggregate(byTarget, playersMap){
         }, 0);
         return;
       }
-      const pointMap = cat.pointMode === "extreme" ? RANK_POINT_EXTREME
-        : cat.pointMode === "convex" ? RANK_POINT_CONVEX
-        : RANK_POINT;
-      const perVoteSums = votes.map(v => {
-        const vals = cat.itemKeys.map(k => pointMap[v[k]]).filter(p => p !== undefined);
-        return vals.length ? vals.reduce((a,b)=>a+b,0) : null;
-      }).filter(s => s !== null);
-      categoryScores[catId] = perVoteSums.length
-        ? perVoteSums.reduce((a,b)=>a+b,0) / perVoteSums.length
-        : 0;
+      if (cat.pointMode === "convex"){
+        // itemAvg(項目平均)を先に出してから、Bを中心にした連続的な非線形変換をかける
+        // (投票ごとに変換してから平均すると詳細モーダルの内訳とズレるため、平均後に変換する)
+        categoryScores[catId] = cat.itemKeys.reduce((sum, k) => {
+          const avg = itemAvg[k] || 0;
+          const d = avg - 3;
+          const val = 3 + 0.5 * d * Math.abs(d); // 距離の2乗に比例して加点(離れるほど差が広がる)
+          return sum + val;
+        }, 0);
+        return;
+      }
+      if (cat.pointMode === "extreme"){
+        categoryScores[catId] = cat.itemKeys.reduce((sum, k) => {
+          const avg = itemAvg[k] || 0;
+          return sum + (1 + 2 * Math.abs(avg - 3));
+        }, 0);
+        return;
+      }
+      // linear(通常の平均合計)
+      categoryScores[catId] = cat.itemKeys.reduce((sum, k) => sum + (itemAvg[k] || 0), 0);
     });
     const player = playersMap[targetId];
     const name = player ? player.name : (votes[0].targetName || targetId);

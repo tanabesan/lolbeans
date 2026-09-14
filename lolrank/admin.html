@@ -27,17 +27,20 @@
     font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
     font-size:14px;
   }
-  header{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:14px 24px 14px 72px; border-bottom:1px solid var(--line);
+  .who{
+    position:fixed; top:16px; right:20px; z-index:1080;
+    background: rgba(13,17,26,0.92);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:12.5px; color:var(--dim);
+    display:flex; align-items:center; gap:10px;
   }
-  header .brand{ font-weight:700; font-size:16px; }
-  header .who{ font-size:12.5px; color:var(--dim); display:flex; align-items:center; gap:10px; }
-  header button.logout{
+  button.logout{
     background:none; border:1px solid var(--line); color:var(--dim);
     border-radius:6px; padding:5px 12px; cursor:pointer; font-size:12px;
   }
-  header button.logout:hover{ border-color:var(--danger); color:var(--danger); }
+  button.logout:hover{ border-color:var(--danger); color:var(--danger); }
 
   /* ---- ログイン画面 ---- */
   #loginScreen{
@@ -78,7 +81,7 @@
   /* ---- 管理画面本体 ---- */
   .layout{
     max-width:900px;
-    margin: 24px auto 60px;
+    margin: 76px auto 60px;
     padding: 0 20px;
     display:none;
   }
@@ -185,13 +188,10 @@
 </head>
 <body data-nav-current="lolrank-admin">
 
-<header>
-  <div class="brand">&amp;LOLBEANS Admin</div>
-  <div class="who" id="whoBox" style="display:none;">
-    <span id="whoEmail"></span>
-    <button class="logout" id="logoutBtn">ログアウト</button>
-  </div>
-</header>
+<div class="who" id="whoBox" style="display:none;">
+  <span id="whoEmail"></span>
+  <button class="logout" id="logoutBtn">ログアウト</button>
+</div>
 
 <!-- ログイン画面 -->
 <div id="loginScreen">

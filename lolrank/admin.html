@@ -42,10 +42,29 @@
   }
   button.logout:hover{ border-color:var(--danger); color:var(--danger); }
 
+  .page-hero{
+    position:relative;
+    min-height:150px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    padding: 56px 20px 26px;
+    background:
+      radial-gradient(circle at 25% 20%, rgba(88,101,242,0.22), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 42px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 42px),
+      #05070c;
+    border-bottom:1px solid var(--line);
+  }
+  .page-hero h1{
+    font-size:19px;
+    margin:0;
+    color: var(--text);
+  }
+
   /* ---- ログイン画面 ---- */
   #loginScreen{
     max-width:360px;
-    margin: 120px auto;
+    margin: 40px auto;
     background: var(--panel);
     border:1px solid var(--line);
     border-radius:12px;
@@ -81,7 +100,7 @@
   /* ---- 管理画面本体 ---- */
   .layout{
     max-width:900px;
-    margin: 76px auto 60px;
+    margin: 24px auto 60px;
     padding: 0 20px;
     display:none;
   }
@@ -187,6 +206,10 @@
 <script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 </head>
 <body data-nav-current="lolrank-admin">
+
+<div class="page-hero">
+  <h1>プレイヤー管理</h1>
+</div>
 
 <div class="who" id="whoBox" style="display:none;">
   <span id="whoEmail"></span>

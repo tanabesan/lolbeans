@@ -202,6 +202,29 @@
   .icon-cell label:hover{ border-color:var(--accent); color:var(--text); }
   .icon-cell input[type=file]{ display:none; }
   .upload-progress{ font-size:11px; color:var(--accent); }
+
+  .request-card{
+    display:flex; align-items:center; gap:12px;
+    background: var(--panel2);
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:10px 14px;
+    margin-bottom:8px;
+  }
+  .request-card img{
+    width:40px; height:40px; border-radius:50%; object-fit:cover; background:#222; flex-shrink:0;
+  }
+  .request-card .rname{ font-size:13.5px; flex:1; }
+  .request-card .rtime{ font-size:11px; color:var(--dim2); }
+  .request-actions{ display:flex; gap:6px; }
+  .request-actions button{
+    border:1px solid var(--line); border-radius:6px;
+    padding:6px 12px; font-size:12px; cursor:pointer; background:none;
+  }
+  .request-actions button.approve{ color:var(--ok); }
+  .request-actions button.approve:hover{ border-color:var(--ok); }
+  .request-actions button.reject{ color:var(--danger); }
+  .request-actions button.reject:hover{ border-color:var(--danger); }
 </style>
 <script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 </head>
@@ -227,6 +250,11 @@
 
 <!-- 管理画面本体 -->
 <div class="layout" id="adminLayout">
+
+  <div class="panel">
+    <h3>承認待ちの申請 <span class="count-badge" id="requestCountBadge"></span></h3>
+    <div id="requestList"></div>
+  </div>
 
   <div class="panel">
     <h3>プレイヤーを追加</h3>
@@ -315,6 +343,7 @@ onAuthStateChanged(auth, (user) => {
     whoBox.style.display = "flex";
     whoEmail.textContent = user.email;
     loadPlayers();
+    loadRequests();
   } else {
     loginScreen.style.display = "block";
     adminLayout.classList.remove("show");
@@ -349,6 +378,81 @@ function slugify(name){
   return name.trim().toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^\w\-一-龠ぁ-んァ-ヶー]/g, "");
+}
+
+// ---- 承認待ち申請 ----
+function slugifyName(name){
+  return name.trim().toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-一-龠ぁ-んァ-ヶー]/g, "");
+}
+
+async function loadRequests(){
+  const listEl = document.getElementById("requestList");
+  listEl.innerHTML = `<div class="hint">読み込み中...</div>`;
+  try {
+    const snap = await getDocs(collection(db, "playerRequests"));
+    const requests = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => r.status === "pending" || !r.status);
+    renderRequests(requests);
+  } catch(e){
+    console.error(e);
+    listEl.innerHTML = `<div class="hint">申請一覧の読み込みに失敗しました</div>`;
+  }
+}
+
+function renderRequests(requests){
+  const listEl = document.getElementById("requestList");
+  document.getElementById("requestCountBadge").textContent = `(${requests.length}件)`;
+  if (requests.length === 0){
+    listEl.innerHTML = `<div class="hint">現在、承認待ちの申請はありません</div>`;
+    return;
+  }
+  listEl.innerHTML = requests.map(r => `
+    <div class="request-card" data-id="${r.id}">
+      <img src="${r.iconUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(r.name)}`}" alt="">
+      <span class="rname">${escapeAttr(r.name)}</span>
+      <div class="request-actions">
+        <button class="approve">承認</button>
+        <button class="reject">却下</button>
+      </div>
+    </div>
+  `).join("");
+
+  [...listEl.querySelectorAll(".request-card")].forEach(card => {
+    const reqId = card.dataset.id;
+    card.querySelector(".approve").addEventListener("click", async () => {
+      const nameEl = card.querySelector(".rname");
+      const iconUrl = card.querySelector("img").src;
+      const name = nameEl.textContent;
+      const newId = slugifyName(name) || reqId;
+      try {
+        await setDoc(doc(db, "players", newId), {
+          name,
+          ...(iconUrl && !iconUrl.includes("dicebear.com") ? { iconUrl } : {}),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        await deleteDoc(doc(db, "playerRequests", reqId));
+        loadRequests();
+        loadPlayers();
+      } catch(e){
+        console.error(e);
+        alert("承認処理に失敗しました");
+      }
+    });
+    card.querySelector(".reject").addEventListener("click", async () => {
+      if (!confirm("この申請を却下しますか？")) return;
+      try {
+        await deleteDoc(doc(db, "playerRequests", reqId));
+        loadRequests();
+      } catch(e){
+        console.error(e);
+        alert("却下処理に失敗しました");
+      }
+    });
+  });
 }
 
 async function loadPlayers(){

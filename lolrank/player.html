@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>プレイヤー詳細 | LOLBeans ビーンズランク</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,-50..200" />
+<style>.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;vertical-align:middle;line-height:1;font-size:1.15em;}</style>
+<script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
+<style>
+  :root{
+    --bg:#05070c;
+    --panel:#0d111a;
+    --panel2:#11151f;
+    --line:#1c2230;
+    --accent:#5865F2;
+    --text:#e7ecf5;
+    --dim:#7a8499;
+    --dim2:#4d5567;
+    --s-color:#ffb454;
+    --a-color:#7cf29c;
+    --b-color:#5ec8ff;
+    --c-color:#c9c9c9;
+    --d-color:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    font-size:14px;
+  }
+
+  .page-hero{
+    position:relative;
+    min-height:200px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    padding: 56px 20px 28px;
+    background:
+      radial-gradient(circle at 25% 20%, rgba(88,101,242,0.28), transparent 55%),
+      radial-gradient(circle at 80% 75%, rgba(255,47,176,0.16), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 42px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 42px),
+      #05070c;
+    border-bottom:1px solid var(--line);
+  }
+  .page-hero img{
+    width:72px; height:72px; border-radius:50%;
+    object-fit:cover; background:#222;
+    margin-bottom:12px;
+    border:2px solid var(--line);
+  }
+  .page-hero h1{ font-size:22px; margin:0 0 4px; }
+  .page-hero .sub{ color:var(--dim); font-size:12.5px; }
+
+  .wrap{
+    max-width:760px;
+    margin: 24px auto 60px;
+    padding: 0 20px;
+  }
+
+  .back-link{
+    display:inline-flex; align-items:center; gap:4px;
+    color:var(--dim); text-decoration:none; font-size:12.5px; margin-bottom:16px;
+  }
+  .back-link:hover{ color:var(--text); }
+
+  .score-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:10px;
+    margin-bottom:24px;
+  }
+  @media (max-width:560px){
+    .score-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+  .score-card{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 10px;
+    text-align:center;
+  }
+  .score-card .cat-label{ font-size:11px; color:var(--dim); margin-bottom:6px; }
+  .score-card .tier-badge{
+    display:inline-block;
+    font-size:18px; font-weight:800;
+    color:#05070c;
+    border-radius:6px;
+    padding:2px 10px;
+    margin-bottom:4px;
+  }
+  .score-card .score-num{ font-size:11px; color:var(--dim2); }
+
+  .t-Sp{ background:#ffd23f; } .t-S{ background:#ffc93f; } .t-Sm{ background:#ffbf3f; }
+  .t-Ap{ background:#7cf29c; } .t-A{ background:#63e389; } .t-Am{ background:#4dd479; }
+  .t-Bp{ background:#5ec8ff; } .t-B{ background:#4ab8f0; } .t-Bm{ background:#38a8e0; }
+  .t-C{ background:#c9c9c9; } .t-D{ background:#ff9d5c; } .t-E{ background:#ff7b6b; } .t-F{ background:#ff5f5f; }
+
+  .panel{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px;
+    margin-bottom:20px;
+  }
+  .panel h2{ margin:0 0 14px; font-size:14px; color:var(--dim); font-weight:600; }
+
+  .radar-row{ display:flex; justify-content:center; }
+
+  .item-line{
+    display:flex; justify-content:space-between;
+    padding:8px 0 2px; border-top:1px solid var(--line); font-size:13.5px;
+  }
+  .item-line:first-child{ border-top:none; }
+  .item-desc{
+    font-size:11.5px; color:var(--dim2); line-height:1.6; padding-bottom:10px;
+  }
+
+  .empty-msg{ text-align:center; color:var(--dim2); font-size:13px; padding:60px 20px; }
+
+  .not-enough{
+    background: var(--panel2);
+    border:1px dashed var(--line);
+    border-radius:10px;
+    padding:16px;
+    text-align:center;
+    color:var(--dim);
+    font-size:12.5px;
+    margin-bottom:20px;
+  }
+</style>
+</head>
+<body data-nav-current="lolrank-ranking">
+
+<div class="page-hero" id="heroBox">
+  <div class="empty-msg" style="padding:0;">読み込み中...</div>
+</div>
+
+<div class="wrap">
+  <a class="back-link" href="./ranking-tier.html">
+    <span class="material-symbols-outlined">arrow_back</span> ランキングに戻る
+  </a>
+  <div id="content"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
+  authDomain: "lolex0204.firebaseapp.com",
+  projectId: "lolex0204",
+  storageBucket: "lolex0204.firebasestorage.app",
+  messagingSenderId: "940620254622",
+  appId: "1:940620254622:web:edca80d191423cd460da8f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const ITEM_DEFS = [
+  { key:"aggression", name:"攻撃性" },
+  { key:"chat", name:"雑談力" },
+  { key:"madness", name:"狂気度" },
+  { key:"devotion", name:"献身度" },
+  { key:"influence", name:"影響力" },
+  { key:"harmony", name:"調和力" },
+  { key:"perversion", name:"変態度" },
+];
+const RANK_POINT = { S:5, A:4, B:3, C:2, D:1 };
+
+const SCORE_DESC = {
+  aggression: {
+    "5.0":"戦闘力が振り切れている。もはや名物と化した毒舌キャラ",
+    "4.5":"喧嘩を売る速度が速すぎる。今日も誰かに絡んでいそう",
+    "4.0":"煽り耐性ゼロ、煽り性能は満点。日常的に火花を散らす",
+    "3.5":"口が悪い日の方が多い。油断すると刺してくる",
+    "3.0":"普段は平和だが、スイッチが入ると牙をむくタイプ",
+    "2.5":"基本おだやかだが、たまに鋭い一言を挟んでくる",
+    "2.0":"滅多に見せない棘。あるとちょっと驚く",
+    "1.5":"平和主義寄り。ごく稀に本音が漏れる程度",
+    "1.0":"争いを知らない。むしろ丸すぎるまである",
+  },
+  chat: {
+    "5.0":"喋らせたら止まらない、場の空気を握るMC気質",
+    "4.5":"一言ごとに笑いが起きる、雑談界のラスボス",
+    "4.0":"話を振れば必ず拾ってくれる安定の面白さ",
+    "3.5":"平均よりテンポがいい。会話のキャッチボールが上手",
+    "3.0":"ノリよく反応してくれる、いい話し相手",
+    "2.5":"聞き役寄りだけど、たまに良いパンチラインを放つ",
+    "2.0":"静かめだが、稀に核心を突く一言を言う",
+    "1.5":"聞き専気味。話しかければ普通に返してくれる",
+    "1.0":"寡黙。雑談の主役に回ることはほぼない",
+  },
+  madness: {
+    "5.0":"次に何をするか誰にも予測できない、伝説級の変人",
+    "4.5":"予測不能装置。想定の斜め上を平然と行く",
+    "4.0":"突飛な発想や行動が頻発、油断ならない存在",
+    "3.5":"時々変な引き出しが開く。目が離せないタイプ",
+    "3.0":"たまに突拍子もないことを言い出す茶目っ気枠",
+    "2.5":"基本常識人だが、たまにネジが外れる瞬間がある",
+    "2.0":"普段は真面目。稀に予想外の一面を見せる",
+    "1.5":"ほぼ安定志向。意外性はごく僅か",
+    "1.0":"堅実で読みやすい、安心感のあるタイプ",
+  },
+  devotion: {
+    "5.0":"体を張って笑いを取りにいく、生粋のお笑い担当",
+    "4.5":"自虐のネタ切れを知らない、ハプニング製造機",
+    "4.0":"自分がボケることを恐れない、頼れるギバー気質",
+    "3.5":"平均よりネタに体を張りがち。損得より笑いを優先",
+    "3.0":"たまに自分を犠牲にしてでも場を盛り上げる",
+    "2.5":"控えめだが、ここぞという時に自虐を挟む",
+    "2.0":"あまり自分は犠牲にしないが、稀に一発かます",
+    "1.5":"堅実タイプ。自虐は滅多に見せない",
+    "1.0":"自分の株は守る主義。自己犠牲とは無縁",
+  },
+  influence: {
+    "5.0":"この人が言えば流行る。コミュニティのトレンド発信源",
+    "4.5":"発言の拡散力が高く、しばしば話題の中心になる",
+    "4.0":"一目置かれる存在。発言に説得力がある",
+    "3.5":"平均より発言力あり。時々ノリが広がっていく",
+    "3.0":"たまに発言がネタとして広がることがある",
+    "2.5":"控えめだが、たまに刺さる発言をする",
+    "2.0":"目立たないが、稀に話題になる発言をする",
+    "1.5":"あまり表に出ないタイプ。存在感は控えめ",
+    "1.0":"発言が広がることはほぼない、静かな存在",
+  },
+  harmony: {
+    "5.0":"みんなの潤滑油。揉め事があれば自然と収まる",
+    "4.5":"場の空気を読むのが上手く、頼りにされる存在",
+    "4.0":"仲裁役として信頼が厚い、まとめ役タイプ",
+    "3.5":"平均より場を落ち着かせる場面が多い",
+    "3.0":"たまに空気を和ませたり、場を取り持ったりする",
+    "2.5":"控えめだが、必要な時にはうまく間に入る",
+    "2.0":"目立たないが、稀に場を和ませる一言を言う",
+    "1.5":"あまり調整役には回らない、マイペースタイプ",
+    "1.0":"調和役として動くことはほぼない",
+  },
+  perversion: {
+    "5.0":"もはや公認変態。誰も驚かなくなったレベル",
+    "4.5":"変態力が振り切れ気味。油断すると際どい発言が飛んでくる",
+    "4.0":"隙あらば下ネタ・きわどい発言を挟んでくる",
+    "3.5":"平均よりやや際どい。たまにギリギリを攻める",
+    "3.0":"たまに変態的な一面をのぞかせる",
+    "2.5":"控えめだが、たまに際どい発言をする",
+    "2.0":"滅多に見せないが、稀に本性が出る",
+    "1.5":"ほぼ紳士(淑女)寄り。ごく稀に片鱗が見える",
+    "1.0":"清廉潔白、変態要素はほぼ皆無",
+  },
+};
+function descFor(itemKey, avg){
+  const clamped = Math.min(5, Math.max(1, avg));
+  const bucket = (Math.round(clamped * 2) / 2).toFixed(1);
+  return SCORE_DESC[itemKey] && SCORE_DESC[itemKey][bucket] || "";
+}
+
+const OVERALL_EXTREME_ITEMS = new Set(["aggression","harmony","devotion"]);
+const MIN_VOTES = 3;
+const CATEGORIES = {
+  overall: { label:"総合", itemKeys:["aggression","chat","madness","devotion","influence","harmony","perversion"], pointMode:"mixed" },
+  violence: { label:"狂暴", itemKeys:["aggression"], pointMode:"linear" },
+  kindness: { label:"優しさ", itemKeys:["harmony","devotion"], pointMode:"linear" },
+  perversion: { label:"変態", itemKeys:["perversion"], pointMode:"linear" },
+};
+
+const TIER_RATIOS = [
+  ["S+","t-Sp",0.938], ["S","t-S",0.877], ["S-","t-Sm",0.815],
+  ["A+","t-Ap",0.754], ["A","t-A",0.692], ["A-","t-Am",0.631],
+  ["B+","t-Bp",0.569], ["B","t-B",0.508], ["B-","t-Bm",0.446],
+  ["C","t-C",0.323], ["D","t-D",0.262], ["E","t-E",0.2], ["F","t-F",0],
+];
+function tierOf(score, maxScore){
+  const ratio = maxScore > 0 ? score / maxScore : 0;
+  for (const t of TIER_RATIOS){ if (ratio >= t[2]) return t; }
+  return TIER_RATIOS[TIER_RATIOS.length-1];
+}
+
+function computeCategoryScores(itemAvg){
+  const categoryScores = {};
+  Object.keys(CATEGORIES).forEach(catId => {
+    const cat = CATEGORIES[catId];
+    if (cat.pointMode === "mixed"){
+      categoryScores[catId] = cat.itemKeys.reduce((sum, k) => {
+        const avg = itemAvg[k] || 0;
+        const val = OVERALL_EXTREME_ITEMS.has(k) ? (1 + 2 * Math.abs(avg - 3)) : avg;
+        return sum + val;
+      }, 0);
+      return;
+    }
+    categoryScores[catId] = cat.itemKeys.reduce((sum, k) => sum + (itemAvg[k] || 0), 0);
+  });
+  return categoryScores;
+}
+
+function buildRadarSVG(itemAvg){
+  const size = 260;
+  const cx = size/2, cy = size/2;
+  const radius = 92;
+  const maxVal = 5;
+  const n = ITEM_DEFS.length;
+  const angleFor = (i) => (Math.PI * 2 * i / n) - Math.PI/2;
+  const pointAt = (i, val) => {
+    const r = (val / maxVal) * radius;
+    const a = angleFor(i);
+    return [cx + r*Math.cos(a), cy + r*Math.sin(a)];
+  };
+  let gridPolys = "";
+  [0.33, 0.66, 1.0].forEach(frac => {
+    const pts = ITEM_DEFS.map((_, i) => pointAt(i, maxVal*frac).join(",")).join(" ");
+    gridPolys += `<polygon points="${pts}" fill="none" stroke="#1c2230" stroke-width="1"/>`;
+  });
+  let axisLines = "";
+  ITEM_DEFS.forEach((_, i) => {
+    const [x,y] = pointAt(i, maxVal);
+    axisLines += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#1c2230" stroke-width="1"/>`;
+  });
+  const dataPts = ITEM_DEFS.map((item, i) => pointAt(i, itemAvg[item.key]).join(",")).join(" ");
+  let labels = "";
+  ITEM_DEFS.forEach((item, i) => {
+    const [x,y] = pointAt(i, maxVal * 1.2);
+    labels += `<text x="${x}" y="${y}" fill="#7a8499" font-size="11.5" text-anchor="middle" dominant-baseline="middle">${item.name}</text>`;
+  });
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      ${gridPolys}
+      ${axisLines}
+      <polygon points="${dataPts}" fill="rgba(88,101,242,0.35)" stroke="#5865F2" stroke-width="2"/>
+      ${labels}
+    </svg>
+  `;
+}
+
+async function loadPlayerVotes(playerId){
+  const snap = await getDocs(collection(db, "ratings", playerId, "votes"));
+  return snap.docs.map(d => d.data());
+}
+
+async function init(){
+  const params = new URLSearchParams(location.search);
+  const playerId = params.get("id");
+  const heroBox = document.getElementById("heroBox");
+  const content = document.getElementById("content");
+
+  if (!playerId){
+    heroBox.innerHTML = `<div class="empty-msg" style="padding:0;">プレイヤーが指定されていません</div>`;
+    return;
+  }
+
+  try {
+    const [playerSnap, votes] = await Promise.all([
+      getDoc(doc(db, "players", playerId)),
+      loadPlayerVotes(playerId),
+    ]);
+
+    const playerData = playerSnap.exists() ? playerSnap.data() : null;
+    const name = playerData ? (playerData.name || playerId) : (votes[0] && votes[0].targetName) || playerId;
+    const iconUrl = playerData ? playerData.iconUrl : null;
+    const voteCount = votes.length;
+
+    heroBox.innerHTML = `
+      <img src="${iconUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(name)}`}" alt="">
+      <h1>${name}</h1>
+      <div class="sub">評価人数 ${voteCount}人</div>
+    `;
+    document.title = `${name} | LOLBeans ビーンズランク`;
+
+    if (voteCount < MIN_VOTES){
+      content.innerHTML = `<div class="not-enough">あと${MIN_VOTES - voteCount}人以上の評価が集まると、Tier判定とランキングへの掲載が有効になります。</div>`;
+      return;
+    }
+
+    const itemAvg = {};
+    ITEM_DEFS.forEach(item => {
+      const pts = votes.map(v => RANK_POINT[v[item.key]]).filter(p => p !== undefined);
+      itemAvg[item.key] = pts.length ? pts.reduce((a,b)=>a+b,0) / pts.length : 0;
+    });
+    const categoryScores = computeCategoryScores(itemAvg);
+
+    const scoreCardsHtml = Object.keys(CATEGORIES).map(catId => {
+      const cat = CATEGORIES[catId];
+      const maxScore = cat.itemKeys.length * 5;
+      const score = categoryScores[catId];
+      const t = tierOf(score, maxScore);
+      return `
+        <div class="score-card">
+          <div class="cat-label">${cat.label}</div>
+          <div class="tier-badge ${t[1]}">${t[0]}</div>
+          <div class="score-num">${score.toFixed(1)} / ${maxScore}</div>
+        </div>
+      `;
+    }).join("");
+
+    const itemsHtml = ITEM_DEFS.map(item => `
+      <div class="item-line">
+        <span>${item.name}</span><span>${itemAvg[item.key].toFixed(1)}</span>
+      </div>
+      <div class="item-desc">${descFor(item.key, itemAvg[item.key])}</div>
+    `).join("");
+
+    content.innerHTML = `
+      <div class="score-grid">${scoreCardsHtml}</div>
+      <div class="panel">
+        <h2>パーソナリティチャート</h2>
+        <div class="radar-row">${buildRadarSVG(itemAvg)}</div>
+      </div>
+      <div class="panel">
+        <h2>項目別詳細</h2>
+        ${itemsHtml}
+      </div>
+    `;
+  } catch(e){
+    console.error(e);
+    heroBox.innerHTML = `<div class="empty-msg" style="padding:0;">読み込みに失敗しました</div>`;
+  }
+}
+init();
+</script>
+</body>
+</html>

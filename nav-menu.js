@@ -8,7 +8,7 @@
  * data-nav-current="file-library" のように id を指定してください。
  * 対応する値: home, lolex, community, ranking, template, block-forge,
  *            file-library, submit, faq, contact,
- *            lolrank-home, lolrank-vote, lolrank-ranking
+ *            lolrank-home, lolrank-vote, lolrank-ranking, lolrank-submit
  */
 (function () {
     const BASE = "https://tanabesan.github.io/lolbeans/";
@@ -28,7 +28,8 @@
         { id: "lolrank", group: "ビーンズランク", items: [
             { id: "lolrank-home", label: "概要", href: BASE + "lolrank/index.html" },
             { id: "lolrank-vote", label: "評価する", href: BASE + "lolrank/lolrank.html" },
-            { id: "lolrank-ranking", label: "ランキング", href: BASE + "lolrank/ranking-tier.html" }
+            { id: "lolrank-ranking", label: "ランキング", href: BASE + "lolrank/ranking-tier.html" },
+            { id: "lolrank-submit", label: "プレイヤー登録申請", href: BASE + "lolrank/submit-player.html" }
         ]},
         { id: "lolex", group: "LOL.ex", items: [
             { id: "lolex", label: "LOL.ex", href: BASE + "lolex/lolex.html" },

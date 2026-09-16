@@ -86,11 +86,15 @@
     border-radius:10px;
     overflow:hidden;
     margin-bottom:10px;
+    position:relative;
   }
   .tier-label{
     display:flex; align-items:center; justify-content:center;
-    font-size:20px; font-weight:800;
+    font-size:21px; font-weight:800;
     color:#05070c;
+    position:relative;
+    letter-spacing:0.5px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.35), 0 -1px 0 rgba(0,0,0,0.15);
   }
   .tier-cards{
     background: var(--panel);
@@ -98,6 +102,7 @@
     display:flex; flex-wrap:wrap; gap:10px;
     min-height:58px;
     align-items:center;
+    position:relative;
   }
   .tier-empty{ color:var(--dim2); font-size:12px; padding-left:4px; }
 
@@ -105,19 +110,52 @@
     display:flex; align-items:center; gap:8px;
     background: var(--panel2);
     border:1px solid var(--line);
+    border-left:3px solid var(--card-tier-color, var(--line));
     border-radius:8px;
     padding:7px 10px;
     cursor:pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
-  .player-card img{ width:30px; height:30px; border-radius:50%; object-fit:cover; background:#222; }
+  .player-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px -4px var(--card-tier-color, transparent);
+  }
+  .player-card img{
+    width:30px; height:30px; border-radius:50%; object-fit:cover; background:#222;
+    border:1px solid var(--card-tier-color, transparent);
+  }
   .player-card .pname{ font-size:13px; }
   .player-card .pscore{ font-size:11px; color:var(--dim); }
 
-  /* tier colors */
-  .t-Sp{ background:#ffd23f; } .t-S{ background:#ffc93f; } .t-Sm{ background:#ffbf3f; }
-  .t-Ap{ background:#7cf29c; } .t-A{ background:#63e389; } .t-Am{ background:#4dd479; }
-  .t-Bp{ background:#5ec8ff; } .t-B{ background:#4ab8f0; } .t-Bm{ background:#38a8e0; }
-  .t-C{ background:#c9c9c9; } .t-D{ background:#ff9d5c; } .t-E{ background:#ff7b6b; } .t-F{ background:#ff5f5f; }
+  /* tier colors: 段位ごとにグラデーション+グロー強度を変えて格の違いを演出 */
+  .tier-label.t-Sp{ background:linear-gradient(135deg,#fff3c4,#ffd23f 45%,#ff9d3f); box-shadow:0 0 26px 2px rgba(255,196,63,0.85), inset 0 0 14px rgba(255,255,255,0.35); }
+  .tier-row:has(.t-Sp){ border-color:#ffd23f; background:linear-gradient(90deg, rgba(255,210,63,0.14), transparent 55%); }
+  .tier-row:has(.t-Sp) .tier-cards{ background:linear-gradient(90deg, rgba(255,210,63,0.06), var(--panel) 45%); }
+  .tier-label.t-Sp::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+    background-size:220% 100%;
+    animation: shine 2.6s ease-in-out infinite;
+  }
+  @keyframes shine{ 0%{ background-position:180% 0; } 100%{ background-position:-60% 0; } }
+
+  .tier-label.t-S{ background:linear-gradient(135deg,#ffe9a8,#ffc93f 50%,#ff8f3f); box-shadow:0 0 18px 1px rgba(255,201,63,0.6); }
+  .tier-row:has(.t-S){ border-color:#ffc93f55; }
+  .tier-label.t-Sm{ background:linear-gradient(135deg,#ffe08f,#ffbf3f); box-shadow:0 0 12px rgba(255,191,63,0.4); }
+
+  .tier-label.t-Ap{ background:linear-gradient(135deg,#c9ffd8,#7cf29c 55%,#3fd47a); box-shadow:0 0 16px rgba(124,242,156,0.55); }
+  .tier-label.t-A{ background:linear-gradient(135deg,#b9f5cc,#63e389); box-shadow:0 0 10px rgba(99,227,137,0.35); }
+  .tier-label.t-Am{ background:linear-gradient(135deg,#a9edc0,#4dd479); }
+
+  .tier-label.t-Bp{ background:linear-gradient(135deg,#cdf0ff,#5ec8ff 55%,#2fa6ef); box-shadow:0 0 12px rgba(94,200,255,0.4); }
+  .tier-label.t-B{ background:linear-gradient(135deg,#bfeaff,#4ab8f0); }
+  .tier-label.t-Bm{ background:linear-gradient(135deg,#aee0ff,#38a8e0); }
+
+  .tier-label.t-C{ background:linear-gradient(135deg,#e6e6e6,#c9c9c9); }
+  .tier-label.t-D{ background:linear-gradient(135deg,#ffc79b,#ff9d5c); }
+  .tier-label.t-E{ background:linear-gradient(135deg,#ffa89e,#ff7b6b); }
+  .tier-label.t-F{ background:linear-gradient(135deg,#ff9a8f,#ff5f5f); box-shadow:inset 0 0 10px rgba(0,0,0,0.25); }
+
 
   .empty-msg{ text-align:center; color:var(--dim2); font-size:12.5px; padding:30px 0; }
 
@@ -381,10 +419,10 @@ let currentCategory = "overall";
 
 // tier定義: [ラベル, cssクラス, 最小スコアの割合(0〜1、満点に対する比率)]
 const TIER_RATIOS = [
-  ["S+","t-Sp",0.938], ["S","t-S",0.877], ["S-","t-Sm",0.815],
-  ["A+","t-Ap",0.754], ["A","t-A",0.692], ["A-","t-Am",0.631],
-  ["B+","t-Bp",0.569], ["B","t-B",0.508], ["B-","t-Bm",0.446],
-  ["C","t-C",0.323], ["D","t-D",0.262], ["E","t-E",0.2], ["F","t-F",0],
+  ["S+","t-Sp",0.938,"#ffd23f"], ["S","t-S",0.877,"#ffc93f"], ["S-","t-Sm",0.815,"#ffbf3f"],
+  ["A+","t-Ap",0.754,"#7cf29c"], ["A","t-A",0.692,"#63e389"], ["A-","t-Am",0.631,"#4dd479"],
+  ["B+","t-Bp",0.569,"#5ec8ff"], ["B","t-B",0.508,"#4ab8f0"], ["B-","t-Bm",0.446,"#38a8e0"],
+  ["C","t-C",0.323,"#c9c9c9"], ["D","t-D",0.262,"#ff9d5c"], ["E","t-E",0.2,"#ff7b6b"], ["F","t-F",0,"#ff5f5f"],
 ];
 function tierOf(score, maxScore){
   const ratio = maxScore > 0 ? score / maxScore : 0;
@@ -485,7 +523,7 @@ function renderTierList(results){
   Object.values(grouped).forEach(list => list.sort((a,b) => b.score - a.score));
 
   wrap.innerHTML = TIER_RATIOS.map(t => {
-    const [label, cls] = t;
+    const [label, cls, , color] = t;
     const list = grouped[label];
     return `
       <div class="tier-row">
@@ -494,7 +532,7 @@ function renderTierList(results){
           ${list.length === 0
             ? `<span class="tier-empty">まだ採点対象なし</span>`
             : list.map(r => `
-                <div class="player-card" data-id="${r.targetId}">
+                <div class="player-card" data-id="${r.targetId}" style="--card-tier-color:${color};">
                   <img src="${r.iconUrl || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${encodeURIComponent(r.name)}`}" alt="">
                   <div>
                     <div class="pname">${r.name}</div>

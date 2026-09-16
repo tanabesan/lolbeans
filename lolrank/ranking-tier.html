@@ -239,6 +239,9 @@
       <div id="modalRadar" class="modal-radar-col"></div>
       <div id="modalItems" class="modal-items-col"></div>
     </div>
+    <a class="close" id="modalOpenPage" style="display:block; text-align:center; text-decoration:none; margin-top:10px; box-sizing:border-box; background:var(--panel2); border:1px solid var(--line);">
+      <span class="material-symbols-outlined" style="font-size:1em;">open_in_new</span> 個別ページを開く
+    </a>
     <button class="close" id="modalClose">閉じる</button>
   </div>
 </div>
@@ -586,6 +589,7 @@ function openModal(id){
     </div>
     <div class="item-desc">${descFor(item.key, r.itemAvg[item.key])}</div>
   `).join("");
+  document.getElementById("modalOpenPage").href = `./player.html?id=${encodeURIComponent(id)}`;
   document.getElementById("modalBg").classList.add("show");
 }
 document.getElementById("modalClose").addEventListener("click", () => {

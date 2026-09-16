@@ -246,7 +246,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, collectionGroup, collection, getDocs
+  getFirestore, collectionGroup, collection, getDocs, doc, getDoc, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -595,10 +595,36 @@ document.getElementById("modalBg").addEventListener("click", (e) => {
   if (e.target.id === "modalBg") document.getElementById("modalBg").classList.remove("show");
 });
 
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15分間はキャッシュを使い回す
+
 async function init(){
   try {
-    const [playersMap, byTarget] = await Promise.all([loadPlayers(), loadVotes()]);
-    const results = aggregate(byTarget, playersMap);
+    let results = null;
+    let usedCache = false;
+
+    // まずキャッシュ(集計済みの結果1件)を読む。読み取りコストは常に1件のみ
+    try {
+      const cacheRef = doc(db, "aggregates", "rankings");
+      const cacheSnap = await getDoc(cacheRef);
+      if (cacheSnap.exists()){
+        const data = cacheSnap.data();
+        const updatedAtMs = data.updatedAt && data.updatedAt.toMillis ? data.updatedAt.toMillis() : 0;
+        if (Date.now() - updatedAtMs < CACHE_TTL_MS && Array.isArray(data.results)){
+          results = data.results;
+          usedCache = true;
+        }
+      }
+    } catch(e){ console.warn("キャッシュの読み込みに失敗", e); }
+
+    // キャッシュが無い/古い場合だけ、全投票データを読んで再集計する(コストが高い処理)
+    if (!usedCache){
+      const [playersMap, byTarget] = await Promise.all([loadPlayers(), loadVotes()]);
+      results = aggregate(byTarget, playersMap);
+      // 次の閲覧者のためにキャッシュを書き戻す(失敗しても表示自体は継続)
+      const cacheRef = doc(db, "aggregates", "rankings");
+      setDoc(cacheRef, { results, updatedAt: serverTimestamp() }).catch(e => console.warn("キャッシュの書き込みに失敗", e));
+    }
+
     window.__allResults = results;
     renderTierList(results);
   } catch(e){

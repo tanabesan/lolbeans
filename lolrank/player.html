@@ -260,7 +260,7 @@ function descFor(itemKey, avg){
   return SCORE_DESC[itemKey] && SCORE_DESC[itemKey][bucket] || "";
 }
 
-const OVERALL_EXTREME_ITEMS = new Set(["aggression","harmony","devotion"]);
+const OVERALL_EXTREME_ITEMS = new Set(["aggression","harmony","devotion","perversion"]);
 const MIN_VOTES = 3;
 const CATEGORIES = {
   overall: { label:"総合", itemKeys:["aggression","chat","madness","devotion","influence","harmony","perversion"], pointMode:"mixed" },

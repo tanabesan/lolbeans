@@ -23,10 +23,10 @@ html{scroll-behavior:smooth}
   --t0:#e4e6ef;
   --t1:#9a9db3;
   --t2:#5f6277;
-  --acc:#ff2fd6;   /* マゼンタ(メイン/アクティブ) */
-  --acc2:#ff2fd6;  /* マゼンタ(アクション) */
-  --acc3:#c9cce0;  /* 淡いグレー(見出し) */
-  --acc4:#ff2fd6;  /* マゼンタ(ハイライト) */
+  --acc:#ff00ff;   /* マゼンタ(メインカラー) */
+  --acc2:#ff00ff;  /* マゼンタ(アクション) */
+  --acc3:#00ffff;  /* シアン(サブカラー・見出し等) */
+  --acc4:#00ffff;  /* シアン(ハイライト) */
   --glow-g:none;
   --glow-b:none;
   --glow-r:none;
@@ -190,12 +190,6 @@ body.jp{font-family:var(--ffj)}
 }
 .level-grid-card:hover .card-thumb{filter:brightness(1.0) saturate(1.1);transform:scale(1.05)}
 
-/* scanline on thumb */
-.card-thumb::after{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px);
-  pointer-events:none;
-}
 .card-type-icon{
   position:absolute;top:10px;right:10px;z-index:15;
   width:32px;height:32px;
@@ -401,7 +395,7 @@ body.jp{font-family:var(--ffj)}
 }
 /* カード上のハートボタン */
 .card-fav-btn{
-  position:absolute;bottom:10px;right:10px;z-index:20;
+  position:absolute;top:50px;right:10px;z-index:20;
   background:rgba(13,14,23,.6);border:1px solid var(--line2);
   color:var(--t2);width:28px;height:28px;
   display:flex;align-items:center;justify-content:center;

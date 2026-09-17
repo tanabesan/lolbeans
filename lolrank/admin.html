@@ -142,6 +142,8 @@
   .hint{ font-size:11.5px; color:var(--dim2); margin-top:2px; }
 
   table{ width:100%; border-collapse:collapse; }
+  .table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .table-scroll table{ min-width:520px; }
   th{
     text-align:left; font-size:12px; color:var(--dim);
     padding:8px 10px; border-bottom:1px solid var(--line);
@@ -225,6 +227,17 @@
   .request-actions button.approve:hover{ border-color:var(--ok); }
   .request-actions button.reject{ color:var(--danger); }
   .request-actions button.reject:hover{ border-color:var(--danger); }
+
+  @media (max-width:600px){
+    .who{ top:8px; right:8px; padding:6px 8px; font-size:11px; }
+    .who span{ display:none; }
+    .layout{ padding:0 12px; }
+    .panel{ padding:14px; }
+    .form-row{ flex-direction:column; }
+    .form-row input{ min-width:0; }
+    .icon-picker{ width:100%; }
+    button.add{ width:100%; }
+  }
 </style>
 <script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 </head>
@@ -276,6 +289,7 @@
 
   <div class="panel">
     <h3>プレイヤー一覧 <span class="count-badge" id="countBadge"></span></h3>
+    <div class="table-scroll">
     <table>
       <thead>
         <tr>
@@ -289,6 +303,7 @@
         <tr><td colspan="3" class="empty-msg">読み込み中...</td></tr>
       </tbody>
     </table>
+    </div>
   </div>
 
 </div>

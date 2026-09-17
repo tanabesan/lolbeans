@@ -159,15 +159,21 @@
 
   .empty-msg{ text-align:center; color:var(--dim2); font-size:12.5px; padding:30px 0; }
 
-  .tab-row{ display:flex; gap:8px; margin-bottom:16px; }
+  .tab-row{
+    display:flex; gap:8px; margin-bottom:16px;
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding-bottom:2px;
+  }
   .tab-btn{
     background: var(--panel);
     border:1px solid var(--line);
     color:var(--dim);
-    padding:9px 18px;
+    padding:9px 16px;
     border-radius:8px;
-    font-size:13.5px;
+    font-size:13px;
     cursor:pointer;
+    white-space:nowrap;
+    flex-shrink:0;
   }
   .tab-btn.active{ background: var(--accent); border-color:var(--accent); color:#fff; }
 
@@ -210,6 +216,14 @@
     .modal-body{ flex-direction:column; }
     .modal-radar-col{ width:100%; }
     .modal-items-col{ max-height:none; width:100%; }
+    .tier-row{ grid-template-columns: 56px 1fr; }
+    .tier-label{ font-size:16px; }
+    .tier-cards{ padding:10px; gap:8px; }
+    .player-card{ padding:6px 8px; gap:6px; }
+    .player-card .pname{ font-size:12px; }
+    .player-card .pscore{ font-size:10px; }
+    .page-hero{ min-height:190px; padding:52px 16px 24px; }
+    .page-hero h1{ font-size:19px; }
   }
   .modal h3{ margin:0 0 2px; font-size:16px; }
   .modal .sub{ font-size:12px; color:var(--dim); }

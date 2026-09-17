@@ -667,6 +667,7 @@ body.eco .site-header h1::after{box-shadow:none}
         <option value="1" selected>🆕 New</option>
         <option value="2">🔥 Trending</option>
         <option value="4">💀 Hardcore</option>
+        <option value="5">🏆 WR更新順</option>
       </select>
     </div>
     <div class="fg">
@@ -740,8 +741,8 @@ function levelSlug(name){return name.normalize('NFD').replace(/[\u0300-\u036f]/g
 function levelPlayUrl(lv){return'https://lolbeans.io/level/'+levelIdToShortId(lv.levelId)+'/'+levelSlug(lv.name)}
 
 const T={
-  ja:{title:'LOLBeans コース一覧',h1:'LOLBeans\nコース一覧',sub:'ユーザーが作成したカスタムマップ',loading:'データをロード中...',lSearch:'コース・作者名検索',lSort:'並び替え',lType:'コース種別',lFin:'クリア率',lView:'表示',btnS:'検索',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',tM1:'すべて',t0:'サンドボックス',t1:'タイムレース',t2:'競争レース',t3:'エリミネーション',f0:'すべて',f1:'低い (<30%)',f2:'普通 (30〜70%)',f3:'高い (>70%)',author:'作者',desc:'概要',votes:'投票数',rating:'平均評価',finPct:'クリア率',starts:'プレイ回数',players:'総プレイヤー数',avgTime:'平均クリア時間',wr:'世界記録 (WR)',wrHolder:'WR保持者',date:'公開日',pi:(c,m)=>`${c+1} / ${m}`,prev:'前へ',next:'次へ',noD:'説明がありません。',noL:'該当するコースが見つかりませんでした。',err:'データの取得に失敗しました。',pbSfx:' のWR保持コース',pbCnt:n=>`WR ${n} コース`,pbLoad:n=>`${n} のWRコースを取得中...`,pbNone:'WR保持コースが見つかりませんでした。',pbBack:'✕ 通常表示に戻る',closeModal:'✕ 閉じる',playBtn:'▶ プレイする'},
-  en:{title:'LOLBeans Course List',h1:'LOLBeans\nCourse List',sub:'Custom maps created by the community',loading:'Loading data...',lSearch:'Search courses / authors',lSort:'Sort By',lType:'Course Type',lFin:'Finish %',lView:'View',btnS:'Search',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',tM1:'All',t0:'Sandbox',t1:'Timed Race',t2:'Competitive Race',t3:'Elimination',f0:'All',f1:'Low (<30%)',f2:'Average (30–70%)',f3:'High (>70%)',author:'Author',desc:'Description',votes:'Votes',rating:'Avg. Rating',finPct:'Finish %',starts:'Starts',players:'Players',avgTime:'Avg. Finish Time',wr:'World Record',wrHolder:'WR Holder',date:'Publish Date',pi:(c,m)=>`Page ${c+1} of ${m}`,prev:'Prev',next:'Next',noD:'No description.',noL:'No courses found.',err:'Failed to fetch data.',pbSfx:"'s WR Courses",pbCnt:n=>`${n} WR courses`,pbLoad:n=>`Loading ${n}'s WR courses...`,pbNone:'No WR courses found.',pbBack:'✕ Back',closeModal:'✕ Close',playBtn:'▶ PLAY'}
+  ja:{title:'LOLBeans コース一覧',h1:'LOLBeans\nコース一覧',sub:'ユーザーが作成したカスタムマップ',loading:'データをロード中...',lSearch:'コース・作者名検索',lSort:'並び替え',lType:'コース種別',lFin:'クリア率',lView:'表示',btnS:'検索',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',s5:'🏆 WR更新順',tM1:'すべて',t0:'サンドボックス',t1:'タイムレース',t2:'競争レース',t3:'エリミネーション',f0:'すべて',f1:'低い (<30%)',f2:'普通 (30〜70%)',f3:'高い (>70%)',author:'作者',desc:'概要',votes:'投票数',rating:'平均評価',finPct:'クリア率',starts:'プレイ回数',players:'総プレイヤー数',avgTime:'平均クリア時間',wr:'世界記録 (WR)',wrHolder:'WR保持者',date:'公開日',pi:(c,m)=>`${c+1} / ${m}`,prev:'前へ',next:'次へ',noD:'説明がありません。',noL:'該当するコースが見つかりませんでした。',err:'データの取得に失敗しました。',pbSfx:' のWR保持コース',pbCnt:n=>`WR ${n} コース`,pbLoad:n=>`${n} のWRコースを取得中...`,pbNone:'WR保持コースが見つかりませんでした。',pbBack:'✕ 通常表示に戻る',closeModal:'✕ 閉じる',playBtn:'▶ プレイする'},
+  en:{title:'LOLBeans Course List',h1:'LOLBeans\nCourse List',sub:'Custom maps created by the community',loading:'Loading data...',lSearch:'Search courses / authors',lSort:'Sort By',lType:'Course Type',lFin:'Finish %',lView:'View',btnS:'Search',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',s5:'🏆 Recent WR',tM1:'All',t0:'Sandbox',t1:'Timed Race',t2:'Competitive Race',t3:'Elimination',f0:'All',f1:'Low (<30%)',f2:'Average (30–70%)',f3:'High (>70%)',author:'Author',desc:'Description',votes:'Votes',rating:'Avg. Rating',finPct:'Finish %',starts:'Starts',players:'Players',avgTime:'Avg. Finish Time',wr:'World Record',wrHolder:'WR Holder',date:'Publish Date',pi:(c,m)=>`Page ${c+1} of ${m}`,prev:'Prev',next:'Next',noD:'No description.',noL:'No courses found.',err:'Failed to fetch data.',pbSfx:"'s WR Courses",pbCnt:n=>`${n} WR courses`,pbLoad:n=>`Loading ${n}'s WR courses...`,pbNone:'No WR courses found.',pbBack:'✕ Back',closeModal:'✕ Close',playBtn:'▶ PLAY'}
 };
 
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -941,8 +942,9 @@ async function fetchL(pi=0,pushUrl=true){
   document.getElementById('pagination').innerHTML='';
   closeModal();
   if(pushUrl)pushFilterUrl(pi);
+  const f=getFilterValues();
+  if(f.s==='5'){await fetchWr(pi,f);return}
   try{
-    const f=getFilterValues();
     const p=new URLSearchParams({i:pi,n:PER_PAGE,m:PER_PAGE,t:f.s,ft:f.ft,ff:f.ff});
     if(f.q)p.append('ts',f.q);
     const res=await fetch(API_BASE_URL+p);
@@ -951,6 +953,41 @@ async function fetchL(pi=0,pushUrl=true){
     page=pi;maxP=data.m;
     if(data.l&&data.l.length){
       data.l.forEach((lv,i)=>c.appendChild(mkCard(lv,i)));
+      mkPager();applyView();ld.style.display='none';
+    }else{ld.innerHTML=t.noL}
+  }catch(e){ld.innerHTML=`${T[lang].err} (${e.message})`}
+}
+
+async function fetchWr(pi,f){
+  const t=T[lang];
+  const c=document.getElementById('level-grid');
+  const ld=document.getElementById('loading-message');
+  try{
+    const p=new URLSearchParams({action:'recentWr'});
+    if(f.ft!=='-1')p.append('type',f.ft);
+    const res=await fetch(GAS_URL+'?'+p);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    let courses=data.courses||[];
+    if(f.q){
+      const q=f.q.toLowerCase();
+      courses=courses.filter(lv=>(lv.name||'').toLowerCase().includes(q)||(lv.author||'').toLowerCase().includes(q));
+    }
+    if(f.ff&&f.ff!=='0'){
+      courses=courses.filter(lv=>{
+        const fp=lv.finishPercent??0;
+        if(f.ff==='1')return fp<0.30;
+        if(f.ff==='2')return fp>=0.30&&fp<=0.70;
+        if(f.ff==='3')return fp>0.70;
+        return true;
+      });
+    }
+    const total=courses.length;
+    page=pi;maxP=Math.max(1,Math.ceil(total/PER_PAGE));
+    const pageItems=courses.slice(pi*PER_PAGE,(pi+1)*PER_PAGE);
+    if(pageItems.length){
+      pageItems.forEach((lv,i)=>c.appendChild(mkCard(lv,i)));
       mkPager();applyView();ld.style.display='none';
     }else{ld.innerHTML=t.noL}
   }catch(e){ld.innerHTML=`${T[lang].err} (${e.message})`}
@@ -969,7 +1006,7 @@ async function fetchPC(name){const t=T[lang];const c=document.getElementById('le
 
 function applyView(){const g=document.getElementById('level-grid');const gb=document.getElementById('btn-grid-view');const lb=document.getElementById('btn-list-view');if(listView){g.classList.add('list-view');lb.classList.add('active');gb.classList.remove('active')}else{g.classList.remove('list-view');gb.classList.add('active');lb.classList.remove('active')}}
 
-function applyLang(l){lang=l;localStorage.setItem('language',l);document.documentElement.lang=l;document.body.classList.toggle('jp',l==='ja');const t=T[l];document.getElementById('page-title').textContent=t.title;document.getElementById('hero-title').innerHTML=t.h1.replace('\n','<br>');document.getElementById('hero-subtitle').textContent=t.sub;document.getElementById('label-search-text').textContent=t.lSearch;document.getElementById('label-sort-type').textContent=t.lSort;document.getElementById('label-filter-type').textContent=t.lType;document.getElementById('label-filter-finish').textContent=t.lFin;document.getElementById('label-view-mode').textContent=t.lView;document.getElementById('search-button').innerHTML=`<i class="fas fa-search"></i> ${t.btnS}`;const so=document.getElementById('sort-type').options;[[0,'s0'],[1,'s1'],[2,'s2'],[3,'s4']].forEach(([i,k])=>{if(so[i])so[i].textContent=t[k]});const to=document.getElementById('filter-type').options;[[0,'tM1'],[1,'t0'],[2,'t1'],[3,'t2'],[4,'t3']].forEach(([i,k])=>{if(to[i])to[i].textContent=t[k]});const fo=document.getElementById('filter-finish').options;[[0,'f0'],[1,'f1'],[2,'f2'],[3,'f3']].forEach(([i,k])=>{if(fo[i])fo[i].textContent=t[k]});if(pMode){document.getElementById('playerBannerName').textContent=pName+t.pbSfx;document.getElementById('playerBannerClose').textContent=t.pbBack}else{fetchL(page)}}
+function applyLang(l){lang=l;localStorage.setItem('language',l);document.documentElement.lang=l;document.body.classList.toggle('jp',l==='ja');const t=T[l];document.getElementById('page-title').textContent=t.title;document.getElementById('hero-title').innerHTML=t.h1.replace('\n','<br>');document.getElementById('hero-subtitle').textContent=t.sub;document.getElementById('label-search-text').textContent=t.lSearch;document.getElementById('label-sort-type').textContent=t.lSort;document.getElementById('label-filter-type').textContent=t.lType;document.getElementById('label-filter-finish').textContent=t.lFin;document.getElementById('label-view-mode').textContent=t.lView;document.getElementById('search-button').innerHTML=`<i class="fas fa-search"></i> ${t.btnS}`;const so=document.getElementById('sort-type').options;[[0,'s0'],[1,'s1'],[2,'s2'],[3,'s4'],[4,'s5']].forEach(([i,k])=>{if(so[i])so[i].textContent=t[k]});const to=document.getElementById('filter-type').options;[[0,'tM1'],[1,'t0'],[2,'t1'],[3,'t2'],[4,'t3']].forEach(([i,k])=>{if(to[i])to[i].textContent=t[k]});const fo=document.getElementById('filter-finish').options;[[0,'f0'],[1,'f1'],[2,'f2'],[3,'f3']].forEach(([i,k])=>{if(fo[i])fo[i].textContent=t[k]});if(pMode){document.getElementById('playerBannerName').textContent=pName+t.pbSfx;document.getElementById('playerBannerClose').textContent=t.pbBack}else{fetchL(page)}}
 
 window.TM_LANG_HOOK=l=>applyLang(l);
 

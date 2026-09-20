@@ -267,7 +267,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   border:2px solid var(--pc);
   box-shadow:0 0 0 1px rgba(0,0,0,.6),8px 8px 0 var(--pc),0 0 30px -4px var(--pg);
   clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);
-  width:100%;max-width:520px;padding:0;position:relative;
+  width:100%;max-width:960px;padding:0;position:relative;
   transform:translateY(20px) scale(.96);transition:transform .28s cubic-bezier(.175,.885,.32,1.275);
   max-height:min(88vh,88dvh);
   display:flex;flex-direction:column;
@@ -355,6 +355,38 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .mstat-lbl{font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
 .mstat-val{font-family:var(--ffh);font-size:1.05rem;text-shadow:0 0 10px var(--pg)}
 .mchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+
+/* ── WIDE (Apex風) LAYOUT ── */
+.mh-banner-wide{text-align:center;padding:24px 26px 20px}
+.mh-title-wide{display:inline-flex;flex-direction:column;align-items:center;gap:6px}
+.mh-title-wide .mh-name{font-size:clamp(.9rem,3vw,1.3rem)}
+.mw-grid{display:flex;align-items:flex-start;gap:32px}
+.mw-side{width:200px;flex-shrink:0;text-align:center}
+.mw-shield-big{height:130px;width:auto;object-fit:contain;margin-bottom:10px}
+.mw-rankname{font-family:var(--ffh);font-size:.62rem;letter-spacing:.03em;margin-top:4px}
+.mw-subname{font-size:.7rem;color:var(--t2);font-weight:700;margin-top:4px}
+.mw-stier{margin-top:20px;text-align:left}
+.mw-stier .stier-grid{grid-template-columns:1fr;gap:6px}
+.mw-main{flex:1;min-width:0}
+.mw-circles{display:flex;gap:22px;margin-bottom:22px;flex-wrap:wrap}
+.mw-circle{
+  --cc:var(--acc3);width:150px;height:150px;border-radius:50%;flex-shrink:0;
+  border:3px solid var(--cc);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.06),transparent 70%);
+  box-shadow:0 0 26px -6px var(--cc),inset 0 0 18px -8px var(--cc);
+}
+.mw-circle-lbl{font-family:var(--ffh);font-size:.4rem;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.mw-circle-val{font-family:var(--ffh);font-size:1.6rem;color:var(--cc);text-shadow:0 0 16px var(--cc)}
+.mw-mstats{grid-template-columns:repeat(2,1fr);margin-top:4px}
+@media(min-width:761px){.mw-mstats{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:760px){
+  .mw-grid{flex-direction:column;align-items:center;gap:20px}
+  .mw-side{width:100%}
+  .mw-side .stier-grid{grid-template-columns:repeat(3,1fr)}
+  .mw-circles{justify-content:center}
+  .mw-circle{width:120px;height:120px}
+  .mw-circle-val{font-size:1.25rem}
+}
 
 /* calc section */
 .calc-wrap{background:var(--edge);border:1px solid var(--line2);overflow:hidden;margin-bottom:14px;clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
@@ -709,13 +741,26 @@ function openModal(idx){
   document.getElementById('modalBox').style.setProperty('--pb1',rk.bg);
   document.getElementById('modalBox').style.setProperty('--pb2',rk.b1);
   document.getElementById('modalContent').innerHTML=`
-    <div class="mh-banner"><div class="mh"><img class="mh-shield" src="${url}" alt="${rkName}" style="--mg:${rk.glow}"><div><div class="mh-name" style="color:${rk.col}">${esc(d.name)}</div><span class="mh-rank" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}30">${rkName} ${subName}</span></div></div></div>
-    <div class="modal-inner">
-    <div class="rank-pos-wrap"><div class="rp-label">${t?'全体順位':'Overall Ranking'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div></div></div><div class="rp-pct">${t?`全${total}人中 ${pos}位 (上位${100-pct}%)`:`#${pos} of ${total} players (Top ${100-pct}%)`}</div></div>
-    <div class="rank-pos-wrap"><div class="rp-label">${t?'次のランクまで':'Progress to Next Rank'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${progressPct}%;background:linear-gradient(90deg,${rk.b2},${rk.b3})"></div>${divHtml}</div>${tipHtml}</div>${segLblHtml}<div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'最高ランク到達！':'Max Rank Achieved!')}</div></div>
-    <div class="stier-wrap"><div class="stier-title">${t?'ランク内の階級':'Rank Divisions'}</div><div class="stier-grid">${stCards}</div></div>
-    <div class="mstats"><div class="mstat"><div class="mstat-lbl">${t?'ポイント':'Points'}</div><div class="mstat-val" style="color:${rk.col}">${d.totalPoints}</div></div><div class="mstat"><div class="mstat-lbl">${t?'WR数':'WR Count'}</div><div class="mstat-val" style="color:var(--acc3)">${d.wrCount}</div></div><div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div><div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div></div>
-    ${chips?`<div class="mchips">${chips}</div>`:''}
+    <div class="mh-banner mh-banner-wide"><div class="mh-title-wide"><div class="mh-name" style="color:${rk.col}">${esc(d.name)}</div><span class="mh-rank" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}30">${rkName} ${subName}</span></div></div>
+    <div class="modal-inner mw">
+    <div class="mw-grid">
+      <div class="mw-side">
+        <img class="mw-shield-big" src="${url}" alt="${rkName}" style="filter:drop-shadow(0 6px 18px ${rk.glow})">
+        <div class="mw-rankname" style="color:${rk.col}">${rkName}</div>
+        <div class="mw-subname">${subName}</div>
+        <div class="stier-wrap mw-stier"><div class="stier-title">${t?'ランク内の階級':'Rank Divisions'}</div><div class="stier-grid">${stCards}</div></div>
+      </div>
+      <div class="mw-main">
+        <div class="mw-circles">
+          <div class="mw-circle" style="--cc:${rk.col}"><div class="mw-circle-lbl">${t?'ポイント':'Points'}</div><div class="mw-circle-val">${d.totalPoints}</div></div>
+          <div class="mw-circle" style="--cc:var(--acc3)"><div class="mw-circle-lbl">${t?'WR数':'WR Count'}</div><div class="mw-circle-val">${d.wrCount}</div></div>
+        </div>
+        <div class="rank-pos-wrap"><div class="rp-label">${t?'全体順位':'Overall Ranking'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div></div></div><div class="rp-pct">${t?`全${total}人中 ${pos}位 (上位${100-pct}%)`:`#${pos} of ${total} players (Top ${100-pct}%)`}</div></div>
+        <div class="rank-pos-wrap"><div class="rp-label">${t?'次のランクまで':'Progress to Next Rank'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${progressPct}%;background:linear-gradient(90deg,${rk.b2},${rk.b3})"></div>${divHtml}</div>${tipHtml}</div>${segLblHtml}<div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'最高ランク到達！':'Max Rank Achieved!')}</div></div>
+        <div class="mstats mw-mstats"><div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div><div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div></div>
+        ${chips?`<div class="mchips">${chips}</div>`:''}
+      </div>
+    </div>
     ${calcHtml}
     </div>`;
   document.getElementById('modalOverlay').classList.add('open');

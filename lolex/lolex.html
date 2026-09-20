@@ -201,6 +201,8 @@
         .feature-card:nth-child(2) { transition-delay: 0.1s; }
         .feature-card:nth-child(3) { transition-delay: 0.2s; }
         .feature-card:nth-child(4) { transition-delay: 0.3s; }
+        .feature-card:nth-child(5) { transition-delay: 0.4s; }
+        .feature-card:nth-child(6) { transition-delay: 0.5s; }
         .feature-card.visible {
             opacity: 1;
             transform: translateY(0);
@@ -423,6 +425,20 @@
                         ロビーの背景をカスタマイズし、個性的なゲーム環境を作り出します。
                     </p>
                 </div>
+                <div class="feature-card">
+                    <i class="fas fa-keyboard"></i>
+                    <h3 id="feature5-title">キー/マウス入力表示</h3>
+                    <p id="feature5-desc">
+                        実際のキーボード配列に近いレイアウトで、押しているキーやマウスボタンをリアルタイム表示します。
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-stopwatch"></i>
+                    <h3 id="feature6-title">ベストタイム計算</h3>
+                    <p id="feature6-desc">
+                        全コースのベストタイムを自動集計し、サムネイル付きの結果をPNG画像として保存できます。
+                    </p>
+                </div>
             </div>
 
             <div class="version-table-container">
@@ -453,6 +469,16 @@
                         </tr>
                         <tr>
                             <td id="table-feature4">バックグラウンドデザイナー</td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                        </tr>
+                        <tr>
+                            <td id="table-feature5">キー/マウス入力表示</td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                            <td><i class="fas fa-check icon-check"></i></td>
+                        </tr>
+                        <tr>
+                            <td id="table-feature6">ベストタイム計算</td>
                             <td><i class="fas fa-check icon-check"></i></td>
                             <td><i class="fas fa-check icon-check"></i></td>
                         </tr>
@@ -525,6 +551,10 @@
                 feature3Desc: "リアルタイムでYouTube動画を再生し、ゲームプレイを妨げることなくエンターテインメントを楽しめます。",
                 feature4Title: "バックグラウンドデザイナー",
                 feature4Desc: "ロビーの背景をカスタマイズし、個性的なゲーム環境を作り出します。",
+                feature5Title: "キー/マウス入力表示",
+                feature5Desc: "実際のキーボード配列に近いレイアウトで、押しているキーやマウスボタンをリアルタイム表示します。",
+                feature6Title: "ベストタイム計算",
+                feature6Desc: "全コースのベストタイムを自動集計し、サムネイル付きの結果をPNG画像として保存できます。",
                 // テーブルの翻訳
                 versionCompareTitle: "バージョン別 機能比較",
                 standardVersionName: "標準版",
@@ -533,6 +563,8 @@
                 tableFeature2: "ラウンドスコープ",
                 tableFeature3: "Youtubeプレイヤー",
                 tableFeature4: "バックグラウンドデザイナー",
+                tableFeature5: "キー/マウス入力表示",
+                tableFeature6: "ベストタイム計算",
                 tableFeatureSpeed: "処理速度 / 軽量性",
                 liteNote: "軽量版 (Lite) は、オートエアスイッチ機能とラウンドスコープ機能を除外することで、最高の動作速度と軽快な操作感を実現しています。",
                 // デモセクションの翻訳
@@ -568,6 +600,10 @@
                 feature3Desc: "Play YouTube videos in real-time and enjoy entertainment without interrupting your gameplay.",
                 feature4Title: "Background Designer",
                 feature4Desc: "Customize your lobby background to create a unique gaming environment.",
+                feature5Title: "Key / Mouse Input Display",
+                feature5Desc: "Shows the keys and mouse buttons you press in real time, arranged in a layout close to a real keyboard.",
+                feature6Title: "Best Time Calculator",
+                feature6Desc: "Automatically totals your best times across all courses and saves the results as a PNG with thumbnails.",
                 // テーブルの翻訳
                 versionCompareTitle: "Feature Comparison by Version",
                 standardVersionName: "Standard",
@@ -576,6 +612,8 @@
                 tableFeature2: "Round Scope",
                 tableFeature3: "Youtube Player",
                 tableFeature4: "Background Designer",
+                tableFeature5: "Key / Mouse Input Display",
+                tableFeature6: "Best Time Calculator",
                 tableFeatureSpeed: "Processing Speed / Lightweight",
                 liteNote: "The Lite Version achieves the best operating speed and a smooth feel by excluding the Auto Air Switch and Round Scope features.",
                 // デモセクションの翻訳
@@ -617,6 +655,10 @@
             document.getElementById('feature3-desc').textContent = langData.feature3Desc;
             document.getElementById('feature4-title').textContent = langData.feature4Title;
             document.getElementById('feature4-desc').textContent = langData.feature4Desc;
+            document.getElementById('feature5-title').textContent = langData.feature5Title;
+            document.getElementById('feature5-desc').textContent = langData.feature5Desc;
+            document.getElementById('feature6-title').textContent = langData.feature6Title;
+            document.getElementById('feature6-desc').textContent = langData.feature6Desc;
 
             // テーブル
             document.getElementById('version-compare-title').textContent = langData.versionCompareTitle;
@@ -626,6 +668,8 @@
             document.getElementById('table-feature2').textContent = langData.tableFeature2;
             document.getElementById('table-feature3').textContent = langData.tableFeature3;
             document.getElementById('table-feature4').textContent = langData.tableFeature4;
+            document.getElementById('table-feature5').textContent = langData.tableFeature5;
+            document.getElementById('table-feature6').textContent = langData.tableFeature6;
             document.getElementById('table-feature-speed').textContent = langData.tableFeatureSpeed;
             document.getElementById('lite-note').innerHTML = langData.liteNote; // innerHTMLを使用
 

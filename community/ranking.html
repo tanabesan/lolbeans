@@ -574,51 +574,14 @@ const RANKS=[
 const getRank=p=>RANKS.find(r=>p>=r.minPts)||RANKS[6];
 function getSubTier(rk,pts){let r=0;for(let i=0;i<rk.subs.length;i++){if(pts>=rk.subs[i].min)r=i;}return r;}
 
-/* ── SHIELD SVG (元のコードをそのまま流用) ── */
+/* ── SHIELD IMAGE (自作画像に差し替え) ── */
+const RANK_IMG_BASE='https://tanabesan.github.io/lolbeans/community/file/';
 function mkShield(r,sz=44,subIdx=null){
-  const id=`${r.id}_${Math.random().toString(36).slice(2,7)}`;
-  const icons={
-    crown:`<g transform="translate(22,19)"><path d="M-9,7 L-9,-1 L-5.5,3 L0,-7 L5.5,3 L9,-1 L9,7 Z" fill="${r.b3}" stroke="${r.b1}" stroke-width="1.2" stroke-linejoin="round"/><rect x="-9" y="7" width="18" height="4" rx="2" fill="${r.b3}" stroke="${r.b1}" stroke-width="1"/><circle cx="-9" cy="-1" r="2" fill="${r.b2}"/><circle cx="0" cy="-7" r="2.4" fill="${r.b2}"/><circle cx="9" cy="-1" r="2" fill="${r.b2}"/><rect x="-6" y="8.2" width="12" height="1.4" rx=".7" fill="white" opacity=".3"/></g>`,
-    gem:`<g transform="translate(22,20)"><polygon points="0,-10 7,-3 7,4 0,9 -7,4 -7,-3" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.5" stroke-linejoin="round"/><polygon points="0,-6 4,-2 4,2 0,5 -4,2 -4,-2" fill="${r.b3}" opacity=".55"/><polygon points="-7,-3 0,-10 7,-3" fill="${r.b3}" opacity=".4"/><line x1="-7" y1="-3" x2="7" y2="-3" stroke="white" stroke-width=".7" opacity=".25"/></g>`,
-    diamond:`<g transform="translate(22,20)"><polygon points="0,-11 8,0 0,11 -8,0" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.5" stroke-linejoin="round"/><polygon points="0,-6 5,0 0,6 -5,0" fill="${r.b3}" opacity=".5"/><polygon points="0,-11 8,0 0,-3 -8,0" fill="${r.b3}" opacity=".4"/><polygon points="0,-2.5 3,0 0,2.5 -3,0" fill="white" opacity=".55"/></g>`,
-    star6:`<g transform="translate(22,20)"><polygon points="0,-10 2.6,-3.5 9,-3.5 4,1 6,8 0,4.5 -6,8 -4,1 -9,-3.5 -2.6,-3.5" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-6 1.6,-2.1 5.5,-2.1 2.4,0.6 3.6,4.8 0,2.7 -3.6,4.8 -2.4,0.6 -5.5,-2.1 -1.6,-2.1" fill="${r.b3}" opacity=".55"/><circle cx="0" cy="0" r="2.2" fill="white" opacity=".5"/></g>`,
-    star5:`<g transform="translate(22,20)"><polygon points="0,-11 3.2,-3.8 11,-3.5 5.2,1.5 7.2,9.5 0,5.5 -7.2,9.5 -5.2,1.5 -11,-3.5 -3.2,-3.8" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-7 2,-2.4 7,-2.2 3.2,1 4.5,6 0,3.5 -4.5,6 -3.2,1 -7,-2.2 -2,-2.4" fill="${r.b3}" opacity=".5"/><circle cx="0" cy="1" r="2" fill="white" opacity=".45"/></g>`,
-    shield:`<g transform="translate(22,20)"><path d="M-5,-10 L5,-10 L8,-6 L8,3 L4,7 L0,12 L-4,7 L-8,3 L-8,-6 Z" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.4" stroke-linejoin="round"/><path d="M-3,-6 L3,-6 L5,-3 L5,3 L2,5.5 L0,8.5 L-2,5.5 L-5,3 L-5,-3 Z" fill="${r.b3}" opacity=".4"/><line x1="-5" y1="-1" x2="5" y2="-1" stroke="${r.b3}" stroke-width="1" opacity=".5"/><line x1="0" y1="-9" x2="0" y2="10" stroke="${r.b3}" stroke-width=".8" opacity=".35"/><line x1="-8" y1="-1" x2="-5" y2="-1" stroke="${r.b3}" stroke-width=".7" opacity=".6"/><line x1="8" y1="-1" x2="5" y2="-1" stroke="${r.b3}" stroke-width=".7" opacity=".6"/></g>`,
-    bean:`<g transform="translate(22,20)"><ellipse cx="0" cy="0" rx="7" ry="9.5" fill="${r.b2}" stroke="${r.b3}" stroke-width="1.4"/><path d="M-3,-8 Q7,-2 2,8" stroke="${r.b3}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/><ellipse cx="0" cy="0" rx="4" ry="5.5" fill="${r.b3}" opacity=".35"/></g>`,
-  };
+  // ブロンズだけ階級なしの共通1枚、他は I/II/III (1/2/3) の3枚
+  if(r.id==='brz')return RANK_IMG_BASE+'rank_brz.png';
   const si=subIdx===null?2:subIdx;
-  const cx=22,cy=25;
-  let deco='';
-  if(r.id==='brz'){
-    if(si>=1){deco+=`<path d="M14,2 L30,2 L40,10 L40,25 L32,30 L22,48 L12,30 L4,25 L4,10 Z" fill="none" stroke="${r.b3}" stroke-width="${si===1?1.2:2}" stroke-linejoin="round" opacity="${si===1?0.25:0.4}"/>`;}
-    if(si>=2){for(let i=0;i<3;i++){const angle=[-30,0,30][i]*Math.PI/180;const px=cx+Math.cos(angle-Math.PI/2)*26,py=cy+Math.sin(angle-Math.PI/2)*26;deco+=`<circle cx="${px}" cy="${py}" r="1" fill="${r.b3}" opacity="0.7"></circle>`;}}
-  }else if(r.id==='sil'){
-    const count=[3,7,12][si];const pts=[[3,8],[41,7],[1,26],[43,25],[5,44],[39,43],[22,-2],[10,16],[34,16],[6,35],[38,35],[22,54],[14,-1]];
-    for(let i=0;i<count;i++){const[px,py]=pts[i];deco+=`<circle cx="${px}" cy="${py}" r="${0.8+i%2*0.4}" fill="${r.b3}" opacity="0.7"></circle>`;}
-    if(si>=1){deco+=`<ellipse cx="${cx}" cy="${cy}" rx="21" ry="24.5" fill="none" stroke="${r.b3}" stroke-width="0.6" opacity="0.2"></ellipse>`;}
-    if(si>=2){deco+=`<line x1="${cx}" y1="-6" x2="${cx}" y2="2" stroke="${r.b3}" stroke-width="0.8" stroke-linecap="round" opacity="0.5"></line>`;}
-  }else if(r.id==='gold'){
-    const rings=si+1;for(let i=0;i<rings;i++){const rx2=20+i*3.5,ry2=23+i*4;deco+=`<ellipse cx="${cx}" cy="${cy}" rx="${rx2}" ry="${ry2}" fill="none" stroke="${r.b3}" stroke-width="${0.9-i*0.15}" opacity="${0.35-i*0.05}"></ellipse>`;}
-    if(si>=1){[[4,4],[40,4],[4,46],[40,46]].forEach(([px,py],i)=>{deco+=`<circle cx="${px}" cy="${py}" r="1.2" fill="${r.b3}" opacity="0.6"></circle>`;});}
-    if(si>=2){deco+=`<path d="M10,0 Q22,-5 34,0" fill="none" stroke="${r.b3}" stroke-width="1" stroke-linecap="round" opacity="0.45"></path>`;}
-  }else if(['plat','dia','mst','gm'].includes(r.id)){
-    const drawWing=(wx,wy,side,n,len,glowAlpha)=>{let g='';const spread=62*Math.PI/180;for(let i=0;i<n;i++){const t=i/(n-1);const rad=-Math.PI/2+t*spread;const l=len*(0.55+t*0.6);const dirx=-side*Math.cos(rad),diry=-Math.sin(rad);const tipx=dirx*l,tipy=diry*l;const w=l*0.15,wt=l*0.04;const px=-diry,py=dirx;const blx=px*w,bly=py*w,brx=-px*w,bry=-py*w;const tlx=tipx+px*wt,tly=tipy+py*wt,trx=tipx-px*wt,try_=tipy-py*wt;g+=`<path d="M${blx},${bly} L${tlx},${tly} L${tipx},${tipy} L${trx},${try_} L${brx},${bry} Z" fill="${r.b2}" stroke="${r.b3}" stroke-width="0.4" stroke-linejoin="miter" opacity="0.92"/>`;g+=`<line x1="0" y1="0" x2="${tipx*0.9}" y2="${tipy*0.9}" stroke="${r.b1}" stroke-width="0.3" opacity="0.55"/>`;if(glowAlpha>0){g+=`<line x1="${tipx*0.5}" y1="${tipy*0.5}" x2="${tipx*0.82}" y2="${tipy*0.82}" stroke="${r.b3}" stroke-width="0.55" stroke-linecap="butt" opacity="${glowAlpha}"/>`;}}return`<g transform="translate(${wx},${wy})">${g}</g>`;};
-    const baseCfgs={plat:{n:[4,5,7],len:[8,10,13],fy:30},dia:{n:[5,6,8],len:[10,13,16],fy:29},mst:{n:[6,7,9],len:[12,16,19],fy:28},gm:{n:[7,8,10],len:[14,19,22],fy:27}};
-    const bc=baseCfgs[r.id];const wn=bc.n[si],wlen=bc.len[si],fy=bc.fy;const glowAlpha=si===0?0:si===1?0.35:0.7;
-    const rowYOffsets=[0,-wlen*0.3,wlen*0.25];const rows=si+1;
-    for(let row=0;row<rows;row++){const ly=fy+rowYOffsets[row];const rowLen=row===0?wlen:wlen*0.72;const rowN=row===0?wn:Math.max(3,wn-2);deco+=drawWing(4,ly,1,rowN,rowLen,row===0?glowAlpha:glowAlpha*0.6);deco+=drawWing(40,ly,-1,rowN,rowLen,row===0?glowAlpha:glowAlpha*0.6);}
-    if(r.id==='plat'){if(si>=2){deco+=`<ellipse cx="${cx}" cy="${cy-4}" rx="18" ry="5" fill="none" stroke="${r.b3}" stroke-width="0.5" opacity="0.2"></ellipse>`;}}
-    else if(r.id==='dia'){if(si>=1)deco+=`<polygon points="${cx},-3 ${cx+2.5},0 ${cx},5 ${cx-2.5},0" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.5" opacity="0.9"></polygon>`;if(si>=2){deco+=`<polygon points="-3,20 0,24 -3,28 -6,24" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.4" opacity="0.8"/>`;deco+=`<polygon points="47,20 50,24 47,28 44,24" fill="${r.b3}" stroke="${r.b2}" stroke-width="0.4" opacity="0.8"/>`;}}
-    else if(r.id==='mst'){const hr=19+si*3;const hp=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i-Math.PI/6;return`${cx+Math.cos(a)*hr},${cy+Math.sin(a)*hr}`;}).join(' ');deco=`<polygon points="${hp}" fill="none" stroke="${r.b2}" stroke-width="${0.4+si*0.15}" opacity="${0.15+si*0.08}"></polygon>`+deco;if(si>=2){const hr2=hr+6;const hp2=Array.from({length:6},(_,i)=>{const a=Math.PI/3*i;return`${cx+Math.cos(a)*hr2},${cy+Math.sin(a)*hr2}`;}).join(' ');deco=`<polygon points="${hp2}" fill="none" stroke="${r.b3}" stroke-width="0.35" opacity="0.18"></polygon>`+deco;}}
-    else if(r.id==='gm'){const fc=si===0?3:si===1?5:7;for(let i=0;i<fc;i++){const fx=10+i*(24/(fc-1)),fh=4+Math.sin(i*1.1)*2;deco+=`<path d="M${fx},52 Q${fx-1.5},${49-fh} ${fx},${47-fh} Q${fx+1.5},${49-fh} ${fx},52" fill="${i%2?r.b2:r.b1}" opacity="${0.35+si*0.1}"></path>`;}if(si>=1){deco+=`<circle cx="${cx}" cy="${cy}" r="${21+si*2}" fill="none" stroke="${r.b1}" stroke-width="${0.6+si*0.3}" opacity="0.15"></circle>`;}const sc=si===0?2:si===1?4:6;for(let i=0;i<sc;i++){const sx=8+i*(28/(sc-1)),sy=-3+i%2*4;deco+=`<circle cx="${sx}" cy="${sy}" r="${0.7+si*0.15}" fill="${r.b3}"></circle>`;}}
-  }
-  const maxPips=3;const filledPips=subIdx===null?3:subIdx+1;let pips='';
-  {const sp=9,ox=22-(maxPips-1)*sp/2;for(let i=0;i<maxPips;i++){const pcx=ox+i*sp;const filled=i<filledPips;const fillCol=filled?r.b3:'rgba(255,255,255,0.12)';const strokeCol=filled?r.b1:'rgba(255,255,255,0.18)';pips+=`<polygon points="${pcx},40 ${pcx+1.6},43.2 ${pcx+5.5},43.2 ${pcx+2.5},45.2 ${pcx+3.4},48.5 ${pcx},46.3 ${pcx-3.4},48.5 ${pcx-2.5},45.2 ${pcx-5.5},43.2 ${pcx-1.6},43.2" fill="${fillCol}" stroke="${strokeCol}" stroke-width=".6"/>`;}}
-  const padMap={brz:[0,0,0,0],sil:[4,4,5,2],gold:[6,6,6,4],plat:[12,12,5,4],dia:[14,14,8,4],mst:[16,16,8,6],gm:[18,18,12,10]};
-  const[pl,pr,pt,pb]=padMap[r.id]||[0,0,0,0];const vbW=44+pl+pr,vbH=52+pt+pb;const ox=pl,oy=pt;const scale=sz/44;const svgW=Math.round(vbW*scale),svgH=Math.round(vbH*scale);
-  return`<svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${vbW} ${vbH}"><defs><linearGradient id="bg_${id}" x1="0%" y1="0%" x2="60%" y2="100%"><stop offset="0%" stop-color="${r.b1}"/><stop offset="55%" stop-color="${r.b2}"/><stop offset="100%" stop-color="${r.bg}"/></linearGradient><linearGradient id="sh_${id}" x1="10%" y1="0%" x2="90%" y2="100%"><stop offset="0%" stop-color="white" stop-opacity=".28"/><stop offset="100%" stop-color="white" stop-opacity="0"/></linearGradient><filter id="gf_${id}" x="-50%" y="-40%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><clipPath id="cl_${id}"><path d="M${14+ox},${2+oy} L${30+ox},${2+oy} L${40+ox},${10+oy} L${40+ox},${25+oy} L${32+ox},${30+oy} L${22+ox},${48+oy} L${12+ox},${30+oy} L${4+ox},${25+oy} L${4+ox},${10+oy} Z"/></clipPath></defs>${deco?`<g transform="translate(${ox},${oy})">${deco}</g>`:''}<g transform="translate(${ox},${oy})"><path d="M14,2 L30,2 L40,10 L40,25 L32,30 L22,48 L12,30 L4,25 L4,10 Z" fill="${r.b2}" opacity=".22" filter="url(#gf_${id})" transform="translate(0,3) scale(1.06,1.04) translate(-1.3,-1.3)"/><path d="M14,2 L30,2 L40,10 L40,25 L32,30 L22,48 L12,30 L4,25 L4,10 Z" fill="none" stroke="${r.b3}" stroke-width="3.5" stroke-linejoin="round" opacity=".9"/><path d="M14,2 L30,2 L40,10 L40,25 L32,30 L22,48 L12,30 L4,25 L4,10 Z" fill="none" stroke="${r.b1}" stroke-width="5.5" stroke-linejoin="round" opacity=".35"/><path d="M14,2 L30,2 L40,10 L40,25 L32,30 L22,48 L12,30 L4,25 L4,10 Z" fill="url(#bg_${id})"/><path d="M15.5,5.5 L28.5,5.5 L37,12 L37,24 L30,28 L22,45 L14,28 L7,24 L7,12 Z" fill="none" stroke="${r.b3}" stroke-width="1" opacity=".3"/><path d="M14,2 L30,2 L40,10 L40,25 L32,30 L22,48 L12,30 L4,25 L4,10 Z" fill="url(#sh_${id})" clip-path="url(#cl_${id})"/>${icons[r.icon]||''}${pips}<path d="M14,7 L22,4 L30,7" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity=".28"/></g></svg>`;
+  return RANK_IMG_BASE+`rank_${r.id}_${si+1}.png`;
 }
-const s2u=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
 
 /* ── PARTICLES (8bit文字) ── */
 (function(){
@@ -638,7 +601,7 @@ const s2u=s=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
 /* ── LEGEND ── */
 function buildLegend(){
   document.getElementById('rankLegend').innerHTML=RANKS.map(r=>{
-    const url=s2u(mkShield(r,34,2));
+    const url=mkShield(r,34,2);
     const next=RANKS[RANKS.indexOf(r)-1];
     const lbl=next?`${r.minPts}–${next.minPts-1} pt`:`${r.minPts}+ pt`;
     const name=lang==='jp'?r.jp:r.en;
@@ -648,8 +611,8 @@ function buildLegend(){
     const next=RANKS[RANKS.indexOf(r)-1];
     const lbl=next?`${r.minPts}–${next.minPts-1} pt`:`${r.minPts}+ pt`;
     const name=lang==='jp'?r.jp:r.en;
-    const miniShields=[2,1,0].map(si=>{const u=s2u(mkShield(r,22,si));const sn=r.subs[si][lang];return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><img src="${u}" width="22" style="height:26px;object-fit:contain"><span style="font-size:.45rem;color:${r.col};font-weight:800;opacity:.8">${sn}</span></div>`;}).join('');
-    return`<div class="rl-acc-item" style="border-color:${r.col}40"><img class="rl-acc-icon" src="${s2u(mkShield(r,32,2))}" alt="${name}"><div class="rl-acc-info"><div class="rl-acc-name" style="color:${r.col}">${name}</div><div class="rl-acc-range">${lbl}</div></div><div style="display:flex;gap:6px;align-items:flex-end">${miniShields}</div></div>`;
+    const miniShields=[2,1,0].map(si=>{const u=mkShield(r,22,si);const sn=r.subs[si][lang];return`<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><img src="${u}" width="22" style="height:26px;object-fit:contain"><span style="font-size:.45rem;color:${r.col};font-weight:800;opacity:.8">${sn}</span></div>`;}).join('');
+    return`<div class="rl-acc-item" style="border-color:${r.col}40"><img class="rl-acc-icon" src="${mkShield(r,32,2)}" alt="${name}"><div class="rl-acc-info"><div class="rl-acc-name" style="color:${r.col}">${name}</div><div class="rl-acc-range">${lbl}</div></div><div style="display:flex;gap:6px;align-items:flex-end">${miniShields}</div></div>`;
   }).join('');
 }
 
@@ -694,7 +657,7 @@ function renderTable(){
     const gr=start+li+1;
     const tc=gr===1?'top1':gr===2?'top2':gr===3?'top3':'topN';
     const rk=getRank(d.totalPoints);const subIdx=getSubTier(rk,d.totalPoints);
-    const url=s2u(mkShield(rk,44,subIdx));
+    const url=mkShield(rk,44,subIdx);
     const filledPips=subIdx+1;let pips='';
     for(let i=0;i<3;i++){const filled=i<filledPips;pips+=`<div class="stpip ${filled?'filled':'empty'}" style="background:${filled?rk.col:'var(--t3)'};${filled?`--pc:${rk.col}`:''}"></div>`;}
     const chips=[d.p1000?`<span class="chip c1000">1000+×${d.p1000}</span>`:'',d.p750?`<span class="chip c750">750+×${d.p750}</span>`:'',d.p500?`<span class="chip c500">500+×${d.p500}</span>`:'',d.p100?`<span class="chip c100">100+×${d.p100}</span>`:'',d.under100?`<span class="chip cu100">&lt;100×${d.under100}</span>`:''].join('');
@@ -726,7 +689,7 @@ function openModal(idx){
   currentModalName=d.name;
   const rk=getRank(d.totalPoints);const subIdx=getSubTier(rk,d.totalPoints);
   const rkName=lang==='jp'?rk.jp:rk.en;const subName=rk.subs[subIdx][lang];
-  const url=s2u(mkShield(rk,64,subIdx));
+  const url=mkShield(rk,64,subIdx);
   const pos=d.globalRank;const total=all.length;const pct=Math.round((1-(pos-1)/total)*100);
   const sameRank=all.filter(x=>getRank(x.totalPoints).id===rk.id);
   const posInRank=sameRank.findIndex(x=>x.name===d.name)+1;const totalInRank=sameRank.length;

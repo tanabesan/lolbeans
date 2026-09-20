@@ -358,6 +358,50 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 
 /* ── WIDE (Apex風) LAYOUT ── */
 .mh-banner-wide{text-align:center;padding:24px 26px 20px}
+.mh-banner-fire{
+  background-color:#150004;
+  background-image:url('https://tanabesan.github.io/lolbeans/community/file/rank_gm_fire.gif');
+  background-repeat:repeat-x;
+  background-position:bottom center;
+  background-size:auto 150%;
+  min-height:150px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.mh-banner-fire::before{display:none}
+.mh-banner-fire .mh-title-wide{padding-bottom:14px}
+.mh-banner-fire-mst{
+  background-color:#0a0016;
+  background-image:url('https://tanabesan.github.io/lolbeans/community/file/rank_mst_fire.gif');
+  background-repeat:repeat-x;
+  background-position:bottom center;
+  background-size:auto 150%;
+  min-height:150px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.mh-banner-fire-mst::before{display:none}
+.mh-banner-fire-mst .mh-title-wide{padding-bottom:14px}
+.mh-banner-fire-dia{
+  background-color:#000814;
+  background-image:url('https://tanabesan.github.io/lolbeans/community/file/rank_dia_fire.gif');
+  background-repeat:repeat-x;
+  background-position:bottom center;
+  background-size:auto 150%;
+  min-height:150px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.mh-banner-fire-dia::before{display:none}
+.mh-banner-fire-dia .mh-title-wide{padding-bottom:14px}
+.mh-banner-fire-plat{
+  background-color:#001408;
+  background-image:url('https://tanabesan.github.io/lolbeans/community/file/rank_plat_fire.gif');
+  background-repeat:repeat-x;
+  background-position:bottom center;
+  background-size:auto 150%;
+  min-height:150px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.mh-banner-fire-plat::before{display:none}
+.mh-banner-fire-plat .mh-title-wide{padding-bottom:14px}
 .mh-title-wide{display:inline-flex;flex-direction:column;align-items:center;gap:6px}
 .mh-title-wide .mh-name{font-size:clamp(.9rem,3vw,1.3rem)}
 .mw-grid{display:flex;align-items:flex-start;gap:32px}
@@ -754,7 +798,7 @@ function openModal(idx){
   document.getElementById('modalBox').style.setProperty('--pb1',rk.bg);
   document.getElementById('modalBox').style.setProperty('--pb2',rk.b1);
   document.getElementById('modalContent').innerHTML=`
-    <div class="mh-banner mh-banner-wide"><div class="mh-title-wide"><div class="mh-name">${esc(d.name)}</div><span class="mh-rank" style="background:${rk.col};color:#0b0715;box-shadow:0 2px 10px -2px ${rk.col}90">${rkName} ${subName}</span></div></div>
+    <div class="mh-banner mh-banner-wide${rk.id==='gm'?' mh-banner-fire':rk.id==='mst'?' mh-banner-fire-mst':rk.id==='dia'?' mh-banner-fire-dia':rk.id==='plat'?' mh-banner-fire-plat':''}"><div class="mh-title-wide"><div class="mh-name">${esc(d.name)}</div><span class="mh-rank" style="background:#0b0715;border:1px solid ${rk.col};color:${rk.col};opacity:1">${rkName} ${subName}</span></div></div>
     <div class="modal-inner mw">
     <div class="mw-grid">
       <div class="mw-side">

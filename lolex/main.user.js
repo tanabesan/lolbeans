@@ -2,7 +2,7 @@
 // @name         LOL.ex ver0.85
 // @namespace    http://tampermonkey.net/
 // @version      0.85
-// @description  LOLBeans extension
+// @description  LOLBeans extension - Added: Key/Mouse input display overlay (real keyboard layout)
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
 // @match        https://bean.lol/*
@@ -67,19 +67,6 @@
             { code: 'MouseRight',label: 'R' },
         ],
     };
-
-    const LOLEX_KEYS = [
-        'yt-videoId','yt-playlistId','yt-last-time','customBackgroundUrl','customBackgroundList',
-        'yt-is-visible','yt-loop','yt-shuffle','airMoveAutoSwitchEnabled','lolex-language',
-        'lolex-primary-color','lolex-secondary-color','yt-collapsed','yt-volume','yt-card-visible',
-        'lolex-yt-hotkey','lolex-yt-float-btn','lolex-keydisplay-enabled','lolex-keydisplay-keys','lolex-keydisplay-pos',
-    ];
-    ['beacon-bay','boulder-hill','circus-contest','devils-trick','dash-cup','escape-tsunami',
-     'gravity-gates','hammer-ville','jungle-temple','kittie-kegs','lava-lake','mecha-maze',
-     'mill-valley','monster-manor','polar-path','123-red-light','nasty-seals','rickety-run',
-     'risky-cliffs','shark-park','silly-slide','spiky-slopes','splash-dash','tumble-town',
-     'tricky-traps','ufo-attack'
-    ].forEach(id => LOLEX_KEYS.push('stopAirMove_' + id));
 
     // ------------------------------------------------------------------------------------------------
     //  ユーティリティ
@@ -548,10 +535,41 @@
         });
     }
 
-    async function saveTimesAsImage() {
-        const saveBtn = $('lb-save-btn');
-        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = t('bestTimesSaving'); }
+    // ── 共通化: ベストタイム取得 & 表示更新 ──
+    // displayEl に結果テキストを表示し、buttonEl の disabled/textContent を制御する
+    function fetchAndDisplayBestTimes(displayEl, buttonEl) {
+        const sessionId = getSessionId();
+        const setState = (text, color) => { if (displayEl) { displayEl.textContent = text; displayEl.style.color = color; } };
 
+        if (!sessionId) { setState(t('bestTimesNoSession'), '#f87171'); return; }
+
+        if (buttonEl) { buttonEl.disabled = true; buttonEl.textContent = t('bestTimesLoading'); }
+        setState(t('bestTimesLoading'), '#94a3b8');
+
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: `https://s.lolbeans.io/my-stats?s=${encodeURIComponent(sessionId)}`,
+            onload: (res) => {
+                if (buttonEl) { buttonEl.disabled = false; buttonEl.textContent = t('bestTimesCalc'); }
+                if (res.status !== 200) { setState(`${t('bestTimesError')} HTTP ${res.status}`, '#f87171'); return; }
+                let json;
+                try { json = JSON.parse(res.responseText); } catch { setState(t('bestTimesError'), '#f87171'); return; }
+                if (!json.records || !Array.isArray(json.records)) { setState(t('bestTimesError'), '#f87171'); return; }
+                const best  = getBestTimes(json.records);
+                const total = Object.values(best).reduce((s, d) => s + d.time, 0);
+                const count = Object.keys(best).length;
+                setState(`${t('bestTimesTotal')}: ${total.toFixed(3)}s（${count} maps）`, '#4ade80');
+            },
+            onerror: () => {
+                if (buttonEl) { buttonEl.disabled = false; buttonEl.textContent = t('bestTimesCalc'); }
+                setState(t('bestTimesError'), '#f87171');
+            },
+        });
+    }
+
+    // ── 共通化: サムネイル付きベストタイム画像を生成してダウンロード ──
+    // totalText には表示中の合計テキスト (displayEl.textContent 相当) を渡す
+    async function renderBestTimesImage(totalText) {
         const thumbs = collectThumbnails();
         const COLS = 4, CARD_W = 200, CARD_H = 130, THUMB_H = 90, PAD = 12, HEADER_H = 60, FOOTER_H = 50;
         const ROWS = Math.ceil(thumbs.length / COLS);
@@ -567,12 +585,11 @@
         ctx.fillStyle = '#fff'; ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'center';
         ctx.fillText('🏆 LolBeans Best Times', W / 2, 38);
 
-        const totalText = $('lb-total-display')?.textContent || '';
         ctx.fillStyle = '#0f172a'; ctx.fillRect(0, H - FOOTER_H, W, FOOTER_H);
         ctx.fillStyle = '#4ade80'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
         ctx.fillText(totalText || '---', W / 2, H - 16);
 
-        const images = await Promise.all(thumbs.map(t => t.imgSrc ? loadImage(t.imgSrc) : Promise.resolve(null)));
+        const images = await Promise.all(thumbs.map(th => th.imgSrc ? loadImage(th.imgSrc) : Promise.resolve(null)));
 
         thumbs.forEach((thumb, i) => {
             const col = i % COLS, row = Math.floor(i / COLS);
@@ -598,54 +615,17 @@
         link.download = 'lolbeans-best-times.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
+    }
 
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = t('bestTimesSave'); }
+    // ── 共通化: 保存ボタンのクリックハンドラ本体 (disabled/textContent制御込み) ──
+    async function saveTimesAsImage(buttonEl, totalText) {
+        if (buttonEl) { buttonEl.disabled = true; buttonEl.textContent = t('bestTimesSaving'); }
+        await renderBestTimesImage(totalText);
+        if (buttonEl) { buttonEl.disabled = false; buttonEl.textContent = t('bestTimesSave'); }
     }
 
     function fetchBestTimes() {
-        const calcBtn   = $('lb-calc-btn');
-        const resultDiv = $('lb-total-display');
-        const sessionId = getSessionId();
-
-        if (!sessionId) {
-            if (resultDiv) { resultDiv.textContent = t('bestTimesNoSession'); resultDiv.style.color = '#f87171'; }
-            return;
-        }
-
-        if (calcBtn) { calcBtn.disabled = true; calcBtn.textContent = t('bestTimesLoading'); }
-        if (resultDiv) { resultDiv.textContent = t('bestTimesLoading'); resultDiv.style.color = '#94a3b8'; }
-
-        GM_xmlhttpRequest({
-            method: 'GET',
-            url: `https://s.lolbeans.io/my-stats?s=${encodeURIComponent(sessionId)}`,
-            onload: (res) => {
-                if (calcBtn) { calcBtn.disabled = false; calcBtn.textContent = t('bestTimesCalc'); }
-                if (res.status !== 200) {
-                    if (resultDiv) { resultDiv.textContent = `${t('bestTimesError')} HTTP ${res.status}`; resultDiv.style.color = '#f87171'; }
-                    return;
-                }
-                let json;
-                try { json = JSON.parse(res.responseText); } catch {
-                    if (resultDiv) { resultDiv.textContent = t('bestTimesError'); resultDiv.style.color = '#f87171'; }
-                    return;
-                }
-                if (!json.records || !Array.isArray(json.records)) {
-                    if (resultDiv) { resultDiv.textContent = t('bestTimesError'); resultDiv.style.color = '#f87171'; }
-                    return;
-                }
-                const best  = getBestTimes(json.records);
-                const total = Object.values(best).reduce((s, d) => s + d.time, 0);
-                const count = Object.keys(best).length;
-                if (resultDiv) {
-                    resultDiv.textContent = `${t('bestTimesTotal')}: ${total.toFixed(3)}s（${count} maps）`;
-                    resultDiv.style.color = '#4ade80';
-                }
-            },
-            onerror: () => {
-                if (calcBtn) { calcBtn.disabled = false; calcBtn.textContent = t('bestTimesCalc'); }
-                if (resultDiv) { resultDiv.textContent = t('bestTimesError'); resultDiv.style.color = '#f87171'; }
-            },
-        });
+        fetchAndDisplayBestTimes($('lb-total-display'), $('lb-calc-btn'));
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -1470,7 +1450,7 @@
         $('ytLoopToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.LOOP, e.target.checked); try { if (player) player.setLoop(e.target.checked); } catch (_) {} });
         $('ytShuffleToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.SHUFFLE, e.target.checked); });
         $('lb-calc-btn')?.addEventListener('click', fetchBestTimes);
-        $('lb-save-btn')?.addEventListener('click', saveTimesAsImage);
+        $('lb-save-btn')?.addEventListener('click', () => { saveTimesAsImage($('lb-save-btn'), $('lb-total-display')?.textContent || ''); });
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -1524,12 +1504,17 @@
         _nextRoundObserver.observe(document.body, { childList: true, subtree: true });
     }
 
+    // ── 共通化: YouTubeホットキー設定の取得 ──
+    function getHotkeyConfig() {
+        const stored = localStorage.getItem(STORAGE.YT_HOTKEY);
+        return stored ? JSON.parse(stored) : { key: 'm', ctrlKey: true, altKey: false, shiftKey: false };
+    }
+
     let _hotkeyHandler = null;
     function setupHotkey() { applyHotkey(); }
     function applyHotkey() {
         if (_hotkeyHandler) { document.removeEventListener('keydown', _hotkeyHandler, { capture: true }); window.removeEventListener('keydown', _hotkeyHandler, { capture: true }); _hotkeyHandler = null; }
-        const stored = localStorage.getItem(STORAGE.YT_HOTKEY);
-        const cfg = stored ? JSON.parse(stored) : { key: 'm', ctrlKey: true, altKey: false, shiftKey: false };
+        const cfg = getHotkeyConfig();
         _hotkeyHandler = (e) => {
             const match = e.key.toLowerCase() === cfg.key.toLowerCase() && !!e.ctrlKey === !!cfg.ctrlKey && !!e.altKey === !!cfg.altKey && !!e.shiftKey === !!cfg.shiftKey;
             if (!match) return;
@@ -1540,8 +1525,7 @@
     }
 
     function hotkeyLabel() {
-        const stored = localStorage.getItem(STORAGE.YT_HOTKEY);
-        const cfg = stored ? JSON.parse(stored) : { key: 'm', ctrlKey: true, altKey: false, shiftKey: false };
+        const cfg = getHotkeyConfig();
         const mods = [cfg.ctrlKey ? 'Ctrl' : '', cfg.altKey ? 'Alt' : '', cfg.shiftKey ? 'Shift' : ''].filter(Boolean);
         return [...mods, cfg.key.toUpperCase()].join('+') || t('ytHotkeyNone');
     }
@@ -1605,61 +1589,10 @@
             panel.appendChild(totalEl);
         }
 
-        calcBtn.addEventListener('click', () => {
-            const sessionId = getSessionId();
-            if (!sessionId) { totalEl.style.color = '#f87171'; totalEl.textContent = t('bestTimesNoSession'); return; }
-            calcBtn.disabled = true; calcBtn.textContent = t('bestTimesLoading');
-            totalEl.style.color = '#94a3b8'; totalEl.textContent = t('bestTimesLoading');
-            GM_xmlhttpRequest({
-                method: 'GET',
-                url: `https://s.lolbeans.io/my-stats?s=${encodeURIComponent(sessionId)}`,
-                onload: (res) => {
-                    calcBtn.disabled = false; calcBtn.textContent = t('bestTimesCalc');
-                    if (res.status !== 200) { totalEl.style.color = '#f87171'; totalEl.textContent = `${t('bestTimesError')} HTTP ${res.status}`; return; }
-                    let json; try { json = JSON.parse(res.responseText); } catch { totalEl.style.color = '#f87171'; totalEl.textContent = t('bestTimesError'); return; }
-                    if (!json.records || !Array.isArray(json.records)) { totalEl.style.color = '#f87171'; totalEl.textContent = t('bestTimesError'); return; }
-                    const best  = getBestTimes(json.records);
-                    const total = Object.values(best).reduce((s, d) => s + d.time, 0);
-                    totalEl.style.color = '#4ade80';
-                    totalEl.textContent = `${t('bestTimesTotal')}: ${total.toFixed(3)}s（${Object.keys(best).length} maps）`;
-                },
-                onerror: () => { calcBtn.disabled = false; calcBtn.textContent = t('bestTimesCalc'); totalEl.style.color = '#f87171'; totalEl.textContent = t('bestTimesError'); },
-            });
-        });
+        calcBtn.addEventListener('click', () => { fetchAndDisplayBestTimes(totalEl, calcBtn); });
 
         saveBtn.addEventListener('click', () => {
-            saveBtn.disabled = true; saveBtn.textContent = t('bestTimesSaving');
-            // collectThumbnails / saveTimesAsImage を流用（lb-total-display の代わりに lb-profile-total を参照）
-            (async () => {
-                const thumbs = collectThumbnails();
-                const COLS=4,CARD_W=200,CARD_H=130,THUMB_H=90,PAD=12,HEADER_H=60,FOOTER_H=50;
-                const ROWS=Math.ceil(thumbs.length/COLS);
-                const W=COLS*CARD_W+(COLS+1)*PAD, H=HEADER_H+ROWS*(CARD_H+PAD)+PAD+FOOTER_H;
-                const canvas=document.createElement('canvas'); canvas.width=W; canvas.height=H;
-                const ctx=canvas.getContext('2d');
-                ctx.fillStyle='#1e293b'; ctx.fillRect(0,0,W,H);
-                ctx.fillStyle='#f97316'; ctx.fillRect(0,0,W,HEADER_H);
-                ctx.fillStyle='#fff'; ctx.font='bold 22px sans-serif'; ctx.textAlign='center';
-                ctx.fillText('🏆 LolBeans Best Times',W/2,38);
-                const totalText = totalEl.textContent || '';
-                ctx.fillStyle='#0f172a'; ctx.fillRect(0,H-FOOTER_H,W,FOOTER_H);
-                ctx.fillStyle='#4ade80'; ctx.font='bold 18px sans-serif'; ctx.textAlign='center';
-                ctx.fillText(totalText||'---',W/2,H-16);
-                const images=await Promise.all(thumbs.map(th=>th.imgSrc?loadImage(th.imgSrc):Promise.resolve(null)));
-                thumbs.forEach((thumb,i)=>{
-                    const col=i%COLS,row=Math.floor(i/COLS);
-                    const x=PAD+col*(CARD_W+PAD),y=HEADER_H+PAD+row*(CARD_H+PAD);
-                    ctx.fillStyle='#334155'; roundRect(ctx,x,y,CARD_W,CARD_H,8); ctx.fill();
-                    const img=images[i];
-                    if(img){ctx.save();roundRect(ctx,x,y,CARD_W,THUMB_H,8);ctx.clip();const scale=Math.max(CARD_W/img.width,THUMB_H/img.height);ctx.drawImage(img,x+(CARD_W-img.width*scale)/2,y+(THUMB_H-img.height*scale)/2,img.width*scale,img.height*scale);ctx.restore();}
-                    else{ctx.fillStyle='#475569';ctx.fillRect(x,y,CARD_W,THUMB_H);}
-                    ctx.fillStyle='rgba(15,23,42,0.85)';ctx.fillRect(x,y+THUMB_H,CARD_W,CARD_H-THUMB_H);
-                    ctx.fillStyle='#e2e8f0';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(thumb.name,x+CARD_W/2,y+THUMB_H+16,CARD_W-8);
-                    ctx.fillStyle='#fbbf24';ctx.font='13px monospace';ctx.fillText(thumb.time,x+CARD_W/2,y+THUMB_H+34,CARD_W-8);
-                });
-                const link=document.createElement('a'); link.download='lolbeans-best-times.png'; link.href=canvas.toDataURL('image/png'); link.click();
-                saveBtn.disabled=false; saveBtn.textContent=t('bestTimesSave');
-            })();
+            saveTimesAsImage(saveBtn, totalEl.textContent || '');
         });
     }
 

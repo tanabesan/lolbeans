@@ -20,7 +20,7 @@
 <meta name="twitter:description" content="LOLBeans コミュニティ WR ランキング。ワールドレコード保持者のポイント・階級を一覧で確認！">
 <meta name="twitter:image" content="https://tanabesan.github.io/lolbeans/file/page/ogp.png">
 <link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link id="ms-font-link" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -269,7 +269,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);
   width:100%;max-width:960px;padding:0;position:relative;
   transform:translateY(20px) scale(.96);transition:transform .28s cubic-bezier(.175,.885,.32,1.275);
-  max-height:min(88vh,88dvh);
+  max-height:min(94vh,94dvh);
   display:flex;flex-direction:column;
 }
 .modal-overlay{padding:2.2rem 1rem}
@@ -302,7 +302,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .modal-dl:hover{background:var(--pc);color:#0b0715;box-shadow:0 0 10px var(--pg)}
 .modal-dl.busy{animation:sp .8s linear infinite}
 .modal.capturing .modal-close,.modal.capturing .modal-dl,.modal.capturing .modal-actions,.modal.capturing .modal-corner{visibility:hidden}
-.modal-inner{padding:24px 22px 0}
+.modal-inner{padding:16px 22px 14px}
 
 /* modal header */
 .mh-banner{
@@ -326,7 +326,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .mh-rank{font-family:var(--ffh);font-size:.42rem;padding:3px 9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;display:inline-block;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
 
 /* rank position bar */
-.rank-pos-wrap{margin-bottom:16px}
+.rank-pos-wrap{margin-bottom:10px}
 .rp-label{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
 .rp-bar-bg{background:var(--edge);border:1px solid var(--line2);height:14px;overflow:visible;position:relative;margin-bottom:20px;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
 .rp-bar-track{position:absolute;inset:0;overflow:hidden;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
@@ -341,16 +341,16 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 
 /* sub-tier */
 .stier-wrap{margin-bottom:16px}
-.stier-title{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.stier-title{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
 .stier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.stier-card{background:var(--edge);border:1px solid var(--line2);padding:8px 6px;text-align:center;transition:border-color .2s;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.stier-card{background:var(--edge);border:1px solid var(--line2);padding:5px 6px;text-align:center;transition:border-color .2s;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
 .stier-card.current{border-color:var(--pc,#fff);box-shadow:2px 2px 0 var(--pc,#fff),0 0 10px -2px var(--pg)}
 .stier-card-name{font-family:var(--ffh);font-size:.5rem;letter-spacing:.03em}
 .stier-card-range{font-size:.55rem;opacity:.5;margin-top:2px}
 .stier-card-you{font-family:var(--ffh);font-size:.42rem;font-weight:800;margin-top:4px;color:var(--acc)}
 
 /* stats grid */
-.mstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.mstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
 .mstat{background:var(--edge);border:1px solid var(--line2);border-left:3px solid var(--pc);padding:10px 12px;position:relative;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
 .mstat-lbl{font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
 .mstat-val{font-family:var(--ffh);font-size:1.05rem;text-shadow:0 0 10px var(--pg)}
@@ -364,7 +364,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   background-repeat:repeat-x;
   background-position:bottom center;
   background-size:auto 150%;
-  min-height:150px;
+  min-height:100px;
   display:flex;align-items:flex-end;justify-content:center;
 }
 .mh-banner-fire::before{display:none}
@@ -375,7 +375,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   background-repeat:repeat-x;
   background-position:bottom center;
   background-size:auto 150%;
-  min-height:150px;
+  min-height:100px;
   display:flex;align-items:flex-end;justify-content:center;
 }
 .mh-banner-fire-mst::before{display:none}
@@ -386,7 +386,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   background-repeat:repeat-x;
   background-position:bottom center;
   background-size:auto 150%;
-  min-height:150px;
+  min-height:100px;
   display:flex;align-items:flex-end;justify-content:center;
 }
 .mh-banner-fire-dia::before{display:none}
@@ -397,7 +397,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   background-repeat:repeat-x;
   background-position:bottom center;
   background-size:auto 150%;
-  min-height:150px;
+  min-height:100px;
   display:flex;align-items:flex-end;justify-content:center;
 }
 .mh-banner-fire-plat::before{display:none}
@@ -406,30 +406,30 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .mh-title-wide .mh-name{font-size:clamp(.9rem,3vw,1.3rem)}
 .mw-grid{display:flex;align-items:flex-start;gap:32px}
 .mw-side{width:200px;flex-shrink:0;text-align:center}
-.mw-shield-big{height:130px;width:auto;object-fit:contain;margin-bottom:10px}
+.mw-shield-big{height:92px;width:auto;object-fit:contain;margin-bottom:6px}
 .mw-rankname{font-family:var(--ffh);font-size:.62rem;letter-spacing:.03em;margin-top:4px}
 .mw-subname{font-size:.7rem;color:var(--t2);font-weight:700;margin-top:4px}
-.mw-stier{margin-top:20px;text-align:left}
+.mw-stier{margin-top:12px;text-align:left}
 .mw-stier .stier-grid{grid-template-columns:1fr;gap:6px}
 .mw-main{flex:1;min-width:0}
-.mw-circles{display:flex;gap:22px;margin-bottom:22px;flex-wrap:wrap}
+.mw-circles{display:flex;gap:18px;margin-bottom:14px;flex-wrap:wrap}
 .mw-circle{
-  --cc:var(--acc3);width:150px;height:150px;border-radius:50%;flex-shrink:0;
+  --cc:var(--acc3);width:118px;height:118px;border-radius:50%;flex-shrink:0;
   border:3px solid var(--cc);display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.06),transparent 70%);
-  box-shadow:0 0 26px -6px var(--cc),inset 0 0 18px -8px var(--cc);
+  background:rgba(255,255,255,.06);
+  box-shadow:0 0 20px -6px var(--cc);
 }
 .mw-circle-lbl{font-family:var(--ffh);font-size:.4rem;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
-.mw-circle-val{font-family:var(--ffh);font-size:1.6rem;color:var(--cc);text-shadow:0 0 16px var(--cc)}
+.mw-circle-val{font-family:var(--ffh);font-size:1.25rem;color:var(--cc);text-shadow:0 0 16px var(--cc)}
 .mw-mstats{grid-template-columns:repeat(2,1fr);margin-top:4px}
 @media(min-width:761px){.mw-mstats{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:760px){
-  .mw-grid{flex-direction:column;align-items:center;gap:20px}
+  .mw-grid{flex-direction:column;align-items:center;gap:14px}
   .mw-side{width:100%}
   .mw-side .stier-grid{grid-template-columns:repeat(3,1fr)}
   .mw-circles{justify-content:center}
-  .mw-circle{width:120px;height:120px}
-  .mw-circle-val{font-size:1.25rem}
+  .mw-circle{width:110px;height:110px}
+  .mw-circle-val{font-size:1.15rem}
 }
 
 /* calc section */
@@ -813,7 +813,6 @@ function openModal(idx){
           <div class="mw-circle" style="--cc:var(--acc3)"><div class="mw-circle-lbl">${t?'WR数':'WR Count'}</div><div class="mw-circle-val">${d.wrCount}</div></div>
         </div>
         <div class="rank-pos-wrap"><div class="rp-label">${t?'全体順位':'Overall Ranking'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div></div></div><div class="rp-pct">${t?`全${total}人中 ${pos}位 (上位${100-pct}%)`:`#${pos} of ${total} players (Top ${100-pct}%)`}</div></div>
-        <div class="rank-pos-wrap"><div class="rp-label">${t?'次のランクまで':'Progress to Next Rank'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${progressPct}%;background:linear-gradient(90deg,${rk.b2},${rk.b3})"></div>${divHtml}</div>${tipHtml}</div>${segLblHtml}<div class="rp-pct">${nextRank?(t?`${d.totalPoints}pt / ${nextMin}pt (あと ${nextMin-d.totalPoints}pt)`:`${d.totalPoints}pt / ${nextMin}pt (${nextMin-d.totalPoints}pt to go)`):(t?'最高ランク到達！':'Max Rank Achieved!')}</div></div>
         ${gradeBarHtml}
         <div class="mstats mw-mstats"><div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div><div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div></div>
         ${chips?`<div class="mchips">${chips}</div>`:''}
@@ -839,7 +838,12 @@ function downloadModalCard(){
   modal.style.maxHeight='none';
   scroller.style.overflow='visible';
   scroller.style.maxHeight='none';
-  html2canvas(modal,{backgroundColor:'#0d0e17',scale:2,useCORS:true}).then(canvas=>{
+  // Material Symbols(可変フォント)がhtml2canvasの文字マッチングを狂わせ、
+  // 数値テキストがアイコン化するバグがあるため、キャプチャ中だけ無効化する
+  const msLink=document.getElementById('ms-font-link');
+  const msWasEnabled=msLink&&!msLink.disabled;
+  if(msLink)msLink.disabled=true;
+  const runCapture=()=>html2canvas(modal,{backgroundColor:'#0d0e17',scale:2,useCORS:true}).then(canvas=>{
     const a=document.createElement('a');
     a.download=`${currentModalName}_profile.png`;
     a.href=canvas.toDataURL('image/png');
@@ -848,12 +852,17 @@ function downloadModalCard(){
     console.error(err);
     alert(lang==='jp'?'画像の生成に失敗しました':'Failed to generate image');
   }).finally(()=>{
+    if(msLink&&msWasEnabled)msLink.disabled=false;
     modal.style.maxHeight=prevMaxH;
     scroller.style.maxHeight=prevScrollMaxH;
     scroller.style.overflow=prevOverflow;
     modal.classList.remove('capturing');
     btn.classList.remove('busy');
   });
+  // フォント無効化とレイアウト再計算が確実に反映されてからキャプチャする
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve())
+    .then(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))))
+    .then(runCapture);
 }
 
 /* ── PAGER ── */

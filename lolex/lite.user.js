@@ -12,8 +12,8 @@
 // @grant        GM_xmlhttpRequest
 // @connect      s.lolbeans.io
 // @run-at       document-start
-// @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
-// @downloadURL  https://tanabesan.github.io/lolbeans/lolex//main.user.js
+// @updateURL    https://tanabesan.github.io/lolbeans/lolex/lite.user.js
+// @downloadURL  https://tanabesan.github.io/lolbeans/lolex/lite.user.js
 // ==/UserScript==
 
 (function () {

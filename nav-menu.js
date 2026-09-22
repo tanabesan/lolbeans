@@ -9,9 +9,32 @@
  * 対応する値: home, lolex, community, ranking, template, block-forge,
  *            file-library, submit, faq, contact,
  *            lolrank-home, lolrank-vote, lolrank-ranking, lolrank-submit
+ *
+ * ── 言語切り替え（サイト全体共有） ──
+ * 画面右上に EN/JP トグルボタンを自動で表示します。選択した言語は
+ * localStorage に保存され、サイト内のどのページに移動しても引き継がれます。
+ *
+ * ページ側で言語切り替えに対応させたい場合は、そのページのスクリプト内に
+ * グローバル関数 `setLang(lang)` を定義してください（lang は 'jp' か 'en'）。
+ * nav-menu.js はページ読み込み時・トグル操作時に自動で `window.setLang(lang)`
+ * を呼び出します（すでに ranking.html はこの方式に対応済み）。
+ *
+ * setLang() を持たないページでも、以下のいずれかの方法で言語変更を検知できます:
+ *   - document.addEventListener('lolbeans:langchange', e => { e.detail.lang })
+ *   - window.lolbeansGetLang() で現在の言語（'jp'/'en'）を取得
  */
 (function () {
     const BASE = "https://tanabesan.github.io/lolbeans/";
+    const LANG_KEY = "lolbeans-lang";
+
+    function getStoredLang() {
+        try { return localStorage.getItem(LANG_KEY) || "jp"; }
+        catch (e) { return "jp"; }
+    }
+    function storeLang(l) {
+        try { localStorage.setItem(LANG_KEY, l); }
+        catch (e) { /* localStorage不可の環境は無視 */ }
+    }
 
     const links = [
         { id: "home", group: "ホーム", items: [
@@ -91,6 +114,36 @@
         }
         .nav-menu-overlay.open { opacity: 1; pointer-events: auto; }
 
+        .nav-lang-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            height: 46px;
+            min-width: 46px;
+            padding: 0 16px;
+            background-color: rgba(23, 26, 41, 0.92);
+            border: 2px solid var(--panel-line, #2c3044);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            z-index: 1100;
+            color: var(--accent2, #00ffff);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+        }
+        .nav-lang-toggle:hover {
+            border-color: var(--accent, #ff00ff);
+            color: var(--accent, #ff00ff);
+            box-shadow: 0 0 12px rgba(255,0,255,0.35);
+        }
+        .nav-lang-toggle .material-symbols-outlined,
+        .nav-lang-toggle .ms { font-size: 16px; }
+
         .nav-side-menu {
             position: fixed;
             top: 0;
@@ -134,6 +187,7 @@
         }
         @media (max-width: 768px) {
             .nav-side-menu { width: 220px; }
+            .nav-lang-toggle { top: 16px; right: 12px; height: 40px; min-width: 40px; padding: 0 12px; font-size: 11px; }
         }
     `;
 
@@ -156,11 +210,27 @@
                     <span class="bar"></span>
                 </div>
             </div>
+            <div class="nav-lang-toggle" id="nav-lang-toggle" title="Language / 言語切替">
+                <span id="nav-lang-toggle-label">EN</span>
+            </div>
             <div class="nav-menu-overlay" id="nav-menu-overlay"></div>
             <nav class="nav-side-menu" id="nav-side-menu">
                 ${linksHtml}
             </nav>
         `;
+    }
+
+    function applyLang(l, opts) {
+        opts = opts || {};
+        storeLang(l);
+        const label = document.getElementById('nav-lang-toggle-label');
+        if (label) label.textContent = l === 'jp' ? 'EN' : 'JP';
+        if (typeof window.setLang === 'function') {
+            window.setLang(l);
+        }
+        if (!opts.silent) {
+            document.dispatchEvent(new CustomEvent('lolbeans:langchange', { detail: { lang: l } }));
+        }
     }
 
     function init() {
@@ -178,6 +248,7 @@
         const toggle = document.getElementById('nav-menu-toggle');
         const overlay = document.getElementById('nav-menu-overlay');
         const sideMenu = document.getElementById('nav-side-menu');
+        const langToggle = document.getElementById('nav-lang-toggle');
 
         toggle.addEventListener('click', () => {
             const isOpen = sideMenu.classList.toggle('open');
@@ -189,6 +260,17 @@
             overlay.classList.remove('open');
             toggle.classList.remove('open');
         });
+        langToggle.addEventListener('click', () => {
+            const next = getStoredLang() === 'jp' ? 'en' : 'jp';
+            applyLang(next);
+        });
+
+        // ページ読み込み時、保存済みの言語設定を反映
+        // (このページ独自の初期表示が終わったあとに上書きするため silent で適用)
+        applyLang(getStoredLang(), { silent: true });
+
+        window.lolbeansGetLang = getStoredLang;
+        window.lolbeansSetLang = applyLang;
     }
 
     if (document.readyState === 'loading') {

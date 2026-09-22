@@ -141,11 +141,41 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 }
 @keyframes eventBolt{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(-8deg) scale(1.15)}}
 
+.event-banner-preview{position:relative;z-index:10;display:flex;justify-content:center;padding:0 1rem 1rem}
+.event-banner-preview-inner{
+  display:flex;align-items:center;gap:12px;width:100%;max-width:420px;
+  background:linear-gradient(160deg,var(--panel),var(--bg2));border:2px solid var(--acc4);
+  box-shadow:2px 2px 0 var(--edge);padding:8px 16px 8px 8px;cursor:pointer;transition:transform .15s;
+}
+.event-banner-preview-inner:hover{transform:translateY(-2px)}
+.event-banner-preview-thumb{
+  width:54px;height:54px;flex-shrink:0;background-size:cover;background-position:center;
+  background-color:var(--bg2);border:2px solid var(--acc4);position:relative;overflow:hidden;
+}
+.event-banner-preview-thumb::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 3px);
+}
+.event-banner-preview-info{flex:1;min-width:0}
+.event-banner-preview-label{font-size:.48rem;color:var(--t3);font-weight:700;letter-spacing:.05em}
+.event-banner-preview-name{
+  font-family:var(--ffh);font-size:.58rem;color:var(--acc4);margin-top:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
 .event-rule{max-width:640px;margin:0 auto 1.6rem;text-align:center;font-size:.72rem;line-height:1.7;color:var(--t2)}
 .event-card-list{display:flex;flex-direction:column;gap:12px;max-width:640px;margin:0 auto}
 .event-card{
   background:linear-gradient(160deg,var(--panel),var(--bg2));border:2px solid var(--acc4);
   padding:16px 18px;box-shadow:3px 3px 0 var(--edge);
+}
+.event-card-thumb{
+  width:100%;height:120px;background-size:cover;background-position:center;
+  background-color:var(--bg2);border:2px solid var(--acc4);position:relative;overflow:hidden;margin-bottom:12px;
+}
+.event-card-thumb::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px);
 }
 .event-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
 .event-card-name{font-family:var(--ffh);font-size:.6rem;color:var(--acc4);line-height:1.5}
@@ -612,6 +642,7 @@ body.eco .logo-sub::after{content:''}
     <span id="eventBannerText">イベント発生中！</span>
   </button>
 </div>
+<div class="event-banner-preview" id="eventBannerPreview" style="display:none"></div>
 
 <div class="info-toggle-wrap">
   <button class="info-toggle-btn" onclick="sfx('click');openInfoOverlay()">
@@ -687,6 +718,7 @@ body.eco .logo-sub::after{content:''}
 
 <script>
 const GAS='https://script.google.com/macros/s/AKfycby5v7E6_690eu6Lag2Kfe1_3YT09yeAzoSLjMDYldGBmClnjWtjFdILs2cnNCHs8GKraQ/exec';
+const THUMB_URL='https://lolbeans.io/ui/level-thumbnails/';
 const PG=30;
 let all=[],fil=[],sort='pts',pg=1,lang='jp';
 let ecoMode=localStorage.getItem('ecoMode')==='1';
@@ -756,6 +788,7 @@ function setLang(l){
       ?(activeEvents.length>1?`イベント発生中！（${activeEvents.length}件）`:'イベント発生中！')
       :(activeEvents.length>1?`Event Active! (${activeEvents.length})`:'Event Active!');
   if(document.getElementById('eventOverlay').classList.contains('open'))renderEventCards();
+  if(activeEvents.length>0)renderEventPreview();
   renderTable();
 }
 
@@ -838,15 +871,34 @@ async function checkActiveEvents(){
     activeEvents=[];
   }
   const wrap=document.getElementById('eventBannerWrap');
+  const preview=document.getElementById('eventBannerPreview');
   if(activeEvents.length>0){
     document.getElementById('eventBannerText').textContent=
       lang==='jp'
         ?(activeEvents.length>1?`イベント発生中！（${activeEvents.length}件）`:'イベント発生中！')
         :(activeEvents.length>1?`Event Active! (${activeEvents.length})`:'Event Active!');
     wrap.style.display='flex';
+    renderEventPreview();
+    preview.style.display='flex';
   }else{
     wrap.style.display='none';
+    preview.style.display='none';
+    preview.innerHTML='';
   }
+}
+
+function renderEventPreview(){
+  const preview=document.getElementById('eventBannerPreview');
+  if(!activeEvents.length){preview.innerHTML='';return;}
+  const ev=activeEvents[0];
+  const th=`${THUMB_URL}${ev.levelId}.png`;
+  preview.innerHTML=`<div class="event-banner-preview-inner" onclick="sfx('open');openEventModal()">
+    <div class="event-banner-preview-thumb" style="background-image:url('${th}')"></div>
+    <div class="event-banner-preview-info">
+      <div class="event-banner-preview-label">${lang==='jp'?'対象コース':'Target Course'}</div>
+      <div class="event-banner-preview-name">${esc(ev.levelName||'')}</div>
+    </div>
+  </div>`;
 }
 
 function formatCountdown(deadlineIso){
@@ -874,6 +926,7 @@ function renderEventCards(){
       ?`<span class="event-card-badge updated">${lang==='jp'?'更新済み！':'Updated!'}</span>`
       :`<span class="event-card-badge">${lang==='jp'?'挑戦中':'In Progress'}</span>`;
     return`<div class="event-card">
+      <div class="event-card-thumb" style="background-image:url('${THUMB_URL}${ev.levelId}.png')"></div>
       <div class="event-card-top">
         <div class="event-card-name">${esc(ev.levelName||'')}${ev.author?`<div style="font-size:.55rem;color:var(--t3);font-weight:700;margin-top:4px">by ${esc(ev.author)} ・ ${courseTypeLabel(ev.type)}</div>`:''}</div>
         ${badge}

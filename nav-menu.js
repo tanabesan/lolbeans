@@ -114,35 +114,41 @@
         }
         .nav-menu-overlay.open { opacity: 1; pointer-events: auto; }
 
-        .nav-lang-toggle {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            height: 46px;
-            min-width: 46px;
-            padding: 0 16px;
-            background-color: rgba(23, 26, 41, 0.92);
-            border: 2px solid var(--panel-line, #2c3044);
+        .nav-lang-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
+            justify-content: space-between;
+            padding: 11px 20px;
             cursor: pointer;
-            z-index: 1100;
-            color: var(--accent2, #00ffff);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
+            border-left: 3px solid transparent;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .nav-lang-item:hover {
+            border-left-color: var(--accent2, #00ffff);
+            background: rgba(0,255,255,0.05);
+        }
+        .nav-lang-item .nav-lang-item-title {
+            font-size: 13px;
+            color: var(--text, #d8dce8);
+        }
+        .nav-lang-item .nav-lang-item-switch {
+            display: flex;
+            gap: 2px;
+            border: 1px solid var(--panel-line, #2c3044);
+            padding: 2px;
+        }
+        .nav-lang-item .nav-lang-item-switch span {
+            font-size: 11px;
             font-weight: 700;
-            letter-spacing: 1px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+            letter-spacing: 0.5px;
+            padding: 3px 8px;
+            color: var(--text-dim, #6b7189);
+            transition: color 0.2s ease, background-color 0.2s ease;
         }
-        .nav-lang-toggle:hover {
-            border-color: var(--accent, #ff00ff);
-            color: var(--accent, #ff00ff);
-            box-shadow: 0 0 12px rgba(255,0,255,0.35);
+        .nav-lang-item .nav-lang-item-switch span.active {
+            color: #06070e;
+            background: var(--accent2, #00ffff);
         }
-        .nav-lang-toggle .material-symbols-outlined,
-        .nav-lang-toggle .ms { font-size: 16px; }
 
         .nav-side-menu {
             position: fixed;
@@ -187,7 +193,6 @@
         }
         @media (max-width: 768px) {
             .nav-side-menu { width: 220px; }
-            .nav-lang-toggle { top: 16px; right: 12px; height: 40px; min-width: 40px; padding: 0 12px; font-size: 11px; }
         }
     `;
 
@@ -210,11 +215,14 @@
                     <span class="bar"></span>
                 </div>
             </div>
-            <div class="nav-lang-toggle" id="nav-lang-toggle" title="Language / 言語切替">
-                <span id="nav-lang-toggle-label">EN</span>
-            </div>
             <div class="nav-menu-overlay" id="nav-menu-overlay"></div>
             <nav class="nav-side-menu" id="nav-side-menu">
+                <div class="nav-lang-item" id="nav-lang-toggle" title="Language / 言語切替">
+                    <span class="nav-lang-item-title">Language / 言語</span>
+                    <span class="nav-lang-item-switch">
+                        <span id="nav-lang-item-jp">JP</span><span id="nav-lang-item-en">EN</span>
+                    </span>
+                </div>
                 ${linksHtml}
             </nav>
         `;
@@ -223,8 +231,10 @@
     function applyLang(l, opts) {
         opts = opts || {};
         storeLang(l);
-        const label = document.getElementById('nav-lang-toggle-label');
-        if (label) label.textContent = l === 'jp' ? 'EN' : 'JP';
+        const jpBtn = document.getElementById('nav-lang-item-jp');
+        const enBtn = document.getElementById('nav-lang-item-en');
+        if (jpBtn) jpBtn.classList.toggle('active', l === 'jp');
+        if (enBtn) enBtn.classList.toggle('active', l === 'en');
         if (typeof window.setLang === 'function') {
             window.setLang(l);
         }

@@ -2,251 +2,1168 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LOLBeans TOOLS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOLBeans コミュニティチャンピオンボード</title>
+<link rel="icon" type="image/png" href="https://tanabesan.github.io/lolbeans/file/page/favicon-128.png">
+<meta name="description" content="LOLBeans コミュニティ WR ランキング。ワールドレコード保持者のポイントランキングを確認しよう。">
+<meta name="theme-color" content="#0d0e17">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tanabesan.github.io/lolbeans/file/page/">
+<meta property="og:title" content="LOLBeans コミュニティチャンピオンボード">
+<meta property="og:description" content="LOLBeans コミュニティ WR ランキング。ワールドレコード保持者のポイント・階級を一覧で確認！">
+<meta property="og:image" content="https://tanabesan.github.io/lolbeans/file/page/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LOLBeans コミュニティチャンピオンボード">
+<meta name="twitter:description" content="LOLBeans コミュニティ WR ランキング。ワールドレコード保持者のポイント・階級を一覧で確認！">
+<meta name="twitter:image" content="https://tanabesan.github.io/lolbeans/file/page/ogp.png">
+<link id="gfont-link" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link id="ms-font-link" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
 
-  :root {
-    --bg: #0d0e17;
-    --panel: #171a29;
-    --panel-line: #2c3044;
-    --text: #d8dce8;
-    --text-dim: #6b7189;
-    --accent: #c77dff;
-    --accent-dim: #6b2f8f;
-  }
+/* ── TOKENS (コース一覧と統一) ── */
+:root{
+  --bg:#0d0e17;--bg2:#12141f;--panel:#171a29;--card:#12141f;
+  --edge:#2c3044;--line:#2c3044;--line2:#3a3f5c;
+  --t0:#d8dce8;--t1:#a8adc4;--t2:#6b7189;--t3:#3f4460;
+  --acc:#00ffff;--acc2:#ff00ff;--acc3:#00ffff;--acc4:#ffe066;
+  --glow-g:0 0 8px #00ffff,0 0 20px rgba(0,255,255,.4);
+  --glow-b:0 0 8px #00ffff,0 0 20px rgba(0,255,255,.4);
+  --glow-r:0 0 8px #ff00ff,0 0 20px rgba(255,0,255,.4);
+  --ff:'JetBrains Mono',monospace;
+  --ffj:'M PLUS Rounded 1c',sans-serif;
+  --ffh:'Press Start 2P',cursive;
+}
 
-  * { box-sizing: border-box; }
+body{font-family:var(--ff);background:var(--bg);color:var(--t0);min-height:100vh;overflow-x:hidden}
+body.jp{font-family:var(--ffj)}
 
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    min-height: 100vh;
-  }
+/* ── CRT SCANLINES ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);
+}
 
-  .pixel-noise {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(var(--panel-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
-    background-size: 24px 24px;
-    opacity: 0.12;
-    z-index: 0;
-  }
+/* ── BG ── */
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.3;
+  background-image:linear-gradient(rgba(0,255,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,255,.15) 1px,transparent 1px);
+  background-size:32px 32px}
+.bg-corner-tl,.bg-corner-tr,.bg-corner-bl,.bg-corner-br{position:fixed;width:120px;height:120px;pointer-events:none;z-index:0;opacity:.4}
+.bg-corner-tl{top:0;left:0;border-top:2px solid var(--acc3);border-left:2px solid var(--acc3)}
+.bg-corner-tr{top:0;right:0;border-top:2px solid var(--acc3);border-right:2px solid var(--acc3)}
+.bg-corner-bl{bottom:0;left:0;border-bottom:2px solid var(--acc3);border-left:2px solid var(--acc3)}
+.bg-corner-br{bottom:0;right:0;border-bottom:2px solid var(--acc3);border-right:2px solid var(--acc3)}
 
-  .scanlines {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(0,0,0,0.25) 0px,
-      rgba(0,0,0,0.25) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-    z-index: 2;
-    opacity: 0.5;
-  }
+/* ── RANKED BG FX (回転エンブレム + 光の筋) ── */
+.bg-emblem{
+  position:fixed;top:-12vmin;left:50%;width:76vmin;height:76vmin;z-index:0;pointer-events:none;
+  transform:translateX(-50%);opacity:.16;
+  background:conic-gradient(from 0deg,
+    transparent 0deg,rgba(0,255,255,.9) 6deg,transparent 14deg,
+    transparent 86deg,rgba(255,0,255,.7) 94deg,transparent 102deg,
+    transparent 176deg,rgba(0,255,255,.9) 184deg,transparent 192deg,
+    transparent 266deg,rgba(255,0,255,.7) 274deg,transparent 282deg,
+    transparent 360deg);
+  border-radius:50%;
+  -webkit-mask:radial-gradient(circle,transparent 54%,#000 56%,#000 63%,transparent 65%);
+  mask:radial-gradient(circle,transparent 54%,#000 56%,#000 63%,transparent 65%);
+  animation:emblemSpin 46s linear infinite;
+}
+.bg-emblem::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  -webkit-mask:radial-gradient(circle,transparent 30%,#000 32%,#000 36%,transparent 38%);
+  mask:radial-gradient(circle,transparent 30%,#000 32%,#000 36%,transparent 38%);
+  background:conic-gradient(from 45deg,transparent 0deg,rgba(255,224,102,.6) 10deg,transparent 24deg,transparent 180deg,rgba(255,224,102,.6) 190deg,transparent 204deg,transparent 360deg);
+  animation:emblemSpin 30s linear infinite reverse;
+}
+@keyframes emblemSpin{to{transform:rotate(360deg)}}
+.bg-rays{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-rays i{
+  position:absolute;top:-60%;width:16vw;height:220%;
+  background:linear-gradient(180deg,transparent,rgba(0,255,255,.07) 45%,rgba(0,255,255,.07) 55%,transparent);
+  transform:rotate(18deg);animation:raySweep linear infinite;
+}
+.bg-rays i:nth-child(2){background:linear-gradient(180deg,transparent,rgba(255,0,255,.06) 45%,rgba(255,0,255,.06) 55%,transparent);animation-duration:17s;animation-delay:-5s}
+.bg-rays i:nth-child(3){background:linear-gradient(180deg,transparent,rgba(255,224,102,.05) 45%,rgba(255,224,102,.05) 55%,transparent);animation-duration:21s;animation-delay:-11s}
+.bg-rays i:nth-child(1){animation-duration:14s}
+@keyframes raySweep{0%{left:-20vw}100%{left:120vw}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-  header {
-    position: relative;
-    z-index: 1;
-    padding: 56px 32px 36px;
-    border-bottom: 2px solid var(--panel-line);
-    text-align: center;
-    overflow: hidden;
-  }
+/* ── HEADER ── */
+header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
+.logo-line{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+.logo-text{
+  font-family:var(--ffh);font-size:clamp(.9rem,3.5vw,1.6rem);
+  color:var(--acc3);text-shadow:var(--glow-b);letter-spacing:.06em;
+}
+.logo-sub{
+  font-family:var(--ffh);font-size:clamp(.5rem,2vw,.75rem);
+  color:var(--acc);letter-spacing:.12em;text-shadow:var(--glow-g);
+  margin-top:6px;
+}
+.logo-sub::after{content:'_';animation:blink .8s step-end infinite}
+.logo-deco{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px}
+.logo-deco-line{width:80px;height:2px;background:var(--acc3);box-shadow:var(--glow-b);
+  clip-path:polygon(0 0,100% 0,100% 50%,calc(100% - 4px) 50%,calc(100% - 4px) 100%,4px 100%,4px 50%,0 50%)}
+.logo-deco span{color:var(--acc3);font-family:var(--ffh);font-size:.5rem}
+.logo-deco-dot{width:7px;height:7px;background:var(--acc3);box-shadow:var(--glow-b);transform:rotate(45deg);flex-shrink:0}
 
-  header::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, rgba(208,96,255,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
+/* ── STATS ── */
+.stats-bar{position:relative;z-index:10;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:.4rem 1rem 1.8rem}
+.s-pill{
+  background:var(--panel);border:2px solid var(--line2);
+  box-shadow:2px 2px 0 var(--edge);
+  padding:7px 14px;font-size:.7rem;font-weight:700;color:var(--t2);
+  display:flex;align-items:center;gap:8px;font-family:var(--ff);
+}
+.s-pill .v{color:var(--acc);font-family:var(--ffh);font-size:.65rem;text-shadow:var(--glow-g)}
+.s-pill .ms{font-size:1rem;color:var(--acc3)}
 
-  h1 {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 26px;
-    color: #fff;
-    margin: 0 0 18px;
-    letter-spacing: 3px;
-    position: relative;
-    display: inline-block;
-    text-shadow:
-      3px 3px 0 var(--accent-dim),
-      0 0 16px rgba(208,96,255,0.35);
-    animation: flicker 4s infinite steps(1);
-  }
+/* ── EVENT BANNER (WRチャレンジ発生中) ── */
+.event-banner-wrap{position:relative;z-index:10;display:flex;justify-content:center;padding:0 1rem .9rem}
+.event-banner-btn{
+  background:linear-gradient(90deg,#3a2d00,#4a3600);border:2px solid var(--acc4);
+  box-shadow:2px 2px 0 var(--edge),0 0 16px -2px var(--acc4);
+  padding:10px 20px;color:var(--acc4);font-family:var(--ffh);font-size:.55rem;
+  font-weight:800;cursor:pointer;letter-spacing:.04em;
+  display:inline-flex;align-items:center;gap:9px;
+  animation:eventPulse 1.6s ease-in-out infinite;
+}
+.event-banner-btn:hover{background:var(--acc4);color:#241a00}
+.event-banner-icon{animation:eventBolt .9s ease-in-out infinite}
+@keyframes eventPulse{
+  0%,100%{box-shadow:2px 2px 0 var(--edge),0 0 10px -2px var(--acc4)}
+  50%{box-shadow:2px 2px 0 var(--edge),0 0 26px 2px var(--acc4)}
+}
+@keyframes eventBolt{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(-8deg) scale(1.15)}}
 
-  @keyframes flicker {
-    0%, 92%, 100% { opacity: 1; }
-    93% { opacity: 0.82; }
-    94% { opacity: 1; }
-    95% { opacity: 0.7; }
-    96% { opacity: 1; }
-  }
+.event-banner-preview{position:relative;z-index:10;display:flex;justify-content:center;padding:0 1rem 1rem}
+.event-banner-preview-inner{
+  display:flex;align-items:center;gap:12px;width:100%;max-width:420px;
+  background:linear-gradient(160deg,var(--panel),var(--bg2));border:2px solid var(--acc4);
+  box-shadow:2px 2px 0 var(--edge);padding:8px 16px 8px 8px;cursor:pointer;transition:transform .15s;
+}
+.event-banner-preview-inner:hover{transform:translateY(-2px)}
+.event-banner-preview-thumb{
+  width:54px;height:54px;flex-shrink:0;background-size:cover;background-position:center;
+  background-color:var(--bg2);border:2px solid var(--acc4);position:relative;overflow:hidden;
+}
+.event-banner-preview-thumb::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 3px);
+}
+.event-banner-preview-info{flex:1;min-width:0}
+.event-banner-preview-label{font-size:.48rem;color:var(--t3);font-weight:700;letter-spacing:.05em}
+.event-banner-preview-name{
+  font-family:var(--ffh);font-size:.58rem;color:var(--acc4);margin-top:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 
-  header p {
-    margin: 0;
-    color: var(--text-dim);
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    position: relative;
-  }
+.event-rule{max-width:640px;margin:0 auto 1.6rem;text-align:center;font-size:.72rem;line-height:1.7;color:var(--t2)}
+.event-card-list{display:flex;flex-direction:column;gap:12px;max-width:640px;margin:0 auto}
+.event-card{
+  background:linear-gradient(160deg,var(--panel),var(--bg2));border:2px solid var(--acc4);
+  padding:16px 18px;box-shadow:3px 3px 0 var(--edge);
+}
+.event-card-thumb{
+  width:100%;height:120px;background-size:cover;background-position:center;
+  background-color:var(--bg2);border:2px solid var(--acc4);position:relative;overflow:hidden;margin-bottom:12px;
+}
+.event-card-thumb::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px);
+}
+.event-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.event-card-name{font-family:var(--ffh);font-size:.6rem;color:var(--acc4);line-height:1.5}
+.event-card-badge{
+  flex-shrink:0;font-family:var(--ffh);font-size:.44rem;font-weight:800;padding:4px 8px;
+  background:var(--acc4);color:#241a00;white-space:nowrap;
+}
+.event-card-badge.updated{background:var(--acc3);box-shadow:0 0 10px -2px var(--acc3)}
+.event-card-row{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:var(--t1);padding:5px 0;border-top:1px solid var(--line2)}
+.event-card-row .lbl{color:var(--t3);font-weight:700}
+.event-card-row .val{font-weight:800}
+.event-card-countdown{font-family:var(--ffh);color:var(--acc4);font-size:.55rem}
 
-  main {
-    position: relative;
-    z-index: 1;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 48px 24px 80px;
-  }
+/* ── INFO TOGGLE BUTTON ── */
+.info-toggle-wrap{position:relative;z-index:10;display:flex;justify-content:center;align-items:center;gap:10px;padding:0 1rem 1.2rem}
+.info-toggle-btn{
+  background:var(--panel);border:2px solid var(--acc3);box-shadow:2px 2px 0 var(--edge),var(--glow-b);
+  padding:9px 18px;color:var(--acc3);font-family:var(--ffh);font-size:.5rem;
+  font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.04em;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.info-toggle-btn:hover{background:var(--acc3);color:#0b0715;box-shadow:3px 3px 0 var(--edge)}
+.sound-toggle-btn{
+  background:var(--panel);border:2px solid var(--line2);box-shadow:2px 2px 0 var(--edge);
+  width:38px;height:38px;flex-shrink:0;color:var(--t2);cursor:pointer;transition:all .15s;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.sound-toggle-btn:hover{border-color:var(--acc4);color:var(--acc4)}
+.sound-toggle-btn.on{border-color:var(--acc3);color:var(--acc3);box-shadow:2px 2px 0 var(--edge),var(--glow-b)}
+.pname-link{color:inherit;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.25);transition:all .2s}
+.pname-link:hover{border-bottom-color:currentColor;opacity:.85}
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
-  }
+/* ── CONTROLS ── */
+.controls{position:relative;z-index:10;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;padding:0 1rem 1.8rem}
+.sbox{position:relative}
+.sbox input{
+  background:var(--bg);border:2px solid var(--line2);
+  padding:8px 12px 8px 36px;color:var(--t0);font-family:var(--ff);
+  font-size:.82rem;font-weight:700;width:200px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.sbox input:focus{border-color:var(--acc3);box-shadow:var(--glow-b)}
+.sbox input::placeholder{color:var(--t3)}
+.si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t2);font-size:.85rem;pointer-events:none}
+.cbtn{
+  background:var(--panel);border:2px solid var(--line2);box-shadow:2px 2px 0 var(--edge);
+  padding:8px 14px;color:var(--t2);font-family:var(--ffh);font-size:.45rem;
+  font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.04em;
+}
+.cbtn:hover,.cbtn.on{border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,224,102,.4),0 0 8px rgba(255,224,102,.2)}
+.rbtn{
+  background:var(--acc2);border:2px solid var(--acc2);
+  padding:8px 16px;color:#0b0715;font-family:var(--ffh);font-size:.45rem;
+  font-weight:900;cursor:pointer;box-shadow:4px 4px 0 rgba(255,0,255,.5);
+  transition:all .15s;letter-spacing:.04em;
+}
+.rbtn:hover{background:transparent;color:var(--acc2);box-shadow:var(--glow-r),4px 4px 0 var(--acc2)}
+.rbtn.spin{animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
 
-  a.card {
-    display: block;
-    background: var(--panel);
-    border: 2px solid var(--panel-line);
-    padding: 24px;
-    text-decoration: none;
-    color: var(--text);
-    position: relative;
-    transition: border-color 0.15s, transform 0.15s;
-  }
+/* ── INFO OVERLAY (ランク一覧 / ポイント計算・全画面) ── */
+.info-overlay{
+  position:fixed;inset:0;z-index:700;background:rgba(5,4,10,.96);
+  display:flex;justify-content:center;align-items:flex-start;
+  padding:2.4rem 1rem;overflow-y:auto;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.info-overlay.open{opacity:1;pointer-events:all}
+.info-panel{position:relative;width:100%;max-width:1400px;margin:0 auto}
+.info-close{
+  position:absolute;top:-6px;right:0;background:var(--panel);border:2px solid var(--line2);
+  color:var(--t1);width:34px;height:34px;font-size:1rem;cursor:pointer;
+  box-shadow:2px 2px 0 var(--edge);
+}
+.info-close:hover{border-color:var(--acc2);color:var(--acc2)}
+.info-heading{
+  font-family:var(--ffh);font-size:.65rem;letter-spacing:.1em;
+  color:var(--acc3);text-align:center;text-transform:uppercase;
+  text-shadow:var(--glow-b);margin-bottom:1.2rem;
+}
+.info-rank-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));align-items:stretch;gap:14px}
+.info-rank-card{
+  width:auto;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,var(--panel),var(--bg2));
+  border:2px solid var(--line2);padding:20px 12px 16px;text-align:center;
+  box-shadow:3px 3px 0 var(--edge);transition:transform .15s,box-shadow .15s;
+}
+.info-rank-card:hover{transform:translate(-1px,-3px);box-shadow:4px 5px 0 var(--edge)}
+.info-rank-shield{height:76px;width:auto;object-fit:contain;margin-bottom:12px}
+.info-rank-name{display:block;font-family:var(--ffh);font-size:.56rem;font-weight:800;margin-bottom:4px}
+.info-rank-pts{display:block;font-size:.62rem;opacity:.6;font-weight:700;margin-bottom:16px}
+.info-rank-subs{flex:1;display:flex;flex-direction:column;gap:6px}
+.info-rank-sub{
+  flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px;
+  background:var(--edge);border:1px solid var(--line2);padding:6px 4px;
+}
+.info-rank-sub-label{font-family:var(--ffh);font-size:.46rem;font-weight:800}
+.info-rank-sub-range{font-size:.56rem;opacity:.6;font-weight:700}
+.info-pt-table{max-width:620px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-pt-row{
+  display:flex;align-items:center;gap:8px;background:var(--card);
+  border:1px solid var(--line2);padding:8px 14px;font-size:.72rem;font-weight:700;color:var(--t1);
+}
+.info-pt-dot{width:9px;height:9px;flex-shrink:0}
+.info-pt-pts{font-family:var(--ffh);color:var(--acc);margin-left:auto;font-size:.55rem}
 
-  a.card:hover {
-    border-color: var(--card-accent, var(--accent));
-    transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0 var(--card-accent, var(--accent-dim));
-  }
+/* ── TABLE ── */
+.tw{position:relative;z-index:10;max-width:980px;margin:0 auto;padding:0 1rem 5rem}
+.slbl{
+  font-family:var(--ffh);font-size:.48rem;letter-spacing:.1em;
+  color:var(--acc3);text-transform:uppercase;text-align:center;
+  margin-bottom:14px;text-shadow:var(--glow-b);
+}
+.rt{width:100%;border-collapse:separate;border-spacing:0 6px}
+.rt thead th{
+  font-family:var(--ffh);font-size:.45rem;letter-spacing:.1em;
+  color:var(--t2);text-transform:uppercase;padding:6px 10px;text-align:left;
+}
+.rt thead th.c{text-align:center}
 
-  .card-tag {
-    display: inline-block;
-    font-size: 10px;
-    color: var(--card-accent, var(--accent));
-    border: 1px solid var(--card-accent, var(--accent));
-    padding: 3px 8px;
-    margin-bottom: 14px;
-    letter-spacing: 0.5px;
-  }
+/* ROW */
+.rrow{
+  background:var(--card);border:2px solid var(--line2);
+  box-shadow:3px 3px 0 var(--edge);
+  transition:transform .15s,box-shadow .15s,border-color .15s;
+  animation:rIn .3s ease-out both;cursor:pointer;
+}
+@keyframes rIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.rrow:hover{transform:translate(-2px,-3px);border-color:var(--acc3);box-shadow:5px 5px 0 var(--acc3),var(--glow-b)}
+.rrow td{padding:10px 10px;vertical-align:middle}
+.rrow td:first-child{text-align:center;width:48px}
+.top1{border-left:4px solid #ffd700;box-shadow:3px 3px 0 rgba(255,215,0,.4)}
+.top2{border-left:4px solid #c8c8d4;box-shadow:3px 3px 0 rgba(200,200,212,.3)}
+.top3{border-left:4px solid #e8874a;box-shadow:3px 3px 0 rgba(232,135,74,.35)}
+.top1:hover{border-color:#ffd700;box-shadow:5px 5px 0 #ffd700,0 0 14px rgba(255,215,0,.4)}
+.top2:hover{border-color:#c8c8d4;box-shadow:5px 5px 0 #c8c8d4}
+.top3:hover{border-color:#e8874a;box-shadow:5px 5px 0 #e8874a}
 
-  .card h2 {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 13px;
-    margin: 0 0 12px;
-    line-height: 1.6;
-    color: var(--text);
-  }
+.rnum{font-family:var(--ffh);font-size:.75rem;color:var(--t3);display:inline-block;min-width:28px;text-align:center}
+.top1 .rnum{color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.6)}
+.top2 .rnum{color:#c8c8d4}
+.top3 .rnum{color:#e8874a}
 
-  .card p {
-    font-size: 12px;
-    color: var(--text-dim);
-    line-height: 1.7;
-    margin: 0;
-  }
+.pcell{display:flex;align-items:center;gap:10px}
+.shw{width:44px;height:52px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:visible}
+.shi{width:auto;height:52px;object-fit:contain;transition:transform .2s,filter .2s;filter:drop-shadow(0 3px 7px var(--sg,rgba(0,0,0,.5)))}
+.rrow:hover .shi{transform:scale(1.15) rotate(-4deg);filter:drop-shadow(0 4px 12px var(--sg,rgba(0,0,0,.5))) brightness(1.1)}
+.pname{font-family:var(--ffh);font-size:.6rem;line-height:1.4;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.top1 .pname{color:#ffe066}.top2 .pname{color:#dde}.top3 .pname{color:#e8874a}.topN .pname{color:var(--t0)}
+.prank-lbl{font-family:var(--ffh);font-size:.42rem;font-weight:800;padding:2px 6px;letter-spacing:.04em;text-transform:uppercase;margin-top:3px;display:inline-block}
+.subtier{display:flex;gap:3px;margin-top:5px;align-items:center}
+.stpip{width:7px;height:7px;transition:transform .15s}
+.stpip.filled{box-shadow:0 0 4px var(--pc)}
+.stpip.empty{opacity:.2}
+.ms{font-family:'Material Symbols Rounded';font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 24}
 
-  .card .arrow {
-    margin-top: 16px;
-    font-size: 11px;
-    color: var(--card-accent, var(--accent));
-  }
+.cats{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-family:var(--ffh);font-size:.42rem;font-weight:800;padding:2px 6px;white-space:nowrap}
+.c1000{background:rgba(255,80,110,.15);color:#ff5070;border:1px solid rgba(255,80,110,.28)}
+.c750{background:rgba(255,205,50,.13);color:#ffc832;border:1px solid rgba(255,205,50,.28)}
+.c500{background:rgba(50,220,240,.1);color:#32dce8;border:1px solid rgba(50,220,240,.22)}
+.c100{background:rgba(165,100,255,.13);color:#a564ff;border:1px solid rgba(165,100,255,.28)}
+.cu100{background:rgba(60,230,140,.1);color:#3ce68c;border:1px solid rgba(60,230,140,.22)}
+.cev{background:rgba(255,184,0,.15);color:var(--acc4,#ffb800);border:1px solid rgba(255,184,0,.32)}
 
-  footer {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    padding: 24px;
-    color: var(--text-dim);
-    font-size: 11px;
-    border-top: 2px solid var(--panel-line);
-  }
+.wrc{font-family:var(--ffh);font-size:.9rem;color:var(--acc3);text-align:center;text-shadow:var(--glow-b)}
+.ptv{font-family:var(--ffh);font-size:1rem;text-align:center;font-weight:900}
+.top1 .ptv{color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.5)}
+.top2 .ptv{color:#c8c8d4}
+.top3 .ptv{color:#e8874a}
 
-  @media (max-width: 600px) {
-    header { padding: 40px 20px 28px; }
-    h1 { font-size: 18px; }
-    main { padding: 32px 16px 60px; }
-    .grid { grid-template-columns: 1fr; }
-  }
+/* ── STATE / PAGER / TOAST ── */
+.smsg{text-align:center;padding:5rem 2rem;color:var(--t2);font-size:.8rem;font-weight:700;font-family:var(--ffh);letter-spacing:.06em}
+.smsg .big{font-size:2.5rem;display:block;margin-bottom:1rem}
+
+.pager{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:1.5rem;flex-wrap:wrap}
+.pgb{
+  background:var(--panel);border:2px solid var(--line2);
+  box-shadow:2px 2px 0 var(--edge);
+  width:36px;height:36px;color:var(--t2);
+  font-family:var(--ffh);font-weight:700;font-size:.5rem;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;
+}
+.pgb:hover{border-color:var(--acc4);color:var(--acc4);box-shadow:2px 2px 0 rgba(255,224,102,.4)}
+.pgb.on{background:var(--acc4);border-color:var(--acc4);color:var(--bg);box-shadow:2px 2px 0 rgba(255,224,102,.5)}
+.pgb:disabled{opacity:.25;cursor:not-allowed}
+
+#toast{
+  position:fixed;bottom:2rem;right:1.5rem;
+  background:var(--panel);border:2px solid var(--acc3);
+  box-shadow:4px 4px 0 var(--acc3),var(--glow-b);
+  padding:10px 16px;color:var(--t0);font-family:var(--ffh);font-size:.5rem;
+  z-index:9999;transform:translateY(70px);opacity:0;
+  transition:all .35s cubic-bezier(.175,.885,.32,1.275);max-width:260px;letter-spacing:.04em;
+}
+#toast.show{transform:translateY(0);opacity:1}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(5,5,10,.92);
+  backdrop-filter:blur(6px);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:1rem;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  --pc:var(--acc3);--pg:rgba(0,255,255,.5);
+  background:
+    repeating-linear-gradient(135deg,rgba(255,255,255,.015) 0 2px,transparent 2px 14px),
+    linear-gradient(160deg,var(--panel) 0%,var(--bg2) 100%);
+  border:2px solid var(--pc);
+  box-shadow:0 0 0 1px rgba(0,0,0,.6),8px 8px 0 var(--pc),0 0 30px -4px var(--pg);
+  clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);
+  width:100%;max-width:960px;padding:0;position:relative;
+  transform:translateY(20px) scale(.96);transition:transform .28s cubic-bezier(.175,.885,.32,1.275);
+  max-height:min(94vh,94dvh);
+  display:flex;flex-direction:column;
+}
+.modal-overlay{padding:2.2rem 1rem}
+.modal-overlay.open .modal{transform:none}
+.modal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:3;
+  background:linear-gradient(90deg,transparent,var(--pc),transparent);
+  box-shadow:0 0 12px 1px var(--pg);pointer-events:none;
+}
+.modal-scroll{overflow-y:auto;flex:1;min-height:0;padding-bottom:22px}
+.modal-corner{position:absolute;width:22px;height:22px;pointer-events:none;z-index:5;opacity:.85}
+.modal-corner.tl{top:8px;left:8px;border-top:2px solid var(--pc);border-left:2px solid var(--pc)}
+.modal-corner.br{bottom:8px;right:8px;border-bottom:2px solid var(--pc);border-right:2px solid var(--pc)}
+.modal-actions{position:absolute;top:10px;right:10px;z-index:6;display:flex;align-items:center;gap:10px}
+.modal-close{
+  position:static;
+  background:rgba(13,14,23,.7);border:2px solid var(--acc2);color:var(--acc2);
+  width:32px;height:32px;font-size:1rem;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  clip-path:polygon(0 6px,6px 0,100% 0,100% 100%,calc(100% - 6px) 100%,0 calc(100% - 6px));
+}
+.modal-close:hover{background:var(--acc2);color:#0b0715;box-shadow:var(--glow-r)}
+.modal-dl{
+  position:static;
+  background:rgba(13,14,23,.7);border:2px solid var(--pc);color:var(--pc);
+  width:32px;height:32px;font-size:1rem;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  clip-path:polygon(6px 0,100% 0,100% 100%,calc(100% - 6px) 100%,0 100%,0 6px);
+}
+.modal-dl:hover{background:var(--pc);color:#0b0715;box-shadow:0 0 10px var(--pg)}
+.modal-dl.busy{animation:sp .8s linear infinite}
+.modal.capturing .modal-close,.modal.capturing .modal-dl,.modal.capturing .modal-actions,.modal.capturing .modal-corner{visibility:hidden}
+.modal-inner{padding:16px 22px 14px}
+
+/* modal header */
+.mh-banner{
+  position:relative;padding:26px 22px 20px;margin-bottom:20px;overflow:hidden;
+  background:linear-gradient(120deg,var(--pb1,#222) 0%,var(--pb2,#333) 55%,transparent 100%);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 16px),calc(100% - 24px) 100%,0 100%);
+}
+.mh-banner::before{
+  content:'';position:absolute;inset:0;opacity:.35;pointer-events:none;
+  background-image:linear-gradient(var(--pc) 1px,transparent 1px),linear-gradient(90deg,var(--pc) 1px,transparent 1px);
+  background-size:14px 14px;
+  mask-image:linear-gradient(115deg,black,transparent 65%);
+}
+.mh-banner::after{
+  content:'';position:absolute;right:-30%;top:-40%;width:140%;height:220%;pointer-events:none;
+  background:radial-gradient(circle,var(--pg) 0%,transparent 60%);opacity:.4;
+}
+.mh{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+.mh-shield{height:76px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
+.mh-name{font-family:var(--ffh);font-size:clamp(.68rem,2.6vw,.95rem);line-height:1.4;color:var(--t0);text-shadow:0 0 14px var(--pg),2px 2px 0 rgba(0,0,0,.5)}
+.mh-rank{font-family:var(--ffh);font-size:.42rem;padding:3px 9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;display:inline-block;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+
+/* rank position bar */
+.rank-pos-wrap{margin-bottom:10px}
+.rp-label{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.rp-bar-bg{background:var(--edge);border:1px solid var(--line2);height:14px;overflow:visible;position:relative;margin-bottom:20px;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.rp-bar-track{position:absolute;inset:0;overflow:hidden;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.rp-bar-fill{height:14px;transition:width .8s cubic-bezier(.22,1,.36,1);position:relative;min-width:4px;box-shadow:0 0 10px 0 var(--pg)}
+.rp-bar-fill::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(0,0,0,.25) 6px,rgba(0,0,0,.25) 7px)}
+.rp-div{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.6);z-index:2}
+.rp-tip{position:absolute;top:-26px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--tipcolor,#fff);padding:2px 6px;font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t0);white-space:nowrap;transition:left .8s cubic-bezier(.22,1,.36,1);pointer-events:none;z-index:10;clip-path:polygon(4px 0,100% 0,100% 100%,0 100%,0 4px)}
+.rp-tip::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border:3px solid transparent;border-top-color:var(--tipcolor,#fff)}
+.rp-seg-labels{display:flex;margin-top:4px}
+.rp-seg-lbl{flex:1;font-size:.5rem;font-weight:800;color:var(--t3);text-align:center;letter-spacing:.02em}
+.rp-pct{font-family:var(--ffh);font-size:.48rem;color:var(--t1);margin-top:4px;text-align:right}
+
+/* sub-tier */
+.stier-wrap{margin-bottom:16px}
+.stier-title{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.stier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stier-card{background:var(--edge);border:1px solid var(--line2);padding:5px 6px;text-align:center;transition:border-color .2s;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.stier-card.current{border-color:var(--pc,#fff);box-shadow:2px 2px 0 var(--pc,#fff),0 0 10px -2px var(--pg)}
+.stier-card-name{font-family:var(--ffh);font-size:.5rem;letter-spacing:.03em}
+.stier-card-range{font-size:.55rem;opacity:.5;margin-top:2px}
+.stier-card-you{font-family:var(--ffh);font-size:.42rem;font-weight:800;margin-top:4px;color:var(--acc)}
+
+/* stats grid */
+.mstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.mstat{background:var(--edge);border:1px solid var(--line2);border-left:3px solid var(--pc);padding:10px 12px;position:relative;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+.mstat-lbl{font-family:var(--ffh);font-size:.42rem;font-weight:800;color:var(--t2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.mstat-val{font-family:var(--ffh);font-size:1.05rem;text-shadow:0 0 10px var(--pg)}
+.mchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+
+/* ── WIDE (Apex風) LAYOUT ── */
+.mh-banner-wide{text-align:center;padding:24px 26px 20px}
+.mh-banner-fire{
+  background-color:#150004;
+  background-image:url('https://tanabesan.github.io/lolbeans/community/file/rank_gm_fire.gif');
+  background-repeat:repeat-x;
+  background-position:bottom center;
+  background-size:auto 150%;
+  min-height:100px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.mh-banner-fire::before{display:none}
+.mh-banner-fire .mh-title-wide{padding-bottom:14px}
+.mh-banner-fire-mst{
+  background-color:#0a0016;
+  background-image:url('https://tanabesan.github.io/lolbeans/community/file/rank_mst_fire.gif');
+  background-repeat:repeat-x;
+  background-position:bottom center;
+  background-size:auto 150%;
+  min-height:100px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.mh-banner-fire-mst::before{display:none}
+.mh-banner-fire-mst .mh-title-wide{padding-bottom:14px}
+.mh-banner-fire-dia{
+  background-color:#000814;
+  background-image:url('https://tanabesan.github.io/lolbeans/community/file/rank_dia_fire.gif');
+  background-repeat:repeat-x;
+  background-position:bottom center;
+  background-size:auto 150%;
+  min-height:100px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.mh-banner-fire-dia::before{display:none}
+.mh-banner-fire-dia .mh-title-wide{padding-bottom:14px}
+.mh-banner-fire-plat{
+  background-color:#001408;
+  background-image:url('https://tanabesan.github.io/lolbeans/community/file/rank_plat_fire.gif');
+  background-repeat:repeat-x;
+  background-position:bottom center;
+  background-size:auto 150%;
+  min-height:100px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.mh-banner-fire-plat::before{display:none}
+.mh-banner-fire-plat .mh-title-wide{padding-bottom:14px}
+.mh-title-wide{display:inline-flex;flex-direction:column;align-items:center;gap:6px}
+.mh-title-wide .mh-name{font-size:clamp(.9rem,3vw,1.3rem)}
+.mw-grid{display:flex;align-items:flex-start;gap:32px}
+.mw-side{width:200px;flex-shrink:0;text-align:center}
+.mw-shield-big{height:92px;width:auto;object-fit:contain;margin-bottom:6px}
+.mw-rankname{font-family:var(--ffh);font-size:.62rem;letter-spacing:.03em;margin-top:4px}
+.mw-subname{font-size:.7rem;color:var(--t2);font-weight:700;margin-top:4px}
+.mw-stier{margin-top:12px;text-align:left}
+.mw-stier .stier-grid{grid-template-columns:1fr;gap:6px}
+.mw-main{flex:1;min-width:0}
+.mw-circles{display:flex;gap:18px;margin-bottom:14px;flex-wrap:wrap}
+.mw-circle{
+  --cc:var(--acc3);width:118px;height:118px;border-radius:50%;flex-shrink:0;
+  border:3px solid var(--cc);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.06);
+  box-shadow:0 0 20px -6px var(--cc);
+}
+.mw-circle-lbl{font-family:var(--ffh);font-size:.4rem;color:var(--t2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.mw-circle-val{font-family:var(--ffh);font-size:1.25rem;color:var(--cc);text-shadow:0 0 16px var(--cc)}
+.mw-mstats{grid-template-columns:repeat(2,1fr);margin-top:4px}
+@media(min-width:761px){.mw-mstats{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:760px){
+  .mw-grid{flex-direction:column;align-items:center;gap:14px}
+  .mw-side{width:100%}
+  .mw-side .stier-grid{grid-template-columns:repeat(3,1fr)}
+  .mw-circles{justify-content:center}
+  .mw-circle{width:110px;height:110px}
+  .mw-circle-val{font-size:1.15rem}
+}
+
+/* calc section */
+.calc-wrap{background:var(--edge);border:1px solid var(--line2);overflow:hidden;margin-bottom:14px;clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
+.calc-summary{padding:10px 14px;font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;user-select:none;letter-spacing:.04em}
+.calc-summary::-webkit-details-marker{display:none}
+.calc-summary::after{content:'▶';margin-left:auto;font-size:.55rem;color:var(--t3);transition:transform .2s}
+details[open] .calc-summary::after{transform:rotate(90deg)}
+.calc-body{padding:4px 14px 14px;border-top:1px solid var(--line2)}
+.calc-section-title{font-family:var(--ffh);font-size:.42rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--t2);margin:10px 0 6px}
+.calc-table{display:flex;flex-direction:column;gap:5px}
+.ct-row{display:flex;align-items:center;gap:6px;font-size:.72rem}
+.ct-tag{font-family:var(--ffh);font-size:.4rem;font-weight:800;padding:1px 6px;white-space:nowrap;flex-shrink:0}
+.ct-rank-dot{width:9px;height:9px;flex-shrink:0}
+.ct-desc{flex:1;color:var(--t1);font-size:.7rem}
+.ct-pts{font-family:var(--ffh);font-size:.6rem;color:var(--acc);font-weight:900;flex-shrink:0}
+.calc-note{font-size:.65rem;color:var(--t2);margin-top:8px;line-height:1.6;background:rgba(255,255,255,.03);border-left:2px solid var(--acc3);padding:6px 8px}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--line2)}::-webkit-scrollbar-thumb:hover{background:var(--acc3)}
+
+/* ── 省エネモード ── */
+body.eco{--ff:system-ui,-apple-system,sans-serif;--ffh:system-ui,-apple-system,sans-serif;--ffj:system-ui,-apple-system,sans-serif}
+body.eco *,body.eco *::before,body.eco *::after{animation:none!important;transition:none!important;text-shadow:none!important;box-shadow:none!important}
+body.eco{--glow-g:none;--glow-b:none;--glow-r:none}
+body.eco::before{display:none}
+body.eco .bg-grid{display:none}
+body.eco .bg-corner-tl,body.eco .bg-corner-tr,body.eco .bg-corner-bl,body.eco .bg-corner-br{display:none}
+body.eco .bg-emblem,body.eco .bg-rays{display:none}
+body.eco .logo-sub::after{content:''}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .cc,.rt thead th.cc{display:none}
+  .sbox input{width:140px}
+  .info-pt-table{grid-template-columns:1fr}
+  .info-rank-card{width:130px;padding:16px 8px 12px}
+  .info-rank-shield{height:56px;margin-bottom:8px}
+  .info-rank-sub-label{font-size:.42rem}
+  .info-rank-sub-range{font-size:.5rem}
+  .controls{gap:6px;padding:0 10px 1.2rem}
+  .cbtn,.rbtn{padding:7px 10px;font-size:.42rem}
+  .rrow td{padding:8px 8px}
+  .shi{height:40px}
+  .shw{width:36px;height:40px}
+  .pname{font-size:.52rem}
+  .prank-lbl{font-size:.38rem}
+  .wrc{font-size:.8rem}
+  .ptv{font-size:.9rem}
+  .stats-bar{gap:5px;padding:.3rem 10px 1.2rem}
+  .s-pill{padding:6px 10px;font-size:.6rem}
+  .modal{padding:16px 14px}
+  header{padding:40px 12px 24px}
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
-<body>
-
-<div class="pixel-noise"></div>
-<div class="scanlines"></div>
+<body class="jp" data-nav-current="ranking">
+<script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
+<div class="bg-grid"></div>
+<div class="bg-corner-tl"></div>
+<div class="bg-corner-tr"></div>
+<div class="bg-corner-bl"></div>
+<div class="bg-corner-br"></div>
+<div class="bg-emblem"></div>
+<div class="bg-rays"><i></i><i></i><i></i></div>
 
 <header>
-  <h1>LOLBEANS TOOLS</h1>
-  <p>LOLBeans関連の自作ツール・サイトまとめ</p>
+  <div class="logo-line">
+    <span class="logo-text">LOLBeans</span>
+  </div>
+  <div class="logo-sub" id="hSub">コミュニティチャンピオンボード</div>
+  <div class="logo-deco">
+    <div class="logo-deco-line"></div>
+    <span class="logo-deco-dot"></span>
+    <div class="logo-deco-line"></div>
+  </div>
 </header>
 
-<main>
-  <div class="grid">
+<div class="stats-bar">
+  <div class="s-pill"><span class="ms" style="font-size:1rem">groups</span><span class="i18n" data-en="Holders" data-jp="ホルダー数">ホルダー数</span><span class="v" id="sH">—</span></div>
+  <div class="s-pill"><span class="ms" style="font-size:1rem">emoji_events</span><span class="i18n" data-en="Total WRs" data-jp="WR 総数">WR 総数</span><span class="v" id="sL">—</span></div>
+  <div class="s-pill"><span class="ms" style="font-size:1rem">schedule</span><span class="i18n" data-en="Updated" data-jp="更新">更新</span><span class="v" id="sT">—</span></div>
+</div>
 
-    <a class="card" href="lolex/lolex.html">
-      <span class="card-tag">SCRIPT</span>
-      <h2>LOL.ex</h2>
-      <p>次世代のゲーム体験を実現するTampermonkeyスクリプト。標準版/軽量版を配布中。</p>
-      <div class="arrow">→ ひらく</div>
-    </a>
+<div class="event-banner-wrap" id="eventBannerWrap" style="display:none">
+  <button class="event-banner-btn" onclick="sfx('open');openEventModal()">
+    <span class="ms event-banner-icon" style="font-size:1.15rem">bolt</span>
+    <span id="eventBannerText">イベント発生中！</span>
+  </button>
+</div>
+<div class="event-banner-preview" id="eventBannerPreview" style="display:none"></div>
 
-    <a class="card" href="community/community.html">
-      <span class="card-tag">FAN SITE</span>
-      <h2>コース一覧</h2>
-      <p>ユーザー作成のカスタムマップ一覧。種別・クリア率・お気に入りで絞り込み検索。</p>
-      <div class="arrow">→ ひらく</div>
-    </a>
+<div class="info-toggle-wrap">
+  <button class="info-toggle-btn" onclick="sfx('click');openInfoOverlay()">
+    <span class="ms" style="font-size:1.05rem;vertical-align:middle">shield</span>
+    <span class="i18n" data-en="Ranks &amp; Points" data-jp="ランク一覧 / ポイント計算">ランク一覧 / ポイント計算</span>
+  </button>
+  <button class="sound-toggle-btn" id="soundBtn" onclick="toggleSound()" title="サウンド ON/OFF">
+    <span class="ms" id="soundIcon" style="font-size:1.1rem">volume_up</span>
+  </button>
+</div>
 
-    <a class="card" href="community/ranking.html">
-      <span class="card-tag">RANKING</span>
-      <h2>WR ランキング</h2>
-      <p>ワールドレコード保持者のポイント・階級ランキング。チャンピオンボード付き。</p>
-      <div class="arrow">→ ひらく</div>
-    </a>
-
-    <a class="card" style="--card-accent:#5865F2;" href="lolrank/index.html">
-      <span class="card-tag">TIER LIST</span>
-      <h2>ビーンズ<br>ランク</h2>
-      <p>みんなの評価でプレイヤーを6項目・S〜D採点。総合/狂暴/優しさのTierリストを公開中。</p>
-      <div class="arrow">→ ひらく</div>
-    </a>
-
-    <a class="card" href="conversion/template.html">
-      <span class="card-tag">CONVERTER</span>
-      <h2>IMAGE → GLOL</h2>
-      <p>画像をLOLBeansのSolid Paneピクセルアートに変換。同色の連続を自動で統合してブロック数を節約。</p>
-      <div class="arrow">→ ひらく</div>
-    </a>
-
-    <a class="card" href="blockforge/programatic.html">
-      <span class="card-tag">BUILDER</span>
-      <h2>BLOCK FORGE</h2>
-      <p>Programmatic式・変数式をブロックのドラッグ&ドロップで組み立てるビジュアルエディタ。</p>
-      <div class="arrow">→ ひらく</div>
-    </a>
-
-    <a class="card" href="library/file.html">
-      <span class="card-tag">LIBRARY</span>
-      <h2>ファイル<br>ライブラリ</h2>
-      <p>エディター用の.lol / .glolファイルを配布。お好みのファイルでコースを豊かに。</p>
-      <div class="arrow">→ ひらく</div>
-    </a>
-
+<div class="controls">
+  <div class="sbox">
+    <span class="ms si" style="font-size:1rem">search</span>
+    <input type="text" id="si" placeholder="プレイヤーを検索…" oninput="onSearch()">
   </div>
-</main>
+  <button class="cbtn on" id="bPts" onclick="setSort('pts')">
+    <span class="ms" style="font-size:.95rem;vertical-align:middle">bolt</span>
+    <span class="i18n" data-en="Points" data-jp="ポイント順">ポイント順</span>
+  </button>
+  <button class="cbtn" id="bWr" onclick="setSort('wr')">
+    <span class="ms" style="font-size:.95rem;vertical-align:middle">workspace_premium</span>
+    <span class="i18n" data-en="WR Count" data-jp="WR 数順">WR 数順</span>
+  </button>
+  <button class="rbtn" id="rBtn" onclick="sfx('refresh');loadData()">
+    <span class="ms" style="font-size:.95rem;vertical-align:middle">refresh</span>
+    <span class="i18n" data-en="Refresh" data-jp="更新">更新</span>
+  </button>
+</div>
 
-<footer>tanabesan.github.io/lolbeans</footer>
+<div class="tw">
+  <div class="slbl i18n" data-en="— Champions Board —" data-jp="— チャンピオンボード —">— チャンピオンボード —</div>
+  <div id="tc"><div class="smsg"><span class="ms" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:var(--acc3)">progress_activity</span>読み込み中…</div></div>
+  <div class="pager" id="pg"></div>
+</div>
 
+<div class="info-overlay" id="infoOverlay" onclick="closeInfoOverlayBg(event)">
+  <div class="info-panel">
+    <button class="info-close" onclick="closeInfoOverlay()">✕</button>
+    <div class="info-scroll">
+      <div class="info-heading i18n" data-en="Point System" data-jp="ポイント計算方法">ポイント計算方法</div>
+      <div class="info-pt-table" id="infoPtTable"></div>
+      <div class="info-heading i18n" style="margin-top:2.2rem" data-en="Rank League" data-jp="ランクリーグ">ランクリーグ</div>
+      <div class="info-rank-row" id="infoRankRow"></div>
+    </div>
+  </div>
+</div>
+
+<div class="info-overlay" id="eventOverlay" onclick="closeEventOverlayBg(event)">
+  <div class="info-panel">
+    <button class="info-close" onclick="closeEventOverlay()">✕</button>
+    <div class="info-scroll">
+      <div class="info-heading i18n" data-en="WR Update Challenge" data-jp="WR更新チャレンジ">WR更新チャレンジ</div>
+      <div class="event-rule i18n" data-en="A random course with an existing WR is picked. If its WR is updated within 3 days, whoever holds the new WR earns +15pt!" data-jp="WRが存在するコースの中からランダムに1つ選ばれます。3日以内にそのWRが更新されたら、更新した人に+15ptが贈呈されます！">WRが存在するコースの中からランダムに1つ選ばれます。3日以内にそのWRが更新されたら、更新した人に+15ptが贈呈されます！</div>
+      <div class="event-card-list" id="eventCardList"></div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-corner tl"></div><div class="modal-corner br"></div>
+    <div class="modal-actions">
+      <button class="modal-dl" id="modalDlBtn" onclick="downloadModalCard()" title="画像として保存"><span class="ms" style="font-size:1rem">download</span></button>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-scroll" id="modalScroll"><div id="modalContent"></div></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const GAS='https://script.google.com/macros/s/AKfycby5v7E6_690eu6Lag2Kfe1_3YT09yeAzoSLjMDYldGBmClnjWtjFdILs2cnNCHs8GKraQ/exec';
+const THUMB_URL='https://lolbeans.io/ui/level-thumbnails/';
+const PG=30;
+let all=[],fil=[],sort='pts',pg=1,lang='jp';
+let ecoMode=localStorage.getItem('ecoMode')==='1';
+
+/* ── 省エネ ── */
+function applyEco(on){
+  ecoMode=on;localStorage.setItem('ecoMode',on?'1':'0');
+  document.body.classList.toggle('eco',on);
+  const fl=document.getElementById('gfont-link');if(fl)fl.disabled=on;
+}
+if(ecoMode)applyEco(true);
+
+/* ── SOUND (8bit風SE, Web Audio APIで自前生成) ── */
+let soundOn=localStorage.getItem('soundOn')!=='0';
+let actx=null;
+function ensureAudio(){
+  if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){soundOn=false;}}
+  if(actx&&actx.state==='suspended')actx.resume();
+}
+function beep(freq,dur,type,vol,slideTo){
+  if(!soundOn||!actx)return;
+  const t0=actx.currentTime;
+  const osc=actx.createOscillator();const gain=actx.createGain();
+  osc.type=type||'square';
+  osc.frequency.setValueAtTime(freq,t0);
+  if(slideTo)osc.frequency.exponentialRampToValueAtTime(slideTo,t0+dur);
+  gain.gain.setValueAtTime(vol||.05,t0);
+  gain.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  osc.connect(gain).connect(actx.destination);
+  osc.start(t0);osc.stop(t0+dur+.02);
+}
+function sfx(name){
+  if(!soundOn)return;
+  ensureAudio();if(!actx)return;
+  switch(name){
+    case'click':beep(560,.05,'square',.04);break;
+    case'toggle':beep(700,.06,'square',.045);break;
+    case'nav':beep(420,.04,'square',.03);break;
+    case'open':beep(320,.09,'square',.05,760);break;
+    case'close':beep(680,.08,'square',.045,300);break;
+    case'refresh':beep(440,.05,'square',.04);setTimeout(()=>beep(680,.06,'square',.04),70);break;
+    case'page':beep(500,.04,'square',.035);break;
+  }
+}
+function toggleSound(){
+  soundOn=!soundOn;localStorage.setItem('soundOn',soundOn?'1':'0');
+  document.getElementById('soundBtn').classList.toggle('on',soundOn);
+  document.getElementById('soundIcon').textContent=soundOn?'volume_up':'volume_off';
+  if(soundOn){ensureAudio();beep(600,.06,'square',.05);}
+}
+(function(){
+  const b=document.getElementById('soundBtn'),ic=document.getElementById('soundIcon');
+  if(b&&ic){b.classList.toggle('on',soundOn);ic.textContent=soundOn?'volume_up':'volume_off';}
+})();
+
+/* ── i18n ── */
+function setLang(l){
+  if(l!==lang)sfx('toggle');
+  lang=l;
+  document.body.classList.toggle('jp',l==='jp');
+  document.getElementById('hSub').textContent=l==='jp'?'コミュニティチャンピオンボード':'Community Champion Board';
+  document.querySelectorAll('.i18n').forEach(el=>{const v=el.dataset[l];if(v)el.textContent=v});
+  document.getElementById('si').placeholder=l==='jp'?'プレイヤーを検索…':'Search player…';
+  if(document.getElementById('infoOverlay').classList.contains('open'))buildInfoOverlay();
+  if(activeEvents.length>0)document.getElementById('eventBannerText').textContent=
+    lang==='jp'
+      ?(activeEvents.length>1?`イベント発生中！（${activeEvents.length}件）`:'イベント発生中！')
+      :(activeEvents.length>1?`Event Active! (${activeEvents.length})`:'Event Active!');
+  if(document.getElementById('eventOverlay').classList.contains('open'))renderEventCards();
+  if(activeEvents.length>0)renderEventPreview();
+  renderTable();
+}
+
+/* ── RANKS ── */
+const RANKS=[
+  {id:'gm',jp:'グランドマスター',en:'Grand Master',minPts:150,maxPts:Infinity,col:'#ff2d55',bg:'#1a000a',b1:'#ff2d55',b2:'#ff8c00',b3:'#ffd700',glow:'rgba(255,45,85,.8)',icon:'crown',subs:[{jp:'I',en:'I',min:150},{jp:'II',en:'II',min:200},{jp:'III',en:'III',min:250}]},
+  {id:'mst',jp:'マスター',en:'Master',minPts:75,maxPts:149,col:'#d946ef',bg:'#150020',b1:'#7c3aed',b2:'#c026d3',b3:'#e879f9',glow:'rgba(192,38,211,.75)',icon:'gem',subs:[{jp:'I',en:'I',min:75},{jp:'II',en:'II',min:95},{jp:'III',en:'III',min:120}]},
+  {id:'dia',jp:'ダイヤモンド',en:'Diamond',minPts:30,maxPts:74,col:'#22d3ee',bg:'#001520',b1:'#0891b2',b2:'#06b6d4',b3:'#67e8f9',glow:'rgba(6,182,212,.7)',icon:'diamond',subs:[{jp:'I',en:'I',min:30},{jp:'II',en:'II',min:42},{jp:'III',en:'III',min:55}]},
+  {id:'plat',jp:'プラチナ',en:'Platinum',minPts:10,maxPts:29,col:'#34d399',bg:'#001a10',b1:'#059669',b2:'#10b981',b3:'#6ee7b7',glow:'rgba(16,185,129,.65)',icon:'star6',subs:[{jp:'I',en:'I',min:10},{jp:'II',en:'II',min:16},{jp:'III',en:'III',min:22}]},
+  {id:'gold',jp:'ゴールド',en:'Gold',minPts:5,maxPts:9,col:'#fbbf24',bg:'#1a0e00',b1:'#b45309',b2:'#d97706',b3:'#fde68a',glow:'rgba(251,191,36,.7)',icon:'star5',subs:[{jp:'I',en:'I',min:5},{jp:'II',en:'II',min:6},{jp:'III',en:'III',min:8}]},
+  {id:'sil',jp:'シルバー',en:'Silver',minPts:2,maxPts:4,col:'#94a3b8',bg:'#0e1018',b1:'#475569',b2:'#64748b',b3:'#cbd5e1',glow:'rgba(100,116,139,.6)',icon:'shield',subs:[{jp:'I',en:'I',min:2},{jp:'II',en:'II',min:3},{jp:'III',en:'III',min:4}]},
+  {id:'brz',jp:'ブロンズ',en:'Bronze',minPts:0,maxPts:1,col:'#fb923c',bg:'#1a0800',b1:'#9a3412',b2:'#ea580c',b3:'#fed7aa',glow:'rgba(234,88,12,.6)',icon:'bean',subs:[{jp:'I',en:'I',min:0},{jp:'II',en:'II',min:1},{jp:'III',en:'III',min:1}]},
+];
+const getRank=p=>RANKS.find(r=>p>=r.minPts)||RANKS[6];
+function getSubTier(rk,pts){let r=0;for(let i=0;i<rk.subs.length;i++){if(pts>=rk.subs[i].min)r=i;}return r;}
+
+/* ── SHIELD IMAGE (自作画像に差し替え) ── */
+const RANK_IMG_BASE='https://tanabesan.github.io/lolbeans/community/file/';
+function mkShield(r,sz=44,subIdx=null){
+  // ブロンズだけ階級なしの共通1枚、他は I/II/III (1/2/3) の3枚
+  if(r.id==='brz')return RANK_IMG_BASE+'rank_brz.png';
+  const si=subIdx===null?2:subIdx;
+  return RANK_IMG_BASE+`rank_${r.id}_${si+1}.png`;
+}
+
+/* ── INFO OVERLAY (ランク一覧 / ポイント計算) ── */
+const PT_ROWS=[
+  {col:'#ff5070',en:'avg 1000+',jp:'平均 1000+',pt:15},
+  {col:'#ffc832',en:'avg 750+',jp:'平均 750+',pt:10},
+  {col:'#32dce8',en:'avg 500+',jp:'平均 500+',pt:5},
+  {col:'#a564ff',en:'avg 100+',jp:'平均 100+',pt:2},
+  {col:'#3ce68c',en:'under 100',jp:'100未満',pt:1},
+  {col:'#ffb800',en:'WR Challenge win',jp:'WRチャレンジ成功',pt:15},
+];
+function buildInfoOverlay(){
+  document.getElementById('infoRankRow').innerHTML=[...RANKS].reverse().map(r=>{
+    const url=mkShield(r,64,2);
+    const next=RANKS[RANKS.indexOf(r)-1];
+    const lbl=next?`${r.minPts}–${next.minPts-1} pt`:`${r.minPts}+ pt`;
+    const name=lang==='jp'?r.jp:r.en;
+    const subRows=r.id==='brz'?'':r.subs.map((s,i)=>{
+      const subLbl=s[lang];
+      const rangeEnd=i<r.subs.length-1?r.subs[i+1].min-1:null;
+      const range=rangeEnd!==null?`${s.min}–${rangeEnd}pt`:(next?`${s.min}–${next.minPts-1}pt`:`${s.min}pt+`);
+      return`<div class="info-rank-sub" style="border-color:${r.col}30"><span class="info-rank-sub-label" style="color:${r.col}">${name} ${subLbl}</span><span class="info-rank-sub-range">${range}</span></div>`;
+    }).join('');
+    return`<div class="info-rank-card" style="border-color:${r.col}50"><img class="info-rank-shield" src="${url}" alt="${name}"><span class="info-rank-name" style="color:${r.col}">${name}</span><span class="info-rank-pts">${lbl}</span>${subRows?`<div class="info-rank-subs">${subRows}</div>`:''}</div>`;
+  }).join('');
+  document.getElementById('infoPtTable').innerHTML=PT_ROWS.map(p=>{
+    const label=lang==='jp'?p.jp:p.en;
+    return`<div class="info-pt-row"><div class="info-pt-dot" style="background:${p.col}"></div><span>${label}</span><span class="info-pt-pts">${p.pt}pt</span></div>`;
+  }).join('');
+}
+function openInfoOverlay(){
+  sfx('open');
+  buildInfoOverlay();
+  document.getElementById('infoOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeInfoOverlay(){
+  const ov=document.getElementById('infoOverlay');
+  if(ov.classList.contains('open'))sfx('close');
+  ov.classList.remove('open');
+  document.body.style.overflow='';
+}
+function closeInfoOverlayBg(e){
+  if(e.target===document.getElementById('infoOverlay'))closeInfoOverlay();
+}
+
+/* ── EVENT BANNER (WR更新チャレンジ) ── */
+let activeEvents=[];
+let eventCountdownTimer=null;
+
+async function checkActiveEvents(){
+  try{
+    const res=await fetch(`${GAS}?action=activeChallenge`);
+    const data=await res.json();
+    activeEvents=(data&&data.active&&Array.isArray(data.events))?data.events:[];
+  }catch(e){
+    console.error('イベント情報の取得に失敗しました',e);
+    activeEvents=[];
+  }
+  const wrap=document.getElementById('eventBannerWrap');
+  const preview=document.getElementById('eventBannerPreview');
+  if(activeEvents.length>0){
+    document.getElementById('eventBannerText').textContent=
+      lang==='jp'
+        ?(activeEvents.length>1?`イベント発生中！（${activeEvents.length}件）`:'イベント発生中！')
+        :(activeEvents.length>1?`Event Active! (${activeEvents.length})`:'Event Active!');
+    wrap.style.display='flex';
+    renderEventPreview();
+    preview.style.display='flex';
+  }else{
+    wrap.style.display='none';
+    preview.style.display='none';
+    preview.innerHTML='';
+  }
+}
+
+function renderEventPreview(){
+  const preview=document.getElementById('eventBannerPreview');
+  if(!activeEvents.length){preview.innerHTML='';return;}
+  const ev=activeEvents[0];
+  const th=`${THUMB_URL}${ev.levelId}.png`;
+  preview.innerHTML=`<div class="event-banner-preview-inner" onclick="sfx('open');openEventModal()">
+    <div class="event-banner-preview-thumb" style="background-image:url('${th}')"></div>
+    <div class="event-banner-preview-info">
+      <div class="event-banner-preview-label">${lang==='jp'?'対象コース':'Target Course'}</div>
+      <div class="event-banner-preview-name">${esc(ev.levelName||'')}</div>
+    </div>
+  </div>`;
+}
+
+function formatCountdown(deadlineIso){
+  const diff=new Date(deadlineIso).getTime()-Date.now();
+  if(diff<=0)return lang==='jp'?'まもなく判定…':'Resolving soon…';
+  const h=Math.floor(diff/3600000);
+  const d=Math.floor(h/24);
+  const rh=h%24;
+  const m=Math.floor((diff%3600000)/60000);
+  if(d>0)return lang==='jp'?`あと ${d}日 ${rh}時間`:`${d}d ${rh}h left`;
+  if(rh>0)return lang==='jp'?`あと ${rh}時間 ${m}分`:`${rh}h ${m}m left`;
+  return lang==='jp'?`あと ${m}分`:`${m}m left`;
+}
+
+function courseTypeLabel(type){
+  const map={0:{jp:'サンドボックス',en:'Sandbox'},1:{jp:'タイムアタック',en:'Timed'},2:{jp:'コンペティティブ',en:'Competitive'},3:{jp:'エリミネーション',en:'Elimination'}};
+  const t=map[type];
+  return t?t[lang]:(lang==='jp'?'不明':'Unknown');
+}
+
+function renderEventCards(){
+  document.getElementById('eventCardList').innerHTML=activeEvents.map(ev=>{
+    const holderNow=ev.currentHolder||ev.holderAtStart||'—';
+    const badge=ev.updatedAlready
+      ?`<span class="event-card-badge updated">${lang==='jp'?'更新済み！':'Updated!'}</span>`
+      :`<span class="event-card-badge">${lang==='jp'?'挑戦中':'In Progress'}</span>`;
+    return`<div class="event-card">
+      <div class="event-card-thumb" style="background-image:url('${THUMB_URL}${ev.levelId}.png')"></div>
+      <div class="event-card-top">
+        <div class="event-card-name">${esc(ev.levelName||'')}${ev.author?`<div style="font-size:.55rem;color:var(--t3);font-weight:700;margin-top:4px">by ${esc(ev.author)} ・ ${courseTypeLabel(ev.type)}</div>`:''}</div>
+        ${badge}
+      </div>
+      <div class="event-card-row"><span class="lbl">${lang==='jp'?'開始時のWRホルダー':'Holder at Start'}</span><span class="val">${esc(ev.holderAtStart||'—')}</span></div>
+      <div class="event-card-row"><span class="lbl">${lang==='jp'?'現在のWRホルダー':'Current Holder'}</span><span class="val" style="color:${ev.updatedAlready?'var(--acc3)':'var(--t1)'}">${esc(holderNow)}</span></div>
+      <div class="event-card-row"><span class="lbl">${lang==='jp'?'判定まで':'Time Left'}</span><span class="val event-card-countdown">${formatCountdown(ev.deadline)}</span></div>
+    </div>`;
+  }).join('')||`<div style="text-align:center;color:var(--t3);font-size:.7rem;padding:2rem 0">${lang==='jp'?'現在進行中のイベントはありません':'No active events right now'}</div>`;
+}
+
+function openEventModal(){
+  renderEventCards();
+  document.getElementById('eventOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  clearInterval(eventCountdownTimer);
+  eventCountdownTimer=setInterval(renderEventCards,30000);
+}
+function closeEventOverlay(){
+  const ov=document.getElementById('eventOverlay');
+  if(ov.classList.contains('open'))sfx('close');
+  ov.classList.remove('open');
+  document.body.style.overflow='';
+  clearInterval(eventCountdownTimer);
+}
+function closeEventOverlayBg(e){
+  if(e.target===document.getElementById('eventOverlay'))closeEventOverlay();
+}
+
+/* ── DATA ── */
+async function loadData(){
+  const btn=document.getElementById('rBtn');btn.classList.add('spin');
+  document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:var(--acc3)">progress_activity</span>${lang==='jp'?'読み込み中…':'Loading…'}</div>`;
+  document.getElementById('pg').innerHTML='';
+  try{
+    const res=await fetch(GAS);if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const raw=await res.json();
+    if(!Array.isArray(raw)||!raw.length)throw new Error(lang==='jp'?'データが空です':'Empty data');
+    all=raw.map(r=>({name:String(r.name||''),under100:+r.under100||0,p100:+r.p100||0,p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0,event:+r.event||0}));
+    all.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
+    all.forEach((d,i)=>d.globalRank=i+1);
+    document.getElementById('sH').textContent=all.length.toLocaleString();
+    document.getElementById('sL').textContent=all.reduce((s,d)=>s+d.wrCount,0).toLocaleString();
+    document.getElementById('sT').textContent=new Date().toLocaleTimeString('ja-JP');
+    applyFil();toast(lang==='jp'?'読み込み完了':'Loaded');
+  }catch(e){
+    document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms big" style="color:var(--acc2)">error</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.65rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
+    toast(lang==='jp'?'失敗':'Failed');
+  }
+  btn.classList.remove('spin');
+}
+
+function setSort(m){sfx('toggle');sort=m;pg=1;document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('on'));document.getElementById(m==='pts'?'bPts':'bWr').classList.add('on');applyFil();}
+function onSearch(){pg=1;applyFil();}
+function applyFil(){
+  const q=document.getElementById('si').value.trim().toLowerCase();
+  fil=all.filter(d=>d.name.toLowerCase().includes(q));
+  if(sort==='pts')fil.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
+  else fil.sort((a,b)=>b.wrCount-a.wrCount||b.totalPoints-a.totalPoints);
+  renderTable();renderPager();
+}
+
+/* ── RENDER TABLE ── */
+function renderTable(){
+  if(!fil.length){document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:var(--t2)">manage_search</span>${lang==='jp'?'見つかりませんでした':'No players found.'}</div>`;return;}
+  const start=(pg-1)*PG;
+  const rows=fil.slice(start,start+PG).map((d,li)=>{
+    const gr=start+li+1;
+    const tc=gr===1?'top1':gr===2?'top2':gr===3?'top3':'topN';
+    const rk=getRank(d.totalPoints);const subIdx=getSubTier(rk,d.totalPoints);
+    const url=mkShield(rk,44,subIdx);
+    const filledPips=subIdx+1;let pips='';
+    if(rk.id!=='brz'){for(let i=0;i<3;i++){const filled=i<filledPips;pips+=`<div class="stpip ${filled?'filled':'empty'}" style="background:${filled?rk.col:'var(--t3)'};${filled?`--pc:${rk.col}`:''}"></div>`;}}
+    const chips=[d.event?`<span class="chip cev">イベント×${d.event}</span>`:'',d.p1000?`<span class="chip c1000">1000+×${d.p1000}</span>`:'',d.p750?`<span class="chip c750">750+×${d.p750}</span>`:'',d.p500?`<span class="chip c500">500+×${d.p500}</span>`:'',d.p100?`<span class="chip c100">100+×${d.p100}</span>`:'',d.under100?`<span class="chip cu100">&lt;100×${d.under100}</span>`:''].join('');
+    const rkName=lang==='jp'?rk.jp:rk.en;const subName=rk.subs[subIdx][lang];
+    const rankLabel=rk.id==='brz'?rkName:`${rkName} ${subName}`;
+    const ptsStyle=gr>3?`color:${rk.col};text-shadow:0 0 10px ${rk.col}55`:gr===1?'color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.55)':gr===2?'color:#c8c8d4':'color:#e8874a';
+    return`<tr class="rrow ${tc}" style="animation-delay:${li*.028}s" onclick="openModal(${d.globalRank-1})">
+      <td><span class="rnum">${gr}</span></td>
+      <td><div class="pcell"><div class="shw" style="--sg:${rk.glow}"><img class="shi" src="${url}" alt="${rkName}"></div>
+        <div>
+          <a class="pname pname-link" href="community.html?player=${encodeURIComponent(d.name)}" target="_blank" onclick="event.stopPropagation()" title="${lang==='jp'?'WRコース一覧を見る':'View WR courses'}">${esc(d.name)}</a>
+          <span class="prank-lbl" style="color:${rk.col};background:${rk.col}18;border:1px solid ${rk.col}28">${rankLabel}</span>
+          <div class="subtier">${pips}</div>
+        </div></div></td>
+      <td class="cc"><div class="cats">${chips||`<span style="color:var(--t3);font-size:.65rem">—</span>`}</div></td>
+      <td><div class="wrc">${d.wrCount}</div></td>
+      <td><div class="ptv" style="${ptsStyle}">${d.totalPoints}</div></td>
+    </tr>`;
+  }).join('');
+  const thPl=lang==='jp'?'プレイヤー':'Player';
+  const thCa=lang==='jp'?'カテゴリ':'WR Breakdown';
+  const thWr=lang==='jp'?'WR数':'WRs';
+  const thPt=lang==='jp'?'ポイント':'Points';
+  document.getElementById('tc').innerHTML=`<table class="rt"><thead><tr><th class="c" style="width:48px">#</th><th>${thPl}</th><th class="c cc">${thCa}</th><th class="c">${thWr}</th><th class="c">${thPt}</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ── MODAL ── */
+function openModal(idx){
+  const d=all[idx];if(!d)return;
+  sfx('open');
+  currentModalName=d.name;
+  const rk=getRank(d.totalPoints);const subIdx=getSubTier(rk,d.totalPoints);
+  const rkName=lang==='jp'?rk.jp:rk.en;const subName=rk.subs[subIdx][lang];
+  const rankLabel=rk.id==='brz'?rkName:`${rkName} ${subName}`;
+  const url=mkShield(rk,64,subIdx);
+  const pos=d.globalRank;const total=all.length;const pct=Math.round((1-(pos-1)/total)*100);
+  const sameRank=all.filter(x=>getRank(x.totalPoints).id===rk.id);
+  const posInRank=sameRank.findIndex(x=>x.name===d.name)+1;const totalInRank=sameRank.length;
+  const nextRank=RANKS[RANKS.indexOf(rk)-1];const prevMin=rk.minPts;const nextMin=nextRank?nextRank.minPts:rk.minPts+50;
+  const progressPct=nextRank?Math.min(100,Math.round(((d.totalPoints-prevMin)/(nextMin-prevMin))*100)):100;
+  const stCards=rk.id==='brz'?'':rk.subs.map((s,i)=>{const isCurrent=i===subIdx;const hi=i<rk.subs.length-1?rk.subs[i+1].min-1:(nextRank?nextMin-1:999);const range=`${s.min}–${hi}pt`;return`<div class="stier-card${isCurrent?' current':''}" style="--pc:${rk.col}"><div class="stier-card-name" style="color:${isCurrent?rk.col:'var(--t2)'}">${lang==='jp'?rk.jp:rk.en} ${s[lang]}</div><div class="stier-card-range">${range}</div>${isCurrent?`<div class="stier-card-you">▶ ${esc(d.name)}</div>`:''}</div>`;}).join('');
+  const chips=[d.event?`<span class="chip cev">イベント: ${d.event}個</span>`:'',d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:''].join('');
+  const t=lang==='jp';
+  const seg3=nextRank?(()=>{const rangeTotal=nextMin-prevMin;const b1=rk.subs[1].min;const b2=rk.subs[2].min;const p1=Math.round((b1-prevMin)/rangeTotal*100);const p2=Math.round((b2-prevMin)/rangeTotal*100);return{p1,p2,b1,b2};})():null;
+  const tipLeft=Math.min(98,Math.max(2,progressPct));
+  const tipHtml=nextRank?`<div class="rp-tip" id="rpTip" style="left:${tipLeft}%;--tipcolor:${rk.col}">${d.totalPoints}pt</div>`:'';
+  const divHtml=seg3?`<div class="rp-div" style="left:${seg3.p1}%"></div><div class="rp-div" style="left:${seg3.p2}%"></div>`:'';
+  const segLblHtml=seg3?`<div class="rp-seg-labels"><div class="rp-seg-lbl" style="flex:${seg3.p1}">${lang==='jp'?rk.jp+' I':rk.en+' I'}<br>${prevMin}–${seg3.b1-1}pt</div><div class="rp-seg-lbl" style="flex:${seg3.p2-seg3.p1}">${lang==='jp'?rk.jp+' II':rk.en+' II'}<br>${seg3.b1}–${seg3.b2-1}pt</div><div class="rp-seg-lbl" style="flex:${100-seg3.p2}">${lang==='jp'?rk.jp+' III':rk.en+' III'}<br>${seg3.b2}–${nextMin-1}pt</div></div>`:'';
+
+  // 次のグレード(階級)までの進捗 (ブロンズには階級が無いので次ランクまでの進捗に直行)
+  const gradeCur=subIdx;const isBrz=rk.id==='brz';const hasNextGrade=isBrz?!!nextRank:(gradeCur<2||nextRank);
+  let gradeMin,gradeNextMin,gradeProgressPct,gradeNextRankObj,gradeNextName;
+  if(isBrz){
+    if(nextRank){gradeMin=prevMin;gradeNextMin=nextMin;gradeProgressPct=progressPct;gradeNextRankObj=nextRank;gradeNextName=`${t?nextRank.jp:nextRank.en} ${nextRank.subs[0][lang]}`;}
+  }else if(gradeCur<2){
+    gradeMin=rk.subs[gradeCur].min;gradeNextMin=rk.subs[gradeCur+1].min;
+    gradeProgressPct=Math.min(100,Math.round(((d.totalPoints-gradeMin)/(gradeNextMin-gradeMin))*100));
+    gradeNextRankObj=rk;gradeNextName=`${t?rk.jp:rk.en} ${rk.subs[gradeCur+1][lang]}`;
+  }else if(nextRank){
+    gradeMin=rk.subs[2].min;gradeNextMin=nextMin;
+    gradeProgressPct=progressPct;
+    gradeNextRankObj=nextRank;gradeNextName=`${t?nextRank.jp:nextRank.en} ${nextRank.subs[0][lang]}`;
+  }
+  const gradeBarLabel=isBrz?(t?'次のランクまで':'Progress to Next Rank'):(t?'次のグレードまで':'Progress to Next Grade');
+  const gradeBarHtml=hasNextGrade?`<div class="rank-pos-wrap"><div class="rp-label">${gradeBarLabel}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${gradeProgressPct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div></div></div><div class="rp-pct">${t?`${gradeNextName} まで あと ${gradeNextMin-d.totalPoints}pt`:`${gradeNextMin-d.totalPoints}pt to ${gradeNextName}`}</div></div>`:`<div class="rank-pos-wrap"><div class="rp-label">${gradeBarLabel}</div><div class="rp-pct">${isBrz?(t?'最高ランク到達！':'Max Rank Achieved!'):(t?'最高グレード到達！':'Max Grade Achieved!')}</div></div>`;
+  document.getElementById('modalBox').style.setProperty('--pc',rk.col);
+  document.getElementById('modalBox').style.setProperty('--pg',rk.glow);
+  document.getElementById('modalBox').style.setProperty('--pb1',rk.bg);
+  document.getElementById('modalBox').style.setProperty('--pb2',rk.b1);
+  document.getElementById('modalContent').innerHTML=`
+    <div class="mh-banner mh-banner-wide${rk.id==='gm'?' mh-banner-fire':rk.id==='mst'?' mh-banner-fire-mst':rk.id==='dia'?' mh-banner-fire-dia':rk.id==='plat'?' mh-banner-fire-plat':''}"><div class="mh-title-wide"><div class="mh-name">${esc(d.name)}</div><span class="mh-rank" style="background:#0b0715;border:1px solid ${rk.col};color:${rk.col};opacity:1">${rankLabel}</span></div></div>
+    <div class="modal-inner mw">
+    <div class="mw-grid">
+      <div class="mw-side">
+        <img class="mw-shield-big" src="${url}" alt="${rkName}" style="filter:drop-shadow(0 6px 18px ${rk.glow})">
+        <div class="mw-rankname" style="color:${rk.col}">${rkName}</div>
+        ${rk.id!=='brz'?`<div class="mw-subname">${subName}</div>`:''}
+        ${rk.id!=='brz'?`<div class="stier-wrap mw-stier"><div class="stier-title">${t?'ランク内の階級':'Rank Divisions'}</div><div class="stier-grid">${stCards}</div></div>`:''}
+      </div>
+      <div class="mw-main">
+        <div class="mw-circles">
+          <div class="mw-circle" style="--cc:${rk.col}"><div class="mw-circle-lbl">${t?'ポイント':'Points'}</div><div class="mw-circle-val">${d.totalPoints}</div></div>
+          <div class="mw-circle" style="--cc:var(--acc3)"><div class="mw-circle-lbl">${t?'WR数':'WR Count'}</div><div class="mw-circle-val">${d.wrCount}</div></div>
+        </div>
+        <div class="rank-pos-wrap"><div class="rp-label">${t?'全体順位':'Overall Ranking'}</div><div class="rp-bar-bg"><div class="rp-bar-track"><div class="rp-bar-fill" style="width:${pct}%;background:linear-gradient(90deg,${rk.b1},${rk.b3})"></div></div></div><div class="rp-pct">${t?`全${total}人中 ${pos}位 (上位${100-pct}%)`:`#${pos} of ${total} players (Top ${100-pct}%)`}</div></div>
+        ${gradeBarHtml}
+        <div class="mstats mw-mstats"><div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div><div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div></div>
+        ${chips?`<div class="mchips">${chips}</div>`:''}
+      </div>
+    </div>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect();}
+function closeModalDirect(){
+  const mo=document.getElementById('modalOverlay');
+  if(mo.classList.contains('open'))sfx('close');
+  mo.classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ── CARD DOWNLOAD ── */
+let currentModalName='player';
+function downloadModalCard(){
+  sfx('click');
+  const modal=document.getElementById('modalBox');
+  const scroller=document.getElementById('modalScroll');
+  const btn=document.getElementById('modalDlBtn');
+  if(typeof html2canvas==='undefined'){alert(lang==='jp'?'画像生成ライブラリの読み込みに失敗しました':'Failed to load image library');return;}
+  btn.classList.add('busy');
+  modal.classList.add('capturing');
+  const prevMaxH=modal.style.maxHeight,prevScrollMaxH=scroller.style.maxHeight,prevOverflow=scroller.style.overflow;
+  modal.style.maxHeight='none';
+  scroller.style.overflow='visible';
+  scroller.style.maxHeight='none';
+  // Material Symbols(可変フォント)がhtml2canvasの文字マッチングを狂わせ、
+  // 数値テキストがアイコン化するバグがあるため、キャプチャ中だけ無効化する
+  const msLink=document.getElementById('ms-font-link');
+  const msWasEnabled=msLink&&!msLink.disabled;
+  if(msLink)msLink.disabled=true;
+  const runCapture=()=>html2canvas(modal,{backgroundColor:'#0d0e17',scale:2,useCORS:true}).then(canvas=>{
+    const a=document.createElement('a');
+    a.download=`${currentModalName}_profile.png`;
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+  }).catch(err=>{
+    console.error(err);
+    alert(lang==='jp'?'画像の生成に失敗しました':'Failed to generate image');
+  }).finally(()=>{
+    if(msLink&&msWasEnabled)msLink.disabled=false;
+    modal.style.maxHeight=prevMaxH;
+    scroller.style.maxHeight=prevScrollMaxH;
+    scroller.style.overflow=prevOverflow;
+    modal.classList.remove('capturing');
+    btn.classList.remove('busy');
+  });
+  // フォント無効化とレイアウト再計算が確実に反映されてからキャプチャする
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve())
+    .then(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))))
+    .then(runCapture);
+}
+
+/* ── PAGER ── */
+function renderPager(){
+  const tot=Math.ceil(fil.length/PG);if(tot<=1){document.getElementById('pg').innerHTML='';return;}
+  const ns=[];for(let i=1;i<=tot;i++){if(i===1||i===tot||Math.abs(i-pg)<=2)ns.push(i);else if(ns[ns.length-1]!=='…')ns.push('…');}
+  let h=`<button class="pgb" onclick="goP(${pg-1})" ${pg===1?'disabled':''}>◀</button>`;
+  ns.forEach(n=>{if(n==='…')h+=`<span style="color:var(--t3);padding:0 4px;font-size:.7rem">…</span>`;else h+=`<button class="pgb ${n===pg?'on':''}" onclick="goP(${n})">${n}</button>`;});
+  h+=`<button class="pgb" onclick="goP(${pg+1})" ${pg===tot?'disabled':''}>▶</button>`;
+  document.getElementById('pg').innerHTML=h;
+}
+function goP(n){const t=Math.ceil(fil.length/PG);if(n<1||n>t)return;sfx('page');pg=n;renderTable();renderPager();window.scrollTo({top:0,behavior:'smooth'});}
+
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3000);}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+window.TM_LANG_HOOK=l=>setLang(l==='ja'?'jp':'en');
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModalDirect();closeInfoOverlay();closeEventOverlay();}});
+
+loadData();
+checkActiveEvents();
+setInterval(checkActiveEvents,5*60*1000);
+</script>
 </body>
 </html>

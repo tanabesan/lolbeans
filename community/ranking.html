@@ -144,6 +144,22 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 }
 @keyframes eventBolt{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(-8deg) scale(1.15)}}
 
+/* ── MONTHLY MVP ── */
+.mvp-card{
+  position:relative;z-index:10;display:none;flex-direction:column;gap:9px;
+  width:calc(100% - 2rem);max-width:420px;margin:0 auto .9rem;
+  background:linear-gradient(160deg,#002830,#001a20);border:2px solid var(--acc3);
+  box-shadow:2px 2px 0 var(--edge),0 0 16px -2px var(--acc3);
+  padding:11px 16px 13px;
+}
+.mvp-card-head{
+  display:flex;align-items:center;gap:8px;color:var(--acc3);
+  font-family:var(--ffh);font-size:.58rem;font-weight:800;letter-spacing:.04em;
+}
+.mvp-card-body{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.mvp-card-name{font-family:var(--ffh);font-size:.85rem;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvp-card-pts{font-family:var(--ffh);font-size:.85rem;color:var(--acc3);text-shadow:0 0 10px rgba(50,220,240,.5);flex-shrink:0}
+
 .event-banner-card-body{display:flex;align-items:center;gap:12px}
 .event-banner-preview-thumb{
   width:54px;height:54px;flex-shrink:0;background-size:cover;background-position:center;
@@ -337,6 +353,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .c100{background:rgba(165,100,255,.13);color:#a564ff;border:1px solid rgba(165,100,255,.28)}
 .cu100{background:rgba(60,230,140,.1);color:#3ce68c;border:1px solid rgba(60,230,140,.22)}
 .cev{background:rgba(255,184,0,.15);color:var(--acc4,#ffb800);border:1px solid rgba(255,184,0,.32)}
+.cpeak{background:rgba(217,70,239,.14);color:#d946ef;border:1px solid rgba(217,70,239,.3)}
 
 .wrc{font-family:var(--ffh);font-size:.9rem;color:var(--acc3);text-align:center;text-shadow:var(--glow-b)}
 .ptv{font-family:var(--ffh);font-size:1rem;text-align:center;font-weight:900}
@@ -641,6 +658,13 @@ body.eco .logo-sub::after{content:''}
   </div>
   <div class="event-banner-card-body" id="eventBannerCardBody"></div>
 </div>
+<div class="mvp-card" id="mvpCard">
+  <div class="mvp-card-head">
+    <span class="ms" style="font-size:1.05rem">military_tech</span>
+    <span id="mvpCardLabel">今月のMVP</span>
+  </div>
+  <div class="mvp-card-body" id="mvpCardBody"></div>
+</div>
 
 <div class="info-toggle-wrap">
   <button class="info-toggle-btn" onclick="sfx('click');openInfoOverlay()">
@@ -715,7 +739,7 @@ body.eco .logo-sub::after{content:''}
 <div id="toast"></div>
 
 <script>
-const GAS='https://script.google.com/macros/s/AKfycby5v7E6_690eu6Lag2Kfe1_3YT09yeAzoSLjMDYldGBmClnjWtjFdILs2cnNCHs8GKraQ/exec';
+const GAS='https://script.google.com/macros/s/AKfycbzxTXBtpZGmHR9Tp4-sspOUNQCAIN9Ur73XkVhwT1o3U2jDEhQ_VfZ12Be55YSedkuMqw/exec';
 const THUMB_URL='https://lolbeans.io/ui/level-thumbnails/';
 const PG=30;
 let all=[],fil=[],sort='pts',pg=1,lang='jp',dataLoaded=false;
@@ -787,6 +811,7 @@ function setLang(l){
       :(activeEvents.length>1?`Event Active! (${activeEvents.length})`:'Event Active!');
   if(document.getElementById('eventOverlay').classList.contains('open'))renderEventCards();
   if(activeEvents.length>0)renderEventPreview();
+  if(dataLoaded)renderMonthlyMvp();
   renderTable();
 }
 
@@ -959,18 +984,27 @@ async function loadData(){
     const res=await fetch(GAS);if(!res.ok)throw new Error(`HTTP ${res.status}`);
     const raw=await res.json();
     if(!Array.isArray(raw)||!raw.length)throw new Error(lang==='jp'?'データが空です':'Empty data');
-    all=raw.map(r=>({name:String(r.name||''),under100:+r.under100||0,p100:+r.p100||0,p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0,event:+r.event||0}));
+    all=raw.map(r=>({name:String(r.name||''),under100:+r.under100||0,p100:+r.p100||0,p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0,event:+r.event||0,peakPoints:+r.peakPoints||0,monthlyPoints:+r.monthlyPoints||0}));
     all.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
     all.forEach((d,i)=>d.globalRank=i+1);
     document.getElementById('sH').textContent=all.length.toLocaleString();
     document.getElementById('sL').textContent=all.reduce((s,d)=>s+d.wrCount,0).toLocaleString();
     document.getElementById('sT').textContent=new Date().toLocaleTimeString('ja-JP');
-    dataLoaded=true;applyFil();toast(lang==='jp'?'読み込み完了':'Loaded');
+    dataLoaded=true;applyFil();renderMonthlyMvp();toast(lang==='jp'?'読み込み完了':'Loaded');
   }catch(e){
     document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms big" style="color:var(--acc2)">error</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.65rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
     toast(lang==='jp'?'失敗':'Failed');
   }
   btn.classList.remove('spin');
+}
+
+function renderMonthlyMvp(){
+  const card=document.getElementById('mvpCard');
+  const top=all.filter(d=>d.monthlyPoints>0).sort((a,b)=>b.monthlyPoints-a.monthlyPoints)[0];
+  document.getElementById('mvpCardLabel').textContent=lang==='jp'?'今月のMVP':"This Month's MVP";
+  if(!top){card.style.display='none';return;}
+  document.getElementById('mvpCardBody').innerHTML=`<div class="mvp-card-name">${esc(top.name)}</div><div class="mvp-card-pts">${top.monthlyPoints}pt</div>`;
+  card.style.display='flex';
 }
 
 function setSort(m){sfx('toggle');sort=m;pg=1;document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('on'));document.getElementById(m==='pts'?'bPts':'bWr').classList.add('on');applyFil();}
@@ -1034,7 +1068,10 @@ function openModal(idx){
   const nextRank=RANKS[RANKS.indexOf(rk)-1];const prevMin=rk.minPts;const nextMin=nextRank?nextRank.minPts:rk.minPts+50;
   const progressPct=nextRank?Math.min(100,Math.round(((d.totalPoints-prevMin)/(nextMin-prevMin))*100)):100;
   const stCards=rk.id==='brz'?'':rk.subs.map((s,i)=>{const isCurrent=i===subIdx;const hi=i<rk.subs.length-1?rk.subs[i+1].min-1:(nextRank?nextMin-1:999);const range=`${s.min}–${hi}pt`;return`<div class="stier-card${isCurrent?' current':''}" style="--pc:${rk.col}"><div class="stier-card-name" style="color:${isCurrent?rk.col:'var(--t2)'}">${lang==='jp'?rk.jp:rk.en} ${s[lang]}</div><div class="stier-card-range">${range}</div>${isCurrent?`<div class="stier-card-you">▶ ${esc(d.name)}</div>`:''}</div>`;}).join('');
-  const chips=[d.event?`<span class="chip cev">イベント: ${d.event}個</span>`:'',d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:''].join('');
+  const peakRk=d.peakPoints>d.totalPoints?getRank(d.peakPoints):null;
+  const peakSubIdx=peakRk?getSubTier(peakRk,d.peakPoints):0;
+  const peakLabel=peakRk?(peakRk.id==='brz'?(lang==='jp'?peakRk.jp:peakRk.en):`${lang==='jp'?peakRk.jp:peakRk.en} ${peakRk.subs[peakSubIdx][lang]}`):'';
+  const chips=[d.event?`<span class="chip cev">イベント: ${d.event}個</span>`:'',peakRk?`<span class="chip cpeak">${lang==='jp'?'歴代最高':'Peak'}: ${peakLabel} (${d.peakPoints}pt)</span>`:'',d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:''].join('');
   const t=lang==='jp';
   const seg3=nextRank?(()=>{const rangeTotal=nextMin-prevMin;const b1=rk.subs[1].min;const b2=rk.subs[2].min;const p1=Math.round((b1-prevMin)/rangeTotal*100);const p2=Math.round((b2-prevMin)/rangeTotal*100);return{p1,p2,b1,b2};})():null;
   const tipLeft=Math.min(98,Math.max(2,progressPct));

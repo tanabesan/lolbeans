@@ -460,6 +460,8 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .mh-shield{height:76px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 14px var(--mg,rgba(0,0,0,.5)))}
 .mh-name{font-family:var(--ffh);font-size:clamp(.68rem,2.6vw,.95rem);line-height:1.4;color:var(--t0);text-shadow:0 0 14px var(--pg),2px 2px 0 rgba(0,0,0,.5)}
 .mh-rank{font-family:var(--ffh);font-size:.42rem;padding:3px 9px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px;display:inline-block;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.mh-peak{font-family:var(--ffh);font-size:.4rem;padding:3px 9px 3px 8px;letter-spacing:.04em;margin-top:6px;margin-left:6px;display:inline-flex;align-items:center;gap:4px;background:rgba(217,70,239,.14);border:1px solid #d946ef;color:#f0abfc;clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px)}
+.mh-peak .ms{font-size:.65rem}
 
 /* rank position bar */
 .rank-pos-wrap{margin-bottom:10px}
@@ -739,7 +741,7 @@ body.eco .logo-sub::after{content:''}
 <div id="toast"></div>
 
 <script>
-const GAS='https://script.google.com/macros/s/AKfycbzxTXBtpZGmHR9Tp4-sspOUNQCAIN9Ur73XkVhwT1o3U2jDEhQ_VfZ12Be55YSedkuMqw/exec';
+const GAS='https://script.google.com/macros/s/AKfycbzitgPfprIJzhg58qIa_yxvUQR9UsrNOPZKA6RV84Hwzo37gSd6uW9CdA3PAqP9vrzBjw/exec';
 const THUMB_URL='https://lolbeans.io/ui/level-thumbnails/';
 const PG=30;
 let all=[],fil=[],sort='pts',pg=1,lang='jp',dataLoaded=false;
@@ -913,10 +915,11 @@ function renderEventPreview(){
   if(!activeEvents.length){body.innerHTML='';return;}
   const ev=activeEvents[0];
   const th=`${THUMB_URL}${ev.levelId}.png`;
+  const dispName=ev.title||ev.levelName||'';
   body.innerHTML=`<div class="event-banner-preview-thumb" style="background-image:url('${th}')"></div>
     <div class="event-banner-preview-info">
-      <div class="event-banner-preview-label">${lang==='jp'?'対象コース':'Target Course'}</div>
-      <div class="event-banner-preview-name">${esc(ev.levelName||'')}</div>
+      <div class="event-banner-preview-label">${ev.title?(lang==='jp'?'対象コース: '+esc(ev.levelName||''):'Course: '+esc(ev.levelName||'')):(lang==='jp'?'対象コース':'Target Course')}</div>
+      <div class="event-banner-preview-name">${esc(dispName)}</div>
     </div>`;
 }
 
@@ -944,14 +947,17 @@ function renderEventCards(){
     const badge=ev.updatedAlready
       ?`<span class="event-card-badge updated">${lang==='jp'?'更新済み！':'Updated!'}</span>`
       :`<span class="event-card-badge">${lang==='jp'?'挑戦中':'In Progress'}</span>`;
+    const dispName=ev.title||ev.levelName||'';
+    const subLine=ev.title&&ev.levelName?`<div style="font-size:.55rem;color:var(--t3);font-weight:700;margin-top:2px">${esc(ev.levelName)}</div>`:'';
     return`<div class="event-card">
       <div class="event-card-thumb" style="background-image:url('${THUMB_URL}${ev.levelId}.png')"></div>
       <div class="event-card-top">
-        <div class="event-card-name">${esc(ev.levelName||'')}${ev.author?`<div style="font-size:.55rem;color:var(--t3);font-weight:700;margin-top:4px">by ${esc(ev.author)} ・ ${courseTypeLabel(ev.type)}</div>`:''}</div>
+        <div class="event-card-name">${esc(dispName)}${subLine}${ev.subtitle?`<div style="font-size:.58rem;color:var(--t2);font-weight:600;margin-top:4px">${esc(ev.subtitle)}</div>`:''}${ev.author?`<div style="font-size:.55rem;color:var(--t3);font-weight:700;margin-top:4px">by ${esc(ev.author)} ・ ${courseTypeLabel(ev.type)}</div>`:''}</div>
         ${badge}
       </div>
       <div class="event-card-row"><span class="lbl">${lang==='jp'?'開始時のWRホルダー':'Holder at Start'}</span><span class="val">${esc(ev.holderAtStart||'—')}</span></div>
       <div class="event-card-row"><span class="lbl">${lang==='jp'?'現在のWRホルダー':'Current Holder'}</span><span class="val" style="color:${ev.updatedAlready?'var(--acc3)':'var(--t1)'}">${esc(holderNow)}</span></div>
+      <div class="event-card-row"><span class="lbl">${lang==='jp'?'付与ポイント':'Award'}</span><span class="val">${ev.plannedPoints||15}pt</span></div>
       <div class="event-card-row"><span class="lbl">${lang==='jp'?'判定まで':'Time Left'}</span><span class="val event-card-countdown">${formatCountdown(ev.deadline)}</span></div>
     </div>`;
   }).join('')||`<div style="text-align:center;color:var(--t3);font-size:.7rem;padding:2rem 0">${lang==='jp'?'現在進行中のイベントはありません':'No active events right now'}</div>`;
@@ -1071,7 +1077,7 @@ function openModal(idx){
   const peakRk=d.peakPoints>d.totalPoints?getRank(d.peakPoints):null;
   const peakSubIdx=peakRk?getSubTier(peakRk,d.peakPoints):0;
   const peakLabel=peakRk?(peakRk.id==='brz'?(lang==='jp'?peakRk.jp:peakRk.en):`${lang==='jp'?peakRk.jp:peakRk.en} ${peakRk.subs[peakSubIdx][lang]}`):'';
-  const chips=[d.event?`<span class="chip cev">イベント: ${d.event}個</span>`:'',peakRk?`<span class="chip cpeak">${lang==='jp'?'歴代最高':'Peak'}: ${peakLabel} (${d.peakPoints}pt)</span>`:'',d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:''].join('');
+  const chips=[d.event?`<span class="chip cev">イベント: ${d.event}個</span>`:'',d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:''].join('');
   const t=lang==='jp';
   const seg3=nextRank?(()=>{const rangeTotal=nextMin-prevMin;const b1=rk.subs[1].min;const b2=rk.subs[2].min;const p1=Math.round((b1-prevMin)/rangeTotal*100);const p2=Math.round((b2-prevMin)/rangeTotal*100);return{p1,p2,b1,b2};})():null;
   const tipLeft=Math.min(98,Math.max(2,progressPct));
@@ -1100,7 +1106,7 @@ function openModal(idx){
   document.getElementById('modalBox').style.setProperty('--pb1',rk.bg);
   document.getElementById('modalBox').style.setProperty('--pb2',rk.b1);
   document.getElementById('modalContent').innerHTML=`
-    <div class="mh-banner mh-banner-wide${rk.id==='gm'?' mh-banner-fire':rk.id==='mst'?' mh-banner-fire-mst':rk.id==='dia'?' mh-banner-fire-dia':rk.id==='plat'?' mh-banner-fire-plat':''}"><div class="mh-title-wide"><div class="mh-name">${esc(d.name)}</div><span class="mh-rank" style="background:#0b0715;border:1px solid ${rk.col};color:${rk.col};opacity:1">${rankLabel}</span></div></div>
+    <div class="mh-banner mh-banner-wide${rk.id==='gm'?' mh-banner-fire':rk.id==='mst'?' mh-banner-fire-mst':rk.id==='dia'?' mh-banner-fire-dia':rk.id==='plat'?' mh-banner-fire-plat':''}"><div class="mh-title-wide"><div class="mh-name">${esc(d.name)}</div><span class="mh-rank" style="background:#0b0715;border:1px solid ${rk.col};color:${rk.col};opacity:1">${rankLabel}</span>${peakRk?`<span class="mh-peak"><span class="ms">military_tech</span>${lang==='jp'?'歴代最高':'Peak'}: ${peakLabel} (${d.peakPoints}pt)</span>`:''}</div></div>
     <div class="modal-inner mw">
     <div class="mw-grid">
       <div class="mw-side">

@@ -124,16 +124,19 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .s-pill .ms{font-size:1rem;color:var(--acc3)}
 
 /* ── EVENT BANNER (WRチャレンジ発生中) ── */
-.event-banner-wrap{position:relative;z-index:10;display:flex;justify-content:center;padding:0 1rem .9rem}
-.event-banner-btn{
-  background:linear-gradient(90deg,#3a2d00,#4a3600);border:2px solid var(--acc4);
+.event-banner-card{
+  position:relative;z-index:10;display:flex;flex-direction:column;gap:9px;
+  width:calc(100% - 2rem);max-width:420px;margin:0 auto .9rem;
+  background:linear-gradient(160deg,#3a2d00,#241c00);border:2px solid var(--acc4);
   box-shadow:2px 2px 0 var(--edge),0 0 16px -2px var(--acc4);
-  padding:10px 20px;color:var(--acc4);font-family:var(--ffh);font-size:.55rem;
-  font-weight:800;cursor:pointer;letter-spacing:.04em;
-  display:inline-flex;align-items:center;gap:9px;
+  padding:11px 16px 13px;cursor:pointer;transition:transform .15s;
   animation:eventPulse 1.6s ease-in-out infinite;
 }
-.event-banner-btn:hover{background:var(--acc4);color:#241a00}
+.event-banner-card:hover{transform:translateY(-2px);background:linear-gradient(160deg,#4a3600,#2e2400)}
+.event-banner-card-head{
+  display:flex;align-items:center;gap:8px;color:var(--acc4);
+  font-family:var(--ffh);font-size:.58rem;font-weight:800;letter-spacing:.04em;
+}
 .event-banner-icon{animation:eventBolt .9s ease-in-out infinite}
 @keyframes eventPulse{
   0%,100%{box-shadow:2px 2px 0 var(--edge),0 0 10px -2px var(--acc4)}
@@ -141,13 +144,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 }
 @keyframes eventBolt{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(-8deg) scale(1.15)}}
 
-.event-banner-preview{position:relative;z-index:10;display:flex;justify-content:center;padding:0 1rem 1rem}
-.event-banner-preview-inner{
-  display:flex;align-items:center;gap:12px;width:100%;max-width:420px;
-  background:linear-gradient(160deg,var(--panel),var(--bg2));border:2px solid var(--acc4);
-  box-shadow:2px 2px 0 var(--edge);padding:8px 16px 8px 8px;cursor:pointer;transition:transform .15s;
-}
-.event-banner-preview-inner:hover{transform:translateY(-2px)}
+.event-banner-card-body{display:flex;align-items:center;gap:12px}
 .event-banner-preview-thumb{
   width:54px;height:54px;flex-shrink:0;background-size:cover;background-position:center;
   background-color:var(--bg2);border:2px solid var(--acc4);position:relative;overflow:hidden;
@@ -339,6 +336,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .c500{background:rgba(50,220,240,.1);color:#32dce8;border:1px solid rgba(50,220,240,.22)}
 .c100{background:rgba(165,100,255,.13);color:#a564ff;border:1px solid rgba(165,100,255,.28)}
 .cu100{background:rgba(60,230,140,.1);color:#3ce68c;border:1px solid rgba(60,230,140,.22)}
+.cev{background:rgba(255,184,0,.15);color:var(--acc4,#ffb800);border:1px solid rgba(255,184,0,.32)}
 
 .wrc{font-family:var(--ffh);font-size:.9rem;color:var(--acc3);text-align:center;text-shadow:var(--glow-b)}
 .ptv{font-family:var(--ffh);font-size:1rem;text-align:center;font-weight:900}
@@ -636,13 +634,13 @@ body.eco .logo-sub::after{content:''}
   <div class="s-pill"><span class="ms" style="font-size:1rem">schedule</span><span class="i18n" data-en="Updated" data-jp="更新">更新</span><span class="v" id="sT">—</span></div>
 </div>
 
-<div class="event-banner-wrap" id="eventBannerWrap" style="display:none">
-  <button class="event-banner-btn" onclick="sfx('open');openEventModal()">
-    <span class="ms event-banner-icon" style="font-size:1.15rem">bolt</span>
+<div class="event-banner-card" id="eventBannerCard" style="display:none" onclick="sfx('open');openEventModal()">
+  <div class="event-banner-card-head">
+    <span class="ms event-banner-icon" style="font-size:1.05rem">bolt</span>
     <span id="eventBannerText">イベント発生中！</span>
-  </button>
+  </div>
+  <div class="event-banner-card-body" id="eventBannerCardBody"></div>
 </div>
-<div class="event-banner-preview" id="eventBannerPreview" style="display:none"></div>
 
 <div class="info-toggle-wrap">
   <button class="info-toggle-btn" onclick="sfx('click');openInfoOverlay()">
@@ -720,7 +718,7 @@ body.eco .logo-sub::after{content:''}
 const GAS='https://script.google.com/macros/s/AKfycby5v7E6_690eu6Lag2Kfe1_3YT09yeAzoSLjMDYldGBmClnjWtjFdILs2cnNCHs8GKraQ/exec';
 const THUMB_URL='https://lolbeans.io/ui/level-thumbnails/';
 const PG=30;
-let all=[],fil=[],sort='pts',pg=1,lang='jp';
+let all=[],fil=[],sort='pts',pg=1,lang='jp',dataLoaded=false;
 let ecoMode=localStorage.getItem('ecoMode')==='1';
 
 /* ── 省エネ ── */
@@ -821,6 +819,7 @@ const PT_ROWS=[
   {col:'#32dce8',en:'avg 500+',jp:'平均 500+',pt:5},
   {col:'#a564ff',en:'avg 100+',jp:'平均 100+',pt:2},
   {col:'#3ce68c',en:'under 100',jp:'100未満',pt:1},
+  {col:'#ffb800',en:'WR Challenge win',jp:'WRチャレンジ成功',pt:15},
 ];
 function buildInfoOverlay(){
   document.getElementById('infoRankRow').innerHTML=[...RANKS].reverse().map(r=>{
@@ -870,35 +869,30 @@ async function checkActiveEvents(){
     console.error('イベント情報の取得に失敗しました',e);
     activeEvents=[];
   }
-  const wrap=document.getElementById('eventBannerWrap');
-  const preview=document.getElementById('eventBannerPreview');
+  const card=document.getElementById('eventBannerCard');
   if(activeEvents.length>0){
     document.getElementById('eventBannerText').textContent=
       lang==='jp'
         ?(activeEvents.length>1?`イベント発生中！（${activeEvents.length}件）`:'イベント発生中！')
         :(activeEvents.length>1?`Event Active! (${activeEvents.length})`:'Event Active!');
-    wrap.style.display='flex';
+    card.style.display='flex';
     renderEventPreview();
-    preview.style.display='flex';
   }else{
-    wrap.style.display='none';
-    preview.style.display='none';
-    preview.innerHTML='';
+    card.style.display='none';
+    document.getElementById('eventBannerCardBody').innerHTML='';
   }
 }
 
 function renderEventPreview(){
-  const preview=document.getElementById('eventBannerPreview');
-  if(!activeEvents.length){preview.innerHTML='';return;}
+  const body=document.getElementById('eventBannerCardBody');
+  if(!activeEvents.length){body.innerHTML='';return;}
   const ev=activeEvents[0];
   const th=`${THUMB_URL}${ev.levelId}.png`;
-  preview.innerHTML=`<div class="event-banner-preview-inner" onclick="sfx('open');openEventModal()">
-    <div class="event-banner-preview-thumb" style="background-image:url('${th}')"></div>
+  body.innerHTML=`<div class="event-banner-preview-thumb" style="background-image:url('${th}')"></div>
     <div class="event-banner-preview-info">
       <div class="event-banner-preview-label">${lang==='jp'?'対象コース':'Target Course'}</div>
       <div class="event-banner-preview-name">${esc(ev.levelName||'')}</div>
-    </div>
-  </div>`;
+    </div>`;
 }
 
 function formatCountdown(deadlineIso){
@@ -965,13 +959,13 @@ async function loadData(){
     const res=await fetch(GAS);if(!res.ok)throw new Error(`HTTP ${res.status}`);
     const raw=await res.json();
     if(!Array.isArray(raw)||!raw.length)throw new Error(lang==='jp'?'データが空です':'Empty data');
-    all=raw.map(r=>({name:String(r.name||''),under100:+r.under100||0,p100:+r.p100||0,p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0}));
+    all=raw.map(r=>({name:String(r.name||''),under100:+r.under100||0,p100:+r.p100||0,p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0,event:+r.event||0}));
     all.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
     all.forEach((d,i)=>d.globalRank=i+1);
     document.getElementById('sH').textContent=all.length.toLocaleString();
     document.getElementById('sL').textContent=all.reduce((s,d)=>s+d.wrCount,0).toLocaleString();
     document.getElementById('sT').textContent=new Date().toLocaleTimeString('ja-JP');
-    applyFil();toast(lang==='jp'?'読み込み完了':'Loaded');
+    dataLoaded=true;applyFil();toast(lang==='jp'?'読み込み完了':'Loaded');
   }catch(e){
     document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms big" style="color:var(--acc2)">error</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.65rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
     toast(lang==='jp'?'失敗':'Failed');
@@ -991,6 +985,7 @@ function applyFil(){
 
 /* ── RENDER TABLE ── */
 function renderTable(){
+  if(!dataLoaded)return;
   if(!fil.length){document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:var(--t2)">manage_search</span>${lang==='jp'?'見つかりませんでした':'No players found.'}</div>`;return;}
   const start=(pg-1)*PG;
   const rows=fil.slice(start,start+PG).map((d,li)=>{
@@ -1000,7 +995,7 @@ function renderTable(){
     const url=mkShield(rk,44,subIdx);
     const filledPips=subIdx+1;let pips='';
     if(rk.id!=='brz'){for(let i=0;i<3;i++){const filled=i<filledPips;pips+=`<div class="stpip ${filled?'filled':'empty'}" style="background:${filled?rk.col:'var(--t3)'};${filled?`--pc:${rk.col}`:''}"></div>`;}}
-    const chips=[d.p1000?`<span class="chip c1000">1000+×${d.p1000}</span>`:'',d.p750?`<span class="chip c750">750+×${d.p750}</span>`:'',d.p500?`<span class="chip c500">500+×${d.p500}</span>`:'',d.p100?`<span class="chip c100">100+×${d.p100}</span>`:'',d.under100?`<span class="chip cu100">&lt;100×${d.under100}</span>`:''].join('');
+    const chips=[d.event?`<span class="chip cev">イベント×${d.event}</span>`:'',d.p1000?`<span class="chip c1000">1000+×${d.p1000}</span>`:'',d.p750?`<span class="chip c750">750+×${d.p750}</span>`:'',d.p500?`<span class="chip c500">500+×${d.p500}</span>`:'',d.p100?`<span class="chip c100">100+×${d.p100}</span>`:'',d.under100?`<span class="chip cu100">&lt;100×${d.under100}</span>`:''].join('');
     const rkName=lang==='jp'?rk.jp:rk.en;const subName=rk.subs[subIdx][lang];
     const rankLabel=rk.id==='brz'?rkName:`${rkName} ${subName}`;
     const ptsStyle=gr>3?`color:${rk.col};text-shadow:0 0 10px ${rk.col}55`:gr===1?'color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.55)':gr===2?'color:#c8c8d4':'color:#e8874a';
@@ -1039,7 +1034,7 @@ function openModal(idx){
   const nextRank=RANKS[RANKS.indexOf(rk)-1];const prevMin=rk.minPts;const nextMin=nextRank?nextRank.minPts:rk.minPts+50;
   const progressPct=nextRank?Math.min(100,Math.round(((d.totalPoints-prevMin)/(nextMin-prevMin))*100)):100;
   const stCards=rk.id==='brz'?'':rk.subs.map((s,i)=>{const isCurrent=i===subIdx;const hi=i<rk.subs.length-1?rk.subs[i+1].min-1:(nextRank?nextMin-1:999);const range=`${s.min}–${hi}pt`;return`<div class="stier-card${isCurrent?' current':''}" style="--pc:${rk.col}"><div class="stier-card-name" style="color:${isCurrent?rk.col:'var(--t2)'}">${lang==='jp'?rk.jp:rk.en} ${s[lang]}</div><div class="stier-card-range">${range}</div>${isCurrent?`<div class="stier-card-you">▶ ${esc(d.name)}</div>`:''}</div>`;}).join('');
-  const chips=[d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:''].join('');
+  const chips=[d.event?`<span class="chip cev">イベント: ${d.event}個</span>`:'',d.p1000?`<span class="chip c1000">1000+: ${d.p1000}個</span>`:'',d.p750?`<span class="chip c750">750+: ${d.p750}個</span>`:'',d.p500?`<span class="chip c500">500+: ${d.p500}個</span>`:'',d.p100?`<span class="chip c100">100+: ${d.p100}個</span>`:'',d.under100?`<span class="chip cu100">&lt;100: ${d.under100}個</span>`:''].join('');
   const t=lang==='jp';
   const seg3=nextRank?(()=>{const rangeTotal=nextMin-prevMin;const b1=rk.subs[1].min;const b2=rk.subs[2].min;const p1=Math.round((b1-prevMin)/rangeTotal*100);const p2=Math.round((b2-prevMin)/rangeTotal*100);return{p1,p2,b1,b2};})():null;
   const tipLeft=Math.min(98,Math.max(2,progressPct));

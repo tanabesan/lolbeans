@@ -657,7 +657,7 @@ body.eco .site-header h1::after{box-shadow:none}
 <script>
 const API_BASE_URL='https://s.lolbeans.io/level-list?';
 const THUMB_URL='https://lolbeans.io/ui/level-thumbnails/';
-const GAS_URL='https://script.google.com/macros/s/AKfycbxJGyMlePH4yerCXagtaxK6ELfheztGp5Mnys5E3jNouotlxhutydxEOROqHc3oI0on8A/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycby5v7E6_690eu6Lag2Kfe1_3YT09yeAzoSLjMDYldGBmClnjWtjFdILs2cnNCHs8GKraQ/exec';
 const PER_PAGE=12;
 const LT={'-1':{ja:'すべて',en:'All',icon:'https://tanabesan.github.io/lolbeans/file/page/all.png'},'0':{ja:'サンドボックス',en:'Sandbox',icon:'https://tanabesan.github.io/lolbeans/file/page/sandbox.png'},'1':{ja:'タイムレース',en:'Timed Race',icon:'https://tanabesan.github.io/lolbeans/file/page/timed.png'},'2':{ja:'競争レース',en:'Competitive Race',icon:'https://tanabesan.github.io/lolbeans/file/page/competitive.png'},'3':{ja:'エリミネーション',en:'Elimination',icon:'https://tanabesan.github.io/lolbeans/file/page/elimination.png'}};
 let lang='ja',page=0,maxP=0,activeEl=null,listView=localStorage.getItem('viewMode')==='list',pMode=false,pName='',devMode=false;
@@ -953,6 +953,10 @@ function applyView(){const g=document.getElementById('level-grid');const gb=docu
 function applyLang(l){lang=l;localStorage.setItem('language',l);document.documentElement.lang=l;document.body.classList.toggle('jp',l==='ja');const t=T[l];document.getElementById('page-title').textContent=t.title;document.getElementById('hero-title').innerHTML=t.h1.replace('\n','<br>');document.getElementById('hero-subtitle').textContent=t.sub;document.getElementById('label-search-text').textContent=t.lSearch;document.getElementById('label-sort-type').textContent=t.lSort;document.getElementById('label-filter-type').textContent=t.lType;document.getElementById('label-filter-finish').textContent=t.lFin;document.getElementById('label-view-mode').textContent=t.lView;document.getElementById('search-button').innerHTML=`<i class="fas fa-search"></i> ${t.btnS}`;const so=document.getElementById('sort-type').options;[[0,'s0'],[1,'s1'],[2,'s2'],[3,'s4'],[4,'s5']].forEach(([i,k])=>{if(so[i])so[i].textContent=t[k]});const to=document.getElementById('filter-type').options;[[0,'tM1'],[1,'t0'],[2,'t1'],[3,'t2'],[4,'t3']].forEach(([i,k])=>{if(to[i])to[i].textContent=t[k]});const fo=document.getElementById('filter-finish').options;[[0,'f0'],[1,'f1'],[2,'f2'],[3,'f3']].forEach(([i,k])=>{if(fo[i])fo[i].textContent=t[k]});if(pMode){document.getElementById('playerBannerName').textContent=pName+t.pbSfx;document.getElementById('playerBannerClose').textContent=t.pbBack}else{fetchL(page)}}
 
 window.TM_LANG_HOOK=l=>applyLang(l);
+
+// nav-menu.js（サイト共通の言語切替）との連携用。
+// nav-menu.js側の言語コードは 'jp'/'en'、このページ内部は 'ja'/'en' のため変換する。
+window.setLang=l=>applyLang(l==='jp'?'ja':'en');
 
 
 document.addEventListener('DOMContentLoaded',()=>{

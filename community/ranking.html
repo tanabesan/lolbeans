@@ -123,6 +123,42 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .s-pill .v{color:var(--acc);font-family:var(--ffh);font-size:.65rem;text-shadow:var(--glow-g)}
 .s-pill .ms{font-size:1rem;color:var(--acc3)}
 
+/* ── EVENT BANNER (WRチャレンジ発生中) ── */
+.event-banner-wrap{position:relative;z-index:10;display:flex;justify-content:center;padding:0 1rem .9rem}
+.event-banner-btn{
+  background:linear-gradient(90deg,#3a2d00,#4a3600);border:2px solid var(--acc4);
+  box-shadow:2px 2px 0 var(--edge),0 0 16px -2px var(--acc4);
+  padding:10px 20px;color:var(--acc4);font-family:var(--ffh);font-size:.55rem;
+  font-weight:800;cursor:pointer;letter-spacing:.04em;
+  display:inline-flex;align-items:center;gap:9px;
+  animation:eventPulse 1.6s ease-in-out infinite;
+}
+.event-banner-btn:hover{background:var(--acc4);color:#241a00}
+.event-banner-icon{animation:eventBolt .9s ease-in-out infinite}
+@keyframes eventPulse{
+  0%,100%{box-shadow:2px 2px 0 var(--edge),0 0 10px -2px var(--acc4)}
+  50%{box-shadow:2px 2px 0 var(--edge),0 0 26px 2px var(--acc4)}
+}
+@keyframes eventBolt{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(-8deg) scale(1.15)}}
+
+.event-rule{max-width:640px;margin:0 auto 1.6rem;text-align:center;font-size:.72rem;line-height:1.7;color:var(--t2)}
+.event-card-list{display:flex;flex-direction:column;gap:12px;max-width:640px;margin:0 auto}
+.event-card{
+  background:linear-gradient(160deg,var(--panel),var(--bg2));border:2px solid var(--acc4);
+  padding:16px 18px;box-shadow:3px 3px 0 var(--edge);
+}
+.event-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.event-card-name{font-family:var(--ffh);font-size:.6rem;color:var(--acc4);line-height:1.5}
+.event-card-badge{
+  flex-shrink:0;font-family:var(--ffh);font-size:.44rem;font-weight:800;padding:4px 8px;
+  background:var(--acc4);color:#241a00;white-space:nowrap;
+}
+.event-card-badge.updated{background:var(--acc3);box-shadow:0 0 10px -2px var(--acc3)}
+.event-card-row{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;color:var(--t1);padding:5px 0;border-top:1px solid var(--line2)}
+.event-card-row .lbl{color:var(--t3);font-weight:700}
+.event-card-row .val{font-weight:800}
+.event-card-countdown{font-family:var(--ffh);color:var(--acc4);font-size:.55rem}
+
 /* ── INFO TOGGLE BUTTON ── */
 .info-toggle-wrap{position:relative;z-index:10;display:flex;justify-content:center;align-items:center;gap:10px;padding:0 1rem 1.2rem}
 .info-toggle-btn{
@@ -570,6 +606,13 @@ body.eco .logo-sub::after{content:''}
   <div class="s-pill"><span class="ms" style="font-size:1rem">schedule</span><span class="i18n" data-en="Updated" data-jp="更新">更新</span><span class="v" id="sT">—</span></div>
 </div>
 
+<div class="event-banner-wrap" id="eventBannerWrap" style="display:none">
+  <button class="event-banner-btn" onclick="sfx('open');openEventModal()">
+    <span class="ms event-banner-icon" style="font-size:1.15rem">bolt</span>
+    <span id="eventBannerText">イベント発生中！</span>
+  </button>
+</div>
+
 <div class="info-toggle-wrap">
   <button class="info-toggle-btn" onclick="sfx('click');openInfoOverlay()">
     <span class="ms" style="font-size:1.05rem;vertical-align:middle">shield</span>
@@ -616,6 +659,18 @@ body.eco .logo-sub::after{content:''}
     </div>
   </div>
 </div>
+
+<div class="info-overlay" id="eventOverlay" onclick="closeEventOverlayBg(event)">
+  <div class="info-panel">
+    <button class="info-close" onclick="closeEventOverlay()">✕</button>
+    <div class="info-scroll">
+      <div class="info-heading i18n" data-en="WR Update Challenge" data-jp="WR更新チャレンジ">WR更新チャレンジ</div>
+      <div class="event-rule i18n" data-en="A random course with an existing WR is picked. If its WR is updated within 3 days, whoever holds the new WR earns +15pt!" data-jp="WRが存在するコースの中からランダムに1つ選ばれます。3日以内にそのWRが更新されたら、更新した人に+15ptが贈呈されます！">WRが存在するコースの中からランダムに1つ選ばれます。3日以内にそのWRが更新されたら、更新した人に+15ptが贈呈されます！</div>
+      <div class="event-card-list" id="eventCardList"></div>
+    </div>
+  </div>
+</div>
+
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal" id="modalBox">
@@ -696,6 +751,11 @@ function setLang(l){
   document.querySelectorAll('.i18n').forEach(el=>{const v=el.dataset[l];if(v)el.textContent=v});
   document.getElementById('si').placeholder=l==='jp'?'プレイヤーを検索…':'Search player…';
   if(document.getElementById('infoOverlay').classList.contains('open'))buildInfoOverlay();
+  if(activeEvents.length>0)document.getElementById('eventBannerText').textContent=
+    lang==='jp'
+      ?(activeEvents.length>1?`イベント発生中！（${activeEvents.length}件）`:'イベント発生中！')
+      :(activeEvents.length>1?`Event Active! (${activeEvents.length})`:'Event Active!');
+  if(document.getElementById('eventOverlay').classList.contains('open'))renderEventCards();
   renderTable();
 }
 
@@ -762,6 +822,85 @@ function closeInfoOverlay(){
 }
 function closeInfoOverlayBg(e){
   if(e.target===document.getElementById('infoOverlay'))closeInfoOverlay();
+}
+
+/* ── EVENT BANNER (WR更新チャレンジ) ── */
+let activeEvents=[];
+let eventCountdownTimer=null;
+
+async function checkActiveEvents(){
+  try{
+    const res=await fetch(`${GAS}?action=activeChallenge`);
+    const data=await res.json();
+    activeEvents=(data&&data.active&&Array.isArray(data.events))?data.events:[];
+  }catch(e){
+    console.error('イベント情報の取得に失敗しました',e);
+    activeEvents=[];
+  }
+  const wrap=document.getElementById('eventBannerWrap');
+  if(activeEvents.length>0){
+    document.getElementById('eventBannerText').textContent=
+      lang==='jp'
+        ?(activeEvents.length>1?`イベント発生中！（${activeEvents.length}件）`:'イベント発生中！')
+        :(activeEvents.length>1?`Event Active! (${activeEvents.length})`:'Event Active!');
+    wrap.style.display='flex';
+  }else{
+    wrap.style.display='none';
+  }
+}
+
+function formatCountdown(deadlineIso){
+  const diff=new Date(deadlineIso).getTime()-Date.now();
+  if(diff<=0)return lang==='jp'?'まもなく判定…':'Resolving soon…';
+  const h=Math.floor(diff/3600000);
+  const d=Math.floor(h/24);
+  const rh=h%24;
+  const m=Math.floor((diff%3600000)/60000);
+  if(d>0)return lang==='jp'?`あと ${d}日 ${rh}時間`:`${d}d ${rh}h left`;
+  if(rh>0)return lang==='jp'?`あと ${rh}時間 ${m}分`:`${rh}h ${m}m left`;
+  return lang==='jp'?`あと ${m}分`:`${m}m left`;
+}
+
+function courseTypeLabel(type){
+  const map={0:{jp:'サンドボックス',en:'Sandbox'},1:{jp:'タイムアタック',en:'Timed'},2:{jp:'コンペティティブ',en:'Competitive'},3:{jp:'エリミネーション',en:'Elimination'}};
+  const t=map[type];
+  return t?t[lang]:(lang==='jp'?'不明':'Unknown');
+}
+
+function renderEventCards(){
+  document.getElementById('eventCardList').innerHTML=activeEvents.map(ev=>{
+    const holderNow=ev.currentHolder||ev.holderAtStart||'—';
+    const badge=ev.updatedAlready
+      ?`<span class="event-card-badge updated">${lang==='jp'?'更新済み！':'Updated!'}</span>`
+      :`<span class="event-card-badge">${lang==='jp'?'挑戦中':'In Progress'}</span>`;
+    return`<div class="event-card">
+      <div class="event-card-top">
+        <div class="event-card-name">${esc(ev.levelName||'')}${ev.author?`<div style="font-size:.55rem;color:var(--t3);font-weight:700;margin-top:4px">by ${esc(ev.author)} ・ ${courseTypeLabel(ev.type)}</div>`:''}</div>
+        ${badge}
+      </div>
+      <div class="event-card-row"><span class="lbl">${lang==='jp'?'開始時のWRホルダー':'Holder at Start'}</span><span class="val">${esc(ev.holderAtStart||'—')}</span></div>
+      <div class="event-card-row"><span class="lbl">${lang==='jp'?'現在のWRホルダー':'Current Holder'}</span><span class="val" style="color:${ev.updatedAlready?'var(--acc3)':'var(--t1)'}">${esc(holderNow)}</span></div>
+      <div class="event-card-row"><span class="lbl">${lang==='jp'?'判定まで':'Time Left'}</span><span class="val event-card-countdown">${formatCountdown(ev.deadline)}</span></div>
+    </div>`;
+  }).join('')||`<div style="text-align:center;color:var(--t3);font-size:.7rem;padding:2rem 0">${lang==='jp'?'現在進行中のイベントはありません':'No active events right now'}</div>`;
+}
+
+function openEventModal(){
+  renderEventCards();
+  document.getElementById('eventOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  clearInterval(eventCountdownTimer);
+  eventCountdownTimer=setInterval(renderEventCards,30000);
+}
+function closeEventOverlay(){
+  const ov=document.getElementById('eventOverlay');
+  if(ov.classList.contains('open'))sfx('close');
+  ov.classList.remove('open');
+  document.body.style.overflow='';
+  clearInterval(eventCountdownTimer);
+}
+function closeEventOverlayBg(e){
+  if(e.target===document.getElementById('eventOverlay'))closeEventOverlay();
 }
 
 /* ── DATA ── */
@@ -965,9 +1104,11 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 window.TM_LANG_HOOK=l=>setLang(l==='ja'?'jp':'en');
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModalDirect();closeInfoOverlay();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModalDirect();closeInfoOverlay();closeEventOverlay();}});
 
 loadData();
+checkActiveEvents();
+setInterval(checkActiveEvents,5*60*1000);
 </script>
 </body>
 </html>

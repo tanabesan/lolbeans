@@ -661,6 +661,7 @@ const GAS_URL='https://script.google.com/macros/s/AKfycbzitgPfprIJzhg58qIa_yxvUQ
 const PER_PAGE=12;
 const LT={'-1':{ja:'すべて',en:'All',icon:'https://tanabesan.github.io/lolbeans/file/page/all.png'},'0':{ja:'サンドボックス',en:'Sandbox',icon:'https://tanabesan.github.io/lolbeans/file/page/sandbox.png'},'1':{ja:'タイムレース',en:'Timed Race',icon:'https://tanabesan.github.io/lolbeans/file/page/timed.png'},'2':{ja:'競争レース',en:'Competitive Race',icon:'https://tanabesan.github.io/lolbeans/file/page/competitive.png'},'3':{ja:'エリミネーション',en:'Elimination',icon:'https://tanabesan.github.io/lolbeans/file/page/elimination.png'}};
 let lang='ja',page=0,maxP=0,activeEl=null,listView=localStorage.getItem('viewMode')==='list',pMode=false,pName='',devMode=false;
+let fetchGen=0; // レース対策: 世代トークン。古いリクエストの結果は描画しない
 let ecoMode=localStorage.getItem('ecoMode')==='1';
 
 /* ── 省エネモード ── */
@@ -881,28 +882,31 @@ async function fetchL(pi=0,pushUrl=true){
   const t=T[lang];
   const c=document.getElementById('level-grid');
   const ld=document.getElementById('loading-message');
+  const gen=++fetchGen; // このリクエストの世代を確保。以降、自分が最新か毎回確認する
   ld.innerHTML=`<i class="fas fa-spinner fa-spin"></i> ${t.loading}`;
   ld.style.display='block';c.innerHTML='';
   document.getElementById('pagination').innerHTML='';
   closeModal();
   if(pushUrl)pushFilterUrl(pi);
   const f=getFilterValues();
-  if(f.s==='5'){await fetchWr(pi,f);return}
+  if(f.s==='5'){await fetchWr(pi,f,gen);return}
   try{
     const p=new URLSearchParams({i:pi,n:PER_PAGE,m:PER_PAGE,t:f.s,ft:f.ft,ff:f.ff});
     if(f.q)p.append('ts',f.q);
     const res=await fetch(API_BASE_URL+p);
+    if(gen!==fetchGen)return; // 自分より新しいリクエストが走っていたら描画しない
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
+    if(gen!==fetchGen)return;
     page=pi;maxP=data.m;
     if(data.l&&data.l.length){
       data.l.forEach((lv,i)=>c.appendChild(mkCard(lv,i)));
       mkPager();applyView();ld.style.display='none';
     }else{ld.innerHTML=t.noL}
-  }catch(e){ld.innerHTML=`${T[lang].err} (${e.message})`}
+  }catch(e){if(gen===fetchGen)ld.innerHTML=`${T[lang].err} (${e.message})`}
 }
 
-async function fetchWr(pi,f){
+async function fetchWr(pi,f,gen){
   const t=T[lang];
   const c=document.getElementById('level-grid');
   const ld=document.getElementById('loading-message');
@@ -910,8 +914,10 @@ async function fetchWr(pi,f){
     const p=new URLSearchParams({action:'recentWr'});
     if(f.ft!=='-1')p.append('type',f.ft);
     const res=await fetch(GAS_URL+'?'+p);
+    if(gen!==fetchGen)return; // 自分より新しいリクエストが走っていたら描画しない
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
+    if(gen!==fetchGen)return;
     if(data.error)throw new Error(data.error);
     let courses=data.courses||[];
     if(f.q){
@@ -934,7 +940,7 @@ async function fetchWr(pi,f){
       pageItems.forEach((lv,i)=>c.appendChild(mkCard(lv,i)));
       mkPager();applyView();ld.style.display='none';
     }else{ld.innerHTML=t.noL}
-  }catch(e){ld.innerHTML=`${T[lang].err} (${e.message})`}
+  }catch(e){if(gen===fetchGen)ld.innerHTML=`${T[lang].err} (${e.message})`}
 }
 
 function clearPF(){
@@ -946,7 +952,7 @@ function clearPF(){
   document.getElementById('filterSection').style.display='';
   fetchL(0);
 }
-async function fetchPC(name){const t=T[lang];const c=document.getElementById('level-grid');const ld=document.getElementById('loading-message');ld.innerHTML=`<i class="fas fa-spinner fa-spin"></i> ${t.pbLoad(name)}`;ld.style.display='block';c.innerHTML='';document.getElementById('pagination').innerHTML='';document.getElementById('playerBanner').style.display='flex';document.getElementById('playerBannerName').textContent=name+t.pbSfx;document.getElementById('playerBannerCount').textContent='...';document.getElementById('playerBannerClose').textContent=t.pbBack;document.getElementById('filterSection').style.display='none';try{const res=await fetch(GAS_URL+'?action=player&name='+encodeURIComponent(name));if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();if(data.error)throw new Error(data.error);const courses=data.courses||[];document.getElementById('playerBannerCount').textContent=t.pbCnt(courses.length);if(!courses.length){ld.innerHTML=t.pbNone;return}ld.style.display='none';courses.forEach((lv,i)=>c.appendChild(mkCard(lv,i)));applyView()}catch(e){ld.innerHTML=`${T[lang].err} (${e.message})`}}
+async function fetchPC(name){const t=T[lang];const c=document.getElementById('level-grid');const ld=document.getElementById('loading-message');const gen=++fetchGen;ld.innerHTML=`<i class="fas fa-spinner fa-spin"></i> ${t.pbLoad(name)}`;ld.style.display='block';c.innerHTML='';document.getElementById('pagination').innerHTML='';document.getElementById('playerBanner').style.display='flex';document.getElementById('playerBannerName').textContent=name+t.pbSfx;document.getElementById('playerBannerCount').textContent='...';document.getElementById('playerBannerClose').textContent=t.pbBack;document.getElementById('filterSection').style.display='none';try{const res=await fetch(GAS_URL+'?action=player&name='+encodeURIComponent(name));if(gen!==fetchGen)return;if(!res.ok)throw new Error('HTTP '+res.status);const data=await res.json();if(gen!==fetchGen)return;if(data.error)throw new Error(data.error);const courses=data.courses||[];document.getElementById('playerBannerCount').textContent=t.pbCnt(courses.length);if(!courses.length){ld.innerHTML=t.pbNone;return}ld.style.display='none';courses.forEach((lv,i)=>c.appendChild(mkCard(lv,i)));applyView()}catch(e){if(gen===fetchGen)ld.innerHTML=`${T[lang].err} (${e.message})`}}
 
 function applyView(){const g=document.getElementById('level-grid');const gb=document.getElementById('btn-grid-view');const lb=document.getElementById('btn-list-view');if(listView){g.classList.add('list-view');lb.classList.add('active');gb.classList.remove('active')}else{g.classList.remove('list-view');gb.classList.add('active');lb.classList.remove('active')}}
 

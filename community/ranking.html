@@ -516,6 +516,24 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .mstat-val{font-family:var(--ffh);font-size:1.05rem;text-shadow:0 0 10px var(--pg)}
 .mchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
 
+/* ── モーダル内: 保持WRコース一覧 ── */
+.mw-courses{margin-top:6px;border-top:1px solid var(--line2);padding-top:12px}
+.mwc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mwc-title{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase}
+.mwc-viewall{font-family:var(--ffh);font-size:.42rem;color:var(--acc3);text-decoration:none;letter-spacing:.04em;white-space:nowrap}
+.mwc-viewall:hover{text-decoration:underline}
+.mwc-body{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.mwc-loading,.mwc-empty,.mwc-error{font-size:.68rem;color:var(--t2);padding:10px 4px;text-align:center}
+.mwc-error{color:#ff5070}
+.mwc-item{
+  display:flex;align-items:center;gap:10px;background:var(--edge);
+  border:1px solid var(--line2);border-left:3px solid var(--pc);
+  padding:7px 10px;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
+}
+.mwc-item-name{flex:1;min-width:0;font-size:.72rem;color:var(--t0);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mwc-item-time{font-family:var(--ffh);font-size:.5rem;color:var(--pc);flex-shrink:0;white-space:nowrap}
+.mwc-more{font-size:.6rem;color:var(--t2);text-align:center;padding:4px 0}
+
 /* ── WIDE (Apex風) LAYOUT ── */
 .mh-banner-wide{text-align:center;padding:24px 26px 20px}
 .mh-banner-fire{
@@ -1022,13 +1040,16 @@ async function loadData(){
   try{
     const res=await fetch(GAS);if(!res.ok)throw new Error(`HTTP ${res.status}`);
     const raw=await res.json();
-    if(!Array.isArray(raw)||!raw.length)throw new Error(lang==='jp'?'データが空です':'Empty data');
-    all=raw.map(r=>({name:String(r.name||''),under100:+r.under100||0,p100:+r.p100||0,p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0,event:+r.event||0,peakPoints:+r.peakPoints||0,monthlyPoints:+r.monthlyPoints||0}));
+    // GASのdoGetは {lastUpdate, players:[...]} で返す（旧形式=配列直返しにも一応対応）
+    const players=Array.isArray(raw)?raw:raw.players;
+    const lastUpdate=Array.isArray(raw)?null:raw.lastUpdate;
+    if(!Array.isArray(players)||!players.length)throw new Error(lang==='jp'?'データが空です':'Empty data');
+    all=players.map(r=>({name:String(r.name||''),under100:+r.under100||0,p100:+r.p100||0,p500:+r.p500||0,p750:+r.p750||0,p1000:+r.p1000||0,wrCount:+r.wrCount||0,totalPoints:+r.totalPoints||0,event:+r.event||0,peakPoints:+r.peakPoints||0,monthlyPoints:+r.monthlyPoints||0}));
     all.sort((a,b)=>b.totalPoints-a.totalPoints||b.wrCount-a.wrCount);
     all.forEach((d,i)=>d.globalRank=i+1);
     document.getElementById('sH').textContent=all.length.toLocaleString();
     document.getElementById('sL').textContent=all.reduce((s,d)=>s+d.wrCount,0).toLocaleString();
-    document.getElementById('sT').textContent=new Date().toLocaleTimeString('ja-JP');
+    document.getElementById('sT').textContent=lastUpdate||new Date().toLocaleTimeString('ja-JP');
     dataLoaded=true;applyFil();renderMonthlyMvp();toast(lang==='jp'?'読み込み完了':'Loaded');
   }catch(e){
     document.getElementById('tc').innerHTML=`<div class="smsg"><span class="ms big" style="color:var(--acc2)">error</span>${lang==='jp'?'データの取得に失敗しました':'Failed to load'}<br><small style="color:#ff5070;font-size:.65rem;margin-top:.5rem;display:block">${e.message}</small></div>`;
@@ -1175,11 +1196,43 @@ function openModal(idx){
         ${gradeBarHtml}
         <div class="mstats mw-mstats"><div class="mstat"><div class="mstat-lbl">${t?'同ランク内順位':'In-Rank Position'}</div><div class="mstat-val">${posInRank} / ${totalInRank}</div></div><div class="mstat"><div class="mstat-lbl">${t?'全体パーセンタイル':'Percentile'}</div><div class="mstat-val">Top ${100-pct}%</div></div></div>
         ${chips?`<div class="mchips">${chips}</div>`:''}
+        <div class="mw-courses" id="mwCourses">
+          <div class="mwc-head">
+            <span class="mwc-title">${t?'保持WRコース一覧':'Held WR Courses'}</span>
+            <a class="mwc-viewall" href="community.html?player=${encodeURIComponent(d.name)}" target="_blank" rel="noopener">${t?'すべて見る →':'View all →'}</a>
+          </div>
+          <div class="mwc-body" id="mwCoursesBody"><div class="mwc-loading">${t?'読み込み中…':'Loading…'}</div></div>
+        </div>
       </div>
     </div>
     </div>`;
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow='hidden';
+  loadModalCourses(d.name,t);
+}
+
+let mwcGen=0; // モーダル内コース一覧のレース対策トークン
+async function loadModalCourses(name,t){
+  const gen=++mwcGen;
+  const body=document.getElementById('mwCoursesBody');
+  try{
+    const res=await fetch(GAS+'?action=player&name='+encodeURIComponent(name));
+    if(gen!==mwcGen)return; // モーダルが切り替わっていたら描画しない
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(gen!==mwcGen)return;
+    if(data.error)throw new Error(data.error);
+    const courses=data.courses||[];
+    if(!courses.length){body.innerHTML=`<div class="mwc-empty">${t?'WR保持コースが見つかりませんでした。':'No WR courses found.'}</div>`;return}
+    const LIMIT=8;
+    const shown=courses.slice(0,LIMIT);
+    body.innerHTML=shown.map(c=>{
+      const time=(c.wr!==undefined&&c.wr!==null)?`${(+c.wr).toFixed(2)}s`:'--';
+      return `<div class="mwc-item"><span class="mwc-item-name">${esc(c.name||'')}</span><span class="mwc-item-time">${time}</span></div>`;
+    }).join('')+(courses.length>LIMIT?`<div class="mwc-more">${t?`ほか ${courses.length-LIMIT} コース`:`+${courses.length-LIMIT} more`}</div>`:'');
+  }catch(e){
+    if(gen===mwcGen)body.innerHTML=`<div class="mwc-error">${t?'コース一覧の取得に失敗しました。':'Failed to load courses.'}</div>`;
+  }
 }
 function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalDirect();}
 function closeModalDirect(){

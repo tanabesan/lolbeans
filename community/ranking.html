@@ -177,6 +177,15 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 }
 
 .event-rule{max-width:640px;margin:0 auto 1.6rem;text-align:center;font-size:.72rem;line-height:1.7;color:var(--t2)}
+.event-rule-divider{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  max-width:280px;margin:.6rem auto 1.2rem;color:var(--acc4);
+}
+.event-rule-divider::before,.event-rule-divider::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--acc4),transparent);opacity:.5;
+}
+.event-rule-divider .ms{font-size:.9rem}
 .event-card-list{display:flex;flex-direction:column;gap:12px;max-width:640px;margin:0 auto}
 .event-card{
   background:linear-gradient(160deg,var(--panel),var(--bg2));border:2px solid var(--acc4);
@@ -743,7 +752,8 @@ body.eco .logo-sub::after{content:''}
     <button class="info-close" onclick="closeEventOverlay()">✕</button>
     <div class="info-scroll">
       <div class="info-heading i18n" data-en="WR Update Challenge" data-jp="WR更新チャレンジ">WR更新チャレンジ</div>
-      <div class="event-rule i18n" data-en="A random course with an existing WR is picked. If its WR is updated within 3 days, whoever holds the new WR earns +15pt!" data-jp="WRが存在するコースの中からランダムに1つ選ばれます。3日以内にそのWRが更新されたら、更新した人に+15ptが贈呈されます！">WRが存在するコースの中からランダムに1つ選ばれます。3日以内にそのWRが更新されたら、更新した人に+15ptが贈呈されます！</div>
+      <div class="event-rule-divider"><span class="ms">bolt</span></div>
+      <div class="event-rule i18n" data-en="A random course with an existing WR is picked. If its WR is updated within the set deadline, whoever holds the new WR earns the award points!" data-jp="WRが存在するコースの中からランダムに1つ選ばれます。設定日以内にそのWRが更新されたら、更新した人に付与ポイント分が追加で贈呈されます！">WRが存在するコースの中からランダムに1つ選ばれます。設定日以内にそのWRが更新されたら、更新した人に付与ポイント分が追加で贈呈されます！</div>
       <div class="event-card-list" id="eventCardList"></div>
     </div>
   </div>

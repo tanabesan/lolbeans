@@ -54,8 +54,8 @@ body::before{
   background-size:32px 32px}
 .bg-corner-tl,.bg-corner-tr,.bg-corner-bl,.bg-corner-br{position:fixed;width:120px;height:120px;pointer-events:none;z-index:0;opacity:.4}
 .bg-corner-tl{top:0;left:0;border-top:2px solid var(--acc3);border-left:2px solid var(--acc3)}
-.bg-corner-tr{top:0;right:0;border-top:2px solid var(--acc3);border-right:2px solid var(--acc3)}
-.bg-corner-bl{bottom:0;left:0;border-bottom:2px solid var(--acc3);border-left:2px solid var(--acc3)}
+.bg-corner-tr{top:0;right:0;border-top:2px solid var(--acc2);border-right:2px solid var(--acc2)}
+.bg-corner-bl{bottom:0;left:0;border-bottom:2px solid var(--acc2);border-left:2px solid var(--acc2)}
 .bg-corner-br{bottom:0;right:0;border-bottom:2px solid var(--acc3);border-right:2px solid var(--acc3)}
 
 /* ── RANKED BG FX (回転エンブレム + 光の筋) ── */
@@ -110,7 +110,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .logo-deco-line{width:80px;height:2px;background:var(--acc3);box-shadow:var(--glow-b);
   clip-path:polygon(0 0,100% 0,100% 50%,calc(100% - 4px) 50%,calc(100% - 4px) 100%,4px 100%,4px 50%,0 50%)}
 .logo-deco span{color:var(--acc3);font-family:var(--ffh);font-size:.5rem}
-.logo-deco-dot{width:7px;height:7px;background:var(--acc3);box-shadow:var(--glow-b);transform:rotate(45deg);flex-shrink:0}
+.logo-deco-dot{width:7px;height:7px;background:var(--acc2);box-shadow:var(--glow-r);transform:rotate(45deg);flex-shrink:0}
 
 /* ── STATS ── */
 .stats-bar{position:relative;z-index:10;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:.4rem 1rem 1.8rem}
@@ -140,7 +140,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 }
 .wr-ticker-text{font-size:.65rem;color:var(--t2)}
 .wr-ticker-course{color:var(--t0);font-weight:700}
-.wr-ticker-holder{color:var(--acc3);font-weight:700}
+.wr-ticker-holder{color:var(--acc2);font-weight:700}
 .wr-ticker-time{color:var(--t3);font-size:.58rem;margin-left:2px}
 .wr-ticker-sep{color:var(--t3);flex-shrink:0}
 @keyframes wrTickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -157,7 +157,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 /* ── EVENT BANNER (WRチャレンジ発生中) ── */
 .event-banner-card{
   position:relative;z-index:10;display:flex;flex-direction:column;gap:9px;
-  width:calc(100% - 2rem);max-width:420px;margin:0 auto .9rem;
+  flex:1;min-width:0;
   background:linear-gradient(160deg,#3a2d00,#241c00);border:2px solid var(--acc4);
   box-shadow:2px 2px 0 var(--edge),0 0 16px -2px var(--acc4);
   padding:11px 16px 13px;cursor:pointer;transition:transform .15s;
@@ -178,7 +178,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 /* ── MONTHLY MVP ── */
 .mvp-card{
   position:relative;z-index:10;display:none;flex-direction:column;gap:9px;
-  width:calc(100% - 2rem);max-width:420px;margin:0 auto .9rem;
+  flex:1;min-width:0;
   background:linear-gradient(160deg,#002830,#001a20);border:2px solid var(--acc3);
   box-shadow:2px 2px 0 var(--edge),0 0 16px -2px var(--acc3);
   padding:11px 16px 13px;
@@ -190,6 +190,15 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .mvp-card-body{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .mvp-card-name{font-family:var(--ffh);font-size:.85rem;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mvp-card-pts{font-family:var(--ffh);font-size:.85rem;color:var(--acc3);text-shadow:0 0 10px rgba(50,220,240,.5);flex-shrink:0}
+
+.event-mvp-row{
+  position:relative;z-index:10;display:flex;align-items:stretch;gap:14px;flex-wrap:wrap;
+  width:calc(100% - 2rem);max-width:860px;margin:0 auto .9rem;
+}
+.event-mvp-row .event-banner-card,.event-mvp-row .mvp-card{margin:0}
+@media (max-width:640px){
+  .event-mvp-row{flex-direction:column}
+}
 
 .event-banner-card-body{display:flex;align-items:center;gap:12px}
 .event-banner-preview-thumb{
@@ -230,6 +239,7 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
   content:'';position:absolute;inset:0;pointer-events:none;
   background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px);
 }
+.event-card-eyebrow{font-family:var(--ffh);font-size:.5rem;color:var(--acc4);letter-spacing:.05em;margin-bottom:9px;line-height:1.6}
 .event-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
 .event-card-name{font-family:var(--ffh);font-size:.6rem;color:var(--acc4);line-height:1.5}
 .event-card-badge{
@@ -553,16 +563,19 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 .mwc-title{font-family:var(--ffh);font-size:.45rem;font-weight:800;color:var(--t2);letter-spacing:.06em;text-transform:uppercase}
 .mwc-viewall{font-family:var(--ffh);font-size:.42rem;color:var(--acc3);text-decoration:none;letter-spacing:.04em;white-space:nowrap}
 .mwc-viewall:hover{text-decoration:underline}
-.mwc-body{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
-.mwc-loading,.mwc-empty,.mwc-error{font-size:.68rem;color:var(--t2);padding:10px 4px;text-align:center}
+.mwc-body{display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.mwc-body::-webkit-scrollbar{height:5px}
+.mwc-body::-webkit-scrollbar-thumb{background:var(--line2)}
+.mwc-loading,.mwc-empty,.mwc-error{font-size:.68rem;color:var(--t2);padding:10px 4px;text-align:center;width:100%}
 .mwc-error{color:#ff5070}
 .mwc-item{
-  display:flex;align-items:center;gap:10px;background:var(--edge);
-  border:1px solid var(--line2);border-left:3px solid var(--pc);
-  padding:7px 10px;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:var(--edge);
+  border:1px solid var(--line2);border-left:3px solid var(--pc);flex:0 0 auto;
+  width:130px;scroll-snap-align:start;
+  padding:9px 10px;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);
 }
-.mwc-item-name{flex:1;min-width:0;font-size:.72rem;color:var(--t0);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mwc-item-time{font-family:var(--ffh);font-size:.5rem;color:var(--pc);flex-shrink:0;white-space:nowrap}
+.mwc-item-name{width:100%;font-size:.66rem;color:var(--t0);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mwc-item-time{font-family:var(--ffh);font-size:.5rem;color:var(--pc);white-space:nowrap}
 .mwc-more{font-size:.6rem;color:var(--t2);text-align:center;padding:4px 0}
 
 /* ── WIDE (Apex風) LAYOUT ── */
@@ -738,6 +751,7 @@ body.eco .logo-sub::after{content:''}
   <div class="wr-ticker-track" id="wrTickerTrack"></div>
 </div>
 
+<div class="event-mvp-row">
 <div class="event-banner-card" id="eventBannerCard" style="display:none" onclick="sfx('open');openEventModal()">
   <div class="event-banner-card-head">
     <span class="ms event-banner-icon" style="font-size:1.05rem">bolt</span>
@@ -751,6 +765,7 @@ body.eco .logo-sub::after{content:''}
     <span id="mvpCardLabel">今月のMVP</span>
   </div>
   <div class="mvp-card-body" id="mvpCardBody"></div>
+</div>
 </div>
 
 <div class="info-toggle-wrap">
@@ -1034,9 +1049,10 @@ function renderEventCards(){
     const badge=ev.updatedAlready
       ?`<span class="event-card-badge updated">${lang==='jp'?'更新済み！':'Updated!'}</span>`
       :`<span class="event-card-badge">${lang==='jp'?'挑戦中':'In Progress'}</span>`;
-    const dispName=ev.title||ev.levelName||'';
-    const subLine=ev.title&&ev.levelName?`<div style="font-size:.55rem;color:var(--t3);font-weight:700;margin-top:2px">${esc(ev.levelName)}</div>`:'';
+    const dispName=ev.levelName||ev.title||'';
+    const subLine='';
     return`<div class="event-card">
+      ${ev.title?`<div class="event-card-eyebrow">${esc(ev.title)}</div>`:''}
       <div class="event-card-thumb" style="background-image:url('${THUMB_URL}${ev.levelId}.png')"></div>
       <div class="event-card-top">
         <div class="event-card-name">${esc(dispName)}${subLine}${ev.subtitle?`<div style="font-size:.58rem;color:var(--t2);font-weight:600;margin-top:4px">${esc(ev.subtitle)}</div>`:''}${ev.author?`<div style="font-size:.55rem;color:var(--t3);font-weight:700;margin-top:4px">by ${esc(ev.author)} ・ ${courseTypeLabel(ev.type)}</div>`:''}</div>
@@ -1299,12 +1315,10 @@ async function loadModalCourses(name,t){
     if(data.error)throw new Error(data.error);
     const courses=data.courses||[];
     if(!courses.length){body.innerHTML=`<div class="mwc-empty">${t?'WR保持コースが見つかりませんでした。':'No WR courses found.'}</div>`;return}
-    const LIMIT=8;
-    const shown=courses.slice(0,LIMIT);
-    body.innerHTML=shown.map(c=>{
+    body.innerHTML=courses.map(c=>{
       const time=(c.wr!==undefined&&c.wr!==null)?`${(+c.wr).toFixed(2)}s`:'--';
       return `<div class="mwc-item"><span class="mwc-item-name">${esc(c.name||'')}</span><span class="mwc-item-time">${time}</span></div>`;
-    }).join('')+(courses.length>LIMIT?`<div class="mwc-more">${t?`ほか ${courses.length-LIMIT} コース`:`+${courses.length-LIMIT} more`}</div>`:'');
+    }).join('');
   }catch(e){
     if(gen===mwcGen)body.innerHTML=`<div class="mwc-error">${t?'コース一覧の取得に失敗しました。':'Failed to load courses.'}</div>`;
   }

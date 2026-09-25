@@ -114,6 +114,37 @@ header{position:relative;z-index:10;text-align:center;padding:52px 16px 32px}
 
 /* ── STATS ── */
 .stats-bar{position:relative;z-index:10;display:flex;justify-content:center;flex-wrap:wrap;gap:8px;padding:.4rem 1rem 1.8rem}
+
+/* ── WR TICKER (直近の更新を横スクロール表示) ── */
+.wr-ticker{
+  position:relative;z-index:10;width:100%;overflow:hidden;
+  margin-bottom:1.6rem;padding:9px 0;
+  background:linear-gradient(180deg,var(--panel),var(--bg2));
+  border-top:2px solid var(--line2);border-bottom:2px solid var(--line2);
+}
+.wr-ticker::before,.wr-ticker::after{
+  content:'';position:absolute;top:0;bottom:0;width:48px;z-index:2;pointer-events:none;
+}
+.wr-ticker::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.wr-ticker::after{right:0;background:linear-gradient(270deg,var(--bg),transparent)}
+.wr-ticker-track{display:flex;align-items:center;gap:14px;width:max-content;animation:wrTickerScroll 45s linear infinite}
+.wr-ticker:hover .wr-ticker-track{animation-play-state:paused}
+.wr-ticker-item{
+  display:flex;align-items:center;gap:9px;flex-shrink:0;
+  background:var(--bg2);border:1px solid var(--line2);
+  padding:6px 12px 6px 6px;white-space:nowrap;
+}
+.wr-ticker-thumb{
+  width:26px;height:26px;flex-shrink:0;background-size:cover;background-position:center;
+  background-color:var(--bg);border:1px solid var(--line2);
+}
+.wr-ticker-text{font-size:.65rem;color:var(--t2)}
+.wr-ticker-course{color:var(--t0);font-weight:700}
+.wr-ticker-holder{color:var(--acc3);font-weight:700}
+.wr-ticker-time{color:var(--t3);font-size:.58rem;margin-left:2px}
+.wr-ticker-sep{color:var(--t3);flex-shrink:0}
+@keyframes wrTickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (max-width:768px){.wr-ticker-text{font-size:.6rem}.wr-ticker-time{font-size:.54rem}}
 .s-pill{
   background:var(--panel);border:2px solid var(--line2);
   box-shadow:2px 2px 0 var(--edge);
@@ -703,6 +734,10 @@ body.eco .logo-sub::after{content:''}
   <div class="s-pill"><span class="ms" style="font-size:1rem">schedule</span><span class="i18n" data-en="Updated" data-jp="更新">更新</span><span class="v" id="sT">—</span></div>
 </div>
 
+<div class="wr-ticker" id="wrTicker" style="display:none">
+  <div class="wr-ticker-track" id="wrTickerTrack"></div>
+</div>
+
 <div class="event-banner-card" id="eventBannerCard" style="display:none" onclick="sfx('open');openEventModal()">
   <div class="event-banner-card-head">
     <span class="ms event-banner-icon" style="font-size:1.05rem">bolt</span>
@@ -865,6 +900,7 @@ function setLang(l){
   if(document.getElementById('eventOverlay').classList.contains('open'))renderEventCards();
   if(activeEvents.length>0)renderEventPreview();
   if(dataLoaded)renderMonthlyMvp();
+  if(wrTickerData.length)renderWrTicker();
   renderTable();
 }
 
@@ -1065,6 +1101,45 @@ function renderMonthlyMvp(){
   if(!top){card.style.display='none';return;}
   document.getElementById('mvpCardBody').innerHTML=`<div class="mvp-card-name">${esc(top.name)}</div><div class="mvp-card-pts">${top.monthlyPoints}pt</div>`;
   card.style.display='flex';
+}
+
+function relTime(iso){
+  const d=new Date(iso);
+  if(isNaN(d))return '';
+  const diffSec=Math.max(0,(Date.now()-d.getTime())/1000);
+  if(diffSec<60)return lang==='jp'?'たった今':'just now';
+  const m=Math.floor(diffSec/60);
+  if(m<60)return lang==='jp'?`${m}分前`:`${m}m ago`;
+  const h=Math.floor(m/60);
+  if(h<24)return lang==='jp'?`${h}時間前`:`${h}h ago`;
+  const day=Math.floor(h/24);
+  if(day<30)return lang==='jp'?`${day}日前`:`${day}d ago`;
+  const mo=Math.floor(day/30);
+  return lang==='jp'?`${mo}ヶ月前`:`${mo}mo ago`;
+}
+
+let wrTickerData=[];
+async function loadWrTicker(){
+  try{
+    const res=await fetch(`${GAS}?action=recentWr&limit=15`);
+    const data=await res.json();
+    wrTickerData=Array.isArray(data.courses)?data.courses:[];
+  }catch(e){wrTickerData=[];}
+  renderWrTicker();
+}
+
+function renderWrTicker(){
+  const wrap=document.getElementById('wrTicker');
+  const track=document.getElementById('wrTickerTrack');
+  if(!wrTickerData.length){wrap.style.display='none';track.innerHTML='';return;}
+  const itemHtml=c=>`<div class="wr-ticker-item">
+      <div class="wr-ticker-thumb" style="background-image:url('${THUMB_URL}${c.levelId}.png')"></div>
+      <div class="wr-ticker-text"><span class="wr-ticker-course">${esc(c.name||'')}</span> ${lang==='jp'?'を':''}<span class="wr-ticker-holder">${esc(c.wrHolder||'')}</span>${lang==='jp'?' が更新':' updated'}<span class="wr-ticker-time"> ・ ${relTime(c.wrDate)}</span></div>
+    </div><span class="wr-ticker-sep">◆</span>`;
+  const html=wrTickerData.map(itemHtml).join('');
+  // シームレスループのため中身を2連続に並べる（半分スクロールしたところで継ぎ目なく戻る）
+  track.innerHTML=html+html;
+  wrap.style.display='block';
 }
 
 function setSort(m){sfx('toggle');sort=m;pg=1;document.querySelectorAll('.cbtn').forEach(b=>b.classList.remove('on'));document.getElementById(m==='pts'?'bPts':'bWr').classList.add('on');applyFil();}
@@ -1303,6 +1378,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModalDirect();
 
 loadData();
 checkActiveEvents();
+loadWrTicker();
 setInterval(checkActiveEvents,5*60*1000);
 </script>
 </body>

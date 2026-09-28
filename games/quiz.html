@@ -181,6 +181,7 @@ const REVEAL_MS  = 5000;   // 結果表示の時間
 const LOAD_WAIT_MS = 12000;// 画像読み込みを待つ最大時間
 const PTS_BASE = 500, PTS_BONUS = 500;  // 正解: 500 + 500×(残り時間の割合)
 const EARLY_REVEAL = true; // 全員が回答したら10秒を待たずに結果へ
+const MAX_PER_AUTHOR = 2; // 同じ作者の問題は1ゲームで最大この数
 const HEARTBEAT_MS = 5000, STALE_MS = 20000; // 生存確認の間隔 / これ以上更新が無い人は退出扱い
 const POP_MIN_RATING = 4.15, POP_MIN_VOTES = 1000, MIN_POOL = 12;
 
@@ -458,15 +459,28 @@ async function startGame(){
   const btn = $('btnStart'); btn.disabled = true; $('lbMsg').textContent = L('問題を準備中…','Preparing questions…');
   try {
     await S.gasReady;
-    const st = S.room.settings, pool = buildPool(st);
+    const st = S.room.settings, fullPool = buildPool(st);
+    // この部屋で出題済みのコースは除く(新しい問題が足りなくなったらリセット)
+    const usedSet = new Set(S.room.used || []);
+    let pool = fullPool.filter(c => !usedSet.has(c.levelId)), usedNow = [...usedSet];
+    if (pool.length < st.count * 2) { pool = fullPool; usedNow = []; }
     if (pool.length < 4) throw new Error(L('この条件だとコースが足りません。条件を変えてください。','Not enough courses for these settings. Try changing them.'));
     // サムネが読めるコースだけを N 問分選ぶ(6件ずつ並列で確認)
-    const src = shuffle(pool), picked = [];
-    for (let i = 0; i < src.length && picked.length < st.count; i += 6) {
-      const chunk = src.slice(i, i + 6);
-      const ok = await Promise.all(chunk.map(c => loadImage(thumbUrl(c)).then(() => true, () => false)));
-      chunk.forEach((c, k) => { if (ok[k] && picked.length < st.count) picked.push(c); });
+    // 同じ作者が偏らないよう、1人あたり最大 MAX_PER_AUTHOR 問(足りなければ後から緩める)
+    const perAuthor = {}, badImg = [], picked = [];
+    for (const cap of [MAX_PER_AUTHOR, 99]) {
+      const src = shuffle(pool.filter(c => !picked.includes(c) && !badImg.includes(c)));
+      for (let i = 0; i < src.length && picked.length < st.count; i += 6) {
+        const chunk = src.slice(i, i + 6).filter(c => (perAuthor[c.author] || 0) < cap);
+        const ok = await Promise.all(chunk.map(c => loadImage(thumbUrl(c)).then(() => true, () => false)));
+        chunk.forEach((c, k) => {
+          if (!ok[k]) { badImg.push(c); return; }
+          if (picked.length < st.count && (perAuthor[c.author] || 0) < cap) { picked.push(c); perAuthor[c.author] = (perAuthor[c.author] || 0) + 1; }
+        });
+      }
+      if (picked.length >= st.count) break;
     }
+    console.info('出題:', picked.map(c => `${c.name} / ${c.author} / type${c.type} / rating ${c.rating} (${c.votes}票)`), '/ 候補', pool.length, '/ サムネ読込失敗', badImg.length);
     if (picked.length < 1) throw new Error(L('サムネイルを読み込めるコースがありませんでした(thumbUrl を確認してください)','No course thumbnails could be loaded (check thumbUrl)'));
     const questions = picked.map(c => ({ levelId: c.levelId, name: c.name, author: c.author || '', type: c.type, choices: makeChoices(c, pool) }));
 
@@ -476,7 +490,7 @@ async function startGame(){
     Object.keys(S.players).filter(id => !ids.includes(id)).forEach(id => batch.delete(doc(db, ROOM_COL, S.code, 'players', id)));
     ids.forEach(id => batch.update(doc(db, ROOM_COL, S.code, 'players', id), { ready: false }));
     batch.update(doc(db, ROOM_COL, S.code), {
-      status: 'loading', questions, qIndex: 0, round: (S.room.round || 0) + 1,
+      status: 'loading', questions, used: usedNow.concat(picked.map(c => c.levelId)), qIndex: 0, round: (S.room.round || 0) + 1,
       scores, corrects, reveal: null, phaseStartMs: Date.now(),
     });
     await batch.commit();

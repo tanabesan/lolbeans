@@ -76,7 +76,7 @@ tr.me td{color:#46178f;background:#f3ecff}
 .ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:1.25em;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;vertical-align:-.2em;white-space:nowrap;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';font-variation-settings:'FILL' 1,'wght' 700}
 </style>
 </head>
-<body>
+<body data-nav-current="quiz">
 <div class="wrap">
   <h1><span class="ms">bolt</span> THUMBNAIL BATTLE</h1>
 
@@ -190,6 +190,44 @@ const ic = (n, st = '') => `<span class="ms" style="${st}">${n}</span>`;
 const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
 const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
 
+// ---------- 言語切り替え(nav-menu.js と連動: window.setLang) ----------
+let lang = (() => { try { return localStorage.getItem('lolbeans-lang') === 'en' ? 'en' : 'jp'; } catch (e) { return 'jp'; } })();
+const L = (jp, en) => lang === 'en' ? en : jp;
+const nth = n => lang === 'en' ? n + ((n % 100 > 10 && n % 100 < 14) ? 'th' : (['th','st','nd','rd'][n % 10] || 'th')) : nth(n);
+const EN = {
+  'ニックネーム':'Nickname','部屋を作る':'Create room','または部屋コードで参加':'Or join with a room code','参加':'Join','部屋コード':'Room code',
+  '招待リンクをコピー':'Copy invite link','参加者':'Players','コースタイプ':'Course type','すべて':'All','サンドボックス':'Sandbox','タイム':'Timed','対戦':'Competitive',
+  'エリミネーション':'Elimination','難易度(人気コースほど簡単)':'Difficulty (popular courses = easier)','かんたん':'Easy','ふつう':'Normal','むずかしい':'Hard',
+  '問題数':'Questions','5問':'5 Qs','10問':'10 Qs','20問':'20 Qs','制限時間10秒 / 早く正解するほど高得点(500〜1000pt)':'10 sec limit / faster correct answers score more (500–1000 pts)',
+  'ホストが開始するのを待っています…':'Waiting for the host to start…','退出':'Leave','画像を読み込み中…':'Loading images…','全員の準備ができたら始まります':'Starts when everyone is ready',
+  'あなた':'You','最終結果':'Final results','もう一度(ロビーへ)':'Play again (back to lobby)','ホストの操作を待っています…':'Waiting for the host…','なまえ':'Name'
+};
+const origText = new WeakMap();
+function translateStatic(){
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let n;
+  while ((n = w.nextNode())) {
+    if (n.parentElement && n.parentElement.closest('script,style,#nav-side-menu,#nav-menu-toggle,#lbPlayers,#ldPlayers,#fnTable,#qReveal,#qChoices')) continue;
+    const raw = origText.has(n) ? origText.get(n) : n.nodeValue, key = raw.trim();
+    if (!(key in EN)) continue;
+    origText.set(n, raw);
+    n.nodeValue = lang === 'en' ? raw.replace(key, EN[key]) : raw;
+  }
+  document.querySelectorAll('input[placeholder]').forEach(el => {
+    if (!el.dataset.phJp) el.dataset.phJp = el.placeholder;
+    el.placeholder = lang === 'en' && EN[el.dataset.phJp] ? EN[el.dataset.phJp] : el.dataset.phJp;
+  });
+  document.title = L('サムネイルバトル | LOLBeans', 'Thumbnail Battle | LOLBeans');
+  document.documentElement.lang = lang === 'en' ? 'en' : 'ja';
+}
+function setLang(l){
+  lang = l === 'en' ? 'en' : 'jp';
+  translateStatic();
+  const r = S.room;
+  if (r) ({ lobby: renderLobby, loading: renderLoading, reveal: renderReveal, finished: renderFinal }[r.status] || (() => {}))();
+}
+window.setLang = setLang;
+
 let db = null;
 const S = {
   pid: sessionStorage.getItem('tb_pid') || ('p' + Math.random().toString(36).slice(2, 10)),
@@ -201,7 +239,7 @@ const S = {
 sessionStorage.setItem('tb_pid', S.pid);
 
 function show(id){ ['scEntry','scLobby','scLoading','scQuiz','scFinal'].forEach(x => $(x).classList.toggle('hidden', x !== id)); }
-const sec = ms => (ms/1000).toFixed(2) + '秒';
+const sec = ms => (ms/1000).toFixed(2) + L('秒','s');
 
 function loadImage(url){
   return new Promise((res, rej) => {
@@ -246,18 +284,18 @@ function startGasLoad(){
 const genCode = () => { const cs = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for (let i=0;i<5;i++) s += cs[Math.random()*cs.length|0]; return s; };
 function getName(){
   const n = $('inName').value.trim();
-  if (!n) { $('entryMsg').innerHTML = '<span class="err">ニックネームを入力してください。</span>'; $('inName').focus(); return null; }
+  if (!n) { $('entryMsg').innerHTML = `<span class="err">${L('ニックネームを入力してください。','Please enter a nickname.')}</span>`; $('inName').focus(); return null; }
   localStorage.setItem('tb_name', n); return n;
 }
 
 // ---------- 部屋の作成・参加 ----------
 async function createRoom(){
   const name = getName(); if (!name) return;
-  $('btnCreate').disabled = true; $('entryMsg').textContent = '部屋を作成中…';
+  $('btnCreate').disabled = true; $('entryMsg').textContent = L('部屋を作成中…','Creating room…');
   try {
     let code = null;
     for (let i = 0; i < 8; i++) { const c = genCode(); if (!(await getDoc(doc(db, ROOM_COL, c))).exists()) { code = c; break; } }
-    if (!code) throw new Error('部屋コードを作れませんでした');
+    if (!code) throw new Error(L('部屋コードを作れませんでした','Could not create a room code'));
     await setDoc(doc(db, ROOM_COL, code), {
       hostId: S.pid, status: 'lobby', settings: { type: 'all', diff: 'normal', count: 10 },
       round: 0, qIndex: 0, scores: {}, corrects: {}, questions: [], reveal: null,
@@ -272,14 +310,14 @@ async function createRoom(){
 async function joinRoom(){
   const name = getName(); if (!name) return;
   const code = $('inCode').value.trim().toUpperCase();
-  if (code.length !== 5) { $('entryMsg').innerHTML = '<span class="err">部屋コード(5文字)を入力してください。</span>'; return; }
-  $('entryMsg').textContent = '参加中…';
+  if (code.length !== 5) { $('entryMsg').innerHTML = `<span class="err">${L('部屋コード(5文字)を入力してください。','Enter the 5-character room code.')}</span>`; return; }
+  $('entryMsg').textContent = L('参加中…','Joining…');
   try {
     const snap = await getDoc(doc(db, ROOM_COL, code));
-    if (!snap.exists()) throw new Error('その部屋は見つかりません');
+    if (!snap.exists()) throw new Error(L('その部屋は見つかりません','Room not found'));
     const pref = doc(db, ROOM_COL, code, 'players', S.pid);
     const mine = await getDoc(pref);
-    if (snap.data().status !== 'lobby' && !mine.exists()) throw new Error('この部屋はすでにゲーム中です');
+    if (snap.data().status !== 'lobby' && !mine.exists()) throw new Error(L('この部屋はすでにゲーム中です','This room is already in a game'));
     await setDoc(pref, { name, ready: mine.exists() ? !!mine.data().ready : false, joinedAt: mine.exists() ? mine.data().joinedAt : Date.now() });
     enterRoom(code);
   } catch (e) { $('entryMsg').innerHTML = `<span class="err">${esc(e.message || e)}</span>`; }
@@ -297,7 +335,7 @@ function enterRoom(code){
   S.code = code; sessionStorage.setItem('tb_code', code);
   clearInterval(S.hb); beat(); S.hb = setInterval(beat, HEARTBEAT_MS);
   S.unsubs.push(onSnapshot(doc(db, ROOM_COL, code), snap => {
-    if (!snap.exists()) { leaveLocal('部屋が閉じられました'); return; }
+    if (!snap.exists()) { leaveLocal(L('部屋が閉じられました','The room was closed')); return; }
     onRoom(snap.data());
   }));
   S.unsubs.push(onSnapshot(collection(db, ROOM_COL, code, 'players'), snap => {
@@ -333,7 +371,7 @@ const onlineIds = () => Object.keys(S.players).filter(isOnline);
 function beat(){
   if (!S.code) return;
   updateDoc(doc(db, ROOM_COL, S.code, 'players', S.pid), { seen: Date.now() })
-    .catch(e => { if (e && e.code === 'not-found' && S.code) leaveLocal('接続が切れたため退出しました'); });
+    .catch(e => { if (e && e.code === 'not-found' && S.code) leaveLocal(L('接続が切れたため退出しました','Disconnected — you left the room')); });
   refresh();
 }
 function refresh(){
@@ -382,7 +420,7 @@ function renderLobby(){
   const r = S.room;
   $('lbCode').textContent = S.code;
   const ids = onlineIds().sort((a,b) => (S.players[a].joinedAt||0) - (S.players[b].joinedAt||0));
-  $('lbCount').textContent = `(${ids.length}人)`;
+  $('lbCount').textContent = L(`(${ids.length}人)`, `(${ids.length})`);
   $('lbPlayers').innerHTML = ids.map(id =>
     `<span class="chip ${id===S.pid?'me':''}">${id===r.hostId?ic('star','color:#ffd23f')+' ':''}${esc(S.players[id].name)}</span>`).join('');
   seg('sgType', r.settings.type, S.isHost, 'type');
@@ -417,11 +455,11 @@ function makeChoices(ans, pool){
 
 async function startGame(){
   if (!S.isHost) return;
-  const btn = $('btnStart'); btn.disabled = true; $('lbMsg').textContent = '問題を準備中…';
+  const btn = $('btnStart'); btn.disabled = true; $('lbMsg').textContent = L('問題を準備中…','Preparing questions…');
   try {
     await S.gasReady;
     const st = S.room.settings, pool = buildPool(st);
-    if (pool.length < 4) throw new Error('この条件だとコースが足りません。条件を変えてください。');
+    if (pool.length < 4) throw new Error(L('この条件だとコースが足りません。条件を変えてください。','Not enough courses for these settings. Try changing them.'));
     // サムネが読めるコースだけを N 問分選ぶ(6件ずつ並列で確認)
     const src = shuffle(pool), picked = [];
     for (let i = 0; i < src.length && picked.length < st.count; i += 6) {
@@ -429,7 +467,7 @@ async function startGame(){
       const ok = await Promise.all(chunk.map(c => loadImage(thumbUrl(c)).then(() => true, () => false)));
       chunk.forEach((c, k) => { if (ok[k] && picked.length < st.count) picked.push(c); });
     }
-    if (picked.length < 1) throw new Error('サムネイルを読み込めるコースがありませんでした(thumbUrl を確認してください)');
+    if (picked.length < 1) throw new Error(L('サムネイルを読み込めるコースがありませんでした(thumbUrl を確認してください)','No course thumbnails could be loaded (check thumbUrl)'));
     const questions = picked.map(c => ({ levelId: c.levelId, name: c.name, author: c.author || '', type: c.type, choices: makeChoices(c, pool) }));
 
     const ids = onlineIds(), scores = {}, corrects = {};
@@ -585,10 +623,10 @@ async function submitAnswer(choiceId){
   if (ms > LIMIT_MS) return;
   c.answered = true;
   [...$('qChoices').children].forEach(b => { b.disabled = true; if (String(b.dataset.id) === String(choiceId)) b.classList.add('sel'); });
-  $('qMy').innerHTML = `<span style="color:var(--yellow)">${sec(ms)}で回答!結果を待っています…</span>`;
+  $('qMy').innerHTML = `<span style="color:var(--yellow)">${L(sec(ms)+'で回答!結果を待っています…', 'Answered in '+sec(ms)+'! Waiting for results…')}</span>`;
   try {
     await setDoc(doc(db, ROOM_COL, S.code, 'answers', `${r.round}_${r.qIndex}_${S.pid}`), { round: r.round, q: r.qIndex, pid: S.pid, choice: choiceId, ms });
-  } catch (e) { $('qMy').innerHTML = `<span class="err">送信に失敗しました: ${esc(e.message || e)}</span>`; }
+  } catch (e) { $('qMy').innerHTML = `<span class="err">${L('送信に失敗しました','Failed to send')}: ${esc(e.message || e)}</span>`; }
 }
 
 // ---------- 結果表示(5秒) ----------
@@ -611,22 +649,22 @@ function renderReveal(){
     else if (mine && mine.choice !== null && String(b.dataset.id) === String(mine.choice)) b.classList.add('ng');
   });
   $('qTimer').textContent = '';
-  if (!mine || mine.ms === null) $('qMy').innerHTML = '<span style="color:var(--dim)">未回答…</span>';
-  else if (mine.correct) $('qMy').innerHTML = `<span style="color:var(--ok)">${ic('check_circle')} 正解! ${sec(mine.ms)} / +${mine.pts}pt</span>`;
-  else $('qMy').innerHTML = `<span style="color:var(--ng)">${ic('cancel')} 不正解…</span>`;
+  if (!mine || mine.ms === null) $('qMy').innerHTML = `<span style="color:var(--dim)">${L('未回答…','No answer…')}</span>`;
+  else if (mine.correct) $('qMy').innerHTML = `<span style="color:var(--ok)">${ic('check_circle')} ${L('正解!','Correct!')} ${sec(mine.ms)} / +${mine.pts}pt</span>`;
+  else $('qMy').innerHTML = `<span style="color:var(--ng)">${ic('cancel')} ${L('不正解…','Incorrect…')}</span>`;
 
   const tot = totalRanking(), totOf = pid => tot.find(x => x.pid === pid) || { rank: '-', score: 0 };
   $('qReveal').innerHTML = `
-    <div class="tt">正解は「${esc(q.name)}」<span style="color:var(--dim);font-size:12px"> 作者: ${esc(q.author)}</span></div>
+    <div class="tt">${L(`正解は「${esc(q.name)}」`, `Answer: ${esc(q.name)}`)}<span style="color:var(--dim);font-size:12px"> ${L('作者','Author')}: ${esc(q.author)}</span></div>
     <table>
-      <tr><th>#</th><th>名前</th><th class="r">タイム</th><th class="r">獲得</th><th class="r">合計(順位)</th></tr>
+      <tr><th>#</th><th>${L('名前','Name')}</th><th class="r">${L('タイム','Time')}</th><th class="r">${L('獲得','Pts')}</th><th class="r">${L('合計(順位)','Total (rank)')}</th></tr>
       ${rv.results.map((x, i) => `
         <tr class="${x.pid === S.pid ? 'me' : ''}">
           <td>${x.correct ? (i + 1) : '-'}</td>
           <td>${esc(x.name)}</td>
-          <td class="r">${x.ms === null ? '未回答' : (x.correct ? '' : ic('close') + ' ') + sec(x.ms)}</td>
+          <td class="r">${x.ms === null ? L('未回答','No answer') : (x.correct ? '' : ic('close') + ' ') + sec(x.ms)}</td>
           <td class="r ${x.pts ? 'plus' : 'zero'}">${x.pts ? '+' + x.pts : '0'}</td>
-          <td class="r">${totOf(x.pid).score} (${totOf(x.pid).rank}位)</td>
+          <td class="r">${totOf(x.pid).score} (${nth(totOf(x.pid).rank)})</td>
         </tr>`).join('')}
     </table>`;
   $('qReveal').classList.remove('hidden');
@@ -645,9 +683,9 @@ function podiumHtml(list){
 }
 function renderFinal(){
   const r = S.room, total = r.questions.length, list = totalRanking();
-  const medal = n => n === 1 ? ic('military_tech','color:#d89e00') : n === 2 ? ic('military_tech','color:#8a93a6') : n === 3 ? ic('military_tech','color:#b0693a') : n + '位';
+  const medal = n => n === 1 ? ic('military_tech','color:#d89e00') : n === 2 ? ic('military_tech','color:#8a93a6') : n === 3 ? ic('military_tech','color:#b0693a') : nth(n);
   $('fnTable').innerHTML = podiumHtml(list) + `<table>
-    <tr><th>順位</th><th>名前</th><th class="r">正解数</th><th class="r">得点</th></tr>
+    <tr><th>${L('順位','Rank')}</th><th>${L('名前','Name')}</th><th class="r">${L('正解数','Correct')}</th><th class="r">${L('得点','Score')}</th></tr>
     ${list.map(x => `<tr class="${x.pid === S.pid ? 'me' : ''}">
       <td class="medal">${medal(x.rank)}</td><td>${esc(x.name)}</td><td class="r">${x.corrects}/${total}</td><td class="r">${x.score}</td></tr>`).join('')}
   </table>`;
@@ -670,9 +708,9 @@ $('btnLeave1').addEventListener('click', leave);
 $('btnLeave2').addEventListener('click', leave);
 $('btnCopy').addEventListener('click', async () => {
   const url = `${location.origin}${location.pathname}?room=${S.code}`;
-  try { await navigator.clipboard.writeText(url); $('btnCopy').textContent = 'コピーしました'; }
-  catch (_) { prompt('コピーしてください', url); }
-  setTimeout(() => $('btnCopy').textContent = '招待リンクをコピー', 1800);
+  try { await navigator.clipboard.writeText(url); $('btnCopy').textContent = L('コピーしました','Copied'); }
+  catch (_) { prompt(L('コピーしてください','Please copy this'), url); }
+  setTimeout(() => $('btnCopy').textContent = L('招待リンクをコピー','Copy invite link'), 1800);
 });
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
@@ -682,6 +720,8 @@ document.addEventListener('keydown', e => {
 });
 
 init();
+setLang(lang);
 </script>
+<script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 </body>
 </html>

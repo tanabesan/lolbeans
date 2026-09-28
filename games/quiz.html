@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>サムネイルバトル | LOLBeans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,700,1,0&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#46178f;--ink:#222;--dim:#666;--ok:#26890c;--ng:#e21b3c;--yellow:#b07d00;--cyan:#1368ce;--c0:#e21b3c;--c1:#1368ce;--c2:#d89e00;--c3:#26890c}
+*{box-sizing:border-box}
+body{margin:0;color:#fff;font-family:'Montserrat','Noto Sans JP','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;font-weight:700;min-height:100vh;
+  background:radial-gradient(circle at 20% 0%,#6b2bd1 0,transparent 45%),radial-gradient(circle at 90% 100%,#2a0d5c 0,transparent 50%),#46178f}
+.wrap{max-width:720px;margin:0 auto;padding:18px 14px 60px}
+h1{font-size:26px;font-weight:900;text-align:center;margin:6px 0 18px;letter-spacing:.5px}
+.panel{background:#fff;color:var(--ink);border-radius:14px;box-shadow:0 5px 0 rgba(0,0,0,.25);padding:18px;margin-bottom:16px}
+label{display:block;font-size:12px;color:var(--dim);margin:14px 0 6px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:76px;background:#f0f0f5;color:#444;border:0;border-radius:8px;padding:10px 6px;font:inherit;font-size:13px;cursor:pointer;box-shadow:0 3px 0 #d3d3df}
+.seg button.on{background:#46178f;color:#fff;box-shadow:0 3px 0 #2a0d5c}
+.seg.lock button{cursor:default}
+input[type=text]{width:100%;background:#fff;color:var(--ink);border:3px solid #d6d6e2;border-radius:10px;padding:12px;font:inherit;font-size:16px;outline:none}
+input[type=text]:focus{border-color:#1368ce}
+.btn{display:block;width:100%;background:var(--c3);color:#fff;border:0;border-radius:10px;padding:14px;font:inherit;font-size:18px;font-weight:900;cursor:pointer;box-shadow:0 5px 0 #17600a;margin-top:14px}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #17600a}
+.btn.sub{background:rgba(255,255,255,.16);box-shadow:0 4px 0 rgba(0,0,0,.25);font-size:14px;padding:11px}
+.panel .btn.sub{background:#f0f0f5;color:#444;box-shadow:0 4px 0 #d3d3df}
+.btn:disabled{opacity:.5;cursor:default}
+.row2{display:flex;gap:8px}.row2>*{flex:1}
+.hidden{display:none}
+.mini{font-size:12px;color:rgba(255,255,255,.75);margin-top:8px}
+.panel .mini{color:var(--dim)}
+.err{color:var(--ng);font-size:14px;line-height:1.7}
+.code{font-size:52px;font-weight:900;letter-spacing:10px;text-align:center;color:#46178f;margin:2px 0}
+.plist{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{background:#f0f0f5;color:#333;border-radius:999px;padding:7px 14px;font-size:14px}
+.chip.me{background:#46178f;color:#fff}
+.hud{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:8px}
+.hud span{background:rgba(0,0,0,.28);border-radius:999px;padding:6px 14px}
+.hud b{color:#ffd23f}
+.timer{width:70px;height:70px;border-radius:50%;background:#fff;color:#46178f;font-size:28px;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.timer:empty{visibility:hidden}
+.bar{height:10px;background:rgba(0,0,0,.3);border-radius:999px;margin-bottom:14px;overflow:hidden}
+.bar i{display:block;height:100%;background:#fff;width:100%;border-radius:999px}
+.bar.rv i{background:#ffa602}
+.thumb{background:#000;border:5px solid #fff;border-radius:18px;box-shadow:0 6px 0 rgba(0,0,0,.3);aspect-ratio:1/1;max-width:400px;margin:0 auto 16px;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:contain;display:block}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.choices{grid-template-columns:1fr}}
+.choice{display:flex;align-items:center;gap:10px;min-height:76px;color:#fff;border:0;border-radius:8px;padding:12px 14px;font:inherit;font-size:16px;font-weight:900;text-align:left;cursor:pointer;word-break:break-word;box-shadow:0 5px 0 rgba(0,0,0,.28);position:relative}
+.choice.c0{background:var(--c0)}.choice.c1{background:var(--c1)}.choice.c2{background:var(--c2)}.choice.c3{background:var(--c3)}
+.choice .ic{font-size:22px;flex:none;width:28px;text-align:center}
+.choice:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.choice:disabled{cursor:default}
+.choice:disabled:not(.sel):not(.ok):not(.ng){opacity:.4}
+.choice.sel{outline:4px solid #fff}
+.choice.ok::after{content:'check_circle';font-family:'Material Symbols Rounded';font-variation-settings:'FILL' 1;position:absolute;right:14px;font-size:26px}
+.choice.ng{opacity:.55}
+.choice.ng::after{content:'cancel';font-family:'Material Symbols Rounded';font-variation-settings:'FILL' 1;position:absolute;right:14px;font-size:26px}
+.mymsg{background:#fff;color:var(--ink);border-radius:10px;padding:10px 14px;margin:14px 0;font-size:15px;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.mymsg:empty{display:none}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 4px;border-bottom:1px solid #ececf3;text-align:left}
+th{color:var(--dim);font-weight:700;font-size:11px}
+td.r,th.r{text-align:right}
+tr.me td{color:#46178f;background:#f3ecff}
+.plus{color:var(--ok)}.zero{color:#aaa}
+.medal{font-size:20px}
+.tt{font-size:16px;font-weight:900;margin:0 0 8px;color:var(--ink)}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:6px 0 18px;min-height:190px}
+.pcol{flex:1;max-width:150px;text-align:center}
+.pn{font-size:13px;margin-bottom:2px;word-break:break-all}.ps{font-size:12px;color:var(--dim);margin-bottom:4px}
+.pb{border-radius:10px 10px 0 0;color:#fff;font-size:30px;font-weight:900;padding-top:8px}
+.p1 .pb{height:120px;background:#d89e00}.p2 .pb{height:88px;background:#8a93a6}.p3 .pb{height:64px;background:#b0693a}
+.ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:1.25em;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;vertical-align:-.2em;white-space:nowrap;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';font-variation-settings:'FILL' 1,'wght' 700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="ms">bolt</span> THUMBNAIL BATTLE</h1>
+
+  <!-- 入口 -->
+  <section id="scEntry" class="panel">
+    <label style="margin-top:0">ニックネーム</label>
+    <input type="text" id="inName" maxlength="12" placeholder="なまえ" autocomplete="off">
+    <button class="btn" id="btnCreate">部屋を作る</button>
+    <label>または部屋コードで参加</label>
+    <div class="row2">
+      <input type="text" id="inCode" maxlength="5" placeholder="ABCDE" autocomplete="off" style="text-transform:uppercase">
+      <button class="btn sub" id="btnJoin" style="margin-top:0">参加</button>
+    </div>
+    <div id="entryMsg" class="mini"></div>
+  </section>
+
+  <!-- ロビー -->
+  <section id="scLobby" class="hidden">
+    <div class="panel">
+      <div class="mini" style="text-align:center;margin:0">部屋コード</div>
+      <div class="code" id="lbCode"></div>
+      <button class="btn sub" id="btnCopy">招待リンクをコピー</button>
+    </div>
+    <div class="panel">
+      <div class="tt">参加者 <span id="lbCount"></span></div>
+      <div class="plist" id="lbPlayers"></div>
+    </div>
+    <div class="panel">
+      <label style="margin-top:0">コースタイプ</label>
+      <div class="seg" id="sgType">
+        <button data-v="all">すべて</button><button data-v="0">サンドボックス</button><button data-v="1">タイム</button><button data-v="2">対戦</button><button data-v="3">エリミネーション</button>
+      </div>
+      <label>難易度(人気コースほど簡単)</label>
+      <div class="seg" id="sgDiff">
+        <button data-v="easy">かんたん</button><button data-v="normal">ふつう</button><button data-v="hard">むずかしい</button>
+      </div>
+      <label>問題数</label>
+      <div class="seg" id="sgCount">
+        <button data-v="5">5問</button><button data-v="10">10問</button><button data-v="20">20問</button>
+      </div>
+      <div class="mini">制限時間10秒 / 早く正解するほど高得点(500〜1000pt)</div>
+      <button class="btn" id="btnStart">START</button>
+      <div id="lbWait" class="mini hidden">ホストが開始するのを待っています…</div>
+      <div id="lbMsg" class="mini"></div>
+    </div>
+    <button class="btn sub" id="btnLeave1">退出</button>
+  </section>
+
+  <!-- 準備中 -->
+  <section id="scLoading" class="hidden panel">
+    <div class="tt">画像を読み込み中…</div>
+    <div class="mini">全員の準備ができたら始まります</div>
+    <div class="plist" id="ldPlayers"></div>
+  </section>
+
+  <!-- 出題・結果 -->
+  <section id="scQuiz" class="hidden">
+    <div class="hud"><span id="qNo">Q 1/10</span><span>あなた <b id="qScore">0</b> pt</span></div>
+    <div class="timer" id="qTimer"></div>
+    <div class="bar" id="qBarWrap"><i id="qBar"></i></div>
+    <div class="thumb"><img id="qImg" alt="コースのサムネイル"></div>
+    <div class="choices" id="qChoices"></div>
+    <div class="mymsg" id="qMy"></div>
+    <div id="qReveal" class="panel hidden"></div>
+  </section>
+
+  <!-- 最終結果 -->
+  <section id="scFinal" class="hidden">
+    <div class="panel">
+      <div class="tt" style="text-align:center;font-size:20px"><span class="ms" style="color:#d89e00">emoji_events</span> 最終結果</div>
+      <div id="fnTable"></div>
+    </div>
+    <button class="btn" id="btnAgain">もう一度(ロビーへ)</button>
+    <div id="fnWait" class="mini hidden" style="text-align:center">ホストの操作を待っています…</div>
+    <button class="btn sub" id="btnLeave2">退出</button>
+  </section>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, writeBatch }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ============================================================
+// 設定
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCJqqCzt_xppIt0lg3ItQfPwoR9uLWRWZI",
+  authDomain: "lolex0204.firebaseapp.com",
+  projectId: "lolex0204",
+  storageBucket: "lolex0204.firebasestorage.app",
+  messagingSenderId: "940620254622",
+  appId: "1:940620254622:web:edca80d191423cd460da8f"
+};
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzitgPfprIJzhg58qIa_yxvUQR9UsrNOPZKA6RV84Hwzo37gSd6uW9CdA3PAqP9vrzBjw/exec';           // ホストだけが使います(action=recentWr)
+const ROOM_COL = 'thumbQuizRooms';                 // Firestoreのコレクション名
+const thumbUrl = c => `https://lolbeans.io/ui/level-thumbnails/${c.levelId}.png`;
+
+const LIMIT_MS   = 10000;  // 制限時間
+const GRACE_MS   = 600;    // 通信遅延の猶予(ホストが結果を出すまでの上乗せ)
+const REVEAL_MS  = 5000;   // 結果表示の時間
+const LOAD_WAIT_MS = 12000;// 画像読み込みを待つ最大時間
+const PTS_BASE = 500, PTS_BONUS = 500;  // 正解: 500 + 500×(残り時間の割合)
+const EARLY_REVEAL = true; // 全員が回答したら10秒を待たずに結果へ
+const HEARTBEAT_MS = 5000, STALE_MS = 20000; // 生存確認の間隔 / これ以上更新が無い人は退出扱い
+const POP_MIN_RATING = 4.15, POP_MIN_VOTES = 1000, MIN_POOL = 12;
+
+// ============================================================
+const $ = id => document.getElementById(id);
+const ic = (n, st = '') => `<span class="ms" style="${st}">${n}</span>`;
+const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+let db = null;
+const S = {
+  pid: sessionStorage.getItem('tb_pid') || ('p' + Math.random().toString(36).slice(2, 10)),
+  code: null, room: null, players: {}, answers: [], isHost: false,
+  all: [], gasReady: null, unsubs: [], answersUnsub: null,
+  sched: { key: null, t: null }, cur: { key: null, started: false, answered: false, shownAt: 0 },
+  tick: null, hb: null, seenAt: {}, seenVal: {}, revealAt: 0, preloaded: null, imgCache: [], revealedKey: null, advancingKey: null,
+};
+sessionStorage.setItem('tb_pid', S.pid);
+
+function show(id){ ['scEntry','scLobby','scLoading','scQuiz','scFinal'].forEach(x => $(x).classList.toggle('hidden', x !== id)); }
+const sec = ms => (ms/1000).toFixed(2) + '秒';
+
+function loadImage(url){
+  return new Promise((res, rej) => {
+    const im = new Image();
+    const t = setTimeout(() => rej(new Error('timeout')), 8000);
+    im.onload = () => { clearTimeout(t); res(im); };
+    im.onerror = () => { clearTimeout(t); rej(new Error('error')); };
+    im.src = url;
+  });
+}
+
+// ---------- 初期化 ----------
+function init(){
+  if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('YOUR_')) {
+    $('entryMsg').innerHTML = '<span class="err">コード内の FIREBASE_CONFIG を設定してください。</span>';
+    $('btnCreate').disabled = true; $('btnJoin').disabled = true; return;
+  }
+  db = getFirestore(initializeApp(FIREBASE_CONFIG));
+  $('inName').value = localStorage.getItem('tb_name') || '';
+  const q = new URLSearchParams(location.search).get('room');
+  if (q) $('inCode').value = q.toUpperCase();
+  startGasLoad();
+  const saved = sessionStorage.getItem('tb_code');
+  if (saved) resume(saved);
+}
+
+function startGasLoad(){
+  S.gasReady = (async () => {
+    if (!GAS_URL || GAS_URL.startsWith('YOUR_')) throw new Error('GAS_URL が未設定です');
+    const json = await (await fetch(`${GAS_URL}?action=recentWr`)).json();
+    if (json.error) throw new Error(json.error);
+    const seen = new Set();
+    S.all = (json.courses || []).filter(c => {
+      const k = (c.name||'').toString().trim().toLowerCase();
+      if (!k || seen.has(k)) return false; seen.add(k);
+      return c.levelId !== undefined && c.levelId !== null;
+    });
+  })();
+  S.gasReady.catch(() => {});
+}
+
+const genCode = () => { const cs = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for (let i=0;i<5;i++) s += cs[Math.random()*cs.length|0]; return s; };
+function getName(){
+  const n = $('inName').value.trim();
+  if (!n) { $('entryMsg').innerHTML = '<span class="err">ニックネームを入力してください。</span>'; $('inName').focus(); return null; }
+  localStorage.setItem('tb_name', n); return n;
+}
+
+// ---------- 部屋の作成・参加 ----------
+async function createRoom(){
+  const name = getName(); if (!name) return;
+  $('btnCreate').disabled = true; $('entryMsg').textContent = '部屋を作成中…';
+  try {
+    let code = null;
+    for (let i = 0; i < 8; i++) { const c = genCode(); if (!(await getDoc(doc(db, ROOM_COL, c))).exists()) { code = c; break; } }
+    if (!code) throw new Error('部屋コードを作れませんでした');
+    await setDoc(doc(db, ROOM_COL, code), {
+      hostId: S.pid, status: 'lobby', settings: { type: 'all', diff: 'normal', count: 10 },
+      round: 0, qIndex: 0, scores: {}, corrects: {}, questions: [], reveal: null,
+      phaseStartMs: Date.now(), createdAt: Date.now(),
+    });
+    await setDoc(doc(db, ROOM_COL, code, 'players', S.pid), { name, ready: false, joinedAt: Date.now() });
+    enterRoom(code);
+  } catch (e) { $('entryMsg').innerHTML = `<span class="err">${esc(e.message || e)}</span>`; }
+  $('btnCreate').disabled = false;
+}
+
+async function joinRoom(){
+  const name = getName(); if (!name) return;
+  const code = $('inCode').value.trim().toUpperCase();
+  if (code.length !== 5) { $('entryMsg').innerHTML = '<span class="err">部屋コード(5文字)を入力してください。</span>'; return; }
+  $('entryMsg').textContent = '参加中…';
+  try {
+    const snap = await getDoc(doc(db, ROOM_COL, code));
+    if (!snap.exists()) throw new Error('その部屋は見つかりません');
+    const pref = doc(db, ROOM_COL, code, 'players', S.pid);
+    const mine = await getDoc(pref);
+    if (snap.data().status !== 'lobby' && !mine.exists()) throw new Error('この部屋はすでにゲーム中です');
+    await setDoc(pref, { name, ready: mine.exists() ? !!mine.data().ready : false, joinedAt: mine.exists() ? mine.data().joinedAt : Date.now() });
+    enterRoom(code);
+  } catch (e) { $('entryMsg').innerHTML = `<span class="err">${esc(e.message || e)}</span>`; }
+}
+
+async function resume(code){
+  try {
+    const snap = await getDoc(doc(db, ROOM_COL, code));
+    const me = await getDoc(doc(db, ROOM_COL, code, 'players', S.pid));
+    if (snap.exists() && me.exists()) enterRoom(code); else sessionStorage.removeItem('tb_code');
+  } catch (_) { sessionStorage.removeItem('tb_code'); }
+}
+
+function enterRoom(code){
+  S.code = code; sessionStorage.setItem('tb_code', code);
+  clearInterval(S.hb); beat(); S.hb = setInterval(beat, HEARTBEAT_MS);
+  S.unsubs.push(onSnapshot(doc(db, ROOM_COL, code), snap => {
+    if (!snap.exists()) { leaveLocal('部屋が閉じられました'); return; }
+    onRoom(snap.data());
+  }));
+  S.unsubs.push(onSnapshot(collection(db, ROOM_COL, code, 'players'), snap => {
+    S.players = {};
+    snap.forEach(d => {
+      const v = d.data(); S.players[d.id] = v;
+      if (!(d.id in S.seenAt) || S.seenVal[d.id] !== v.seen) { S.seenAt[d.id] = Date.now(); S.seenVal[d.id] = v.seen; }
+    });
+    if (!S.room) return;
+    if (S.room.status === 'lobby') renderLobby();
+    if (S.room.status === 'loading') { renderLoading(); hostCheckReady(); }
+    if (S.room.status === 'question') hostCheckEarly();
+  }));
+}
+
+function leaveLocal(msg){
+  S.unsubs.forEach(u => u()); S.unsubs = [];
+  if (S.answersUnsub) { S.answersUnsub(); S.answersUnsub = null; }
+  clearTimeout(S.sched.t); S.sched = { key: null, t: null }; clearInterval(S.tick); clearInterval(S.hb);
+  S.seenAt = {}; S.seenVal = {};
+  S.code = null; S.room = null; S.players = {}; S.answers = []; S.cur = { key: null, started: false, answered: false, shownAt: 0 };
+  sessionStorage.removeItem('tb_code');
+  show('scEntry'); $('entryMsg').textContent = msg || '';
+}
+async function leave(){
+  try { if (S.code) await deleteDoc(doc(db, ROOM_COL, S.code, 'players', S.pid)); } catch (_) {}
+  leaveLocal('');
+}
+
+// ---------- 生存確認(切断検知)とホスト引き継ぎ ----------
+const isOnline = pid => pid === S.pid || (pid in S.players && Date.now() - (S.seenAt[pid] || 0) < STALE_MS);
+const onlineIds = () => Object.keys(S.players).filter(isOnline);
+function beat(){
+  if (!S.code) return;
+  updateDoc(doc(db, ROOM_COL, S.code, 'players', S.pid), { seen: Date.now() })
+    .catch(e => { if (e && e.code === 'not-found' && S.code) leaveLocal('接続が切れたため退出しました'); });
+  refresh();
+}
+function refresh(){
+  const r = S.room; if (!r) return;
+  if (r.status === 'lobby') renderLobby();
+  if (r.status === 'loading') { renderLoading(); hostCheckReady(); }
+  if (r.status === 'question') hostCheckEarly();
+  // ホストが落ちたら、最も早く参加したオンラインの人が引き継ぐ
+  if (!isOnline(r.hostId) && S.players[S.pid]) {
+    const first = onlineIds().sort((a, b) => (S.players[a].joinedAt || 0) - (S.players[b].joinedAt || 0))[0];
+    if (first === S.pid) updateDoc(doc(db, ROOM_COL, S.code), { hostId: S.pid }).catch(() => {});
+  }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) beat(); });
+
+// ---------- 部屋の状態に応じた描画 ----------
+function onRoom(room){
+  const prevStatus = S.room && S.room.status;
+  S.room = room; S.isHost = room.hostId === S.pid;
+  if (S.isHost && !S.answersUnsub) {
+    S.answersUnsub = onSnapshot(collection(db, ROOM_COL, S.code, 'answers'), snap => {
+      S.answers = snap.docs.map(d => d.data()); hostCheckEarly();
+    });
+  }
+  if (room.status !== 'question') clearInterval(S.tick);
+  switch (room.status) {
+    case 'lobby':    show('scLobby'); renderLobby(); break;
+    case 'loading':  show('scLoading'); renderLoading(); preloadAll(); hostWatchLoading(); break;
+    case 'question': show('scQuiz'); renderQuestion(); hostWatchQuestion(); break;
+    case 'reveal':   show('scQuiz'); renderReveal(); hostWatchReveal(); break;
+    case 'finished': show('scFinal'); renderFinal(); break;
+  }
+}
+
+function seg(id, val, canEdit, key){
+  [...$(id).children].forEach(b => b.classList.toggle('on', String(b.dataset.v) === String(val)));
+  $(id).classList.toggle('lock', !canEdit);
+  $(id).onclick = canEdit ? (e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const v = key === 'count' ? Number(b.dataset.v) : b.dataset.v;
+    updateDoc(doc(db, ROOM_COL, S.code), { settings: { ...S.room.settings, [key]: v } });
+  }) : null;
+}
+
+function renderLobby(){
+  const r = S.room;
+  $('lbCode').textContent = S.code;
+  const ids = onlineIds().sort((a,b) => (S.players[a].joinedAt||0) - (S.players[b].joinedAt||0));
+  $('lbCount').textContent = `(${ids.length}人)`;
+  $('lbPlayers').innerHTML = ids.map(id =>
+    `<span class="chip ${id===S.pid?'me':''}">${id===r.hostId?ic('star','color:#ffd23f')+' ':''}${esc(S.players[id].name)}</span>`).join('');
+  seg('sgType', r.settings.type, S.isHost, 'type');
+  seg('sgDiff', r.settings.diff, S.isHost, 'diff');
+  seg('sgCount', r.settings.count, S.isHost, 'count');
+  $('btnStart').classList.toggle('hidden', !S.isHost);
+  $('lbWait').classList.toggle('hidden', S.isHost);
+}
+
+function renderLoading(){
+  const ids = onlineIds();
+  $('ldPlayers').innerHTML = ids.map(id =>
+    `<span class="chip ${id===S.pid?'me':''}">${S.players[id].ready ? ic('check_circle','color:#26890c') : ic('hourglass_top')} ${esc(S.players[id].name)}</span>`).join('');
+}
+
+// ---------- ホスト: ゲーム開始 ----------
+function buildPool(settings){
+  const base = S.all.filter(c => settings.type === 'all' || c.type === Number(settings.type));
+  const votesOk = c => (c.votes || 0) >= POP_MIN_VOTES, ratingOk = c => (c.rating || 0) >= POP_MIN_RATING;
+  let pool = base;
+  if (settings.diff === 'easy')   pool = base.filter(c => votesOk(c) && ratingOk(c));
+  if (settings.diff === 'normal') pool = base.filter(votesOk);
+  if (pool.length < MIN_POOL && settings.diff === 'easy') pool = base.filter(votesOk);
+  if (pool.length < MIN_POOL && settings.diff !== 'hard') pool = base;
+  return pool;
+}
+function makeChoices(ans, pool){
+  const same  = shuffle(pool.filter(c => c.levelId !== ans.levelId && c.type === ans.type));
+  const other = shuffle(S.all.filter(c => c.levelId !== ans.levelId && c.type !== ans.type));
+  return shuffle([ans, ...same.concat(other).slice(0, 3)]).map(c => ({ levelId: c.levelId, name: c.name }));
+}
+
+async function startGame(){
+  if (!S.isHost) return;
+  const btn = $('btnStart'); btn.disabled = true; $('lbMsg').textContent = '問題を準備中…';
+  try {
+    await S.gasReady;
+    const st = S.room.settings, pool = buildPool(st);
+    if (pool.length < 4) throw new Error('この条件だとコースが足りません。条件を変えてください。');
+    // サムネが読めるコースだけを N 問分選ぶ(6件ずつ並列で確認)
+    const src = shuffle(pool), picked = [];
+    for (let i = 0; i < src.length && picked.length < st.count; i += 6) {
+      const chunk = src.slice(i, i + 6);
+      const ok = await Promise.all(chunk.map(c => loadImage(thumbUrl(c)).then(() => true, () => false)));
+      chunk.forEach((c, k) => { if (ok[k] && picked.length < st.count) picked.push(c); });
+    }
+    if (picked.length < 1) throw new Error('サムネイルを読み込めるコースがありませんでした(thumbUrl を確認してください)');
+    const questions = picked.map(c => ({ levelId: c.levelId, name: c.name, author: c.author || '', type: c.type, choices: makeChoices(c, pool) }));
+
+    const ids = onlineIds(), scores = {}, corrects = {};
+    ids.forEach(id => { scores[id] = 0; corrects[id] = 0; });
+    const batch = writeBatch(db);
+    Object.keys(S.players).filter(id => !ids.includes(id)).forEach(id => batch.delete(doc(db, ROOM_COL, S.code, 'players', id)));
+    ids.forEach(id => batch.update(doc(db, ROOM_COL, S.code, 'players', id), { ready: false }));
+    batch.update(doc(db, ROOM_COL, S.code), {
+      status: 'loading', questions, qIndex: 0, round: (S.room.round || 0) + 1,
+      scores, corrects, reveal: null, phaseStartMs: Date.now(),
+    });
+    await batch.commit();
+    $('lbMsg').textContent = '';
+  } catch (e) { $('lbMsg').innerHTML = `<span class="err">${esc(e.message || e)}</span>`; }
+  btn.disabled = false;
+}
+
+// ---------- 全員: 画像の先読み ----------
+async function preloadAll(){
+  const r = S.room;
+  if (S.preloaded === r.round) return;
+  S.preloaded = r.round; S.imgCache = [];
+  await Promise.allSettled(r.questions.map(q => loadImage(thumbUrl(q)).then(im => S.imgCache.push(im))));
+  try { await updateDoc(doc(db, ROOM_COL, S.code, 'players', S.pid), { ready: true }); } catch (_) {}
+}
+
+// ---------- ホスト: 進行管理 ----------
+function schedule(key, ms, fn){
+  if (S.sched.key === key) return;
+  clearTimeout(S.sched.t);
+  S.sched = { key, t: setTimeout(fn, Math.max(0, ms)) };
+}
+function hostWatchLoading(){
+  if (!S.isHost) return;
+  const r = S.room;
+  schedule(`${r.round}:loading`, r.phaseStartMs + LOAD_WAIT_MS - Date.now(), () => beginQuestion(0, 'loading'));
+  hostCheckReady();
+}
+function hostCheckReady(){
+  if (!S.isHost || !S.room || S.room.status !== 'loading') return;
+  const ids = onlineIds();
+  if (ids.length && ids.every(id => S.players[id].ready)) beginQuestion(0, 'loading');
+}
+async function beginQuestion(i, from){
+  const r = S.room;
+  if (!S.isHost || !r || r.status !== from) return;
+  const key = `${r.round}:${from}:${i}`;
+  if (S.advancingKey === key) return; S.advancingKey = key;
+  await updateDoc(doc(db, ROOM_COL, S.code), { status: 'question', qIndex: i, phaseStartMs: Date.now(), reveal: null });
+}
+function hostWatchQuestion(){
+  if (!S.isHost) return;
+  const r = S.room;
+  schedule(`${r.round}:q:${r.qIndex}`, r.phaseStartMs + LIMIT_MS + GRACE_MS - Date.now(), doReveal);
+  hostCheckEarly();
+}
+function hostCheckEarly(){
+  if (!EARLY_REVEAL || !S.isHost || !S.room || S.room.status !== 'question') return;
+  const r = S.room;
+  const done = new Set(S.answers.filter(a => a.round === r.round && a.q === r.qIndex).map(a => a.pid));
+  const ids = onlineIds();
+  if (ids.length && ids.every(id => done.has(id))) setTimeout(doReveal, 250);
+}
+async function doReveal(){
+  const r = S.room;
+  if (!S.isHost || !r || r.status !== 'question') return;
+  const key = `${r.round}:${r.qIndex}`;
+  if (S.revealedKey === key) return; S.revealedKey = key;
+  const q = r.questions[r.qIndex];
+  const results = Object.keys(S.players).filter(pid => isOnline(pid) || S.answers.some(x => x.pid === pid && x.round === r.round && x.q === r.qIndex)).map(pid => {
+    const a = S.answers.find(x => x.pid === pid && x.round === r.round && x.q === r.qIndex);
+    const name = S.players[pid].name;
+    if (!a || typeof a.ms !== 'number') return { pid, name, choice: null, ms: null, correct: false, pts: 0 };
+    const ms = Math.max(0, Math.min(a.ms, LIMIT_MS));
+    const correct = a.choice === q.levelId;
+    const pts = correct ? PTS_BASE + Math.round(PTS_BONUS * (1 - ms / LIMIT_MS)) : 0;
+    return { pid, name, choice: a.choice, ms, correct, pts };
+  });
+  // 正解者を早い順 → 不正解 → 未回答
+  const rank = x => x.correct ? 0 : (x.ms !== null ? 1 : 2);
+  results.sort((a, b) => rank(a) - rank(b) || (a.ms ?? 0) - (b.ms ?? 0));
+  const scores = { ...(r.scores || {}) }, corrects = { ...(r.corrects || {}) };
+  results.forEach(x => { scores[x.pid] = (scores[x.pid] || 0) + x.pts; if (x.correct) corrects[x.pid] = (corrects[x.pid] || 0) + 1; });
+  await updateDoc(doc(db, ROOM_COL, S.code), { status: 'reveal', phaseStartMs: Date.now(), reveal: { q: r.qIndex, results }, scores, corrects });
+}
+function hostWatchReveal(){
+  if (!S.isHost) return;
+  const r = S.room;
+  schedule(`${r.round}:r:${r.qIndex}`, r.phaseStartMs + REVEAL_MS - Date.now(), async () => {
+    if (S.room.status !== 'reveal') return;
+    if (r.qIndex + 1 < r.questions.length) beginQuestion(r.qIndex + 1, 'reveal');
+    else await updateDoc(doc(db, ROOM_COL, S.code), { status: 'finished' });
+  });
+}
+
+// ---------- 出題画面 ----------
+function totalRanking(){
+  const sc = S.room.scores || {}, co = S.room.corrects || {};
+  const list = Object.keys(S.players).map(pid => ({ pid, name: S.players[pid].name, score: sc[pid] || 0, corrects: co[pid] || 0 }));
+  list.sort((a, b) => b.score - a.score);
+  list.forEach(x => { x.rank = 1 + list.filter(y => y.score > x.score).length; });
+  return list;
+}
+
+function renderChoices(q, r){
+  $('qChoices').innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = 'choice c' + i; b.innerHTML = `<span class="ic">${['▲','◆','●','■'][i]}</span><span>${esc(c.name)}</span>`; b.dataset.id = c.levelId; b.disabled = true;
+    b.addEventListener('click', () => submitAnswer(c.levelId));
+    $('qChoices').appendChild(b);
+  });
+}
+
+function renderQuestion(){
+  const r = S.room, q = r.questions[r.qIndex], key = `${r.round}:${r.qIndex}`;
+  $('qNo').textContent = `Q ${r.qIndex + 1}/${r.questions.length}`;
+  $('qScore').textContent = (r.scores || {})[S.pid] || 0;
+  $('qReveal').classList.add('hidden');
+  $('qBarWrap').classList.remove('rv');
+  if (S.cur.key === key) return; // 同じ問題の再描画(他人の書き込み等)では作り直さない
+  const c = S.cur = { key, started: false, answered: false, shownAt: 0 };
+  $('qMy').textContent = ''; $('qTimer').textContent = '10.0'; $('qBar').style.width = '100%';
+  renderChoices(q, r);
+  const img = $('qImg');
+  const start = () => {
+    if (c.started || S.cur !== c) return;
+    c.started = true; c.shownAt = performance.now();
+    [...$('qChoices').children].forEach(b => b.disabled = false);
+    clearInterval(S.tick); S.tick = setInterval(tick, 50);
+  };
+  img.onload = start; img.onerror = start;
+  img.src = thumbUrl(q);
+  setTimeout(start, 2500); // 画像が遅くても2.5秒後には開始
+}
+
+function tick(){
+  const c = S.cur; if (!c.started || S.room.status !== 'question') return;
+  const el = performance.now() - c.shownAt, left = Math.max(0, LIMIT_MS - el);
+  $('qTimer').textContent = (left / 1000).toFixed(1);
+  $('qBar').style.width = (left / LIMIT_MS * 100) + '%';
+  if (left <= 0) {
+    [...$('qChoices').children].forEach(b => b.disabled = true);
+    if (!c.answered) $('qMy').innerHTML = '<span style="color:var(--ng)">TIME UP!</span>';
+    clearInterval(S.tick);
+  }
+}
+
+async function submitAnswer(choiceId){
+  const c = S.cur, r = S.room;
+  if (!c.started || c.answered || !r || r.status !== 'question') return;
+  const ms = Math.round(performance.now() - c.shownAt);
+  if (ms > LIMIT_MS) return;
+  c.answered = true;
+  [...$('qChoices').children].forEach(b => { b.disabled = true; if (String(b.dataset.id) === String(choiceId)) b.classList.add('sel'); });
+  $('qMy').innerHTML = `<span style="color:var(--yellow)">${sec(ms)}で回答!結果を待っています…</span>`;
+  try {
+    await setDoc(doc(db, ROOM_COL, S.code, 'answers', `${r.round}_${r.qIndex}_${S.pid}`), { round: r.round, q: r.qIndex, pid: S.pid, choice: choiceId, ms });
+  } catch (e) { $('qMy').innerHTML = `<span class="err">送信に失敗しました: ${esc(e.message || e)}</span>`; }
+}
+
+// ---------- 結果表示(5秒) ----------
+function renderReveal(){
+  const r = S.room, q = r.questions[r.qIndex], rv = r.reveal;
+  clearInterval(S.tick);
+  $('qNo').textContent = `Q ${r.qIndex + 1}/${r.questions.length}`;
+  $('qScore').textContent = (r.scores || {})[S.pid] || 0;
+  if (!rv) return;
+  // 途中参加(再読込)でも正しく出せるよう、問題が違えば描き直す
+  const key = `${r.round}:${r.qIndex}`;
+  if (S.cur.key !== key) {
+    S.cur = { key, started: true, answered: true, shownAt: 0 };
+    $('qImg').src = thumbUrl(q); renderChoices(q, r);
+  }
+  const mine = rv.results.find(x => x.pid === S.pid);
+  [...$('qChoices').children].forEach(b => {
+    b.disabled = true; b.classList.remove('sel');
+    if (String(b.dataset.id) === String(q.levelId)) b.classList.add('ok');
+    else if (mine && mine.choice !== null && String(b.dataset.id) === String(mine.choice)) b.classList.add('ng');
+  });
+  $('qTimer').textContent = '';
+  if (!mine || mine.ms === null) $('qMy').innerHTML = '<span style="color:var(--dim)">未回答…</span>';
+  else if (mine.correct) $('qMy').innerHTML = `<span style="color:var(--ok)">${ic('check_circle')} 正解! ${sec(mine.ms)} / +${mine.pts}pt</span>`;
+  else $('qMy').innerHTML = `<span style="color:var(--ng)">${ic('cancel')} 不正解…</span>`;
+
+  const tot = totalRanking(), totOf = pid => tot.find(x => x.pid === pid) || { rank: '-', score: 0 };
+  $('qReveal').innerHTML = `
+    <div class="tt">正解は「${esc(q.name)}」<span style="color:var(--dim);font-size:12px"> 作者: ${esc(q.author)}</span></div>
+    <table>
+      <tr><th>#</th><th>名前</th><th class="r">タイム</th><th class="r">獲得</th><th class="r">合計(順位)</th></tr>
+      ${rv.results.map((x, i) => `
+        <tr class="${x.pid === S.pid ? 'me' : ''}">
+          <td>${x.correct ? (i + 1) : '-'}</td>
+          <td>${esc(x.name)}</td>
+          <td class="r">${x.ms === null ? '未回答' : (x.correct ? '' : ic('close') + ' ') + sec(x.ms)}</td>
+          <td class="r ${x.pts ? 'plus' : 'zero'}">${x.pts ? '+' + x.pts : '0'}</td>
+          <td class="r">${totOf(x.pid).score} (${totOf(x.pid).rank}位)</td>
+        </tr>`).join('')}
+    </table>`;
+  $('qReveal').classList.remove('hidden');
+
+  // 5秒バー(受信した時刻から)
+  const bar = $('qBar'); $('qBarWrap').classList.add('rv');
+  bar.style.transition = 'none'; bar.style.width = '100%';
+  requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transition = `width ${REVEAL_MS}ms linear`; bar.style.width = '0%'; }));
+  setTimeout(() => { bar.style.transition = 'none'; }, REVEAL_MS + 50);
+}
+
+// ---------- 最終結果 ----------
+function podiumHtml(list){
+  const top = list.slice(0, 3), order = [1, 0, 2].filter(i => top[i]);
+  return `<div class="podium">${order.map(i => `<div class="pcol p${i+1}"><div class="pn">${esc(top[i].name)}</div><div class="ps">${top[i].score}pt</div><div class="pb">${i+1}</div></div>`).join('')}</div>`;
+}
+function renderFinal(){
+  const r = S.room, total = r.questions.length, list = totalRanking();
+  const medal = n => n === 1 ? ic('military_tech','color:#d89e00') : n === 2 ? ic('military_tech','color:#8a93a6') : n === 3 ? ic('military_tech','color:#b0693a') : n + '位';
+  $('fnTable').innerHTML = podiumHtml(list) + `<table>
+    <tr><th>順位</th><th>名前</th><th class="r">正解数</th><th class="r">得点</th></tr>
+    ${list.map(x => `<tr class="${x.pid === S.pid ? 'me' : ''}">
+      <td class="medal">${medal(x.rank)}</td><td>${esc(x.name)}</td><td class="r">${x.corrects}/${total}</td><td class="r">${x.score}</td></tr>`).join('')}
+  </table>`;
+  $('btnAgain').classList.toggle('hidden', !S.isHost);
+  $('fnWait').classList.toggle('hidden', S.isHost);
+}
+async function playAgain(){
+  if (!S.isHost) return;
+  await updateDoc(doc(db, ROOM_COL, S.code), { status: 'lobby', questions: [], scores: {}, corrects: {}, reveal: null, qIndex: 0, phaseStartMs: Date.now() });
+  S.cur = { key: null, started: false, answered: false, shownAt: 0 };
+}
+
+// ---------- イベント ----------
+$('btnCreate').addEventListener('click', createRoom);
+$('btnJoin').addEventListener('click', joinRoom);
+$('inCode').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
+$('btnStart').addEventListener('click', startGame);
+$('btnAgain').addEventListener('click', playAgain);
+$('btnLeave1').addEventListener('click', leave);
+$('btnLeave2').addEventListener('click', leave);
+$('btnCopy').addEventListener('click', async () => {
+  const url = `${location.origin}${location.pathname}?room=${S.code}`;
+  try { await navigator.clipboard.writeText(url); $('btnCopy').textContent = 'コピーしました'; }
+  catch (_) { prompt('コピーしてください', url); }
+  setTimeout(() => $('btnCopy').textContent = '招待リンクをコピー', 1800);
+});
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (!$('scQuiz').classList.contains('hidden') && e.key >= '1' && e.key <= '4') {
+    const b = $('qChoices').children[Number(e.key) - 1]; if (b && !b.disabled) b.click();
+  }
+});
+
+init();
+</script>
+</body>
+</html>

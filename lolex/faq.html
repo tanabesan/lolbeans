@@ -58,21 +58,6 @@
             text-shadow: 3px 3px 0 var(--primary-color);
         }
 
-        /* 言語セレクタのスタイル（ナビゲーションとは独立して右上に固定） */
-        #language-switcher {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 8px 10px;
-            border-radius: 0;
-            border: 1px solid var(--panel-line);
-            background-color: rgba(26, 29, 43, 0.92);
-            color: var(--text-color-dark);
-            cursor: pointer;
-            font-size: 14px;
-            z-index: 1000;
-        }
-
         /* FAQ Content */
         .container {
             max-width: 900px;
@@ -161,11 +146,6 @@
         <h1 id="hero-title">よくある質問</h1>
         <p id="hero-subtitle">疑問を解決し、LOL.exをさらに活用しましょう。</p>
     </header>
-
-    <select id="language-switcher">
-        <option value="ja">日本語</option>
-        <option value="en">English</option>
-    </select>
 
     <main class="container">
         <section id="faq-list">
@@ -292,9 +272,13 @@
             }
         };
 
+        // ナビ(nav-menu.js)の言語切り替えと連動: localStorage 'lolbeans-lang'('jp'/'en')を共有し、
+        // ナビ側の切り替え時に window.setLang が呼ばれます
+        const getNavLang = () => { try { return localStorage.getItem('lolbeans-lang') === 'en' ? 'en' : 'ja'; } catch (e) { return 'ja'; } };
+        window.setLang = (l) => applyLanguage(l === 'en' ? 'en' : 'ja');
+
         // 言語設定の取得と適用
         const applyLanguage = (lang) => {
-            localStorage.setItem('language', lang);
             const langData = translations[lang];
 
             // ページタイトルとナビゲーション
@@ -319,12 +303,11 @@
                     }
                 }
             }
-            document.getElementById('language-switcher').value = lang;
         };
 
         document.addEventListener('DOMContentLoaded', () => {
             // 初期ロード時の言語設定
-            const savedLang = localStorage.getItem('language') || 'ja';
+            const savedLang = getNavLang();
             applyLanguage(savedLang);
 
             // アコーディオンの開閉機能
@@ -342,11 +325,6 @@
                 });
             });
 
-            // 言語切り替えイベント
-            const languageSwitcher = document.getElementById('language-switcher');
-            languageSwitcher.addEventListener('change', (event) => {
-                applyLanguage(event.target.value);
-            });
         });
     </script>
 </body>

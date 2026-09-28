@@ -86,17 +86,6 @@
             color: var(--text-dim);
         }
 
-        #language-switcher {
-            display: inline-block;
-            padding: 8px 10px;
-            border: 2px solid var(--panel-line);
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'JetBrains Mono', monospace;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
         .container {
             position: relative;
             z-index: 1;
@@ -294,12 +283,6 @@
 
     <main class="container">
         <section id="download-items" style="text-align: center;">
-            <div style="text-align:right; margin-bottom: 16px;">
-                <select id="language-switcher">
-                    <option value="ja">日本語</option>
-                    <option value="en">English</option>
-                </select>
-            </div>
             <h2 id="available-files-title" style="font-family:'Press Start 2P',monospace; font-size:14px; font-weight:normal; color:var(--accent2);">利用可能なファイル</h2>
             <p id="description-text" style="max-width: 700px; margin: 16px auto 32px; font-size: 12px; color: var(--text-dim);">
                 ここでは、ゲーム内エディターで使用できる様々なファイルをダウンロードできます。お好みのファイルを選んで、コースをさらに豊かにしましょう。
@@ -419,8 +402,12 @@
             }
         };
 
+        // ナビ(nav-menu.js)の言語切り替えと連動: localStorage 'lolbeans-lang'('jp'/'en')を共有し、
+        // ナビ側の切り替え時に window.setLang が呼ばれます
+        const getNavLang = () => { try { return localStorage.getItem('lolbeans-lang') === 'en' ? 'en' : 'ja'; } catch (e) { return 'ja'; } };
+        window.setLang = (l) => applyLanguage(l === 'en' ? 'en' : 'ja');
+
         const applyLanguage = (lang) => {
-            localStorage.setItem('language', lang);
             const langData = translations[lang];
 
             document.title = langData.heroTitle;
@@ -432,17 +419,15 @@
             document.getElementById('search-input').placeholder = langData.searchPlaceholder;
             document.querySelector('.filter-button[data-filter="all"]').textContent = langData.allFilter;
 
-            document.getElementById('language-switcher').value = lang;
         };
 
         document.addEventListener('DOMContentLoaded', () => {
             const fileListContainer = document.getElementById('file-list');
             const searchInput = document.getElementById('search-input');
             const filterButtons = document.querySelectorAll('.filter-button');
-            const languageSwitcher = document.getElementById('language-switcher');
             let allFiles = [];
 
-            const savedLang = localStorage.getItem('language') || 'ja';
+            const savedLang = getNavLang();
             applyLanguage(savedLang);
 
             const filterAndDisplayFiles = () => {
@@ -469,7 +454,7 @@
                 filesDataReady = true;
                 filteredFilesCache = files;
                 fileListContainer.innerHTML = '';
-                const langData = translations[localStorage.getItem('language') || 'ja'];
+                const langData = translations[getNavLang()];
 
                 if (files.length === 0) {
                     fileListContainer.innerHTML = `<p style="text-align: center; color: var(--text-dim);">${langData.noResults}</p>`;
@@ -533,10 +518,8 @@
                 });
             });
 
-            languageSwitcher.addEventListener('change', (event) => {
-                applyLanguage(event.target.value);
-                filterAndDisplayFiles();
-            });
+            // ナビの言語切り替え時は、ファイル一覧も再描画する
+            window.setLang = (l) => { applyLanguage(l === 'en' ? 'en' : 'ja'); filterAndDisplayFiles(); };
         });
     </script>
 </body>

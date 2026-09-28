@@ -193,7 +193,7 @@ const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Ma
 // ---------- 言語切り替え(nav-menu.js と連動: window.setLang) ----------
 let lang = (() => { try { return localStorage.getItem('lolbeans-lang') === 'en' ? 'en' : 'jp'; } catch (e) { return 'jp'; } })();
 const L = (jp, en) => lang === 'en' ? en : jp;
-const nth = n => lang === 'en' ? n + ((n % 100 > 10 && n % 100 < 14) ? 'th' : (['th','st','nd','rd'][n % 10] || 'th')) : nth(n);
+const nth = n => lang === 'en' ? n + ((n % 100 > 10 && n % 100 < 14) ? 'th' : (['th','st','nd','rd'][n % 10] || 'th')) : n + '位';
 const EN = {
   'ニックネーム':'Nickname','部屋を作る':'Create room','または部屋コードで参加':'Or join with a room code','参加':'Join','部屋コード':'Room code',
   '招待リンクをコピー':'Copy invite link','参加者':'Players','コースタイプ':'Course type','すべて':'All','サンドボックス':'Sandbox','タイム':'Timed','対戦':'Competitive',

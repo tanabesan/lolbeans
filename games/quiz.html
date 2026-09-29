@@ -74,6 +74,19 @@ tr.me td{color:#46178f;background:#f3ecff}
 .pb{border-radius:10px 10px 0 0;color:#fff;font-size:30px;font-weight:900;padding-top:8px}
 .p1 .pb{height:120px;background:#d89e00}.p2 .pb{height:88px;background:#8a93a6}.p3 .pb{height:64px;background:#b0693a}
 .ms{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:1.25em;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;vertical-align:-.2em;white-space:nowrap;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';font-variation-settings:'FILL' 1,'wght' 700}
+.qGrid{display:block}
+#qReveal{max-height:min(52vh,420px);overflow-y:auto}
+#qReveal table{font-size:13px}
+.qGrid.reveal .thumb{max-width:150px;margin:0 auto 8px}
+.qGrid.reveal .choices{grid-template-columns:1fr;gap:6px}
+.qGrid.reveal .choice{min-height:0;padding:8px 12px;font-size:13px}
+.qGrid.reveal .choice .ic{font-size:16px}
+.qGrid.reveal .timer{width:44px;height:44px;font-size:16px;margin-bottom:6px}
+@media(min-width:760px){
+  .qGrid.reveal{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+  .qGrid.reveal .thumb{max-width:220px}
+  #qReveal{max-height:min(70vh,520px)}
+}
 </style>
 </head>
 <body data-nav-current="quiz">
@@ -103,6 +116,7 @@ tr.me td{color:#46178f;background:#f3ecff}
     <div class="panel">
       <div class="tt">参加者 <span id="lbCount"></span></div>
       <div class="plist" id="lbPlayers"></div>
+      <button class="btn sub" id="btnSpectateToggle" style="margin-top:12px"></button>
     </div>
     <div class="panel">
       <label style="margin-top:0">コースタイプ</label>
@@ -135,12 +149,16 @@ tr.me td{color:#46178f;background:#f3ecff}
   <!-- 出題・結果 -->
   <section id="scQuiz" class="hidden">
     <div class="hud"><span id="qNo">Q 1/10</span><span>あなた <b id="qScore">0</b> pt</span></div>
-    <div class="timer" id="qTimer"></div>
-    <div class="bar" id="qBarWrap"><i id="qBar"></i></div>
-    <div class="thumb"><img id="qImg" alt="コースのサムネイル"></div>
-    <div class="choices" id="qChoices"></div>
-    <div class="mymsg" id="qMy"></div>
-    <div id="qReveal" class="panel hidden"></div>
+    <div id="qGrid" class="qGrid">
+      <div id="qMain">
+        <div class="timer" id="qTimer"></div>
+        <div class="bar" id="qBarWrap"><i id="qBar"></i></div>
+        <div class="thumb"><img id="qImg" alt="コースのサムネイル"></div>
+        <div class="choices" id="qChoices"></div>
+        <div class="mymsg" id="qMy"></div>
+      </div>
+      <div id="qReveal" class="panel hidden"></div>
+    </div>
   </section>
 
   <!-- 最終結果 -->
@@ -157,7 +175,7 @@ tr.me td{color:#46178f;background:#f3ecff}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, writeBatch }
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, writeBatch, runTransaction }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ============================================================
@@ -264,7 +282,11 @@ function init(){
   if (q) $('inCode').value = q.toUpperCase();
   startGasLoad();
   const saved = sessionStorage.getItem('tb_code');
-  if (saved) resume(saved);
+  // 招待リンクの部屋コードが、前回入っていた部屋と違う場合はリンクを優先する
+  // (同じタブ/アプリ内ブラウザで別の招待リンクを開いたときに、古い部屋へ勝手に
+  //  戻ってしまい、別の部屋コードを入力しても反応しないように見えるのを防ぐ)
+  if (saved && (!q || q.toUpperCase() === saved)) resume(saved);
+  else if (saved) sessionStorage.removeItem('tb_code');
 }
 
 function startGasLoad(){
@@ -287,6 +309,24 @@ function getName(){
   const n = $('inName').value.trim();
   if (!n) { $('entryMsg').innerHTML = `<span class="err">${L('ニックネームを入力してください。','Please enter a nickname.')}</span>`; $('inName').focus(); return null; }
   localStorage.setItem('tb_name', n); return n;
+}
+
+// ---------- 止まった部屋の自動復旧 ----------
+// 進行役(ホスト)の生存確認が STALE_MS を超えて途絶えている部屋は、
+// ロビーに戻して誰でも入れるようにする(全プレイヤーの参加自体は常に別処理なので、
+// これが無いと「進行中のまま誰も進められない部屋」に新規参加だけがブロックされ続ける)。
+async function tryRecoverStuckRoom(code, room){
+  try {
+    const hostSnap = await getDoc(doc(db, ROOM_COL, code, 'players', room.hostId));
+    const hostSeen = hostSnap.exists() ? (hostSnap.data().seen || 0) : 0;
+    if (Date.now() - hostSeen < STALE_MS + 5000) return false; // ホストはまだ生きている
+    await runTransaction(db, async tx => {
+      const cur = await tx.get(doc(db, ROOM_COL, code));
+      if (!cur.exists() || cur.data().status === 'lobby') return;
+      tx.update(doc(db, ROOM_COL, code), { status: 'lobby', questions: [], scores: {}, corrects: {}, reveal: null, qIndex: 0, phaseStartMs: Date.now() });
+    });
+    return true;
+  } catch (e) { console.warn(L('部屋の復旧に失敗','Room recovery failed'), e); return false; }
 }
 
 // ---------- 部屋の作成・参加 ----------
@@ -314,12 +354,22 @@ async function joinRoom(){
   if (code.length !== 5) { $('entryMsg').innerHTML = `<span class="err">${L('部屋コード(5文字)を入力してください。','Enter the 5-character room code.')}</span>`; return; }
   $('entryMsg').textContent = L('参加中…','Joining…');
   try {
-    const snap = await getDoc(doc(db, ROOM_COL, code));
+    let snap = await getDoc(doc(db, ROOM_COL, code));
     if (!snap.exists()) throw new Error(L('その部屋は見つかりません','Room not found'));
     const pref = doc(db, ROOM_COL, code, 'players', S.pid);
-    const mine = await getDoc(pref);
-    if (snap.data().status !== 'lobby' && !mine.exists()) throw new Error(L('この部屋はすでにゲーム中です','This room is already in a game'));
-    await setDoc(pref, { name, ready: mine.exists() ? !!mine.data().ready : false, joinedAt: mine.exists() ? mine.data().joinedAt : Date.now() });
+    let mine = await getDoc(pref);
+    let spectator = false;
+    if (snap.data().status !== 'lobby' && !mine.exists()) {
+      // ホストが応答なし(切断)のまま進行中で止まっている部屋は、自動でロビーに戻す
+      const stuck = await tryRecoverStuckRoom(code, snap.data());
+      if (stuck) { snap = await getDoc(doc(db, ROOM_COL, code)); mine = await getDoc(pref); }
+      else spectator = true; // 進行中の部屋には観戦として参加(この試合では得点なし、次の試合から参加)
+    }
+    await setDoc(pref, {
+      name, ready: mine.exists() ? !!mine.data().ready : false,
+      joinedAt: mine.exists() ? mine.data().joinedAt : Date.now(),
+      spectator,
+    });
     enterRoom(code);
   } catch (e) { $('entryMsg').innerHTML = `<span class="err">${esc(e.message || e)}</span>`; }
 }
@@ -332,7 +382,18 @@ async function resume(code){
   } catch (_) { sessionStorage.removeItem('tb_code'); }
 }
 
+function cleanupListeners(){
+  S.unsubs.forEach(u => u()); S.unsubs = [];
+  if (S.answersUnsub) { S.answersUnsub(); S.answersUnsub = null; }
+  clearTimeout(S.sched.t); S.sched = { key: null, t: null };
+  clearInterval(S.tick); clearInterval(S.hb);
+  S.seenAt = {}; S.seenVal = {}; S.players = {}; S.answers = []; S.room = null; S.isHost = false;
+  S.cur = { key: null, started: false, answered: false, shownAt: 0 };
+}
 function enterRoom(code){
+  // 前の部屋の監視が残ったまま新しい部屋を開くと、古い部屋の状態(ゲーム中など)が
+  // 混ざって表示されてしまうため、必ず先に後片付けしてから切り替える
+  cleanupListeners();
   S.code = code; sessionStorage.setItem('tb_code', code);
   clearInterval(S.hb); beat(); S.hb = setInterval(beat, HEARTBEAT_MS);
   S.unsubs.push(onSnapshot(doc(db, ROOM_COL, code), snap => {
@@ -353,11 +414,8 @@ function enterRoom(code){
 }
 
 function leaveLocal(msg){
-  S.unsubs.forEach(u => u()); S.unsubs = [];
-  if (S.answersUnsub) { S.answersUnsub(); S.answersUnsub = null; }
-  clearTimeout(S.sched.t); S.sched = { key: null, t: null }; clearInterval(S.tick); clearInterval(S.hb);
-  S.seenAt = {}; S.seenVal = {};
-  S.code = null; S.room = null; S.players = {}; S.answers = []; S.cur = { key: null, started: false, answered: false, shownAt: 0 };
+  cleanupListeners();
+  S.code = null;
   sessionStorage.removeItem('tb_code');
   show('scEntry'); $('entryMsg').textContent = msg || '';
 }
@@ -367,8 +425,10 @@ async function leave(){
 }
 
 // ---------- 生存確認(切断検知)とホスト引き継ぎ ----------
+const isSpectator = pid => !!(S.players[pid] && S.players[pid].spectator);
 const isOnline = pid => pid === S.pid || (pid in S.players && Date.now() - (S.seenAt[pid] || 0) < STALE_MS);
 const onlineIds = () => Object.keys(S.players).filter(isOnline);
+const activeIds = () => onlineIds().filter(id => !isSpectator(id)); // 観戦者を除いた、実際に参加している人
 function beat(){
   if (!S.code) return;
   updateDoc(doc(db, ROOM_COL, S.code, 'players', S.pid), { seen: Date.now() })
@@ -421,9 +481,13 @@ function renderLobby(){
   const r = S.room;
   $('lbCode').textContent = S.code;
   const ids = onlineIds().sort((a,b) => (S.players[a].joinedAt||0) - (S.players[b].joinedAt||0));
-  $('lbCount').textContent = L(`(${ids.length}人)`, `(${ids.length})`);
+  const activeCount = ids.filter(id => !isSpectator(id)).length;
+  $('lbCount').textContent = L(`(参加${activeCount}人 / 観戦${ids.length-activeCount}人)`, `(${activeCount} playing / ${ids.length-activeCount} watching)`);
   $('lbPlayers').innerHTML = ids.map(id =>
-    `<span class="chip ${id===S.pid?'me':''}">${id===r.hostId?ic('star','color:#ffd23f')+' ':''}${esc(S.players[id].name)}</span>`).join('');
+    `<span class="chip ${id===S.pid?'me':''}">${id===r.hostId?ic('star','color:#ffd23f')+' ':''}${isSpectator(id)?ic('visibility','color:#8a93a6')+' ':''}${esc(S.players[id].name)}</span>`).join('');
+  const myBtn = $('btnSpectateToggle'), mySpec = isSpectator(S.pid);
+  myBtn.textContent = mySpec ? L('参加する','Join the game') : L('観戦にまわる','Spectate instead');
+  myBtn.onclick = () => updateDoc(doc(db, ROOM_COL, S.code, 'players', S.pid), { spectator: !mySpec });
   seg('sgType', r.settings.type, S.isHost, 'type');
   seg('sgDiff', r.settings.diff, S.isHost, 'diff');
   seg('sgCount', r.settings.count, S.isHost, 'count');
@@ -484,7 +548,7 @@ async function startGame(){
     if (picked.length < 1) throw new Error(L('サムネイルを読み込めるコースがありませんでした(thumbUrl を確認してください)','No course thumbnails could be loaded (check thumbUrl)'));
     const questions = picked.map(c => ({ levelId: c.levelId, name: c.name, author: c.author || '', type: c.type, choices: makeChoices(c, pool) }));
 
-    const ids = onlineIds(), scores = {}, corrects = {};
+    const ids = activeIds(), scores = {}, corrects = {};
     ids.forEach(id => { scores[id] = 0; corrects[id] = 0; });
     const batch = writeBatch(db);
     Object.keys(S.players).filter(id => !ids.includes(id)).forEach(id => batch.delete(doc(db, ROOM_COL, S.code, 'players', id)));
@@ -522,7 +586,7 @@ function hostWatchLoading(){
 }
 function hostCheckReady(){
   if (!S.isHost || !S.room || S.room.status !== 'loading') return;
-  const ids = onlineIds();
+  const ids = activeIds();
   if (ids.length && ids.every(id => S.players[id].ready)) beginQuestion(0, 'loading');
 }
 async function beginQuestion(i, from){
@@ -542,7 +606,7 @@ function hostCheckEarly(){
   if (!EARLY_REVEAL || !S.isHost || !S.room || S.room.status !== 'question') return;
   const r = S.room;
   const done = new Set(S.answers.filter(a => a.round === r.round && a.q === r.qIndex).map(a => a.pid));
-  const ids = onlineIds();
+  const ids = activeIds();
   if (ids.length && ids.every(id => done.has(id))) setTimeout(doReveal, 250);
 }
 async function doReveal(){
@@ -551,7 +615,7 @@ async function doReveal(){
   const key = `${r.round}:${r.qIndex}`;
   if (S.revealedKey === key) return; S.revealedKey = key;
   const q = r.questions[r.qIndex];
-  const results = Object.keys(S.players).filter(pid => isOnline(pid) || S.answers.some(x => x.pid === pid && x.round === r.round && x.q === r.qIndex)).map(pid => {
+  const results = Object.keys(S.players).filter(pid => !isSpectator(pid) && (isOnline(pid) || S.answers.some(x => x.pid === pid && x.round === r.round && x.q === r.qIndex))).map(pid => {
     const a = S.answers.find(x => x.pid === pid && x.round === r.round && x.q === r.qIndex);
     const name = S.players[pid].name;
     if (!a || typeof a.ms !== 'number') return { pid, name, choice: null, ms: null, correct: false, pts: 0 };
@@ -580,7 +644,7 @@ function hostWatchReveal(){
 // ---------- 出題画面 ----------
 function totalRanking(){
   const sc = S.room.scores || {}, co = S.room.corrects || {};
-  const list = Object.keys(S.players).map(pid => ({ pid, name: S.players[pid].name, score: sc[pid] || 0, corrects: co[pid] || 0 }));
+  const list = Object.keys(S.players).filter(pid => !isSpectator(pid)).map(pid => ({ pid, name: S.players[pid].name, score: sc[pid] || 0, corrects: co[pid] || 0 }));
   list.sort((a, b) => b.score - a.score);
   list.forEach(x => { x.rank = 1 + list.filter(y => y.score > x.score).length; });
   return list;
@@ -602,15 +666,18 @@ function renderQuestion(){
   $('qScore').textContent = (r.scores || {})[S.pid] || 0;
   $('qReveal').classList.add('hidden');
   $('qBarWrap').classList.remove('rv');
+  $('qGrid').classList.remove('reveal');
   if (S.cur.key === key) return; // 同じ問題の再描画(他人の書き込み等)では作り直さない
-  const c = S.cur = { key, started: false, answered: false, shownAt: 0 };
-  $('qMy').textContent = ''; $('qTimer').textContent = '10.0'; $('qBar').style.width = '100%';
+  const spectating = isSpectator(S.pid);
+  const c = S.cur = { key, started: false, answered: spectating, shownAt: 0 };
+  $('qMy').innerHTML = spectating ? `<span style="color:var(--dim)">${L('観戦中(次のゲームから参加できます)','Spectating (you can join from the next game)')}</span>` : '';
+  $('qTimer').textContent = '10.0'; $('qBar').style.width = '100%';
   renderChoices(q, r);
   const img = $('qImg');
   const start = () => {
     if (c.started || S.cur !== c) return;
     c.started = true; c.shownAt = performance.now();
-    [...$('qChoices').children].forEach(b => b.disabled = false);
+    if (!spectating) [...$('qChoices').children].forEach(b => b.disabled = false);
     clearInterval(S.tick); S.tick = setInterval(tick, 50);
   };
   img.onload = start; img.onerror = start;
@@ -625,7 +692,7 @@ function tick(){
   $('qBar').style.width = (left / LIMIT_MS * 100) + '%';
   if (left <= 0) {
     [...$('qChoices').children].forEach(b => b.disabled = true);
-    if (!c.answered) $('qMy').innerHTML = '<span style="color:var(--ng)">TIME UP!</span>';
+    if (!c.answered && !isSpectator(S.pid)) $('qMy').innerHTML = '<span style="color:var(--ng)">TIME UP!</span>';
     clearInterval(S.tick);
   }
 }
@@ -663,7 +730,8 @@ function renderReveal(){
     else if (mine && mine.choice !== null && String(b.dataset.id) === String(mine.choice)) b.classList.add('ng');
   });
   $('qTimer').textContent = '';
-  if (!mine || mine.ms === null) $('qMy').innerHTML = `<span style="color:var(--dim)">${L('未回答…','No answer…')}</span>`;
+  if (isSpectator(S.pid)) $('qMy').innerHTML = `<span style="color:var(--dim)">${L('観戦中(次のゲームから参加できます)','Spectating (you can join from the next game)')}</span>`;
+  else if (!mine || mine.ms === null) $('qMy').innerHTML = `<span style="color:var(--dim)">${L('未回答…','No answer…')}</span>`;
   else if (mine.correct) $('qMy').innerHTML = `<span style="color:var(--ok)">${ic('check_circle')} ${L('正解!','Correct!')} ${sec(mine.ms)} / +${mine.pts}pt</span>`;
   else $('qMy').innerHTML = `<span style="color:var(--ng)">${ic('cancel')} ${L('不正解…','Incorrect…')}</span>`;
 
@@ -682,6 +750,7 @@ function renderReveal(){
         </tr>`).join('')}
     </table>`;
   $('qReveal').classList.remove('hidden');
+  $('qGrid').classList.add('reveal');
 
   // 5秒バー(受信した時刻から)
   const bar = $('qBar'); $('qBarWrap').classList.add('rv');

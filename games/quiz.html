@@ -548,10 +548,11 @@ async function startGame(){
     if (picked.length < 1) throw new Error(L('サムネイルを読み込めるコースがありませんでした(thumbUrl を確認してください)','No course thumbnails could be loaded (check thumbUrl)'));
     const questions = picked.map(c => ({ levelId: c.levelId, name: c.name, author: c.author || '', type: c.type, choices: makeChoices(c, pool) }));
 
+    const keepIds = onlineIds();          // 削除してよいのは本当にオフラインの人だけ(観戦者は消さない)
     const ids = activeIds(), scores = {}, corrects = {};
     ids.forEach(id => { scores[id] = 0; corrects[id] = 0; });
     const batch = writeBatch(db);
-    Object.keys(S.players).filter(id => !ids.includes(id)).forEach(id => batch.delete(doc(db, ROOM_COL, S.code, 'players', id)));
+    Object.keys(S.players).filter(id => !keepIds.includes(id)).forEach(id => batch.delete(doc(db, ROOM_COL, S.code, 'players', id)));
     ids.forEach(id => batch.update(doc(db, ROOM_COL, S.code, 'players', id), { ready: false }));
     batch.update(doc(db, ROOM_COL, S.code), {
       status: 'loading', questions, used: usedNow.concat(picked.map(c => c.levelId)), qIndex: 0, round: (S.room.round || 0) + 1,

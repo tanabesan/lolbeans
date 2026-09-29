@@ -294,11 +294,14 @@ function startGasLoad(){
     if (!GAS_URL || GAS_URL.startsWith('YOUR_')) throw new Error('GAS_URL が未設定です');
     const json = await (await fetch(`${GAS_URL}?action=recentWr`)).json();
     if (json.error) throw new Error(json.error);
+    // levelId を正としてコースを一意化する(recentWr はコースごとの履歴を含むため、
+    // 同じコースが複数回リストに出ることがあり、名前だけで判定すると取りこぼす)
     const seen = new Set();
     S.all = (json.courses || []).filter(c => {
-      const k = (c.name||'').toString().trim().toLowerCase();
-      if (!k || seen.has(k)) return false; seen.add(k);
-      return c.levelId !== undefined && c.levelId !== null;
+      if (c.levelId === undefined || c.levelId === null) return false;
+      const k = String(c.levelId);
+      if (seen.has(k)) return false; seen.add(k);
+      return !!(c.name || '').toString().trim();
     });
   })();
   S.gasReady.catch(() => {});
@@ -524,10 +527,16 @@ async function startGame(){
   try {
     await S.gasReady;
     const st = S.room.settings, fullPool = buildPool(st);
-    // この部屋で出題済みのコースは除く(新しい問題が足りなくなったらリセット)
+    // この部屋(パーティー)が続く限り、出題済みのコースは避ける。
+    // 「かんたん」は対象コースがもともと少ないので、この重複回避の対象からは外す。
     const usedSet = new Set(S.room.used || []);
-    let pool = fullPool.filter(c => !usedSet.has(c.levelId)), usedNow = [...usedSet];
-    if (pool.length < st.count * 2) { pool = fullPool; usedNow = []; }
+    let pool, usedNow;
+    if (st.diff === 'easy') {
+      pool = fullPool; usedNow = [...usedSet]; // 記録はそのまま維持(かんたん分は追加しない)
+    } else {
+      pool = fullPool.filter(c => !usedSet.has(c.levelId)); usedNow = [...usedSet];
+      if (pool.length < st.count) { pool = fullPool; usedNow = []; } // どうしても足りない時だけリセット
+    }
     if (pool.length < 4) throw new Error(L('この条件だとコースが足りません。条件を変えてください。','Not enough courses for these settings. Try changing them.'));
     // サムネが読めるコースだけを N 問分選ぶ(6件ずつ並列で確認)
     // 同じ作者が偏らないよう、1人あたり最大 MAX_PER_AUTHOR 問(足りなければ後から緩める)
@@ -555,7 +564,7 @@ async function startGame(){
     Object.keys(S.players).filter(id => !keepIds.includes(id)).forEach(id => batch.delete(doc(db, ROOM_COL, S.code, 'players', id)));
     ids.forEach(id => batch.update(doc(db, ROOM_COL, S.code, 'players', id), { ready: false }));
     batch.update(doc(db, ROOM_COL, S.code), {
-      status: 'loading', questions, used: usedNow.concat(picked.map(c => c.levelId)), qIndex: 0, round: (S.room.round || 0) + 1,
+      status: 'loading', questions, used: st.diff === 'easy' ? usedNow : usedNow.concat(picked.map(c => c.levelId)), qIndex: 0, round: (S.room.round || 0) + 1,
       scores, corrects, reveal: null, phaseStartMs: Date.now(),
     });
     await batch.commit();

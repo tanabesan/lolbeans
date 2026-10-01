@@ -482,7 +482,7 @@ function onRoom(room){
   }
   if (room.status !== 'question') clearInterval(S.tick);
   switch (room.status) {
-    case 'lobby':    show('scLobby'); renderLobby(); playBgm(); break;
+    case 'lobby':    show('scLobby'); renderLobby(); if (prevStatus !== 'lobby') playBgm(); break;
     case 'loading':  show('scLoading'); renderLoading(); preloadAll(); hostWatchLoading(); stopBgm(); break;
     case 'question': show('scQuiz'); renderQuestion(); hostWatchQuestion(); break;
     case 'reveal':   show('scQuiz'); renderReveal(); hostWatchReveal(); break;

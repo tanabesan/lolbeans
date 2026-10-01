@@ -92,6 +92,7 @@ tr.me td{color:#46178f;background:#f3ecff}
 <body data-nav-current="quiz">
 <audio id="bgmLobby" loop preload="auto" src="audio/lobby-bgm.m4a"></audio>
 <audio id="sfxStart" preload="auto" src="audio/question-start.m4a"></audio>
+<audio id="sfxReveal" preload="auto" src="audio/reveal.m4a"></audio>
 <div class="wrap">
   <h1><span class="ms">bolt</span> THUMBNAIL BATTLE</h1>
 
@@ -435,14 +436,17 @@ async function leave(){
 // 例えば quiz.html と同じ場所に audio フォルダを作り、その中に
 //   lobby-bgm.m4a         … ロビーで流すBGM(ループ再生)
 //   question-start.m4a    … 問題が始まった瞬間に鳴らす効果音
+//   reveal.m4a            … 答え合わせが始まった瞬間に鳴らす効果音(鳴ると同時に問題開始音は止まります)
 // を置けば、このままのパスで動きます。場所やファイル名を変えたい場合は、
 // このすぐ下の2行のファイル名だけ書き換えてください。
 const bgmLobby = document.getElementById('bgmLobby');
 const sfxStart = document.getElementById('sfxStart');
-bgmLobby.volume = 0.5; sfxStart.volume = 0.7;
+const sfxReveal = document.getElementById('sfxReveal');
+bgmLobby.volume = 0.5; sfxStart.volume = 0.7; sfxReveal.volume = 0.7;
 function playBgm(){ try { bgmLobby.currentTime = 0; bgmLobby.play().catch(() => {}); } catch (_) {} }
 function stopBgm(){ try { bgmLobby.pause(); } catch (_) {} }
-function playStartSfx(){ try { sfxStart.currentTime = 0; sfxStart.play().catch(() => {}); } catch (_) {} }
+function playStartSfx(){ try { sfxReveal.pause(); sfxStart.currentTime = 0; sfxStart.play().catch(() => {}); } catch (_) {} }
+function playRevealSfx(){ try { sfxStart.pause(); sfxReveal.currentTime = 0; sfxReveal.play().catch(() => {}); } catch (_) {} }
 
 const isSpectator = pid => !!(S.players[pid] && S.players[pid].spectator);
 const isOnline = pid => pid === S.pid || (pid in S.players && Date.now() - (S.seenAt[pid] || 0) < STALE_MS);
@@ -750,6 +754,7 @@ function renderReveal(){
     S.cur = { key, started: true, answered: true, shownAt: 0 };
     $('qImg').src = thumbUrl(q); renderChoices(q, r);
   }
+  if (S.revealSoundKey !== key) { S.revealSoundKey = key; playRevealSfx(); }
   const mine = rv.results.find(x => x.pid === S.pid);
   [...$('qChoices').children].forEach(b => {
     b.disabled = true; b.classList.remove('sel');

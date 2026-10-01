@@ -90,6 +90,8 @@ tr.me td{color:#46178f;background:#f3ecff}
 </style>
 </head>
 <body data-nav-current="quiz">
+<audio id="bgmLobby" loop preload="auto" src="audio/lobby-bgm.m4a"></audio>
+<audio id="sfxStart" preload="auto" src="audio/question-start.m4a"></audio>
 <div class="wrap">
   <h1><span class="ms">bolt</span> THUMBNAIL BATTLE</h1>
 
@@ -417,7 +419,7 @@ function enterRoom(code){
 }
 
 function leaveLocal(msg){
-  cleanupListeners();
+  cleanupListeners(); stopBgm();
   S.code = null;
   sessionStorage.removeItem('tb_code');
   show('scEntry'); $('entryMsg').textContent = msg || '';
@@ -428,6 +430,20 @@ async function leave(){
 }
 
 // ---------- 生存確認(切断検知)とホスト引き継ぎ ----------
+// ---------- 音楽・効果音 ----------
+// このファイル(quiz.html)からの相対パスで指定しています。
+// 例えば quiz.html と同じ場所に audio フォルダを作り、その中に
+//   lobby-bgm.m4a         … ロビーで流すBGM(ループ再生)
+//   question-start.m4a    … 問題が始まった瞬間に鳴らす効果音
+// を置けば、このままのパスで動きます。場所やファイル名を変えたい場合は、
+// このすぐ下の2行のファイル名だけ書き換えてください。
+const bgmLobby = document.getElementById('bgmLobby');
+const sfxStart = document.getElementById('sfxStart');
+bgmLobby.volume = 0.5; sfxStart.volume = 0.7;
+function playBgm(){ try { bgmLobby.currentTime = 0; bgmLobby.play().catch(() => {}); } catch (_) {} }
+function stopBgm(){ try { bgmLobby.pause(); } catch (_) {} }
+function playStartSfx(){ try { sfxStart.currentTime = 0; sfxStart.play().catch(() => {}); } catch (_) {} }
+
 const isSpectator = pid => !!(S.players[pid] && S.players[pid].spectator);
 const isOnline = pid => pid === S.pid || (pid in S.players && Date.now() - (S.seenAt[pid] || 0) < STALE_MS);
 const onlineIds = () => Object.keys(S.players).filter(isOnline);
@@ -462,8 +478,8 @@ function onRoom(room){
   }
   if (room.status !== 'question') clearInterval(S.tick);
   switch (room.status) {
-    case 'lobby':    show('scLobby'); renderLobby(); break;
-    case 'loading':  show('scLoading'); renderLoading(); preloadAll(); hostWatchLoading(); break;
+    case 'lobby':    show('scLobby'); renderLobby(); playBgm(); break;
+    case 'loading':  show('scLoading'); renderLoading(); preloadAll(); hostWatchLoading(); stopBgm(); break;
     case 'question': show('scQuiz'); renderQuestion(); hostWatchQuestion(); break;
     case 'reveal':   show('scQuiz'); renderReveal(); hostWatchReveal(); break;
     case 'finished': show('scFinal'); renderFinal(); break;
@@ -680,6 +696,7 @@ function renderQuestion(){
   if (S.cur.key === key) return; // 同じ問題の再描画(他人の書き込み等)では作り直さない
   const spectating = isSpectator(S.pid);
   const c = S.cur = { key, started: false, answered: spectating, shownAt: 0 };
+  playStartSfx();
   $('qMy').innerHTML = spectating ? `<span style="color:var(--dim)">${L('観戦中(次のゲームから参加できます)','Spectating (you can join from the next game)')}</span>` : '';
   $('qTimer').textContent = '10.0'; $('qBar').style.width = '100%';
   renderChoices(q, r);

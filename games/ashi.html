@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASHI WALK | LOLBeans LAB</title>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0b0c16; --panel:#151829; --line:#2c3044; --text:#e4e7f3; --dim:#8087a3; --ac:#c77dff;
+          --px:'Press Start 2P','DotGothic16',monospace; --jp:'DotGothic16','Press Start 2P',monospace; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:var(--jp);
+         display:flex; flex-direction:column; align-items:center; padding:64px 12px 40px; }
+  h1 { font-family:var(--px); font-size:clamp(16px,4vw,28px); margin:0 0 8px; color:#fff; text-shadow:3px 0 #ff2e93,-3px 0 #22d3ee; }
+  .sub { color:var(--dim); font-size:14px; margin:0 0 16px; text-align:center; line-height:1.7; }
+  .hud { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:10px; }
+  .chip { background:var(--panel); border:2px solid var(--line); padding:6px 12px; font-size:14px; }
+  .chip b { font-family:var(--px); font-size:11px; color:var(--ac); margin-right:6px; font-weight:400; }
+  .wrap { position:relative; width:100%; max-width:900px; }
+  canvas { display:block; width:100%; height:auto; border:2px solid var(--line); background:#0e1020; touch-action:none; cursor:crosshair; }
+  .msg { position:absolute; left:0; right:0; top:12px; text-align:center; font-size:15px; color:var(--dim); pointer-events:none; }
+  .over { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:12px; background:rgba(11,12,22,.84); }
+  .over.show { display:flex; }
+  .over .big { font-family:var(--px); font-size:clamp(22px,6vw,44px); color:#fff; }
+  .btns { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:14px; }
+  button { font-family:var(--jp); font-size:16px; color:var(--text); background:var(--panel); border:2px solid var(--line); padding:10px 16px; cursor:pointer; }
+  button:hover:not(:disabled), button:focus-visible { outline:none; border-color:var(--ac); color:var(--ac); box-shadow:3px 3px 0 #6b2f8f; }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  button.go { border-color:var(--ac); color:#fff; }
+</style>
+</head>
+<body data-nav-current="ashi-walk">
+
+<h1>ASHI WALK</h1>
+<p class="sub">ビーンズの足を自分で描こう。描いた足が動いて、20秒でどこまで進めるか競う。<br>足の長さ・曲がり方・本数で、歩きかたが変わる。短い足ほど、足の動きが速くなる。</p>
+
+<div class="hud">
+  <span class="chip"><b>DIST</b><span id="dist">0.0</span> m</span>
+  <span class="chip"><b>TIME</b><span id="time">20.0</span></span>
+  <span class="chip"><b>BEST</b><span id="best">0.0</span> m</span>
+  <span class="chip"><b>PACE</b><span id="pace">1.0</span>/s</span>
+  <span class="chip"><b>LEGS</b><span id="nlegs">0</span></span>
+</div>
+
+<div class="wrap">
+  <canvas id="cv" width="900" height="500"></canvas>
+  <div class="msg" id="msg"></div>
+  <div class="over" id="over">
+    <div class="big" id="res">0.0 m</div>
+    <div id="rec"></div>
+    <div class="btns">
+      <button class="go" id="again">もう一度歩く</button>
+      <button id="redraw">描き直す</button>
+    </div>
+  </div>
+</div>
+
+<div class="btns">
+  <button id="undo">1本消す</button>
+  <button id="clear">全部消す</button>
+  <button class="go" id="start">スタート ▶</button>
+</div>
+
+<script>
+const cv = document.getElementById('cv'), cx = cv.getContext('2d');
+const $ = id => document.getElementById(id);
+const W = 900, H = 500, GY = 420, OX = 450, OY = 190, RAD = 80, MAXLEN = 230, STEP = 6, LIMIT = 20;
+const COLORS = ['#c77dff', '#4cc9f0', '#ff5d8f', '#ffd23f', '#2ee6a6', '#ff8a3d'];
+const BODY = ["................","................","....PPPPPPPP....","...PPPPPPPPPP...","..PPLLPPPPPPPP..","..PPLPPPPPPPPP..","..PPPPPPPPPPPP..","..PPPPPPPPPPPP..","..PPPPPPPPPPPP..","..PPPPPPPPPPSS..","..PPPPPPPPPPSS..","..PPPPPPPPSSSS..","...PPPPPPPSSS...","....PPPPSSSS....","................","................"];
+const EYES = [[5,7],[6,7],[5,8],[6,8],[9,7],[10,7],[9,8],[10,8]];
+
+let legs = [], cur = null, mode = 'draw', t = 0, X = 300, X0 = 300, Y = 0, prev = null, left = LIMIT, lastT = 0, tmp = 0;
+let best = 0, FREQ = 1;
+try { best = parseFloat(localStorage.getItem('ashiBest')) || 0; } catch (e) {}
+
+const BASE_HINT = 'からだの近くから足を描き始めよう(2本以上)';
+function say(m) { $('msg').textContent = m; clearTimeout(tmp); tmp = setTimeout(() => $('msg').textContent = mode === 'draw' ? BASE_HINT : '', 1800); }
+
+function pos(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; }
+cv.addEventListener('pointerdown', e => {
+  if (mode !== 'draw') return;
+  const p = pos(e);
+  if (legs.length >= 6) return say('足は6本まで');
+  if (Math.hypot(p.x - OX, p.y - OY) > RAD) return say('からだの近くから描き始めてね');
+  cv.setPointerCapture(e.pointerId); cur = { raw: [p], len: 0 };
+});
+cv.addEventListener('pointermove', e => {
+  if (!cur) return;
+  const p = pos(e), a = cur.raw[cur.raw.length - 1], d = Math.hypot(p.x - a.x, p.y - a.y);
+  if (d < 3 || cur.len >= MAXLEN) return;
+  cur.len += d; cur.raw.push(p);
+});
+function endStroke() {
+  if (!cur) return;
+  if (cur.len < 20) say('短すぎるよ');
+  else { legs.push({ pts: resample(cur.raw) }); phases(); }
+  cur = null; ui();
+}
+cv.addEventListener('pointerup', endStroke); cv.addEventListener('pointercancel', endStroke);
+
+function resample(r) {
+  const o = [{ x: r[0].x, y: r[0].y }]; let need = STEP;
+  for (let i = 1; i < r.length; i++) {
+    let a = r[i - 1], b = r[i], d = Math.hypot(b.x - a.x, b.y - a.y);
+    while (d >= need) { const f = need / d; a = { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f }; o.push(a); d = Math.hypot(b.x - a.x, b.y - a.y); need = STEP; }
+    need -= d;
+  }
+  return o;
+}
+function phases() { legs.sort((a, b) => a.pts[0].x - b.pts[0].x).forEach((l, i) => l.ph = (i % 2) * Math.PI); }
+
+function ui() {
+  $('nlegs').textContent = legs.length;
+  $('start').disabled = legs.length < 2 || mode !== 'draw';
+  $('undo').disabled = !legs.length || mode !== 'draw';
+  $('clear').disabled = !legs.length || mode !== 'draw';
+  $('best').textContent = best.toFixed(1);
+}
+$('undo').onclick = () => { legs.pop(); phases(); ui(); };
+$('clear').onclick = () => { legs = []; ui(); };
+$('start').onclick = start;
+$('again').onclick = start;
+$('redraw').onclick = () => { mode = 'draw'; $('over').classList.remove('show'); say(BASE_HINT); ui(); };
+
+function start() {
+  const avg = legs.reduce((a, l) => a + l.pts.length * STEP, 0) / legs.length;
+  FREQ = Math.min(3, Math.max(0.7, Math.pow(220 / avg, 1.2))); $('pace').textContent = FREQ.toFixed(1);
+  mode = 'walk'; t = 0; X = X0 = 300; prev = null; left = LIMIT; $('over').classList.remove('show'); $('msg').textContent = ''; ui();
+}
+
+function step(dt) {
+  t += dt; left -= dt;
+  const w = Math.PI * 2 * FREQ, A = 0.6, LIFT = 30;
+  let maxY = -1e9, key = null;
+  legs.forEach((l, li) => {
+    const a = A * Math.sin(w * t + l.ph), lift = LIFT * Math.max(0, -Math.cos(w * t + l.ph));
+    const c = Math.cos(a), s = Math.sin(a), h = l.pts[0];
+    l.cur = l.pts.map(p => { const dx = p.x - h.x, dy = p.y - h.y; return { x: h.x - OX + dx * c - dy * s, y: h.y - OY + dx * s + dy * c - lift }; });
+    l.cur.forEach((q, i) => { if (q.y > maxY) { maxY = q.y; key = [li, i]; } });
+  });
+  if (prev) { const q = legs[prev.l].cur[prev.i]; if (q.y >= maxY - 4) X += prev.x - q.x; }
+  prev = { l: key[0], i: key[1], x: legs[key[0]].cur[key[1]].x };
+  Y = GY - maxY;
+  if (left <= 0) finish();
+}
+function finish() {
+  mode = 'done'; left = 0;
+  const d = (X - X0) / 100;
+  $('res').textContent = d.toFixed(1) + ' m';
+  let rec = '';
+  if (d > best) { best = d; rec = 'NEW RECORD!'; try { localStorage.setItem('ashiBest', String(d)); } catch (e) {} }
+  else rec = 'ベスト ' + best.toFixed(1) + ' m';
+  $('rec').textContent = rec; $('over').classList.add('show'); ui();
+}
+
+function rect(x, y, w, h, c) { cx.fillStyle = c; cx.fillRect(x, y, w, h); }
+function drawBean(bx, by) {
+  const s = 6, x0 = bx - 8 * s, y0 = by - 8 * s;
+  BODY.forEach((row, j) => [...row].forEach((ch, i) => {
+    const c = { P: '#c77dff', L: '#f1d4ff', S: '#8a3fc4' }[ch]; if (c) rect(x0 + i * s, y0 + j * s, s, s, c);
+  }));
+  EYES.forEach(([i, j]) => rect(x0 + i * s, y0 + j * s, s, s, '#0b0c16'));
+}
+function poly(pts, ox, oy, color) {
+  cx.strokeStyle = color; cx.lineWidth = 7; cx.lineCap = 'square'; cx.lineJoin = 'miter';
+  cx.beginPath(); pts.forEach((p, i) => i ? cx.lineTo(ox + p.x, oy + p.y) : cx.moveTo(ox + p.x, oy + p.y)); cx.stroke();
+}
+
+function draw() {
+  cx.clearRect(0, 0, W, H);
+  const walk = mode !== 'draw', cam = walk ? X - 300 : 0;
+  cx.strokeStyle = 'rgba(44,48,68,.55)'; cx.lineWidth = 1;
+  for (let x = -((cam % 40) + 40) % 40; x < W; x += 40) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, H); cx.stroke(); }
+  for (let y = 0; y < H; y += 40) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); }
+  rect(0, GY, W, H - GY, '#151829'); rect(0, GY, W, 4, '#c77dff');
+  cx.font = '14px DotGothic16, monospace'; cx.fillStyle = '#8087a3'; cx.textAlign = 'center';
+  const k0 = Math.floor((cam - 60) / 100);
+  for (let k = k0; k < k0 + 11; k++) {
+    const sx = X0 + k * 100 - cam; if (sx < -10 || sx > W + 10) continue;
+    rect(sx - 1, GY + 4, 2, k % 5 ? 8 : 16, '#2c3044');
+    if (k % 5 === 0 && k >= 0) cx.fillText(k + 'm', sx, GY + 38);
+  }
+  if (!walk) {
+    cx.strokeStyle = 'rgba(199,125,255,.35)'; cx.setLineDash([6, 6]); cx.beginPath(); cx.arc(OX, OY, RAD, 0, 7); cx.stroke(); cx.setLineDash([]);
+    legs.forEach((l, i) => poly(l.pts, 0, 0, COLORS[i % 6]));
+    if (cur) poly(cur.raw, 0, 0, '#fff');
+    drawBean(OX, OY);
+  } else {
+    legs.forEach((l, i) => poly(l.cur, 300, Y, COLORS[i % 6]));
+    drawBean(300, Y);
+  }
+  $('dist').textContent = Math.max(0, (X - X0) / 100).toFixed(1);
+  $('time').textContent = left.toFixed(1);
+}
+
+function loop(ts) {
+  const dt = Math.min(0.033, (ts - lastT) / 1000 || 0); lastT = ts;
+  if (mode === 'walk') step(dt);
+  draw(); requestAnimationFrame(loop);
+}
+say(BASE_HINT); ui(); requestAnimationFrame(loop);
+</script>
+<script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
+</body>
+</html>

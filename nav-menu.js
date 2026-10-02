@@ -11,7 +11,7 @@
  *            lolrank-home, lolrank-vote, lolrank-ranking, lolrank-submit
  *
  * ── 言語切り替え（サイト全体共有） ──
- * 画面右上に EN/JP トグルボタンを自動で表示します。選択した言語は
+ * 左メニュー内の Language トグルで切り替えます。メニュー項目の英語表記は EN テーブルで管理。選択した言語は
  * localStorage に保存され、サイト内のどのページに移動しても引き継がれます。
  *
  * ページ側で言語切り替えに対応させたい場合は、そのページのスクリプト内に
@@ -35,6 +35,18 @@
         try { localStorage.setItem(LANG_KEY, l); }
         catch (e) { /* localStorage不可の環境は無視 */ }
     }
+
+    // メニュー項目の英語表記(キーは日本語ラベル。ここに無いものはそのまま表示)
+    const EN = {
+        "ホーム": "Home", "トップページ": "Top page",
+        "ツール": "Tools", "コミュニティ": "Community", "ゲーム": "Games",
+        "コース一覧": "Course List", "WRランキング": "WR Ranking",
+        "ビーンズランク": "Beans Rank", "概要": "Overview", "評価する": "Vote",
+        "ランキング": "Ranking", "プレイヤー登録申請": "Submit a Player",
+        "サムネイルクイズ": "Thumbnail Quiz",
+        "よくある質問": "FAQ", "お問い合わせ": "Contact",
+        "ファイルライブラリ": "File Library", "ファイルを投稿する": "Submit a File"
+    };
 
     const links = [
         { id: "home", group: "ホーム", items: [
@@ -203,10 +215,10 @@
         const currentId = document.body.getAttribute('data-nav-current') || '';
         let linksHtml = '';
         links.forEach(group => {
-            linksHtml += `<div class="menu-group-label">${group.group}</div>`;
+            linksHtml += `<div class="menu-group-label" data-jp="${group.group}">${group.group}</div>`;
             group.items.forEach(item => {
                 const cls = item.id === currentId ? ' class="current"' : '';
-                linksHtml += `<a href="${item.href}"${cls}>${item.label}</a>`;
+                linksHtml += `<a href="${item.href}"${cls} data-jp="${item.label}">${item.label}</a>`;
             });
         });
 
@@ -238,6 +250,10 @@
         const enBtn = document.getElementById('nav-lang-item-en');
         if (jpBtn) jpBtn.classList.toggle('active', l === 'jp');
         if (enBtn) enBtn.classList.toggle('active', l === 'en');
+        document.querySelectorAll('#nav-side-menu [data-jp]').forEach(el => {
+            const jp = el.getAttribute('data-jp');
+            el.textContent = (l === 'en' && EN[jp]) ? EN[jp] : jp;
+        });
         if (typeof window.setLang === 'function') {
             window.setLang(l);
         }

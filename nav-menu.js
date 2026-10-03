@@ -68,7 +68,7 @@
         ]},
         { id: "games", group: "ゲーム", items: [
             { id: "quiz", label: "サムネイルクイズ", href: BASE + "games/quiz.html" },
-            { id: "ashi", label: "足ウォーク", href: BASE + "game/ashi.html" }
+            { id: "ashi", label: "足ウォーク", href: BASE + "games/ashi.html" }
         ]},
         { id: "lolex", group: "LOL.ex", items: [
             { id: "lolex", label: "LOL.ex", href: BASE + "lolex/lolex.html" },

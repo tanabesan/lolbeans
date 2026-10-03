@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LOLBeans LAB</title>
+<meta name="description" content="LOLBeansの自作ツール・ランキング・ゲームをまとめたサイト。コース一覧、WRランキング、ビーンズランク、LOL.exなど。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LOLBeans LAB">
+<meta property="og:title" content="LOLBeans LAB">
+<meta property="og:description" content="LOLBeansをもっと遊んで、もっと作るための実験場。コース一覧、ランキング、クイズ、制作ツールが全部ある。">
+<meta property="og:url" content="https://tanabesan.github.io/lolbeans/">
+<meta property="og:image" content="https://tanabesan.github.io/lolbeans/file/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LOLBeans LAB">
+<meta name="twitter:description" content="LOLBeansをもっと遊んで、もっと作るための実験場。">
+<meta name="twitter:image" content="https://tanabesan.github.io/lolbeans/file/og-image.png">
+<meta name="theme-color" content="#0b0c16">
 <link rel="icon" href="favicon/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
@@ -185,7 +199,7 @@
   <h1>LOLBEANS<br>LAB</h1>
   <p class="lead">LOLBeansをもっと遊んで、もっと作るための実験場。コースを探して、ランクを見て、マップを作ろう。</p>
   <div class="stats">
-    <span class="chip"><b>8</b><span class="t">ツール</span></span>
+    <span class="chip"><b>9</b><span class="t">ツール</span></span>
     <span class="chip"><b>6</b><span class="t">カテゴリ</span></span>
     <span class="chip"><b>FREE</b><span class="t">全部無料</span></span>
   </div>
@@ -255,6 +269,12 @@
         <p>コースのサムネイルからコース名を当てるクイズ。</p>
         <div class="go">OPEN</div>
       </a>
+      <a class="card" style="--ca:#2ee6a6; --i:6;" href="game/ashi.html">
+        <div class="top"><div class="icon" data-i="ashi"></div><span class="tag">DRAW &amp; WALK</span></div>
+        <h2>足ウォーク</h2>
+        <p>ビーンズの足を自分で描いて、20秒でどこまで歩けるか競うゲーム。</p>
+        <div class="go">OPEN</div>
+      </a>
     </div>
   </section>
 
@@ -301,6 +321,7 @@
 
 <script>
 const I={
+ashi:["....111111....","...11111111...","...12111121...","...11111111...","....111111....",".....1..1.....","....1....1....","...1......1...","..1........1..","..1.........1.",".11........11.","111........111"],
 quiz:["...111111...","..11111111..",".111....111.",".111....111.","........111.",".......111..","......111...",".....111....",".....111....","............",".....111....",".....111...."],
 bolt:["......1111..",".....1111...","....1111....","...1111.....","..11111111..","..12111111..",".......111..","......111...",".....111....","....111.....","....11......","....1......."],
 flag:["..1.........","..1111111...","..1122221...","..1122221...","..1111111...","..1.........","..1.........","..1.........","..1.........","..1.........",".1111.......","111111......"],
@@ -322,7 +343,8 @@ const T={
 "LOLBeansをもっと遊んで、もっと作るための実験場。コースを探して、ランクを見て、マップを作ろう。":"A lab for playing and building more of LOLBeans. Find courses, check the ranks, make maps.",
 "ツール":"tools","カテゴリ":"categories","全部無料":"all free",
 "コミュニティ":"Community","ビーンズランク":"Beans Rank","ゲーム":"Games","ファイルライブラリ":"File Library",
-"コース一覧":"Course List","WR ランキング":"WR Ranking","サムネイルクイズ":"Thumbnail Quiz",
+"コース一覧":"Course List","WR ランキング":"WR Ranking","サムネイルクイズ":"Thumbnail Quiz","足ウォーク":"Ashi Walk",
+"ビーンズの足を自分で描いて、20秒でどこまで歩けるか競うゲーム。":"Draw the bean's legs yourself and see how far they walk in 20 seconds.",
 "評価する":"Vote","ランキング":"Ranking","プレイヤー登録申請":"Submit a Player","よくある質問":"FAQ","お問い合わせ":"Contact","ファイルを投稿する":"Submit a File",
 "画像をLOLBeansのSolid Paneピクセルアートに変換。同色の連続を自動で統合してブロック数を節約。":"Turn images into LOLBeans Solid Pane pixel art. Runs of the same color are merged to save blocks.",
 "Programmatic式・変数式をブロックのドラッグ&ドロップで組み立てるビジュアルエディタ。":"A visual editor that builds Programmatic and variable expressions by dragging and dropping blocks.",

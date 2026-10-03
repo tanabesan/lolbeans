@@ -27,23 +27,23 @@
   button:hover:not(:disabled), button:focus-visible { outline:none; border-color:var(--ac); color:var(--ac); box-shadow:3px 3px 0 #6b2f8f; }
   button:disabled { opacity:.4; cursor:not-allowed; }
   button.go { border-color:var(--ac); color:#fff; }
+  .chip.low { border-color:#ff5d8f; color:#ff5d8f; }
 </style>
 </head>
-<body data-nav-current="ashi-walk">
+<body data-nav-current="ashi">
 
 <h1>ASHI WALK</h1>
-<p class="sub">ビーンズの足を自分で描こう。描いた足が動いて、20秒でどこまで進めるか競う。<br>足の長さ・曲がり方・本数で、歩きかたが変わる。短い足ほど、足の動きが速くなる。</p>
+<p class="sub">ビーンズの足を自分で描こう。描いた足が動いて、20秒でどこまで進めるか。<br>使える線の長さは決まっている。長い足にするか、数を増やすか。</p>
 
 <div class="hud">
   <span class="chip"><b>DIST</b><span id="dist">0.0</span> m</span>
   <span class="chip"><b>TIME</b><span id="time">20.0</span></span>
   <span class="chip"><b>BEST</b><span id="best">0.0</span> m</span>
-  <span class="chip"><b>PACE</b><span id="pace">1.0</span>/s</span>
-  <span class="chip"><b>LEGS</b><span id="nlegs">0</span></span>
+  <span class="chip" id="inkchip"><b>INK</b><span id="ink">0</span>/<span id="inkmax">600</span></span>
 </div>
 
 <div class="wrap">
-  <canvas id="cv" width="900" height="500"></canvas>
+  <canvas id="cv" width="900" height="700"></canvas>
   <div class="msg" id="msg"></div>
   <div class="over" id="over">
     <div class="big" id="res">0.0 m</div>
@@ -59,41 +59,53 @@
   <button id="undo">1本消す</button>
   <button id="clear">全部消す</button>
   <button class="go" id="start">スタート ▶</button>
+  <button id="stop" hidden>やめる ■</button>
 </div>
 
 <script>
 const cv = document.getElementById('cv'), cx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
-const W = 900, H = 500, GY = 420, OX = 450, OY = 190, RAD = 80, MAXLEN = 230, STEP = 6, LIMIT = 20;
+const W = 900, H = 700, GY = 620, OX = 450, OY = 160, RAD = 80, MAXLEN = 460, TOTAL = 600, STEP = 6, LIMIT = 20, MAXLEGS = 6;
 const COLORS = ['#c77dff', '#4cc9f0', '#ff5d8f', '#ffd23f', '#2ee6a6', '#ff8a3d'];
 const BODY = ["................","................","....PPPPPPPP....","...PPPPPPPPPP...","..PPLLPPPPPPPP..","..PPLPPPPPPPPP..","..PPPPPPPPPPPP..","..PPPPPPPPPPPP..","..PPPPPPPPPPPP..","..PPPPPPPPPPSS..","..PPPPPPPPPPSS..","..PPPPPPPPSSSS..","...PPPPPPPSSS...","....PPPPSSSS....","................","................"];
 const EYES = [[5,7],[6,7],[5,8],[6,8],[9,7],[10,7],[9,8],[10,8]];
+const BASE_HINT = 'からだの近くから足を描き始めよう';
 
-let legs = [], cur = null, mode = 'draw', t = 0, X = 300, X0 = 300, Y = 0, prev = null, left = LIMIT, lastT = 0, tmp = 0;
-let best = 0, FREQ = 1;
-try { best = parseFloat(localStorage.getItem('ashiBest')) || 0; } catch (e) {}
+let legs = [], cur = null, mode = 'draw', left = LIMIT, lastT = 0, tmp = 0;
+let P = null, G = null, best = 0, bestLegs = null;
+try {
+  best = parseFloat(localStorage.getItem('ashiBest')) || 0;
+  bestLegs = JSON.parse(localStorage.getItem('ashiBestLegs') || 'null');
+} catch (e) {}
 
-const BASE_HINT = 'からだの近くから足を描き始めよう(2本以上)';
 function say(m) { $('msg').textContent = m; clearTimeout(tmp); tmp = setTimeout(() => $('msg').textContent = mode === 'draw' ? BASE_HINT : '', 1800); }
+const used = () => legs.reduce((a, l) => a + l.pts.length * STEP, 0) + (cur ? cur.len : 0);
 
+/* ---------- drawing ---------- */
 function pos(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; }
 cv.addEventListener('pointerdown', e => {
   if (mode !== 'draw') return;
   const p = pos(e);
-  if (legs.length >= 6) return say('足は6本まで');
+  if (legs.length >= MAXLEGS) return say('足は' + MAXLEGS + '本まで');
+  if (TOTAL - used() < 30) return say('線の長さを使い切ったよ');
   if (Math.hypot(p.x - OX, p.y - OY) > RAD) return say('からだの近くから描き始めてね');
   cv.setPointerCapture(e.pointerId); cur = { raw: [p], len: 0 };
 });
+function addPoint(p) {
+  const a = cur.raw[cur.raw.length - 1]; let d = Math.hypot(p.x - a.x, p.y - a.y);
+  const cap = Math.min(MAXLEN, TOTAL - legs.reduce((s, l) => s + l.pts.length * STEP, 0));
+  if (d < 3 || cur.len >= cap) return;
+  if (cur.len + d > cap) { const f = (cap - cur.len) / d; p = { x: a.x + (p.x - a.x) * f, y: a.y + (p.y - a.y) * f }; d = cap - cur.len; }
+  cur.len += d; cur.raw.push(p);
+}
 cv.addEventListener('pointermove', e => {
   if (!cur) return;
-  const p = pos(e), a = cur.raw[cur.raw.length - 1], d = Math.hypot(p.x - a.x, p.y - a.y);
-  if (d < 3 || cur.len >= MAXLEN) return;
-  cur.len += d; cur.raw.push(p);
+  (e.getCoalescedEvents ? e.getCoalescedEvents() : [e]).forEach(ev => addPoint(pos(ev)));
 });
 function endStroke() {
   if (!cur) return;
   if (cur.len < 20) say('短すぎるよ');
-  else { legs.push({ pts: resample(cur.raw) }); phases(); }
+  else legs.push({ pts: resample(cur.raw) });
   cur = null; ui();
 }
 cv.addEventListener('pointerup', endStroke); cv.addEventListener('pointercancel', endStroke);
@@ -107,52 +119,84 @@ function resample(r) {
   }
   return o;
 }
-function phases() { legs.sort((a, b) => a.pts[0].x - b.pts[0].x).forEach((l, i) => l.ph = (i % 2) * Math.PI); }
 
-function ui() {
-  $('nlegs').textContent = legs.length;
-  $('start').disabled = legs.length < 2 || mode !== 'draw';
-  $('undo').disabled = !legs.length || mode !== 'draw';
-  $('clear').disabled = !legs.length || mode !== 'draw';
-  $('best').textContent = best.toFixed(1);
+/* ---------- walking ---------- */
+/* 長い足から順に交互の位相(長い足どうしが同時に浮かないように)。短い足ほど速く動く(長さ40pxきざみで同じ速さ) */
+function prepare(ls) {
+  ls.slice().sort((a, b) => b.pts.length - a.pts.length || a.pts[0].x - b.pts[0].x).forEach((l, i) => { l.ph = (i % 2) * Math.PI; });
+  ls.forEach(l => {
+    const b = Math.max(40, Math.round(l.pts.length * STEP / 40) * 40);
+    l.f = Math.min(3, Math.max(0.35, Math.pow(220 / b, 1.2)));
+  });
+  return ls;
 }
-$('undo').onclick = () => { legs.pop(); phases(); ui(); };
-$('clear').onclick = () => { legs = []; ui(); };
-$('start').onclick = start;
-$('again').onclick = start;
-$('redraw').onclick = () => { mode = 'draw'; $('over').classList.remove('show'); say(BASE_HINT); ui(); };
+function makeRun(ls) { return { legs: ls, t: 0, X: 300, prev: null, Y: 0 }; }
 
-function start() {
-  const avg = legs.reduce((a, l) => a + l.pts.length * STEP, 0) / legs.length;
-  FREQ = Math.min(3, Math.max(0.7, Math.pow(220 / avg, 1.2))); $('pace').textContent = FREQ.toFixed(1);
-  mode = 'walk'; t = 0; X = X0 = 300; prev = null; left = LIMIT; $('over').classList.remove('show'); $('msg').textContent = ''; ui();
-}
-
-function step(dt) {
-  t += dt; left -= dt;
-  const w = Math.PI * 2 * FREQ, A = 0.6, LIFT = 30;
+function advance(st, dt) {
+  const TAU = Math.PI * 2, ls = st.legs, A = 0.6, LIFT = 30, hopMode = ls.length === 1;
+  st.t += dt;
   let maxY = -1e9, key = null;
-  legs.forEach((l, li) => {
-    const a = A * Math.sin(w * t + l.ph), lift = LIFT * Math.max(0, -Math.cos(w * t + l.ph));
+  ls.forEach((l, li) => {
+    const ph = TAU * l.f * st.t + l.ph, a = A * Math.sin(ph), lift = hopMode ? 0 : LIFT * Math.max(0, -Math.cos(ph));
     const c = Math.cos(a), s = Math.sin(a), h = l.pts[0];
     l.cur = l.pts.map(p => { const dx = p.x - h.x, dy = p.y - h.y; return { x: h.x - OX + dx * c - dy * s, y: h.y - OY + dx * s + dy * c - lift }; });
     l.cur.forEach((q, i) => { if (q.y > maxY) { maxY = q.y; key = [li, i]; } });
   });
-  if (prev) { const q = legs[prev.l].cur[prev.i]; if (q.y >= maxY - 4) X += prev.x - q.x; }
-  prev = { l: key[0], i: key[1], x: legs[key[0]].cur[key[1]].x };
-  Y = GY - maxY;
+  let hop = 0;
+  if (hopMode) {                       /* 足が1本のときはケンケンで進む */
+    const l = ls[0], u = -Math.cos(TAU * l.f * st.t);
+    if (u > 0.05) { hop = 2 * LIFT * u; st.prev = null; st.X += 2 * l.pts.length * STEP * Math.sin(A) * 2 * l.f * dt; }
+  }
+  if (!hop) {                          /* 地面についている足が後ろへ蹴ると、からだが前へ進む */
+    if (st.prev) { const q = ls[st.prev.l].cur[st.prev.i]; if (q.y >= maxY - 4) st.X += st.prev.x - q.x; }
+    st.prev = { l: key[0], i: key[1], x: ls[key[0]].cur[key[1]].x };
+  }
+  st.Y = GY - maxY - hop;
+}
+
+function ui() {
+  const u = Math.round(used());
+  $('ink').textContent = u; $('inkmax').textContent = TOTAL; $('inkchip').classList.toggle('low', TOTAL - u < 30);
+  $('start').disabled = !legs.length || mode !== 'draw';
+  $('undo').disabled = !legs.length || mode !== 'draw';
+  $('clear').disabled = !legs.length || mode !== 'draw';
+  $('stop').hidden = mode !== 'walk';
+  $('best').textContent = best.toFixed(1);
+}
+$('undo').onclick = () => { legs.pop(); ui(); };
+$('clear').onclick = () => { legs = []; ui(); };
+$('start').onclick = start; $('again').onclick = start;
+$('redraw').onclick = () => { mode = 'draw'; P = G = null; $('over').classList.remove('show'); say(BASE_HINT); ui(); };
+function stopRun() { if (mode !== 'walk') return; mode = 'draw'; P = G = null; left = LIMIT; say(BASE_HINT); ui(); }
+$('stop').onclick = stopRun;
+addEventListener('keydown', e => { if (e.key === 'Escape') stopRun(); });
+
+function start() {
+  P = makeRun(prepare(legs));
+  G = bestLegs && bestLegs.length ? makeRun(prepare(bestLegs.map(pts => ({ pts: pts.map(p => ({ x: p[0], y: p[1] })) })))) : null;
+  left = LIMIT; mode = 'walk'; $('over').classList.remove('show'); $('msg').textContent = ''; ui();
+  if (legs.length === 1) say('足が1本のときは、ケンケンで進むよ');
+}
+function step(dt) {
+  left -= dt; advance(P, dt); if (G) advance(G, dt);
   if (left <= 0) finish();
 }
 function finish() {
   mode = 'done'; left = 0;
-  const d = (X - X0) / 100;
+  const d = (P.X - 300) / 100, gd = G ? (G.X - 300) / 100 : null;
   $('res').textContent = d.toFixed(1) + ' m';
-  let rec = '';
-  if (d > best) { best = d; rec = 'NEW RECORD!'; try { localStorage.setItem('ashiBest', String(d)); } catch (e) {} }
-  else rec = 'ベスト ' + best.toFixed(1) + ' m';
+  let rec;
+  if (d > best) {
+    best = d; rec = 'NEW RECORD!';
+    bestLegs = legs.map(l => l.pts.map(p => [Math.round(p.x * 10) / 10, Math.round(p.y * 10) / 10]));
+    try { localStorage.setItem('ashiBest', String(d)); localStorage.setItem('ashiBestLegs', JSON.stringify(bestLegs)); } catch (e) {}
+  } else rec = 'ベスト ' + best.toFixed(1) + ' m';
+  if (d < 5) rec = '長さが違いすぎる足は地面に届かないよ。  ' + rec;
+  if (gd !== null) rec += '  /  前のベスト足 ' + gd.toFixed(1) + ' m';
   $('rec').textContent = rec; $('over').classList.add('show'); ui();
 }
 
+/* ---------- render ---------- */
 function rect(x, y, w, h, c) { cx.fillStyle = c; cx.fillRect(x, y, w, h); }
 function drawBean(bx, by) {
   const s = 6, x0 = bx - 8 * s, y0 = by - 8 * s;
@@ -165,10 +209,9 @@ function poly(pts, ox, oy, color) {
   cx.strokeStyle = color; cx.lineWidth = 7; cx.lineCap = 'square'; cx.lineJoin = 'miter';
   cx.beginPath(); pts.forEach((p, i) => i ? cx.lineTo(ox + p.x, oy + p.y) : cx.moveTo(ox + p.x, oy + p.y)); cx.stroke();
 }
-
 function draw() {
   cx.clearRect(0, 0, W, H);
-  const walk = mode !== 'draw', cam = walk ? X - 300 : 0;
+  const walk = mode !== 'draw' && P, cam = walk ? P.X - 300 : 0;
   cx.strokeStyle = 'rgba(44,48,68,.55)'; cx.lineWidth = 1;
   for (let x = -((cam % 40) + 40) % 40; x < W; x += 40) { cx.beginPath(); cx.moveTo(x, 0); cx.lineTo(x, H); cx.stroke(); }
   for (let y = 0; y < H; y += 40) { cx.beginPath(); cx.moveTo(0, y); cx.lineTo(W, y); cx.stroke(); }
@@ -176,9 +219,9 @@ function draw() {
   cx.font = '14px DotGothic16, monospace'; cx.fillStyle = '#8087a3'; cx.textAlign = 'center';
   const k0 = Math.floor((cam - 60) / 100);
   for (let k = k0; k < k0 + 11; k++) {
-    const sx = X0 + k * 100 - cam; if (sx < -10 || sx > W + 10) continue;
+    const sx = 300 + k * 100 - cam; if (sx < -10 || sx > W + 10) continue;
     rect(sx - 1, GY + 4, 2, k % 5 ? 8 : 16, '#2c3044');
-    if (k % 5 === 0 && k >= 0) cx.fillText(k + 'm', sx, GY + 38);
+    if (k % 5 === 0 && k >= 0) cx.fillText(k * 5 + 'm', sx, GY + 38);
   }
   if (!walk) {
     cx.strokeStyle = 'rgba(199,125,255,.35)'; cx.setLineDash([6, 6]); cx.beginPath(); cx.arc(OX, OY, RAD, 0, 7); cx.stroke(); cx.setLineDash([]);
@@ -186,10 +229,20 @@ function draw() {
     if (cur) poly(cur.raw, 0, 0, '#fff');
     drawBean(OX, OY);
   } else {
-    legs.forEach((l, i) => poly(l.cur, 300, Y, COLORS[i % 6]));
-    drawBean(300, Y);
+    if (G && G.legs[0].cur) {            /* 前のベストの足(ゴースト) */
+      const gx = 300 + (G.X - P.X);
+      if (gx > -80 && gx < W + 80) {
+        cx.globalAlpha = 0.4; G.legs.forEach(l => poly(l.cur, gx, G.Y, '#e4e7f3')); drawBean(gx, G.Y);
+        cx.globalAlpha = 1; cx.fillStyle = '#e4e7f3'; cx.textAlign = 'center'; cx.fillText('BEST', gx, G.Y - 78);
+      } else {
+        const diff = (G.X - P.X) / 100; cx.fillStyle = '#e4e7f3'; cx.textAlign = diff > 0 ? 'right' : 'left';
+        cx.fillText(diff > 0 ? 'BEST ▶ +' + diff.toFixed(1) + 'm' : '◀ BEST ' + diff.toFixed(1) + 'm', diff > 0 ? W - 12 : 12, GY - 40);
+      }
+    }
+    P.legs.forEach((l, i) => poly(l.cur, 300, P.Y, COLORS[i % 6]));
+    drawBean(300, P.Y);
   }
-  $('dist').textContent = Math.max(0, (X - X0) / 100).toFixed(1);
+  $('dist').textContent = (P ? Math.max(0, (P.X - 300) / 100) : 0).toFixed(1);
   $('time').textContent = left.toFixed(1);
 }
 

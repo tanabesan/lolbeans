@@ -7,7 +7,7 @@
  * 現在のページをハイライトしたい場合は、<body>タグに
  * data-nav-current="file-library" のように id を指定してください。
  * 対応する値: home, lolex, community, ranking, template, block-forge,
- *            file-library, submit, faq, contact, quiz,
+ *            file-library, submit, faq, contact, quiz, ashi,
  *            lolrank-home, lolrank-vote, lolrank-ranking, lolrank-submit
  *
  * ── 言語切り替え（サイト全体共有） ──
@@ -43,7 +43,7 @@
         "コース一覧": "Course List", "WRランキング": "WR Ranking",
         "ビーンズランク": "Beans Rank", "概要": "Overview", "評価する": "Vote",
         "ランキング": "Ranking", "プレイヤー登録申請": "Submit a Player",
-        "サムネイルクイズ": "Thumbnail Quiz",
+        "サムネイルクイズ": "Thumbnail Quiz", "足ウォーク": "Ashi Walk",
         "よくある質問": "FAQ", "お問い合わせ": "Contact",
         "ファイルライブラリ": "File Library", "ファイルを投稿する": "Submit a File"
     };
@@ -67,7 +67,8 @@
             { id: "lolrank-submit", label: "プレイヤー登録申請", href: BASE + "lolrank/submit-player.html" }
         ]},
         { id: "games", group: "ゲーム", items: [
-            { id: "quiz", label: "サムネイルクイズ", href: BASE + "games/quiz.html" }
+            { id: "quiz", label: "サムネイルクイズ", href: BASE + "games/quiz.html" },
+            { id: "ashi", label: "足ウォーク", href: BASE + "game/ashi.html" }
         ]},
         { id: "lolex", group: "LOL.ex", items: [
             { id: "lolex", label: "LOL.ex", href: BASE + "lolex/lolex.html" },

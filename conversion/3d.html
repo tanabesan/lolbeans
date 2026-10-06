@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0b12">
+<title>GLB / OBJ → LOL コンバーター</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+JP:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #0a0b12; --slab: #10121c; --well: #0b0d16;
+    --rule: #262a40; --rule-hi: #3a3f5e;
+    --bone: #e9ebf5; --mute: #8d92b2;
+    --cyan: #19e3f5; --magenta: #ff3fd0; --err: #ff7a8a;
+    /* nav-menu.js が参照する変数名(サイト共通) */
+    --panel: var(--slab); --panel-line: var(--rule);
+    --text: var(--bone); --text-dim: var(--mute);
+    --accent: var(--magenta); --accent2: var(--cyan);
+    --display: "Chakra Petch", "IBM Plex Sans JP", sans-serif;
+    --body: "IBM Plex Sans JP", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--ink); color: var(--bone);
+    font: 15px/1.7 var(--body); -webkit-font-smoothing: antialiased;
+    display: flex; justify-content: center; padding: 88px 24px 64px;
+  }
+  .page { width: 100%; max-width: 760px; }
+
+  /* ---- 見出し ---- */
+  .hero { display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: end; margin-bottom: 36px; }
+  h1 { font: 600 clamp(34px, 7vw, 56px)/1.05 var(--display); letter-spacing: -.01em; margin: 0 0 14px; }
+  .sub { margin: 0; color: var(--mute); font-size: 14px; max-width: 46ch; }
+
+  /* 三角形を垂線で2つの直角三角形に割る図(読み込み時に1回だけ描く) */
+  .mech { width: 200px; height: auto; display: block; overflow: visible; }
+  .mech .edge, .mech .alt { fill: none; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .9s cubic-bezier(.6, 0, .2, 1) forwards; }
+  .mech .edge { stroke: var(--bone); stroke-width: 1.5; animation-delay: .1s; }
+  .mech .alt { stroke: var(--mute); stroke-width: 1.25; animation-delay: .75s; }
+  .mech .half-l, .mech .half-r, .mech .right-angle { opacity: 0; animation: show .6s 1.05s forwards; }
+  .mech .half-l { fill: rgba(25, 227, 245, .18); }
+  .mech .half-r { fill: rgba(255, 63, 208, .18); }
+  .mech .right-angle { fill: none; stroke: var(--mute); stroke-width: 1; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes show { to { opacity: 1; } }
+
+  /* ---- 作業台 ---- */
+  .bench { border: 1px solid var(--rule); border-radius: 14px; background: var(--slab); overflow: hidden; }
+  .zone { padding: 24px; }
+  .zone + .zone { border-top: 1px solid var(--rule); }
+  .zone-drop { padding: 20px; }
+
+  #drop {
+    position: relative; isolation: isolate; overflow: hidden; cursor: pointer;
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end;
+    min-height: 220px; padding: 24px; border-radius: 10px;
+    border: 1px dashed var(--rule-hi); background: var(--well);
+    transition: border-color .2s;
+  }
+  #drop .mesh { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+  .facet { fill: transparent; stroke: #232842; stroke-width: 1; transition: fill .25s, stroke .25s; }
+  #drop:hover .facet, #drop:focus-visible .facet { stroke: var(--rule-hi); }
+  #drop.over { border-color: var(--cyan); border-style: solid; }
+  #drop.over .facet { fill: rgba(25, 227, 245, .07); stroke: rgba(25, 227, 245, .5); }
+  #drop:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+  .l1 { display: block; font-size: 20px; font-weight: 600; line-height: 1.4; text-wrap: balance; }
+  .l1 b { font: 500 .85em var(--mono); color: var(--cyan); }
+  .l2 { display: block; margin-top: 2px; color: var(--mute); font-size: 14px; }
+  #fname {
+    margin-top: 14px; padding: 4px 10px; border-radius: 6px; word-break: break-all;
+    font: 12px/1.5 var(--mono); color: var(--bone);
+    background: rgba(25, 227, 245, .09); border: 1px solid rgba(25, 227, 245, .3);
+  }
+  #fname:empty { display: none; }
+
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .field { display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 500; color: var(--bone); }
+  .field input[type=number], .field input[type=color] {
+    width: 100%; height: 44px; border-radius: 8px; border: 1px solid var(--rule);
+    background: var(--well); color: var(--bone); font: 14px var(--mono);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input[type=number] { padding: 0 12px; }
+  .field input[type=color] { padding: 5px; cursor: pointer; }
+  .field input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+  .field input[type=color]::-webkit-color-swatch { border: 0; border-radius: 4px; }
+  .field input[type=color]::-moz-color-swatch { border: 0; border-radius: 4px; }
+  .field input:hover { border-color: var(--rule-hi); }
+  .field input:focus-visible { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(25, 227, 245, .18); }
+
+  .switch-row {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; cursor: pointer;
+    padding: 14px 16px; border-radius: 8px; border: 1px solid var(--rule); background: var(--well);
+    font-size: 13px; color: var(--bone); transition: border-color .15s;
+  }
+  .switch-row:hover { border-color: var(--rule-hi); }
+  .switch-row input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .switch { position: relative; flex: none; width: 40px; height: 22px; border-radius: 99px; background: #23273d; transition: background .2s; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--mute); transition: transform .2s, background .2s; }
+  .switch-row input:checked + .switch { background: var(--cyan); }
+  .switch-row input:checked + .switch::after { transform: translateX(18px); background: #041014; }
+  .switch-row input:focus-visible + .switch { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+  #go {
+    display: block; width: 100%; height: 48px; border: 0; border-radius: 8px; cursor: pointer;
+    background: var(--cyan); color: #041014; font: 600 15px var(--body);
+    transition: filter .15s, transform .1s;
+  }
+  #go:hover:not(:disabled) { filter: brightness(1.1); }
+  #go:active:not(:disabled) { transform: translateY(1px); }
+  #go:disabled { background: #1b2030; color: #5b6180; cursor: not-allowed; }
+  #go:focus-visible, #dl button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
+  #dl { display: none; margin-top: 10px; text-decoration: none; }
+  #dl button {
+    display: block; width: 100%; height: 48px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--cyan); background: transparent; color: var(--cyan); font: 600 15px var(--body);
+    transition: background .15s;
+  }
+  #dl button:hover { background: rgba(25, 227, 245, .1); }
+
+  #log {
+    margin-top: 16px; padding: 14px 16px; min-height: 76px; border-radius: 4px 8px 8px 4px;
+    background: var(--well); border: 1px solid var(--rule); border-left: 2px solid var(--cyan);
+    font: 12.5px/1.75 var(--mono); color: #aee9f1; white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  #log .err { color: var(--err); }
+
+  .notes { margin: 28px 4px 0; color: var(--mute); font-size: 12.5px; line-height: 1.8; }
+  .notes p { margin: 0 0 4px; padding-left: 1em; text-indent: -1em; }
+
+  @media (max-width: 600px) {
+    body { padding: 80px 16px 48px; }
+    .hero { grid-template-columns: 1fr; }
+    .mech { display: none; }
+    .opts { grid-template-columns: 1fr; }
+    .zone { padding: 18px; }
+    .zone-drop { padding: 14px; }
+    #drop { min-height: 180px; padding: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mech .edge, .mech .alt { animation: none; stroke-dashoffset: 0; }
+    .mech .half-l, .mech .half-r, .mech .right-angle { animation: none; opacity: 1; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body data-nav-current="glb2lol">
+<main class="page">
+  <header class="hero">
+    <div>
+      <h1>GLB / OBJ → LOL</h1>
+      <p class="sub">モデルファイルを LOLBeans のマップ形式(.lol)に変換します。処理はすべてブラウザ内で完結します。</p>
+    </div>
+    <svg class="mech" viewBox="0 0 214 140" aria-hidden="true">
+      <polygon class="half-l" points="14,128 142,18 142,128"/>
+      <polygon class="half-r" points="142,18 200,128 142,128"/>
+      <path class="edge" pathLength="1" d="M14 128 L142 18 L200 128 Z"/>
+      <path class="alt" pathLength="1" d="M142 18 L142 128"/>
+      <path class="right-angle" d="M130 128 V116 H142 M142 116 H154 V128"/>
+    </svg>
+  </header>
+
+  <div class="bench">
+    <div class="zone zone-drop">
+      <div id="drop" role="button" tabindex="0" aria-label="Select a .glb or .obj file">
+        <svg class="mesh" viewBox="0 0 720 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <polygon class="facet" points="0,0 112,0 99,74"/>
+          <polygon class="facet" points="0,0 99,74 0,69"/>
+          <polygon class="facet" points="112,0 223,0 99,74"/>
+          <polygon class="facet" points="223,0 218,71 99,74"/>
+          <polygon class="facet" points="223,0 367,0 339,60"/>
+          <polygon class="facet" points="223,0 339,60 218,71"/>
+          <polygon class="facet" points="367,0 459,0 339,60"/>
+          <polygon class="facet" points="459,0 476,84 339,60"/>
+          <polygon class="facet" points="459,0 602,0 582,64"/>
+          <polygon class="facet" points="459,0 582,64 476,84"/>
+          <polygon class="facet" points="602,0 720,0 582,64"/>
+          <polygon class="facet" points="720,0 720,77 582,64"/>
+          <polygon class="facet" points="0,69 99,74 0,161"/>
+          <polygon class="facet" points="99,74 124,143 0,161"/>
+          <polygon class="facet" points="99,74 218,71 263,132"/>
+          <polygon class="facet" points="99,74 263,132 124,143"/>
+          <polygon class="facet" points="218,71 339,60 263,132"/>
+          <polygon class="facet" points="339,60 377,140 263,132"/>
+          <polygon class="facet" points="339,60 476,84 463,134"/>
+          <polygon class="facet" points="339,60 463,134 377,140"/>
+          <polygon class="facet" points="476,84 582,64 463,134"/>
+          <polygon class="facet" points="582,64 591,157 463,134"/>
+          <polygon class="facet" points="582,64 720,77 720,136"/>
+          <polygon class="facet" points="582,64 720,136 591,157"/>
+          <polygon class="facet" points="0,161 124,143 124,220"/>
+          <polygon class="facet" points="0,161 124,220 0,220"/>
+          <polygon class="facet" points="124,143 263,132 124,220"/>
+          <polygon class="facet" points="263,132 247,220 124,220"/>
+          <polygon class="facet" points="263,132 377,140 354,220"/>
+          <polygon class="facet" points="263,132 354,220 247,220"/>
+          <polygon class="facet" points="377,140 463,134 354,220"/>
+          <polygon class="facet" points="463,134 482,220 354,220"/>
+          <polygon class="facet" points="463,134 591,157 579,220"/>
+          <polygon class="facet" points="463,134 579,220 482,220"/>
+          <polygon class="facet" points="591,157 720,136 579,220"/>
+          <polygon class="facet" points="720,136 720,220 579,220"/>
+        </svg>
+        <span class="l1">ここに <b>.glb</b> / <b>.obj</b> をドラッグ&ドロップ</span>
+        <span class="l2">またはクリックして選択</span>
+        <div id="fname"></div>
+      </div>
+      <input type="file" id="file" accept=".glb,.obj" hidden>
+    </div>
+
+    <div class="zone">
+      <div class="opts">
+        <label class="field">スケール (SCALE)
+          <input type="number" id="scale" value="10" step="any">
+        </label>
+        <label class="field">ID開始番号 (ID_OFFSET)
+          <input type="number" id="idoff" value="1000" step="1">
+        </label>
+        <label class="field">デフォルト色
+          <input type="color" id="tint" value="#808080">
+        </label>
+        <label class="field">テクスチャ細分割 (0〜3)
+          <input type="number" id="subdiv" value="0" min="0" max="3" step="1">
+        </label>
+        <label class="switch-row">
+          <input type="checkbox" id="usemat" checked>
+          <span class="switch" aria-hidden="true"></span>
+          GLBの色を使う(テクスチャ/頂点カラー/マテリアル)
+        </label>
+      </div>
+    </div>
+
+    <div class="zone">
+      <button id="go" disabled>変換する</button>
+      <a id="dl"><button type="button">output.lol をダウンロード</button></a>
+      <div id="log">ファイルを選んでください。</div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <p>・色は三角形ごとに1色です(テクスチャは各三角形の中心点の色を採用)。模様が粗いときは「テクスチャ細分割」を上げてください(1上げるごとに面数が4倍)。</p>
+    <p>・アニメーションは非対応です。</p>
+    <p>・Draco / meshopt 圧縮されたGLBは読めません。</p>
+    <p>・面が多いモデルは出力が非常に大きくなります。</p>
+  </aside>
+</main>
+
+<script>
+// ==CORE==
+function parseOBJ(text, scale, defTint) {
+  const faces = [], vertices = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (line.startsWith("v ")) {
+      const l = line.slice(2).trim().split(/\s+/);
+      vertices.push([parseFloat(l[0]) * scale, parseFloat(l[1]) * scale, parseFloat(l[2]) * scale]);
+    } else if (line.startsWith("f ")) {
+      const l = line.slice(2).trim().split(/\s+/);
+      const vi = s => { const n = parseInt(s.split("/")[0], 10); return n < 0 ? vertices.length + n : n - 1; };
+      let p1 = vertices[vi(l[1])];
+      let p2 = vertices[vi(l[0])];
+      const triangles = l.length - 2;
+      for (let i = 0; i < triangles; i++) {
+        const index = (i & 1) ? triangles - Math.floor(i / 2) + 1 : Math.floor(i / 2) + 2;
+        const p3 = vertices[vi(l[index])];
+        faces.push([p1, p2, p3, defTint]);
+        p1 = p2; p2 = p3;
+      }
+    }
+  }
+  return { faces, nverts: vertices.length };
+}
+
+const COMP = {
+  5120: ["getInt8", 1], 5121: ["getUint8", 1], 5122: ["getInt16", 2],
+  5123: ["getUint16", 2], 5125: ["getUint32", 4], 5126: ["getFloat32", 4],
+};
+const NCOMP = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 };
+
+function matMul(a, b) {
+  const r = new Array(16).fill(0);
+  for (let c = 0; c < 4; c++)
+    for (let rr = 0; rr < 4; rr++) {
+      let s = 0;
+      for (let k = 0; k < 4; k++) s += a[k * 4 + rr] * b[c * 4 + k];
+      r[c * 4 + rr] = s;
+    }
+  return r;
+}
+function trsToMat(t, q, s) {
+  const [x, y, z, w] = q;
+  const xx = x * x, yy = y * y, zz = z * z, xy = x * y, xz = x * z, yz = y * z, wx = w * x, wy = w * y, wz = w * z;
+  return [
+    (1 - 2 * (yy + zz)) * s[0], (2 * (xy + wz)) * s[0], (2 * (xz - wy)) * s[0], 0,
+    (2 * (xy - wz)) * s[1], (1 - 2 * (xx + zz)) * s[1], (2 * (yz + wx)) * s[1], 0,
+    (2 * (xz + wy)) * s[2], (2 * (yz - wx)) * s[2], (1 - 2 * (xx + yy)) * s[2], 0,
+    t[0], t[1], t[2], 1,
+  ];
+}
+function xform(m, p) {
+  return [
+    m[0] * p[0] + m[4] * p[1] + m[8] * p[2] + m[12],
+    m[1] * p[0] + m[5] * p[1] + m[9] * p[2] + m[13],
+    m[2] * p[0] + m[6] * p[1] + m[10] * p[2] + m[14],
+  ];
+}
+function srgbByte(c) {
+  c = Math.max(0, Math.min(1, c));
+  const v = c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+  return Math.round(Math.max(0, Math.min(1, v)) * 255);
+}
+
+const S2L = new Float64Array(256);
+for (let i = 0; i < 256; i++) { const c = i / 255; S2L[i] = c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+
+async function parseGLB(buf, scale, defTint, useColor, decodeImage, subdiv) {
+  subdiv = Math.max(0, Math.min(3, subdiv | 0));
+  const dv = new DataView(buf);
+  if (dv.getUint32(0, true) !== 0x46546C67) throw new Error("GLBファイルではありません");
+  let off = 12, gltf = null, bin = null;
+  while (off < buf.byteLength) {
+    const clen = dv.getUint32(off, true), ctype = dv.getUint32(off + 4, true);
+    const start = off + 8;
+    if (ctype === 0x4E4F534A) gltf = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, start, clen)));
+    else if (ctype === 0x004E4942) bin = new DataView(buf, start, clen);
+    off = start + clen;
+  }
+  if (!gltf) throw new Error("JSONチャンクが見つかりません");
+  if (!bin) bin = new DataView(new ArrayBuffer(0));
+
+  const info = {
+    textured: false, vcolor: false, matColor: false, texFailed: false,
+    texErr: "", ext: gltf.extensionsUsed || [], mimes: [], fallback: 0, nMat: (gltf.materials || []).length,
+  };
+
+  function readAccessor(idx) {
+    const acc = gltf.accessors[idx];
+    const [getter, size] = COMP[acc.componentType];
+    const n = NCOMP[acc.type];
+    const out = [];
+    if (acc.bufferView === undefined) {
+      for (let i = 0; i < acc.count; i++) out.push(new Array(n).fill(0));
+      return out;
+    }
+    const bv = gltf.bufferViews[acc.bufferView];
+    const base = (bv.byteOffset || 0) + (acc.byteOffset || 0);
+    const stride = bv.byteStride || size * n;
+    for (let i = 0; i < acc.count; i++) {
+      const v = [];
+      for (let j = 0; j < n; j++) v.push(bin[getter](base + i * stride + j * size, true));
+      out.push(v);
+    }
+    return out;
+  }
+  function readUV(idx) {
+    const acc = gltf.accessors[idx];
+    const div = !acc.normalized ? 1 : acc.componentType === 5121 ? 255 : acc.componentType === 5123 ? 65535 : 1;
+    return readAccessor(idx).map(v => [v[0] / div, v[1] / div]);
+  }
+  function readColors(idx) {
+    const acc = gltf.accessors[idx];
+    const div = acc.componentType === 5121 ? 255 : acc.componentType === 5123 ? 65535 : 1;
+    return readAccessor(idx).map(v => [v[0] / div, v[1] / div, v[2] / div]);
+  }
+
+  const imgCache = {};
+  async function getImage(texIndex) {
+    if (texIndex in imgCache) return imgCache[texIndex];
+    let img = null;
+    try {
+      const tex = gltf.textures[texIndex];
+      const ex = tex.extensions || {};
+      let src = tex.source;
+      if (src === undefined && ex.EXT_texture_webp) src = ex.EXT_texture_webp.source;
+      if (src === undefined && ex.KHR_texture_basisu) src = ex.KHR_texture_basisu.source;
+      if (src === undefined && ex.MSFT_texture_dds) src = ex.MSFT_texture_dds.source;
+      const im = gltf.images[src];
+      let bytes = null, mime = im.mimeType || "image/png";
+      if (im.bufferView !== undefined) {
+        const bv = gltf.bufferViews[im.bufferView];
+        bytes = new Uint8Array(bin.buffer, bin.byteOffset + (bv.byteOffset || 0), bv.byteLength);
+      } else if (im.uri && im.uri.startsWith("data:")) {
+        const b64 = im.uri.split(",")[1];
+        const bs = atob(b64);
+        bytes = new Uint8Array(bs.length);
+        for (let i = 0; i < bs.length; i++) bytes[i] = bs.charCodeAt(i);
+        mime = im.uri.slice(5, im.uri.indexOf(";"));
+      } else if (im.uri) {
+        throw new Error("外部ファイル参照の画像(" + im.uri + ")は読めません");
+      }
+      if (!info.mimes.includes(mime)) info.mimes.push(mime);
+      if (!bytes) throw new Error("画像データが見つかりません");
+      if (decodeImage) img = await decodeImage(bytes, mime);
+    } catch (e) { img = null; if (!info.texErr) info.texErr = String(e && e.message || e); }
+    imgCache[texIndex] = img;
+    if (!img) info.texFailed = true;
+    return img;
+  }
+  function matInfo(mi) {
+    const m = mi !== undefined ? (gltf.materials || [])[mi] || {} : {};
+    const pbr = m.pbrMetallicRoughness || {};
+    const sg = m.extensions && m.extensions.KHR_materials_pbrSpecularGlossiness;
+    let factor = pbr.baseColorFactor, tex = pbr.baseColorTexture;
+    if (!factor && !tex && sg) { factor = sg.diffuseFactor; tex = sg.diffuseTexture; }
+    return { factor: factor || [1, 1, 1, 1], tex, explicit: !!(factor || tex), hasFactor: !!factor };
+  }
+  const WRAP_CLAMP = 33071, WRAP_MIRROR = 33648;
+  function wrap(t, mode) {
+    if (mode === WRAP_CLAMP) return Math.min(1, Math.max(0, t));
+    if (mode === WRAP_MIRROR) { const m = Math.abs(t) % 2; return m > 1 ? 2 - m : m; }
+    return t - Math.floor(t);
+  }
+
+  const faces = [];
+  let vcount = 0;
+  const IDENT = [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+  const mid = (x, y) => x.map((v, i) => (v + y[i]) / 2);
+
+  async function visit(ni, parent) {
+    const node = gltf.nodes[ni];
+    const local = node.matrix || trsToMat(node.translation || [0,0,0], node.rotation || [0,0,0,1], node.scale || [1,1,1]);
+    const world = matMul(parent, local);
+    if (node.mesh !== undefined) {
+      for (const prim of gltf.meshes[node.mesh].primitives) {
+        const mode = prim.mode === undefined ? 4 : prim.mode;
+        if (mode !== 4 && mode !== 5 && mode !== 6) continue;
+        if (prim.extensions && (prim.extensions.KHR_draco_mesh_compression || prim.extensions.EXT_meshopt_compression))
+          throw new Error("Draco/meshopt圧縮されたGLBには対応していません");
+        const pos = readAccessor(prim.attributes.POSITION).map(p => xform(world, p).map(c => c * scale));
+        vcount += pos.length;
+        const idx = prim.indices !== undefined ? readAccessor(prim.indices).map(v => v[0]) : pos.map((_, i) => i);
+        const tris = [];
+        if (mode === 4) for (let i = 0; i + 2 < idx.length; i += 3) tris.push([idx[i], idx[i+1], idx[i+2]]);
+        else if (mode === 5) for (let i = 0; i + 2 < idx.length; i++)
+          tris.push(i % 2 === 0 ? [idx[i], idx[i+1], idx[i+2]] : [idx[i+1], idx[i], idx[i+2]]);
+        else for (let i = 1; i + 1 < idx.length; i++) tris.push([idx[0], idx[i], idx[i+1]]);
+
+        // ---- 色の取得元を集める ----
+        const mat = matInfo(prim.material);
+        const tt = mat.tex && mat.tex.extensions && mat.tex.extensions.KHR_texture_transform;
+        const texObj = mat.tex ? (gltf.textures || [])[mat.tex.index] : null;
+        const sampler = texObj && texObj.sampler !== undefined ? (gltf.samplers || [])[texObj.sampler] || {} : {};
+        let img = null, uvs = null, vcols = null;
+        if (useColor) {
+          if (mat.tex) img = await getImage(mat.tex.index);
+          const set = tt && tt.texCoord !== undefined ? tt.texCoord : (mat.tex && mat.tex.texCoord) || 0;
+          const uvAcc = prim.attributes["TEXCOORD_" + set];
+          if (img && uvAcc !== undefined) uvs = readUV(uvAcc);
+          if (prim.attributes.COLOR_0 !== undefined) vcols = readColors(prim.attributes.COLOR_0);
+          if (uvs) info.textured = true;
+          if (vcols) info.vcolor = true;
+          if (mat.hasFactor && !uvs) info.matColor = true;
+        }
+        const texBroken = useColor && !!mat.tex && !uvs;   // テクスチャがあるはずなのに使えない
+        const hasAnything = useColor && ((mat.explicit && !texBroken) || uvs || vcols);
+
+        const sample = (u, v) => {
+          if (tt) {
+            const sx = (tt.scale || [1, 1]), o = (tt.offset || [0, 0]), r = tt.rotation || 0;
+            const c = Math.cos(r), s = Math.sin(r), a = sx[0] * u, b = sx[1] * v;
+            u = c * a + s * b + o[0]; v = -s * a + c * b + o[1];
+          }
+          const fx = wrap(u, sampler.wrapS), fy = wrap(v, sampler.wrapT);
+          const x = Math.min(img.width - 1, Math.floor(fx * img.width));
+          const y = Math.min(img.height - 1, Math.floor(fy * img.height));
+          const o = (y * img.width + x) * 4;
+          return [S2L[img.data[o]], S2L[img.data[o + 1]], S2L[img.data[o + 2]]];
+        };
+        const colorFrom = (U, C) => {
+          if (!hasAnything) { info.fallback++; return defTint; }
+          let r = mat.factor[0], g = mat.factor[1], bl = mat.factor[2];
+          if (U) {
+            const t = sample((U[0][0] + U[1][0] + U[2][0]) / 3, (U[0][1] + U[1][1] + U[2][1]) / 3);
+            r *= t[0]; g *= t[1]; bl *= t[2];
+          }
+          if (C) {
+            r *= (C[0][0] + C[1][0] + C[2][0]) / 3;
+            g *= (C[0][1] + C[1][1] + C[2][1]) / 3;
+            bl *= (C[0][2] + C[1][2] + C[2][2]) / 3;
+          }
+          return (srgbByte(r) << 16) | (srgbByte(g) << 8) | srgbByte(bl);
+        };
+        // P/U/C は (b, a, c) の順。細分割は向きを保ったまま4分割する
+        const emit = (P, U, C, depth) => {
+          if (depth === 0 || !U) { faces.push([P[0], P[1], P[2], colorFrom(U, C)]); return; }
+          const m01 = mid(P[0], P[1]), m12 = mid(P[1], P[2]), m20 = mid(P[2], P[0]);
+          const u01 = mid(U[0], U[1]), u12 = mid(U[1], U[2]), u20 = mid(U[2], U[0]);
+          let c01, c12, c20;
+          if (C) { c01 = mid(C[0], C[1]); c12 = mid(C[1], C[2]); c20 = mid(C[2], C[0]); }
+          const cs = (x, y, z) => C ? [x, y, z] : null;
+          emit([P[0], m01, m20], [U[0], u01, u20], cs(C && C[0], c01, c20), depth - 1);
+          emit([m01, P[1], m12], [u01, U[1], u12], cs(c01, C && C[1], c12), depth - 1);
+          emit([m20, m12, P[2]], [u20, u12, U[2]], cs(c20, c12, C && C[2]), depth - 1);
+          emit([m01, m12, m20], [u01, u12, u20], cs(c01, c12, c20), depth - 1);
+        };
+        for (const [a, b, c] of tris) {
+          emit([pos[b], pos[a], pos[c]],
+               uvs ? [uvs[b], uvs[a], uvs[c]] : null,
+               vcols ? [vcols[b], vcols[a], vcols[c]] : null,
+               uvs ? subdiv : 0);
+        }
+      }
+    }
+    for (const ch of node.children || []) await visit(ch, world);
+  }
+  const scene = gltf.scenes ? gltf.scenes[gltf.scene || 0] : { nodes: gltf.nodes.map((_, i) => i) };
+  for (const n of scene.nodes) await visit(n, IDENT);
+  return { faces, nverts: vcount, info };
+}
+
+// ---- 三角形 -> ブロック変換 ----
+function matToQuat(m) {
+  const m00 = m[0][0], m10 = m[0][1], m20 = m[0][2];
+  const m01 = m[1][0], m11 = m[1][1], m21 = m[1][2];
+  const m02 = m[2][0], m12 = m[2][1], m22 = m[2][2];
+  const tr = m00 + m11 + m22;
+  let x, y, z, w, s;
+  if (tr > 0) { s = Math.sqrt(tr + 1) * 2; w = 0.25 * s; x = (m21 - m12) / s; y = (m02 - m20) / s; z = (m10 - m01) / s; }
+  else if (m00 > m11 && m00 > m22) { s = Math.sqrt(1 + m00 - m11 - m22) * 2; w = (m21 - m12) / s; x = 0.25 * s; y = (m01 + m10) / s; z = (m02 + m20) / s; }
+  else if (m11 > m22) { s = Math.sqrt(1 + m11 - m00 - m22) * 2; w = (m02 - m20) / s; x = (m01 + m10) / s; y = 0.25 * s; z = (m12 + m21) / s; }
+  else { s = Math.sqrt(1 + m22 - m00 - m11) * 2; w = (m10 - m01) / s; x = (m02 + m20) / s; y = (m12 + m21) / s; z = 0.25 * s; }
+  return [x, y, z, w];
+}
+const vsub = (a, b) => [a[0]-b[0], a[1]-b[1], a[2]-b[2]];
+const vadd = (a, b) => [a[0]+b[0], a[1]+b[1], a[2]+b[2]];
+const vscale = (a, s) => [a[0]*s, a[1]*s, a[2]*s];
+const vlen = a => Math.sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
+const vdot = (a, b) => a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+const vcross = (a, b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+
+function buildLol(faces, idOffset) {
+  const EPS = 1e-9;
+  const blocks = [];
+  let index = 0, skipped = 0;
+  for (const face of faces) {
+    let a = face[0], b = face[1], c = face[2];
+    const tint = face[3];
+    let ab = vsub(b, a), bc = vsub(c, b), ac = vsub(c, a);
+    const ab2 = vdot(ab, ab), bc2 = vdot(bc, bc), ac2 = vdot(ac, ac);
+    if (bc2 > ac2 && bc2 > ab2) { [a, b, c] = [b, c, a]; ab = vsub(b, a); bc = vsub(c, b); ac = vsub(c, a); }
+    else if (ac2 > ab2 && ac2 > bc2) { [a, b, c] = [c, a, b]; ab = vsub(b, a); bc = vsub(c, b); ac = vsub(c, a); }
+    if (vdot(ab, ab) < EPS) { skipped++; continue; }
+    const t = vdot(ab, ac) / vdot(ab, ab);
+    const d = vadd(a, vscale(ab, t));
+    const da = vsub(a, d), daL = vlen(da);
+    const dc = vsub(c, d), dcL = vlen(dc);
+    const db = vsub(b, d), dbL = vlen(db);
+    if (!(daL >= EPS) || !(dcL >= EPS)) { skipped++; continue; }
+    const xA = vscale(da, 1 / daL), yA = vscale(dc, 1 / dcL), zA = vcross(xA, yA);
+    const p1 = vscale(vadd(a, c), 0.5), p2 = vscale(vadd(b, c), 0.5);
+    const q1 = matToQuat([xA, zA, vscale(yA, -1)]);
+    const q2 = matToQuat([vscale(xA, -1), vscale(zA, -1), vscale(yA, -1)]);
+    [[p1, q1, daL], [p2, q2, dbL]].forEach(([p, q, wl], k) => {
+      blocks.push(`{"id":${index*2+idOffset+k},"blockId":424,"name":"t","textureId":100,"tintColor":${tint},"position":{"x":${p[0]},"y":${p[1]},"z":${p[2]}},"quaternion":{"x":${q[0]},"y":${q[1]},"z":${q[2]},"w":${q[3]}},"scale":{"x":${wl/5},"y":0.001,"z":${dcL/5}}}`);
+    });
+    index++;
+  }
+  return { text: '{"blocks":[' + blocks.join(",") + ']}', count: blocks.length, skipped };
+}
+// ==/CORE==
+
+// ---- UI ----
+async function decodeImageBrowser(bytes, mime) {
+  const bmp = await createImageBitmap(new Blob([bytes], { type: mime }), { colorSpaceConversion: "none", premultiplyAlpha: "none" });
+  const c = document.createElement("canvas");
+  c.width = bmp.width; c.height = bmp.height;
+  const ctx = c.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(bmp, 0, 0);
+  return { width: c.width, height: c.height, data: ctx.getImageData(0, 0, c.width, c.height).data };
+}
+if (typeof document !== "undefined") {
+  const $ = id => document.getElementById(id);
+  const drop = $("drop"), fileIn = $("file"), go = $("go"), logEl = $("log"), dl = $("dl");
+  let file = null, dlUrl = null;
+
+  function log(msg, err) {
+    logEl.innerHTML = "";
+    const d = document.createElement("div");
+    if (err) d.className = "err";
+    d.textContent = msg;
+    logEl.appendChild(d);
+  }
+  function setFile(f) {
+    if (!f) return;
+    if (!/\.(glb|obj)$/i.test(f.name)) { log("対応しているのは .glb と .obj です。", true); return; }
+    file = f;
+    $("fname").textContent = f.name + "  (" + (f.size / 1024 / 1024).toFixed(2) + " MB)";
+    go.disabled = false; dl.style.display = "none";
+    log("「変換する」を押してください。");
+  }
+  drop.addEventListener("click", () => fileIn.click());
+  drop.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } });
+  fileIn.addEventListener("change", e => setFile(e.target.files[0]));
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => setFile(e.dataTransfer.files[0]));
+
+  go.addEventListener("click", async () => {
+    if (!file) return;
+    go.disabled = true; dl.style.display = "none";
+    log("変換中...");
+    await new Promise(r => setTimeout(r, 30));
+    try {
+      const scale = parseFloat($("scale").value) || 10;
+      const idOff = parseInt($("idoff").value, 10) || 0;
+      const defTint = parseInt($("tint").value.slice(1), 16);
+      const useMat = $("usemat").checked;
+      let res;
+      if (/\.glb$/i.test(file.name)) res = await parseGLB(await file.arrayBuffer(), scale, defTint, useMat, decodeImageBrowser, parseInt($("subdiv").value, 10) || 0);
+      else res = parseOBJ(await file.text(), scale, defTint);
+      if (!res.faces.length) throw new Error("三角形が見つかりませんでした。");
+      const out = buildLol(res.faces, idOff);
+      const inf = res.info || {};
+      const parts = [];
+      if (inf.textured) parts.push("テクスチャ");
+      if (inf.vcolor) parts.push("頂点カラー");
+      if (inf.matColor) parts.push("マテリアル色");
+      if (inf.texFailed) parts.push("※テクスチャの読み込みに失敗");
+      let diag = "";
+      if (res.info) {
+        diag = "マテリアル数: " + inf.nMat + " / 画像形式: " + (inf.mimes.join(", ") || "なし") +
+          (inf.ext.length ? "\n使用拡張: " + inf.ext.join(", ") : "") +
+          (inf.texErr ? "\n読み込みエラー: " + inf.texErr : "") +
+          (inf.fallback ? "\nデフォルト色にした面: " + inf.fallback : "") + "\n";
+      }
+      const colorNote = res.info === undefined ? "" : !useMat ? "色: デフォルト色を使用\n" : "色の取得元: " + (parts.length ? parts.join(" / ") : "なし(デフォルト色)") + "\n" + diag;
+      if (dlUrl) URL.revokeObjectURL(dlUrl);
+      dlUrl = URL.createObjectURL(new Blob([out.text], { type: "application/json" }));
+      dl.href = dlUrl;
+      dl.download = file.name.replace(/\.[^.]+$/, "") + ".lol";
+      dl.style.display = "block";
+      log(`VERTICES: ${res.nverts}\nFACES: ${res.faces.length}\nBLOCKS: ${out.count}  (除外した面: ${out.skipped})\nサイズ: ${(out.text.length / 1024 / 1024).toFixed(2)} MB\n${colorNote}完了しました。`);
+    } catch (e) {
+      log("エラー: " + e.message, true);
+    }
+    go.disabled = false;
+  });
+}
+</script>
+<script src="/tools-i18n.js" defer></script>
+<script src="/nav-menu.js" defer></script>
+</body>
+</html>

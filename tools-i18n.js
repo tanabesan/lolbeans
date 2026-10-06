@@ -1,6 +1,6 @@
 /**
  * tools-i18n.js
- * ツール(IMAGE→GLOL / BLOCK FORGE)の英語表示(nav-menu.js の JP/EN 切り替えと連動)。
+ * ツール(IMAGE→GLOL / GLB・OBJ→LOL / BLOCK FORGE)の英語表示(nav-menu.js の JP/EN 切り替えと連動)。
  * 各ページで nav-menu.js より前(または後)に <script src=".../tools-i18n.js" defer></script> を読み込むだけ。
  * 日本語の文言をキーに辞書で置換し、後から動的に追加された文言も自動で翻訳します。
  */
@@ -200,10 +200,58 @@
  ".glol をダウンロード": "Download .glol",
  "画像とグリッドサイズを正しく指定してください": "Please specify a valid image and grid size",
  "ブロック数:": "Blocks:",
- "グリッド:": "Grid:"
+ "グリッド:": "Grid:",
+ "GLB / OBJ → LOL コンバーター": "GLB / OBJ → LOL Converter",
+ "モデルファイルを LOLBeans のマップ形式(.lol)に変換します。処理はすべてブラウザ内で完結します。": "Converts model files into the LOLBeans map format (.lol). Everything is processed inside your browser.",
+ "ここに": "Drag & drop",
+ "をドラッグ&ドロップ": "here",
+ "またはクリックして選択": "or click to select",
+ "スケール (SCALE)": "Scale (SCALE)",
+ "ID開始番号 (ID_OFFSET)": "Starting ID (ID_OFFSET)",
+ "デフォルト色": "Default color",
+ "テクスチャ細分割 (0〜3)": "Texture subdivision (0–3)",
+ "GLBの色を使う(テクスチャ/頂点カラー/マテリアル)": "Use GLB colors (texture / vertex color / material)",
+ "output.lol をダウンロード": "Download output.lol",
+ "ファイルを選んでください。": "Please choose a file.",
+ "「変換する」を押してください。": "Press “Convert”.",
+ "変換中...": "Converting...",
+ "対応しているのは .glb と .obj です。": "Only .glb and .obj files are supported.",
+ "・色は三角形ごとに1色です(テクスチャは各三角形の中心点の色を採用)。模様が粗いときは「テクスチャ細分割」を上げてください(1上げるごとに面数が4倍)。": "・Color is one per triangle (for textures, the color at each triangle's center is used). If patterns look rough, raise “Texture subdivision” (each +1 makes 4× the faces).",
+ "・アニメーションは非対応です。": "・Animations are not supported.",
+ "・Draco / meshopt 圧縮されたGLBは読めません。": "・GLBs compressed with Draco / meshopt cannot be read.",
+ "・面が多いモデルは出力が非常に大きくなります。": "・Models with many faces produce very large output."
 };
+
+  // 変換結果ログ(動的に生成される文言)用の置換リスト
+  const LOGREPL = [
+    [/外部ファイル参照の画像\((.*?)\)は読めません/g, 'External image file reference ($1) cannot be read'],
+    [/Draco\/meshopt圧縮されたGLBには対応していません/g, 'Draco/meshopt-compressed GLB is not supported'],
+    [/GLBファイルではありません/g, 'Not a GLB file'],
+    [/JSONチャンクが見つかりません/g, 'JSON chunk not found'],
+    [/画像データが見つかりません/g, 'Image data not found'],
+    [/三角形が見つかりませんでした。/g, 'No triangles found.'],
+    [/除外した面: /g, 'skipped faces: '],
+    [/サイズ: /g, 'Size: '],
+    [/色: デフォルト色を使用/g, 'Color: using default color'],
+    [/色の取得元: /g, 'Color source: '],
+    [/なし\(デフォルト色\)/g, 'none (default color)'],
+    [/※テクスチャの読み込みに失敗/g, '* texture load failed'],
+    [/テクスチャ/g, 'texture'],
+    [/頂点カラー/g, 'vertex color'],
+    [/マテリアル色/g, 'material color'],
+    [/マテリアル数: /g, 'Materials: '],
+    [/画像形式: /g, 'Image formats: '],
+    [/なし/g, 'none'],
+    [/使用拡張: /g, 'Extensions used: '],
+    [/読み込みエラー: /g, 'Load error: '],
+    [/デフォルト色にした面: /g, 'Faces set to default color: '],
+    [/完了しました。/g, 'Done.']
+  ];
+  const jpLog = s => LOGREPL.reduce((a, [re, rep]) => a.replace(re, rep), s);
   const RULES = [
-    [/^\((\d+)ピクセル中\)$/, '(out of $1 pixels)']
+    [/^\((\d+)ピクセル中\)$/, '(out of $1 pixels)'],
+    [/^エラー: ([\s\S]*)$/, (m, g) => 'Error: ' + jpLog(g)],
+    [/^VERTICES: [\s\S]*$/, m => jpLog(m)]
   ];
   let lang = 'jp';
   try { lang = localStorage.getItem(KEY) === 'en' ? 'en' : 'jp'; } catch (e) {}

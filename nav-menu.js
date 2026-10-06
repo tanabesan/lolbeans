@@ -6,7 +6,7 @@
  *
  * 現在のページをハイライトしたい場合は、<body>タグに
  * data-nav-current="file-library" のように id を指定してください。
- * 対応する値: home, lolex, community, ranking, template, block-forge,
+ * 対応する値: home, lolex, community, ranking, template, glb2lol, block-forge,
  *            file-library, submit, faq, contact, quiz, ashi,
  *            lolrank-home, lolrank-vote, lolrank-ranking, lolrank-submit
  *
@@ -54,6 +54,7 @@
         ]},
         { id: "tools", group: "ツール", items: [
             { id: "template", label: "IMAGE → GLOL", href: BASE + "conversion/template.html" },
+            { id: "glb2lol", label: "GLB / OBJ → LOL", href: BASE + "conversion/3d.html" },
             { id: "block-forge", label: "BLOCK FORGE", href: BASE + "blockforge/programatic.html" }
         ]},
         { id: "community", group: "コミュニティ", items: [

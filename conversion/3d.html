@@ -231,6 +231,11 @@
           <span class="switch" aria-hidden="true"></span>
           GLBの色を使う(テクスチャ/頂点カラー/マテリアル)
         </label>
+        <label class="switch-row">
+          <input type="checkbox" id="nocol" checked>
+          <span class="switch" aria-hidden="true"></span>
+          当たり判定を出す(424ブロック / textureId 101 で出力。オフ時は505ブロック)
+        </label>
       </div>
     </div>
 
@@ -531,7 +536,7 @@ const vlen = a => Math.sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
 const vdot = (a, b) => a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
 const vcross = (a, b) => [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
 
-function buildLol(faces, idOffset) {
+function buildLol(faces, idOffset, collide) {
   const EPS = 1e-9;
   const blocks = [];
   let index = 0, skipped = 0;
@@ -550,12 +555,24 @@ function buildLol(faces, idOffset) {
     const db = vsub(b, d), dbL = vlen(db);
     if (!(daL >= EPS) || !(dcL >= EPS)) { skipped++; continue; }
     const xA = vscale(da, 1 / daL), yA = vscale(dc, 1 / dcL), zA = vcross(xA, yA);
-    const p1 = vscale(vadd(a, c), 0.5), p2 = vscale(vadd(b, c), 0.5);
-    const q1 = matToQuat([xA, zA, vscale(yA, -1)]);
-    const q2 = matToQuat([vscale(xA, -1), vscale(zA, -1), vscale(yA, -1)]);
-    [[p1, q1, daL], [p2, q2, dbL]].forEach(([p, q, wl], k) => {
-      blocks.push(`{"id":${index*2+idOffset+k},"blockId":424,"name":"t","textureId":100,"tintColor":${tint},"position":{"x":${p[0]},"y":${p[1]},"z":${p[2]}},"quaternion":{"x":${q[0]},"y":${q[1]},"z":${q[2]},"w":${q[3]}},"scale":{"x":${wl/5},"y":0.001,"z":${dcL/5}}}`);
-    });
+    let blockStr;
+    if (collide) {
+      // 当たり判定あり: 424ブロック(薄い板) + textureId 101
+      const p1 = vscale(vadd(a, c), 0.5), p2 = vscale(vadd(b, c), 0.5);
+      const q1 = matToQuat([xA, zA, vscale(yA, -1)]);
+      const q2 = matToQuat([vscale(xA, -1), vscale(zA, -1), vscale(yA, -1)]);
+      [[p1, q1, daL], [p2, q2, dbL]].forEach(([p, q, wl], k) => {
+        blocks.push(`{"id":${index*2+idOffset+k},"blockId":424,"name":"t","textureId":101,"tintColor":${tint},"position":{"x":${p[0]},"y":${p[1]},"z":${p[2]}},"quaternion":{"x":${q[0]},"y":${q[1]},"z":${q[2]},"w":${q[3]}},"scale":{"x":${wl/5},"y":0.001,"z":${dcL/5}}}`);
+      });
+    } else {
+      // 当たり判定なし: 505ブロック
+      const p1 = vscale(vadd(a, d), 0.5), p2 = vscale(vadd(b, d), 0.5);
+      const q1 = matToQuat([zA, yA, vscale(xA, -1)]);
+      const q2 = matToQuat([vscale(zA, -1), yA, xA]);
+      [[p1, q1, daL], [p2, q2, dbL]].forEach(([p, q, wl], k) => {
+        blocks.push(`{"id":${index*2+idOffset+k},"blockId":505,"name":"t","tintColor":${tint},"position":{"x":${p[0]},"y":${p[1]},"z":${p[2]}},"quaternion":{"x":${q[0]},"y":${q[1]},"z":${q[2]},"w":${q[3]}},"scale":{"x":1,"y":${dcL},"z":${wl}}}`);
+      });
+    }
     index++;
   }
   return { text: '{"blocks":[' + blocks.join(",") + ']}', count: blocks.length, skipped };
@@ -612,7 +629,7 @@ if (typeof document !== "undefined") {
       if (/\.glb$/i.test(file.name)) res = await parseGLB(await file.arrayBuffer(), scale, defTint, useMat, decodeImageBrowser, parseInt($("subdiv").value, 10) || 0);
       else res = parseOBJ(await file.text(), scale, defTint);
       if (!res.faces.length) throw new Error("三角形が見つかりませんでした。");
-      const out = buildLol(res.faces, idOff);
+      const out = buildLol(res.faces, idOff, $("nocol").checked);
       const inf = res.info || {};
       const parts = [];
       if (inf.textured) parts.push("テクスチャ");

@@ -219,11 +219,29 @@
  "・色は三角形ごとに1色です(テクスチャは各三角形の中心点の色を採用)。模様が粗いときは「テクスチャ細分割」を上げてください(1上げるごとに面数が4倍)。": "・Color is one per triangle (for textures, the color at each triangle's center is used). If patterns look rough, raise “Texture subdivision” (each +1 makes 4× the faces).",
  "・アニメーションは非対応です。": "・Animations are not supported.",
  "・Draco / meshopt 圧縮されたGLBは読めません。": "・GLBs compressed with Draco / meshopt cannot be read.",
- "・面が多いモデルは出力が非常に大きくなります。": "・Models with many faces produce very large output."
+ "・面が多いモデルは出力が非常に大きくなります。": "・Models with many faces produce very large output.",
+ "モデルを LOLBeans のマップ形式(.lol)に変換(処理はブラウザ内で完結)": "Converts models into the LOLBeans map format (.lol). Everything is processed inside your browser.",
+ "座標を小数5桁までに丸める(ファイルを軽くする)": "Round coordinates to 5 decimal places (makes the file smaller)",
+ "当たり判定を出す(424 / textureId 101。オフ時は505)": "Output collision (424 / textureId 101; 505 when off)",
+ "・当たり判定をオフにすると、tris(三角形の描画負荷)を約8分の1まで減らせます。当たり判定が不要なら、オフ(505ブロック)がおすすめです。": "・Turning collision off cuts tris (triangle rendering load) to about 1/8. If you don't need collision, we recommend leaving it off (505 blocks).",
+ "・変換後のファイルが10MBを超えると、現在のLOLBeans内では使用できません。(ダウンロード自体は可能です。スケールや細分割を下げて面数を減らしてください)": "・If the converted file exceeds 10 MB, it cannot currently be used inside LOLBeans. (You can still download it. Lower the scale or subdivision to reduce the number of faces.)",
+ "・色は三角形ごとに1色(テクスチャは中心点の色)。粗いときは細分割を上げる(1上げるごとに面数4倍)。": "・One color per triangle (for textures, the color at the center point). If it looks rough, raise the subdivision (each +1 makes 4× the faces).",
+ "・アニメーション非対応 / Draco・meshopt圧縮GLBは不可 / 面が多いと出力が非常に大きくなります。": "・No animation support / Draco・meshopt-compressed GLB not supported / models with many faces produce very large output.",
+ "⚠ 出力が10MBを超えています。現在のLOLBeans内では使用できません(ダウンロードはできます)。スケールや細分割を下げるか、当たり判定をオフにして面数を減らしてください。": "⚠ The output exceeds 10 MB and cannot currently be used inside LOLBeans (you can still download it). Lower the scale or subdivision, or turn collision off, to reduce the number of faces.",
+ "画像を LOLBeans の Solid Pane ピクセルアートに変換します。処理はすべてブラウザ内で完結します。": "Converts an image into LOLBeans Solid Pane pixel art. Everything is processed inside your browser.",
+ "画像をドラッグ&ドロップ": "Drag & drop an image",
+ "グリッドサイズ (ブロック数: 幅 / 高さ)": "Grid size (number of blocks: width / height)",
+ "画像を選んでください。": "Please choose an image.",
+ "画像を LOLBeans の Solid Pane ピクセルアートに変換(処理はブラウザ内で完結)": "Converts an image into LOLBeans Solid Pane pixel art (processed entirely in your browser)"
 };
 
   // 変換結果ログ(動的に生成される文言)用の置換リスト
   const LOGREPL = [
+    [/丸めあり: /g, 'With rounding: '],
+    [/丸めなし: /g, 'Without rounding: '],
+    [/\(今回\)/g, '(this run)'],
+    [/\(目安\)/g, '(estimate)'],
+    [/→ 約(\d+)%削減/g, '→ about $1% smaller'],
     [/外部ファイル参照の画像\((.*?)\)は読めません/g, 'External image file reference ($1) cannot be read'],
     [/Draco\/meshopt圧縮されたGLBには対応していません/g, 'Draco/meshopt-compressed GLB is not supported'],
     [/GLBファイルではありません/g, 'Not a GLB file'],

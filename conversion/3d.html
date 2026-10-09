@@ -103,7 +103,7 @@
   .switch-row:hover { border-color: var(--rule-hi); }
   .switch-row input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .switch { position: relative; flex: none; width: 36px; height: 20px; border-radius: 99px; background: #23273d; transition: background .2s; }
-  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--mute); transition: transform .2s, background .2s; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--mute); transition: transform .3s cubic-bezier(.3, 1.6, .5, 1), background .2s; }
   .switch-row input:checked + .switch { background: var(--cyan); }
   .switch-row input:checked + .switch::after { transform: translateX(16px); background: #041014; }
   .switch-row input:focus-visible + .switch { outline: 2px solid var(--cyan); outline-offset: 3px; }
@@ -137,6 +137,70 @@
   .notes p.em { color: var(--bone); font-weight: 600; }
   #log .warn { color: #ffd166; margin-top: 8px; }
 
+  /* ---- アニメーション ---- */
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes sweep { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  @keyframes twinkle { 0%, 100% { fill: transparent; } 50% { fill: rgba(25, 227, 245, .07); } }
+  @keyframes pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+  @keyframes stripes { to { background-position: 34px 0; } }
+  @keyframes glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(25, 227, 245, 0); } 50% { box-shadow: 0 0 0 7px rgba(25, 227, 245, .18); } }
+  @keyframes logIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+  @keyframes warnPulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+  @keyframes breatheL { 0%, 100% { fill: rgba(25, 227, 245, .18); } 50% { fill: rgba(25, 227, 245, .34); } }
+  @keyframes breatheR { 0%, 100% { fill: rgba(255, 63, 208, .18); } 50% { fill: rgba(255, 63, 208, .34); } }
+
+  /* 読み込み時: 見出し → 左右カラム → 各項目が順番にふわっと出る */
+  .hero { animation: rise .5s backwards; }
+  .bench { animation: rise .5s .06s backwards; }
+  .col > * { animation: rise .45s backwards; }
+  .col > :nth-child(1) { animation-delay: 0.17s; }
+  .col > :nth-child(2) { animation-delay: 0.22s; }
+  .col > :nth-child(3) { animation-delay: 0.27s; }
+  .col > :nth-child(4) { animation-delay: 0.32s; }
+  .col > :nth-child(5) { animation-delay: 0.37s; }
+  .col > :nth-child(6) { animation-delay: 0.42s; }
+  .col > :nth-child(7) { animation-delay: 0.47s; }
+  .col > :nth-child(8) { animation-delay: 0.52s; }
+
+  /* 三角形: 描き終わったあと、色がゆっくり呼吸する */
+  .mech .half-l { animation: show .6s 1.05s forwards, breatheL 4.5s 2.2s ease-in-out infinite; }
+  .mech .half-r { animation: show .6s 1.05s forwards, breatheR 4.5s 3.2s ease-in-out infinite; }
+  .mech:hover .edge { stroke: var(--cyan); transition: stroke .3s; }
+
+  /* ドロップ領域: 光の帯が時々横切り、メッシュがまたたく */
+  #drop::after {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: linear-gradient(100deg, transparent 40%, rgba(25, 227, 245, .09) 50%, transparent 60%);
+    transform: translateX(-100%); animation: sweep 5s ease-in-out 1.2s infinite;
+  }
+  #drop .facet:nth-child(4n+1) { animation: twinkle 6s ease-in-out infinite; }
+  #drop .facet:nth-child(5n+2) { animation: twinkle 7s 1.5s ease-in-out infinite; }
+  #drop .facet:nth-child(7n+3) { animation: twinkle 5s 3s ease-in-out infinite; }
+  #drop.over .facet { animation: none; }
+  #drop.over::after { animation-duration: 1.4s; }
+  #drop { transition: border-color .2s, transform .2s; }
+  #drop:hover { transform: translateY(-1px); }
+  #fname { animation: pop .35s cubic-bezier(.2, 1.4, .4, 1); }
+
+  /* ボタン: ホバーで光が走る / 変換中はしま模様が流れる */
+  #go { position: relative; overflow: hidden; }
+  #go::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(100deg, transparent 35%, rgba(255, 255, 255, .45) 50%, transparent 65%);
+    transform: translateX(-120%); transition: transform .6s;
+  }
+  #go:hover:not(:disabled)::after { transform: translateX(120%); }
+  #go.busy, #go.busy:disabled {
+    color: #041014; cursor: progress;
+    background: repeating-linear-gradient(45deg, #19e3f5 0 12px, #12b9c8 12px 24px); background-size: 34px 34px;
+    animation: stripes .8s linear infinite;
+  }
+  #dl button { animation: rise .4s backwards, glow 1.6s .4s 2; }
+
+  /* ログ: 更新のたびにすっと入る */
+  #log > div { animation: logIn .35s both; }
+  #log .warn { animation: logIn .35s .15s both, warnPulse 2s .6s 2; }
+
   @media (max-width: 600px) { .mech { display: none; } }
   @media (max-width: 820px) {
     body { padding: 72px 14px 32px; }
@@ -144,9 +208,9 @@
     .col + .col { border-left: 0; border-top: 1px solid var(--rule); }
   }
   @media (prefers-reduced-motion: reduce) {
-    .mech .edge, .mech .alt { animation: none; stroke-dashoffset: 0; }
-    .mech .half-l, .mech .half-r, .mech .right-angle { animation: none; opacity: 1; }
-    * { transition: none !important; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .mech .edge, .mech .alt { stroke-dashoffset: 0; }
+    .mech .half-l, .mech .half-r, .mech .right-angle { opacity: 1; }
   }
 </style>
 </head>
@@ -613,6 +677,7 @@ if (typeof document !== "undefined") {
     if (!/\.(glb|obj)$/i.test(f.name)) { log("対応しているのは .glb と .obj です。", true); return; }
     file = f;
     $("fname").textContent = f.name + "  (" + (f.size / 1024 / 1024).toFixed(2) + " MB)";
+    const fn = $("fname"); fn.style.animation = "none"; void fn.offsetWidth; fn.style.animation = "";
     go.disabled = false; dl.style.display = "none";
     log("「変換する」を押してください。");
   }
@@ -625,7 +690,7 @@ if (typeof document !== "undefined") {
 
   go.addEventListener("click", async () => {
     if (!file) return;
-    go.disabled = true; dl.style.display = "none";
+    go.disabled = true; go.classList.add("busy"); dl.style.display = "none";
     log("変換中...");
     await new Promise(r => setTimeout(r, 30));
     try {
@@ -678,7 +743,7 @@ if (typeof document !== "undefined") {
     } catch (e) {
       log("エラー: " + e.message, true);
     }
-    go.disabled = false;
+    go.disabled = false; go.classList.remove("busy");
   });
 }
 </script>

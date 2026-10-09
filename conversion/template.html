@@ -3,326 +3,222 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0b12">
 <title>IMAGE → GLOL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+JP:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap');
-
   :root {
-    --bg: #0d0e17;
-    --panel: #171a29;
-    --panel-line: #2c3044;
-    --text: #d8dce8;
-    --text-dim: #6b7189;
-    --accent: #ff00ff;
-    --accent2: #00ffff;
-    --accent-dim: #a3009e;
-    --warn: #ff2d55;
+    color-scheme: dark;
+    --ink: #0a0b12; --slab: #10121c; --well: #0b0d16;
+    --rule: #262a40; --rule-hi: #3a3f5e;
+    --bone: #e9ebf5; --mute: #8d92b2;
+    --cyan: #19e3f5; --magenta: #ff3fd0; --err: #ff7a8a;
+    /* nav-menu.js が参照する変数名(サイト共通) */
+    --panel: var(--slab); --panel-line: var(--rule);
+    --text: var(--bone); --text-dim: var(--mute);
+    --accent: var(--magenta); --accent2: var(--cyan);
+    --display: "Chakra Petch", "IBM Plex Sans JP", sans-serif;
+    --body: "IBM Plex Sans JP", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", Consolas, monospace;
   }
-
   * { box-sizing: border-box; }
-
   body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    min-height: 100vh;
+    margin: 0; min-height: 100vh; background: var(--ink); color: var(--bone);
+    font: 14px/1.6 var(--body); -webkit-font-smoothing: antialiased;
+    display: flex; justify-content: center; padding: 64px 24px 24px;
   }
+  .page { width: 100%; max-width: 1040px; }
 
-  body::before{
-    content:'';position:fixed;inset:0;pointer-events:none;z-index:2;
-    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.18) 2px,rgba(0,0,0,.18) 4px);
+  /* ---- 見出し(1行にまとめる) ---- */
+  .hero { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 20px; margin-bottom: 16px; }
+  h1 { font: 600 clamp(26px, 4vw, 34px)/1.1 var(--display); letter-spacing: -.01em; margin: 0; }
+  .sub { margin: 0; color: var(--mute); font-size: 13px; }
+
+  /* ---- 作業台: 左=設定 / 右=プレビュー ---- */
+  .bench {
+    display: grid; grid-template-columns: 380px 1fr;
+    border: 1px solid var(--rule); border-radius: 14px; background: var(--slab); overflow: hidden;
   }
+  .col { padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .col + .col { border-left: 1px solid var(--rule); }
 
-  .pixel-noise {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(rgba(0,255,255,.15) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,255,255,.15) 1px, transparent 1px);
-    background-size: 24px 24px;
-    opacity: 0.3;
-    z-index: 0;
-  }
-
-  header {
-    position: relative;
-    z-index: 1;
-    padding: 28px 32px 20px 78px;
-    border-bottom: 2px solid var(--panel-line);
-  }
-
-  h1 {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 18px;
-    color: var(--accent);
-    margin: 0 0 8px;
-    letter-spacing: 1px;
-    text-shadow: 3px 3px 0 var(--accent-dim), 0 0 16px rgba(255,0,255,.4);
-  }
-
-  header p {
-    margin: 0;
-    color: var(--text-dim);
-    font-size: 13px;
-  }
-  header p::before {
-    content: '▸ ';
-    color: var(--accent2);
-  }
-
-  main {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 0;
-    min-height: calc(100vh - 96px);
-  }
-
-  @media (max-width: 860px) {
-    main { grid-template-columns: 1fr; }
-  }
-
-  .panel {
-    padding: 28px;
-    border-right: 2px solid var(--panel-line);
-    background: var(--panel);
-    position: relative;
-    z-index: 1;
-  }
-
-  .field { margin-bottom: 22px; }
-
-  .field label {
-    display: block;
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-    text-transform: lowercase;
-  }
-
+  /* ---- ドロップ領域(選んだ写真がサムネイルで出る) ---- */
   #drop {
-    border: 2px dashed var(--panel-line);
-    padding: 24px 12px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 12px;
-    color: var(--text-dim);
-    transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    display: flex; align-items: center; gap: 14px; cursor: pointer;
+    padding: 12px; border-radius: 10px;
+    border: 1px dashed var(--rule-hi); background: var(--well);
+    transition: border-color .2s, background .2s;
   }
-  #drop:hover, #drop.drag { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 12px rgba(255,0,255,.25); }
-  #fileInput { display: none; }
-
-  .field input[type="number"] {
-    width: 100%;
-    background: var(--bg);
-    border: 2px solid var(--panel-line);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    padding: 8px 10px;
+  #drop:hover { border-color: var(--mute); }
+  #drop.over { border-color: var(--cyan); border-style: solid; background: rgba(25, 227, 245, .06); }
+  #drop:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+  .frame {
+    flex: none; width: 72px; height: 72px; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--rule-hi); background: #151828;
+    display: grid; place-items: center; color: var(--rule-hi);
   }
-  .field input[type="number"]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 8px rgba(255,0,255,.3); }
-
-  .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  .checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-    color: var(--text-dim);
+  .frame svg { width: 32px; height: 32px; }
+  .frame img { display: none; width: 100%; height: 100%; object-fit: cover; }
+  #drop.has-img .frame { border-color: rgba(25, 227, 245, .5); }
+  #drop.has-img .frame img { display: block; }
+  #drop.has-img .frame svg { display: none; }
+  .dtext { min-width: 0; }
+  .l1 { display: block; font-size: 15px; font-weight: 600; line-height: 1.4; }
+  .l2 { display: block; color: var(--mute); font-size: 12.5px; }
+  #fname {
+    display: inline-block; margin-top: 6px; padding: 1px 8px; border-radius: 6px; word-break: break-all;
+    font: 11.5px/1.5 var(--mono); color: var(--bone);
+    background: rgba(25, 227, 245, .09); border: 1px solid rgba(25, 227, 245, .3);
   }
-  .checkbox-row input { accent-color: var(--accent); width: 16px; height: 16px; }
-  input[type="range"] { accent-color: var(--accent2); width: 100%; }
-  #keepTransparent { accent-color: var(--accent2); }
+  #fname:empty { display: none; }
 
-  button#convertBtn {
-    width: 100%;
-    padding: 14px;
-    background: var(--accent);
-    color: #0b0715;
-    border: 2px solid var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    box-shadow: 4px 4px 0 rgba(255,0,255,.4);
-    transition: all .15s;
+  /* ---- 設定 ---- */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; font-weight: 500; color: var(--bone); }
+  .field input[type=number], .field input[type=text] {
+    width: 100%; height: 38px; border-radius: 8px; border: 1px solid var(--rule); padding: 0 12px;
+    background: var(--well); color: var(--bone); font: 13.5px var(--mono);
+    transition: border-color .15s, box-shadow .15s;
   }
-  button#convertBtn:hover { background: transparent; color: var(--accent); box-shadow: 0 0 10px 1px rgba(255,0,255,.5), 4px 4px 0 var(--accent); }
-  button#convertBtn:disabled { background: var(--panel-line); border-color: var(--panel-line); color: var(--text-dim); cursor: not-allowed; box-shadow: none; }
+  .field input:hover { border-color: var(--rule-hi); }
+  .field input:focus-visible { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(25, 227, 245, .18); }
+  .field b { font: 500 12px var(--mono); color: var(--cyan); margin-left: 6px; }
+  input[type=range] { accent-color: var(--cyan); width: 100%; height: 22px; margin: 0; cursor: pointer; }
 
-  .stats {
-    margin-top: 16px;
-    font-size: 11px;
-    color: var(--text-dim);
-    line-height: 1.8;
+  .switch-row {
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+    padding: 9px 12px; border-radius: 8px; border: 1px solid var(--rule); background: var(--well);
+    font-size: 12.5px; color: var(--bone); transition: border-color .15s;
   }
-  .stats span { color: var(--accent); }
+  .switch-row:hover { border-color: var(--rule-hi); }
+  .switch-row input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .switch { position: relative; flex: none; width: 36px; height: 20px; border-radius: 99px; background: #23273d; transition: background .2s; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--mute); transition: transform .2s, background .2s; }
+  .switch-row input:checked + .switch { background: var(--cyan); }
+  .switch-row input:checked + .switch::after { transform: translateX(16px); background: #041014; }
+  .switch-row input:focus-visible + .switch { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
-  .viewport {
-    position: relative;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 24px;
+  /* ---- ボタン ---- */
+  #convertBtn {
+    display: block; width: 100%; height: 44px; border: 0; border-radius: 8px; cursor: pointer;
+    background: var(--cyan); color: #041014; font: 600 14.5px var(--body);
+    transition: filter .15s, transform .1s;
   }
-
-  .canvas-wrap {
-    max-width: 100%;
-    border: 2px solid var(--panel-line);
-    box-shadow: 0 0 24px -6px rgba(0,255,255,.2);
-    background:
-      linear-gradient(45deg, #1f2233 25%, transparent 25%) -8px 0/16px 16px,
-      linear-gradient(-45deg, #1f2233 25%, transparent 25%) -8px 0/16px 16px,
-      linear-gradient(45deg, transparent 75%, #1f2233 75%) 0 0/16px 16px,
-      linear-gradient(-45deg, transparent 75%, #1f2233 75%) 0 0/16px 16px;
-    background-color: #16182422;
-    padding: 12px;
-  }
-
-  canvas#preview {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    display: block;
-    max-width: min(70vw, 560px);
-    max-height: 60vh;
-  }
-
-  .empty-state {
-    color: var(--text-dim);
-    font-size: 12px;
-    text-align: center;
-    padding: 60px 40px;
-  }
-
+  #convertBtn:hover:not(:disabled) { filter: brightness(1.1); }
+  #convertBtn:active:not(:disabled) { transform: translateY(1px); }
+  #convertBtn:disabled { background: #1b2030; color: #5b6180; cursor: not-allowed; }
   #downloadBtn {
-    padding: 12px 28px;
-    background: transparent;
-    border: 2px solid var(--accent2);
-    color: var(--accent2);
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    display: none;
-    width: 100%;
-    max-width: 320px;
-    transition: all .15s;
+    display: none; width: 100%; height: 44px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--cyan); background: transparent; color: var(--cyan); font: 600 14.5px var(--body);
+    transition: background .15s;
   }
-  #downloadBtn:hover { background: var(--accent2); color: #0b0715; box-shadow: 0 0 14px 1px rgba(0,255,255,.5); }
+  #downloadBtn:hover { background: rgba(25, 227, 245, .1); }
+  #convertBtn:focus-visible, #downloadBtn:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 
-  #err {
-    color: var(--warn);
-    font-size: 12px;
-    margin-top: 10px;
-    display: none;
+  #err { display: none; color: var(--err); font-size: 12.5px; }
+  .stats {
+    padding: 10px 14px; border-radius: 4px 8px 8px 4px;
+    background: var(--well); border: 1px solid var(--rule); border-left: 2px solid var(--cyan);
+    font: 12px/1.7 var(--mono); color: #aee9f1;
   }
+  .stats span { color: var(--bone); font-weight: 700; }
 
-  @media (max-width: 860px) {
-    header { padding: 20px 18px 16px 70px; }
-    h1 { font-size: 14px; }
-    header p { font-size: 12px; }
-
-    main { grid-template-columns: 1fr; min-height: auto; }
-
-    .panel {
-      padding: 18px;
-      border-right: none;
-      border-bottom: 2px solid var(--panel-line);
-    }
-
-    .viewport { padding: 18px; gap: 16px; }
-
-    canvas#preview { max-width: 100%; max-height: 50vh; }
-
-    button#convertBtn, #downloadBtn { font-size: 12px; padding: 13px; }
-
-    .field { margin-bottom: 18px; }
+  /* ---- プレビュー ---- */
+  .stage {
+    flex: 1; display: grid; place-items: center; min-height: 300px; padding: 14px; border-radius: 10px;
+    border: 1px solid var(--rule); background-color: var(--well);
+    background-image:
+      linear-gradient(45deg, #151828 25%, transparent 25%, transparent 75%, #151828 75%),
+      linear-gradient(45deg, #151828 25%, transparent 25%, transparent 75%, #151828 75%);
+    background-size: 16px 16px; background-position: 0 0, 8px 8px;
   }
-
-  @media (max-width: 420px) {
-    .grid-two { grid-template-columns: 1fr 1fr; gap: 8px; }
-    h1 { font-size: 12px; }
+  canvas#preview {
+    image-rendering: pixelated; image-rendering: crisp-edges; display: block;
+    max-width: 100%; max-height: calc(100vh - 230px); border-radius: 4px;
+    box-shadow: 0 0 0 1px var(--rule-hi);
   }
+  .empty-state { color: var(--mute); font-size: 13px; text-align: center; padding: 24px; }
+
+  @media (max-width: 820px) {
+    body { padding: 72px 14px 32px; }
+    .bench { grid-template-columns: 1fr; }
+    .col + .col { border-left: 0; border-top: 1px solid var(--rule); }
+    .stage { min-height: 220px; }
+    canvas#preview { max-height: 50vh; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body data-nav-current="template">
 <script src="https://tanabesan.github.io/lolbeans/tools-i18n.js" defer></script>
 <script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
 
-<div class="pixel-noise"></div>
+<main class="page">
+  <header class="hero">
+    <h1>IMAGE → GLOL</h1>
+    <p class="sub">画像を LOLBeans の Solid Pane ピクセルアートに変換(処理はブラウザ内で完結)</p>
+  </header>
 
-<header>
-  <h1>IMAGE → GLOL</h1>
-  <p>画像をLOLBeansのSolid Paneピクセルアートに変換する</p>
-</header>
-
-<main>
-  <div class="panel">
-
-    <div class="field">
-      <label>入力画像</label>
-      <div id="drop">クリック or ドラッグ&ドロップ</div>
-      <input type="file" id="fileInput" accept="image/*">
-    </div>
-
-    <div class="field">
-      <label>グリッドサイズ (ブロック数)</label>
-      <div class="grid-two">
-        <input type="number" id="gridW" value="32" min="1" max="128">
-        <input type="number" id="gridH" value="32" min="1" max="128">
+  <div class="bench">
+    <div class="col">
+      <div id="drop" role="button" tabindex="0" aria-label="Select an image">
+        <div class="frame">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 9"/></svg>
+          <img id="thumb" alt="">
+        </div>
+        <div class="dtext">
+          <span class="l1">画像をドラッグ&amp;ドロップ</span>
+          <span class="l2">またはクリックして選択</span>
+          <div id="fname"></div>
+        </div>
       </div>
-      <div class="checkbox-row" style="margin-top:10px;">
+      <input type="file" id="fileInput" accept="image/*" hidden>
+
+      <div class="field">グリッドサイズ (ブロック数: 幅 / 高さ)
+        <div class="row">
+          <input type="number" id="gridW" value="32" min="1" max="128" aria-label="幅">
+          <input type="number" id="gridH" value="32" min="1" max="128" aria-label="高さ">
+        </div>
+      </div>
+      <label class="switch-row">
         <input type="checkbox" id="lockAspect" checked>
-        <span>元画像の縦横比に合わせる</span>
+        <span class="switch" aria-hidden="true"></span>
+        元画像の縦横比に合わせる
+      </label>
+
+      <label class="field">グループ名
+        <input type="text" id="groupName" value="Converted">
+      </label>
+
+      <div class="row">
+        <label class="field">彩度<b id="satVal">1.0</b>
+          <input type="range" id="saturation" min="0.5" max="2" step="0.05" value="1">
+        </label>
+        <label class="field">明度<b id="briVal">1.0</b>
+          <input type="range" id="brightness" min="0.5" max="1.5" step="0.05" value="1">
+        </label>
       </div>
-    </div>
 
-    <div class="field">
-      <label>グループ名</label>
-      <input type="text" id="groupName" value="Converted" style="width:100%; background: var(--bg); border: 2px solid var(--panel-line); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 14px; padding: 8px 10px;">
-    </div>
-
-    <div class="field">
-      <label>彩度 / 明度 補正(薄く見える場合の調整)</label>
-      <div class="grid-two">
-        <div>
-          <label style="font-size:10px; margin-bottom:4px;">彩度 <span id="satVal">1.0</span></label>
-          <input type="range" id="saturation" min="0.5" max="2" step="0.05" value="1" style="width:100%;">
-        </div>
-        <div>
-          <label style="font-size:10px; margin-bottom:4px;">明度 <span id="briVal">1.0</span></label>
-          <input type="range" id="brightness" min="0.5" max="1.5" step="0.05" value="1" style="width:100%;">
-        </div>
-      </div>
-    </div>
-
-    <div class="field">
-      <div class="checkbox-row">
+      <label class="switch-row">
         <input type="checkbox" id="keepTransparent">
-        <span>透明ピクセルもブロック化する</span>
+        <span class="switch" aria-hidden="true"></span>
+        透明ピクセルもブロック化する
+      </label>
+
+      <button id="convertBtn" disabled>変換する</button>
+      <div id="err"></div>
+    </div>
+
+    <div class="col">
+      <div class="stage">
+        <canvas id="preview" width="1" height="1"></canvas>
+        <div class="empty-state" id="emptyState">画像を選択するとここにピクセル化プレビューが表示されます</div>
       </div>
+      <div class="stats" id="stats">画像を選んでください。</div>
+      <button id="downloadBtn">.glol をダウンロード</button>
     </div>
-
-    <button id="convertBtn" disabled>変換する</button>
-    <div id="err"></div>
-
-    <div class="stats" id="stats"></div>
-  </div>
-
-  <div class="viewport">
-    <div class="canvas-wrap">
-      <canvas id="preview" width="1" height="1"></canvas>
-      <div class="empty-state" id="emptyState">画像を選択するとここにピクセル化プレビューが表示されます</div>
-    </div>
-    <button id="downloadBtn">.glol をダウンロード</button>
   </div>
 </main>
 
@@ -363,15 +259,18 @@ const convertBtn = document.getElementById('convertBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const previewCanvas = document.getElementById('preview');
 const emptyState = document.getElementById('emptyState');
+const fnameEl = document.getElementById('fname');
+const thumb = document.getElementById('thumb');
 const statsEl = document.getElementById('stats');
 const errEl = document.getElementById('err');
 
 dropEl.addEventListener('click', () => fileInput.click());
-dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('drag'); });
-dropEl.addEventListener('dragleave', () => dropEl.classList.remove('drag'));
+dropEl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+dropEl.addEventListener('dragover', e => { e.preventDefault(); dropEl.classList.add('over'); });
+dropEl.addEventListener('dragleave', () => dropEl.classList.remove('over'));
 dropEl.addEventListener('drop', e => {
   e.preventDefault();
-  dropEl.classList.remove('drag');
+  dropEl.classList.remove('over');
   if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
 });
 fileInput.addEventListener('change', e => {
@@ -385,7 +284,9 @@ function loadFile(file) {
     img.onload = () => {
       sourceImg = img;
       aspectRatio = img.naturalWidth / img.naturalHeight;
-      dropEl.textContent = file.name;
+      fnameEl.textContent = file.name;
+      thumb.src = ev.target.result;
+      dropEl.classList.add('has-img');
       convertBtn.disabled = false;
       errEl.style.display = 'none';
 
@@ -545,7 +446,7 @@ function convert() {
   previewCanvas.style.display = 'block';
 
   statsEl.innerHTML = `ブロック数: <span>${blocks.length}</span> (${gw * gh}ピクセル中)<br>グリッド: <span>${gw} × ${gh}</span>`;
-  downloadBtn.style.display = 'inline-block';
+  downloadBtn.style.display = 'block';
 }
 
 downloadBtn.addEventListener('click', () => {

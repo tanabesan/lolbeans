@@ -107,7 +107,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .ov-stat i{margin-right:6px}
 .ov-stat i.fa-star{color:var(--gold)}
 .ov-stat.fin i{color:var(--cy)}
+.ov-stat.wr i{color:var(--cy)}
 .ov-date{margin-left:auto;font-size:12px;color:var(--t1)}
+.ov-date i{margin-right:5px;color:var(--gold)}
 
 /* list view */
 #level-grid.list-view{display:flex;flex-direction:column;gap:16px}
@@ -341,6 +343,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
         <option value="2">🔥 Trending</option>
         <option value="4">💀 Hardcore</option>
         <option value="5">🏆 WR更新順</option>
+        <option value="6">⚡ WRが早い順</option>
+        <option value="7">🐢 WRが遅い順</option>
+        <option value="8">🕰 WR更新が古い順</option>
       </select>
     </div>
     <div class="fg">
@@ -396,8 +401,8 @@ function levelSlug(name){return name.normalize('NFD').replace(/[\u0300-\u036f]/g
 function levelPlayUrl(lv){return'https://lolbeans.io/level/'+levelIdToShortId(lv.levelId)+'/'+levelSlug(lv.name)}
 
 const T={
-  ja:{title:'LOLBeans Course List',h1:'LOLBeans\nCourse List',sub:'ユーザーが作成したカスタムマップ',loading:'データをロード中...',lSearch:'コース・作者名検索',lSort:'並び替え',lType:'コース種別',lFin:'クリア率',lView:'表示',btnS:'検索',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',s5:'🏆 WR更新順',tM1:'すべて',t0:'サンドボックス',t1:'タイムレース',t2:'競争レース',t3:'エリミネーション',f0:'すべて',f1:'低い (<30%)',f2:'普通 (30〜70%)',f3:'高い (>70%)',author:'作者',desc:'概要',votes:'投票数',rating:'平均評価',finPct:'クリア率',starts:'プレイ回数',players:'総プレイヤー数',avgTime:'平均クリア時間',wr:'世界記録 (WR)',wrHolder:'WR保持者',date:'公開日',pi:(c,m)=>`${c+1} / ${m}`,prev:'前へ',next:'次へ',noD:'説明がありません。',noL:'該当するコースが見つかりませんでした。',err:'データの取得に失敗しました。',pbSfx:' のWR保持コース',pbCnt:n=>`WR ${n} コース`,pbLoad:n=>`${n} のWRコースを取得中...`,pbNone:'WR保持コースが見つかりませんでした。',pbBack:'✕ 通常表示に戻る',closeModal:'✕ 閉じる',playBtn:'▶ プレイする'},
-  en:{title:'LOLBeans Course List',h1:'LOLBeans\nCourse List',sub:'Custom maps created by the community',loading:'Loading data...',lSearch:'Search courses / authors',lSort:'Sort By',lType:'Course Type',lFin:'Finish %',lView:'View',btnS:'Search',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',s5:'🏆 Recent WR',tM1:'All',t0:'Sandbox',t1:'Timed Race',t2:'Competitive Race',t3:'Elimination',f0:'All',f1:'Low (<30%)',f2:'Average (30–70%)',f3:'High (>70%)',author:'Author',desc:'Description',votes:'Votes',rating:'Avg. Rating',finPct:'Finish %',starts:'Starts',players:'Players',avgTime:'Avg. Finish Time',wr:'World Record',wrHolder:'WR Holder',date:'Publish Date',pi:(c,m)=>`Page ${c+1} of ${m}`,prev:'Prev',next:'Next',noD:'No description.',noL:'No courses found.',err:'Failed to fetch data.',pbSfx:"'s WR Courses",pbCnt:n=>`${n} WR courses`,pbLoad:n=>`Loading ${n}'s WR courses...`,pbNone:'No WR courses found.',pbBack:'✕ Back',closeModal:'✕ Close',playBtn:'▶ PLAY'}
+  ja:{title:'LOLBeans Course List',h1:'LOLBeans\nCourse List',sub:'ユーザーが作成したカスタムマップ',loading:'データをロード中...',lSearch:'コース・作者名検索',lSort:'並び替え',lType:'コース種別',lFin:'クリア率',lView:'表示',btnS:'検索',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',s5:'🏆 WR更新順',s6:'⚡ WRが早い順',s7:'🐢 WRが遅い順',s8:'🕰 WR更新が古い順',tM1:'すべて',t0:'サンドボックス',t1:'タイムレース',t2:'競争レース',t3:'エリミネーション',f0:'すべて',f1:'低い (<30%)',f2:'普通 (30〜70%)',f3:'高い (>70%)',author:'作者',desc:'概要',votes:'投票数',rating:'平均評価',finPct:'クリア率',starts:'プレイ回数',players:'総プレイヤー数',avgTime:'平均クリア時間',wr:'世界記録 (WR)',wrHolder:'WR保持者',date:'公開日',pi:(c,m)=>`${c+1} / ${m}`,prev:'前へ',next:'次へ',noD:'説明がありません。',noL:'該当するコースが見つかりませんでした。',err:'データの取得に失敗しました。',pbSfx:' のWR保持コース',pbCnt:n=>`WR ${n} コース`,pbLoad:n=>`${n} のWRコースを取得中...`,pbNone:'WR保持コースが見つかりませんでした。',pbBack:'✕ 通常表示に戻る',closeModal:'✕ 閉じる',playBtn:'▶ プレイする'},
+  en:{title:'LOLBeans Course List',h1:'LOLBeans\nCourse List',sub:'Custom maps created by the community',loading:'Loading data...',lSearch:'Search courses / authors',lSort:'Sort By',lType:'Course Type',lFin:'Finish %',lView:'View',btnS:'Search',s0:'⭐ Best Rated',s1:'🆕 New',s2:'🔥 Trending',s4:'💀 Hardcore',s5:'🏆 Recent WR',s6:'⚡ Fastest WR',s7:'🐢 Slowest WR',s8:'🕰 Oldest WR',tM1:'All',t0:'Sandbox',t1:'Timed Race',t2:'Competitive Race',t3:'Elimination',f0:'All',f1:'Low (<30%)',f2:'Average (30–70%)',f3:'High (>70%)',author:'Author',desc:'Description',votes:'Votes',rating:'Avg. Rating',finPct:'Finish %',starts:'Starts',players:'Players',avgTime:'Avg. Finish Time',wr:'World Record',wrHolder:'WR Holder',date:'Publish Date',pi:(c,m)=>`Page ${c+1} of ${m}`,prev:'Prev',next:'Next',noD:'No description.',noL:'No courses found.',err:'Failed to fetch data.',pbSfx:"'s WR Courses",pbCnt:n=>`${n} WR courses`,pbLoad:n=>`Loading ${n}'s WR courses...`,pbNone:'No WR courses found.',pbBack:'✕ Back',closeModal:'✕ Close',playBtn:'▶ PLAY'}
 };
 
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -579,13 +584,14 @@ function mkCard(lv,idx){
   // エリミネーションは最後の一人まで戦うモードで、クリア率・クリア時間・WRがない。サンドボックスもクリア率なし
   const hasFin=lv.type!==0&&lv.type!==3&&lv.finishPercent!=null;
   const showWr=lv.type!==3&&!(lv.type===0&&!(lv.wr>0));
+  const wrView=!pMode&&showWr&&lv.wr>0&&!!WR_SORTS[document.getElementById('sort-type').value]; // WR順のときはWRの秒数と更新日を見せる
   const pd=fDate(lv.date,lang);
   const desc=esc(lv.description||t.noD);
   const playUrl=levelPlayUrl(lv);
   const card=document.createElement('div');
   card.className='level-grid-card';card.dataset.cardId=cid;card.dataset.type=lv.type;card.style.setProperty('--i',Math.min(idx,11));
   const faved=isFav(lv.levelId);
-  card.innerHTML=`<div class="card-display">${isNew?'<div class="new-badge">NEW</div>':''}<div class="card-thumb" style="background-image:url('${th}')"></div><div class="card-details" data-card-id="${cid}"><div class="modal-cw"><div class="modal-top"><div class="modal-tabs"><button data-tab="normal">${lang==='ja'?'通常':'Normal'}</button><button data-tab="dev">DEV</button></div><button class="modal-close-btn" aria-label="${t.closeModal}"><i class="fas fa-times"></i></button></div><div class="m-side"><div class="modal-thumb" style="background-image:url('${th}')"></div><button class="modal-fav-btn ${faved?'active':''}" data-fav-id="${lv.levelId}">${faved?(lang==='ja'?'♥ お気に入り済み':'♥ Favorited'):(lang==='ja'?'♡ お気に入りに追加':'♡ Add to Favorites')}</button><a class="modal-play-btn" href="${playUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${t.playBtn}</a></div><div class="m-main"><div class="modal-hdr"><div class="modal-info"><h2>${esc(lv.name)}</h2><p><i class="fas fa-user-circle"></i> ${esc(lv.author||'N/A')}</p><div class="modal-stats"><span><i class="fas fa-star"></i>${r.toFixed(2)}</span>${hasFin?`<span><i class="fas fa-chart-bar"></i>${fp}%</span>`:''}<span class="gt-icon"><img class="ty-ic" src="${lt2.icon}" alt="">${tn}</span></div></div></div><div class="modal-body"><div class="modal-left"><div class="desc-box"><strong><i class="fas fa-align-left"></i> ${t.desc}</strong><p>${desc}</p></div><div class="hl-box"><div class="hl-box-title">${lang==='ja'?'注目ポイント':'Highlights'}</div><div class="hl-content"></div></div></div><div class="modal-right"><div class="detail-grid">${mkDI('rating',r,false)}${showWr?mkDI('wr',fTime(lv.wr),true)+mkDI('wrHolder',esc(lv.wrHolder||'N/A'),false)+mkDI('avgTime',fTime(lv.averageFinishTime),false):''}${mkDI('starts',lv.starts,false)}${mkDI('votes',lv.votes,false)}${mkDI('players',lv.distinctPlayers,false)}${mkDI('date',pd,false)}${mkDiffGauge(lv)}</div></div></div></div><button class="modal-close-bar">${t.closeModal}</button></div></div></div><div class="card-overlay"><div class="ov-type"><img class="ty-ic" src="${lt2.icon}" alt="">${tn}</div><div class="ov-title" title="${esc(lv.name)}">${esc(lv.name)}</div><div class="ov-author">${esc(lv.author||'N/A')}</div><div class="ov-stats"><span class="ov-stat"><i class="fas fa-star"></i>${r.toFixed(2)}</span>${hasFin?`<span class="ov-stat fin"><i class="fas fa-chart-bar"></i>${fp}%</span>`:''}<span class="ov-date">${pd}</span></div></div><button class="card-fav-btn ${faved?'active':''}" data-fav-id="${lv.levelId}">${faved?'♥':'♡'}</button>`;
+  card.innerHTML=`<div class="card-display">${isNew?'<div class="new-badge">NEW</div>':''}<div class="card-thumb" style="background-image:url('${th}')"></div><div class="card-details" data-card-id="${cid}"><div class="modal-cw"><div class="modal-top"><div class="modal-tabs"><button data-tab="normal">${lang==='ja'?'通常':'Normal'}</button><button data-tab="dev">DEV</button></div><button class="modal-close-btn" aria-label="${t.closeModal}"><i class="fas fa-times"></i></button></div><div class="m-side"><div class="modal-thumb" style="background-image:url('${th}')"></div><button class="modal-fav-btn ${faved?'active':''}" data-fav-id="${lv.levelId}">${faved?(lang==='ja'?'♥ お気に入り済み':'♥ Favorited'):(lang==='ja'?'♡ お気に入りに追加':'♡ Add to Favorites')}</button><a class="modal-play-btn" href="${playUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${t.playBtn}</a></div><div class="m-main"><div class="modal-hdr"><div class="modal-info"><h2>${esc(lv.name)}</h2><p><i class="fas fa-user-circle"></i> ${esc(lv.author||'N/A')}</p><div class="modal-stats"><span><i class="fas fa-star"></i>${r.toFixed(2)}</span>${hasFin?`<span><i class="fas fa-chart-bar"></i>${fp}%</span>`:''}<span class="gt-icon"><img class="ty-ic" src="${lt2.icon}" alt="">${tn}</span></div></div></div><div class="modal-body"><div class="modal-left"><div class="desc-box"><strong><i class="fas fa-align-left"></i> ${t.desc}</strong><p>${desc}</p></div><div class="hl-box"><div class="hl-box-title">${lang==='ja'?'注目ポイント':'Highlights'}</div><div class="hl-content"></div></div></div><div class="modal-right"><div class="detail-grid">${mkDI('rating',r,false)}${showWr?mkDI('wr',fTime(lv.wr),true)+mkDI('wrHolder',esc(lv.wrHolder||'N/A'),false)+mkDI('avgTime',fTime(lv.averageFinishTime),false):''}${mkDI('starts',lv.starts,false)}${mkDI('votes',lv.votes,false)}${mkDI('players',lv.distinctPlayers,false)}${mkDI('date',pd,false)}${mkDiffGauge(lv)}</div></div></div></div><button class="modal-close-bar">${t.closeModal}</button></div></div></div><div class="card-overlay"><div class="ov-type"><img class="ty-ic" src="${lt2.icon}" alt="">${tn}</div><div class="ov-title" title="${esc(lv.name)}">${esc(lv.name)}</div><div class="ov-author">${esc(lv.author||'N/A')}</div><div class="ov-stats"><span class="ov-stat"><i class="fas fa-star"></i>${r.toFixed(2)}</span>${wrView?`<span class="ov-stat wr"><i class="fas fa-stopwatch"></i>${lv.wr.toFixed(2)}${lang==='ja'?'秒':'s'}</span>`:hasFin?`<span class="ov-stat fin"><i class="fas fa-chart-bar"></i>${fp}%</span>`:''}${wrView?`<span class="ov-date" title="WR">${'<i class="fas fa-trophy"></i>'}${fDate(lv.wrDate,lang)}</span>`:`<span class="ov-date">${pd}</span>`}</div></div><button class="card-fav-btn ${faved?'active':''}" data-fav-id="${lv.levelId}">${faved?'♥':'♡'}</button>`;
   const de=card.querySelector('.card-details');card._levelData=lv;de.dataset.type=lv.type;
   de.querySelector('.modal-close-btn').addEventListener('click',e=>{e.stopPropagation();closeModal()});
   de.querySelector('.modal-tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;e.stopPropagation();devMode=b.dataset.tab==='dev';try{localStorage.setItem('lb_dev',devMode?'1':'0')}catch{}applyDevTab(de,lv)});
@@ -668,7 +674,7 @@ async function fetchL(pi=0,pushUrl=true){
   closeModal();
   if(pushUrl)pushFilterUrl(pi);
   const f=getFilterValues();
-  if(f.s==='5'){await fetchWr(pi,f,gen);return}
+  if(WR_SORTS[f.s]){await fetchWr(pi,f,gen);return}
   try{
     const p=new URLSearchParams({i:pi,n:PER_PAGE,m:PER_PAGE,t:f.s,ft:f.ft,ff:f.ff});
     if(f.q)p.append('ts',f.q);
@@ -685,12 +691,34 @@ async function fetchL(pi=0,pushUrl=true){
   }catch(e){if(gen===fetchGen)ld.innerHTML=`${T[lang].err} (${e.message})`}
 }
 
+/* WR一覧の並び替え: [基準, 順序]  5=WR更新が新しい順 / 6=WRが早い順 / 7=WRが遅い順 / 8=WR更新が古い順
+   GASの更新前でも動くよう、並べ替えはここ (ブラウザ側) でも行う。WRの秒数がないものは常に末尾 */
+const WR_SORTS={'5':['wrDate','desc'],'6':['wrTime','asc'],'7':['wrTime','desc'],'8':['wrDate','asc']};
+function sortWrCourses(courses,mode){
+  const [key,order]=WR_SORTS[mode]||WR_SORTS['5'];
+  const dir=order==='asc'?1:-1;
+  const ms=c=>new Date(c.wrDate).getTime()||0;
+  const tm=c=>{const v=Number(c.wr);return Number.isFinite(v)&&v>0?v:null};
+  return [...courses].sort((a,b)=>{
+    if(key==='wrTime'){
+      const ta=tm(a),tb=tm(b);
+      if(ta===null&&tb===null)return ms(b)-ms(a);
+      if(ta===null)return 1;
+      if(tb===null)return -1;
+      if(ta!==tb)return (ta-tb)*dir;
+      return ms(b)-ms(a);
+    }
+    return (ms(a)-ms(b))*dir;
+  });
+}
 async function fetchWr(pi,f,gen){
   const t=T[lang];
   const c=document.getElementById('level-grid');
   const ld=document.getElementById('loading-message');
   try{
     const p=new URLSearchParams({action:'recentWr'});
+    const [wrKey,wrOrder]=WR_SORTS[f.s]||WR_SORTS['5'];
+    p.append('sort',wrKey);p.append('order',wrOrder);
     if(f.ft!=='-1')p.append('type',f.ft);
     const res=await fetch(GAS_URL+'?'+p);
     if(gen!==fetchGen)return; // 自分より新しいリクエストが走っていたら描画しない
@@ -698,7 +726,7 @@ async function fetchWr(pi,f,gen){
     const data=await res.json();
     if(gen!==fetchGen)return;
     if(data.error)throw new Error(data.error);
-    let courses=data.courses||[];
+    let courses=sortWrCourses(data.courses||[],f.s);
     if(f.q){
       const q=f.q.toLowerCase();
       courses=courses.filter(lv=>(lv.name||'').toLowerCase().includes(q)||(lv.author||'').toLowerCase().includes(q));
@@ -735,7 +763,7 @@ async function fetchPC(name){const t=T[lang];const c=document.getElementById('le
 
 function applyView(){const g=document.getElementById('level-grid');const gb=document.getElementById('btn-grid-view');const lb=document.getElementById('btn-list-view');if(listView){g.classList.add('list-view');lb.classList.add('active');gb.classList.remove('active')}else{g.classList.remove('list-view');gb.classList.add('active');lb.classList.remove('active')}}
 
-function applyLang(l){lang=l;localStorage.setItem('language',l);document.documentElement.lang=l;document.body.classList.toggle('jp',l==='ja');const t=T[l];document.getElementById('page-title').textContent=t.title;document.getElementById('hero-title').innerHTML=t.h1.replace('\n','<br>');document.getElementById('hero-subtitle').textContent=t.sub;document.getElementById('label-search-text').textContent=t.lSearch;document.getElementById('label-sort-type').textContent=t.lSort;document.getElementById('label-filter-type').textContent=t.lType;document.getElementById('label-filter-finish').textContent=t.lFin;document.getElementById('label-view-mode').textContent=t.lView;document.getElementById('search-button').innerHTML=`<i class="fas fa-search"></i> ${t.btnS}`;const so=document.getElementById('sort-type').options;[[0,'s0'],[1,'s1'],[2,'s2'],[3,'s4'],[4,'s5']].forEach(([i,k])=>{if(so[i])so[i].textContent=t[k]});const to=document.getElementById('filter-type').options;[[0,'tM1'],[1,'t0'],[2,'t1'],[3,'t2'],[4,'t3']].forEach(([i,k])=>{if(to[i])to[i].textContent=t[k]});const fo=document.getElementById('filter-finish').options;[[0,'f0'],[1,'f1'],[2,'f2'],[3,'f3']].forEach(([i,k])=>{if(fo[i])fo[i].textContent=t[k]});if(pMode){document.getElementById('playerBannerName').textContent=pName+t.pbSfx;document.getElementById('playerBannerClose').textContent=t.pbBack}else{fetchL(page)}}
+function applyLang(l){lang=l;localStorage.setItem('language',l);document.documentElement.lang=l;document.body.classList.toggle('jp',l==='ja');const t=T[l];document.getElementById('page-title').textContent=t.title;document.getElementById('hero-title').innerHTML=t.h1.replace('\n','<br>');document.getElementById('hero-subtitle').textContent=t.sub;document.getElementById('label-search-text').textContent=t.lSearch;document.getElementById('label-sort-type').textContent=t.lSort;document.getElementById('label-filter-type').textContent=t.lType;document.getElementById('label-filter-finish').textContent=t.lFin;document.getElementById('label-view-mode').textContent=t.lView;document.getElementById('search-button').innerHTML=`<i class="fas fa-search"></i> ${t.btnS}`;const so=document.getElementById('sort-type').options;[[0,'s0'],[1,'s1'],[2,'s2'],[3,'s4'],[4,'s5'],[5,'s6'],[6,'s7'],[7,'s8']].forEach(([i,k])=>{if(so[i])so[i].textContent=t[k]});const to=document.getElementById('filter-type').options;[[0,'tM1'],[1,'t0'],[2,'t1'],[3,'t2'],[4,'t3']].forEach(([i,k])=>{if(to[i])to[i].textContent=t[k]});const fo=document.getElementById('filter-finish').options;[[0,'f0'],[1,'f1'],[2,'f2'],[3,'f3']].forEach(([i,k])=>{if(fo[i])fo[i].textContent=t[k]});if(pMode){document.getElementById('playerBannerName').textContent=pName+t.pbSfx;document.getElementById('playerBannerClose').textContent=t.pbBack}else{fetchL(page)}}
 
 window.TM_LANG_HOOK=l=>applyLang(l);
 

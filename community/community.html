@@ -677,6 +677,7 @@ async function fetchL(pi=0,pushUrl=true){
   closeModal();
   if(pushUrl)pushFilterUrl(pi);
   const f=getFilterValues();
+  if(favMode){await fetchFav(pi,f,gen);return}
   if(WR_SORTS[f.s]){await fetchWr(pi,f,gen);return}
   try{
     const p=new URLSearchParams({i:pi,n:PER_PAGE,m:PER_PAGE,t:f.s,ft:f.ft,ff:f.ff});
@@ -713,6 +714,55 @@ function sortWrCourses(courses,mode){
     }
     return (ms(a)-ms(b))*dir;
   });
+}
+/* お気に入り: 保存してあるIDをGASに送り、そのコースの一覧を返してもらう
+   (IDの保存先はこれまで通りブラウザ。GASはIDからコース情報を引くだけ) */
+function sortFavCourses(courses,mode){
+  if(WR_SORTS[mode])return sortWrCourses(courses,mode);
+  const ms=c=>new Date(c.date).getTime()||0;
+  const a=[...courses];
+  if(mode==='0')return a.sort((x,y)=>(y.rating||0)-(x.rating||0)||(y.votes||0)-(x.votes||0));
+  if(mode==='2')return a.sort((x,y)=>(y.starts||0)-(x.starts||0));
+  if(mode==='4')return a.sort((x,y)=>(x.finishPercent??9)-(y.finishPercent??9));
+  return a.sort((x,y)=>ms(y)-ms(x));
+}
+async function fetchFav(pi,f,gen){
+  const t=T[lang];
+  const c=document.getElementById('level-grid');
+  const ld=document.getElementById('loading-message');
+  const ids=[...getFavs()];
+  if(!ids.length){ld.innerHTML=lang==='ja'?'お気に入りがまだありません。':'No favorites yet.';return}
+  try{
+    const p=new URLSearchParams({action:'favorites',ids:ids.join(',')});
+    const res=await fetch(GAS_URL+'?'+p);
+    if(gen!==fetchGen)return;
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(gen!==fetchGen)return;
+    if(data.error)throw new Error(data.error);
+    let courses=data.courses||[];
+    if(f.ft!=='-1')courses=courses.filter(lv=>String(lv.type)===String(f.ft));
+    if(f.q){
+      const q=f.q.toLowerCase();
+      courses=courses.filter(lv=>(lv.name||'').toLowerCase().includes(q)||(lv.author||'').toLowerCase().includes(q));
+    }
+    if(f.ff&&f.ff!=='0'){
+      courses=courses.filter(lv=>{
+        const fp=lv.finishPercent??0;
+        if(f.ff==='1')return fp<0.30;
+        if(f.ff==='2')return fp>=0.30&&fp<=0.70;
+        if(f.ff==='3')return fp>0.70;
+        return true;
+      });
+    }
+    courses=sortFavCourses(courses,f.s);
+    page=pi;maxP=Math.max(1,Math.ceil(courses.length/PER_PAGE));
+    const pageItems=courses.slice(pi*PER_PAGE,(pi+1)*PER_PAGE);
+    if(pageItems.length){
+      pageItems.forEach((lv,i)=>c.appendChild(mkCard(lv,i)));
+      mkPager();applyView();ld.style.display='none';
+    }else{ld.innerHTML=lang==='ja'?'お気に入りのコースが見つかりません。':'No favorite courses found.'}
+  }catch(e){if(gen===fetchGen)ld.innerHTML=`${T[lang].err} (${e.message})`}
 }
 async function fetchWr(pi,f,gen){
   const t=T[lang];
@@ -792,23 +842,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const btn=document.getElementById('favFilterBtn');
     btn.classList.toggle('active',favMode);
     btn.textContent=favMode?(lang==='ja'?'♥ お気に入り':'♥ Favorites'):(lang==='ja'?'♡ お気に入り':'♡ Favorites');
-    if(favMode){
-      // お気に入りモード: 現在表示中のカードをフィルタリング
-      const favs=getFavs();
-      document.querySelectorAll('.level-grid-card').forEach(c=>{
-        const fid=c.querySelector('.card-fav-btn')?.dataset.favId;
-        c.style.display=(fid&&favs.has(Number(fid)))?'':'none';
-      });
-      const visible=document.querySelectorAll('.level-grid-card[style=""],.level-grid-card:not([style])');
-      if(!visible.length){
-        const ld=document.getElementById('loading-message');
-        ld.innerHTML=lang==='ja'?'お気に入りがまだありません。':'No favorites yet.';
-        ld.style.display='block';
-      }
-    }else{
-      document.querySelectorAll('.level-grid-card').forEach(c=>c.style.display='');
-      document.getElementById('loading-message').style.display='none';
-    }
+    fetchL(0,false);
   });
   applyView();
 

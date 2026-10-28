@@ -2000,6 +2000,7 @@
     }
 
     // ---------- 一人称視点 ----------
+    const FPV_FOV = 100;   // 一人称視点のときのFOV
     let _fpvWasOn = false, _fpvNearSet = false;
     function modsApplyFPV(p, camera) {
         const T = modsT, dir = p.input.direction;
@@ -2010,7 +2011,7 @@
         const look = camera.position.clone().add(new T.Vector3(0, 0, 1).applyEuler(dir));
         camera.up.set(0, 1, 0);
         camera.lookAt(look);
-        if (camera.near !== 0.03) { camera.near = 0.03; camera.updateProjectionMatrix(); }
+        if (camera.near !== 0.03 || camera.fov !== FPV_FOV) { camera.near = 0.03; camera.fov = FPV_FOV; camera.updateProjectionMatrix(); }
         _fpvNearSet = true;
     }
 
@@ -2312,7 +2313,7 @@
                         const lp = modsLocalPlayer(scene, camera);
                         if (lp) MW.__lolexPlayer = lp;
                         if (M.fpv && lp) { modsApplyFPV(lp, camera); _fpvWasOn = true; }
-                        else if (_fpvWasOn) { _fpvWasOn = false; if (_fpvNearSet) { camera.near = 0.1; camera.updateProjectionMatrix(); _fpvNearSet = false; } }
+                        else if (_fpvWasOn) { _fpvWasOn = false; if (_fpvNearSet) { camera.near = 0.1; let g = 75; try { g = parseFloat(localStorage.getItem('FOV')) || 75; } catch (_) {} camera.fov = g; camera.updateProjectionMatrix(); _fpvNearSet = false; } }
                         modsApplyFOV(camera);
                         modsApplyBones(scene, lp);
                     }

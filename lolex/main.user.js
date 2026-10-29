@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LOL.ex ver0.90
+// @name         LOL.ex ver0.91
 // @namespace    http://tampermonkey.net/
-// @version      0.90
+// @version      0.91
 // @description  LOLBeans extension
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
@@ -11,6 +11,7 @@
 // @grant        unsafeWindow
 // @grant        GM_xmlhttpRequest
 // @connect      s.lolbeans.io
+// @connect      translate.googleapis.com
 // @run-at       document-start
 // @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
 // @downloadURL  https://tanabesan.github.io/lolbeans/lolex//main.user.js
@@ -19,7 +20,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '0.90';
+    const SCRIPT_VERSION = '0.91';
 
     const STORAGE = {
         VIDEO:          'yt-videoId',
@@ -44,6 +45,8 @@
         KEYDISPLAY_ENABLED: 'lolex-keydisplay-enabled',
         KEYDISPLAY_KEYS:    'lolex-keydisplay-keys',
         KEYDISPLAY_POS:     'lolex-keydisplay-pos',
+        // ★ チャット自動翻訳
+        CHAT_TR:            'lolex-chat-translate',
     };
 
     const DEFAULT = {
@@ -243,6 +246,9 @@
             catInfo:             '情報・言語',
             catGame:             'ゲーム補助',
             catLook:             '見た目・表示',
+            chatTrTitle:         'チャット自動翻訳',
+            chatTrEnable:        'チャットを自動翻訳する',
+            chatTrNote:          '選択中の言語(日本語 / English)以外の発言を、その言語に翻訳して発言の下に表示します。すでにその言語の発言は翻訳しません。翻訳にはGoogle翻訳を利用します。',
             catMusic:            '音楽',
             catView:             '視点・演出',
             catRec:              '録画',
@@ -370,6 +376,9 @@
             catInfo:             'Info',
             catGame:             'Game Helpers',
             catLook:             'Appearance',
+            chatTrTitle:         'Chat Auto-Translate',
+            chatTrEnable:        'Auto-translate chat messages',
+            chatTrNote:          'Messages written in a language other than the one selected above (English / 日本語) are translated into it and shown under the message. Messages already in that language are left alone. Uses Google Translate.',
             catMusic:            'Music',
             catView:             'View & Effects',
             catRec:              'Recording',
@@ -1551,8 +1560,15 @@
         btFs.appendChild(btNote);
         container.appendChild(btFs);
 
+        // ── チャット自動翻訳 ──
+        const chatFs = document.createElement('fieldset');
+        const chatLegend = document.createElement('legend'); chatLegend.innerHTML = `<i class="fas fa-language"></i> ${t('chatTrTitle')}`; chatFs.appendChild(chatLegend);
+        chatFs.appendChild(makeToggleRow('chatTrToggle', `<i class="fas fa-comments"></i>${t('chatTrEnable')}`, getStoredBool(STORAGE.CHAT_TR, true)));
+        const chatNote = document.createElement('div'); chatNote.className = 'lolex-note'; chatNote.textContent = t('chatTrNote'); chatFs.appendChild(chatNote);
+        container.appendChild(chatFs);
+
         const modsList = modsBuildSettings(container);
-        const fsList = [[updateFs,'update'],[langFs,'lang'],[gameFs,'airmove'],[courseFs,'course'],[visualFs,'visual'],[kdFs,'keydisplay'],[ytFs,'yt'],[btFs,'besttimes'],...modsList,...lolexBuildHelp(container)];
+        const fsList = [[updateFs,'update'],[langFs,'lang'],[gameFs,'airmove'],[courseFs,'course'],[visualFs,'visual'],[kdFs,'keydisplay'],[ytFs,'yt'],[btFs,'besttimes'],[chatFs,'chattr'],...modsList,...lolexBuildHelp(container)];
         fsList.forEach(([fs, key]) => makeCollapsibleFieldset(fs, key));
         lolexApplySettingsCategories(container, fsList);
 
@@ -1562,7 +1578,8 @@
     }
 
     function bindSettingsEvents() {
-        $('language-switcher')?.addEventListener('change', (e) => { localStorage.setItem(STORAGE.LANGUAGE, e.target.value); invalidateLangCache(); createSettings(); updateProfileUILang(); });
+        $('language-switcher')?.addEventListener('change', (e) => { localStorage.setItem(STORAGE.LANGUAGE, e.target.value); invalidateLangCache(); createSettings(); updateProfileUILang(); chatTrReset(); });
+        $('chatTrToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.CHAT_TR, e.target.checked); chatTrApply(); });
         $('airMoveAutoSwitchToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.AIR_MOVE_AUTO, e.target.checked); });
         COURSES.forEach(({ id }) => {
             const cb = document.getElementById(`courseAirMoveToggle_${id}`);
@@ -2523,7 +2540,7 @@
     // ---------- 設定画面をカテゴリ(タブ)で分ける ----------
     const LOLEX_CATS = [
         { id: 'info',  icon: 'fa-info-circle', label: 'catInfo',  keys: ['update', 'lang'] },
-        { id: 'game',  icon: 'fa-flag-checkered', label: 'catGame', keys: ['airmove', 'course', 'besttimes'] },
+        { id: 'game',  icon: 'fa-flag-checkered', label: 'catGame', keys: ['airmove', 'course', 'besttimes', 'chattr'] },
         { id: 'look',  icon: 'fa-paint-brush', label: 'catLook',  keys: ['visual', 'keydisplay'] },
         { id: 'music', icon: 'fa-music',       label: 'catMusic', keys: ['yt'] },
         { id: 'view',  icon: 'fa-eye',         label: 'catView',  keys: ['modsview', 'modsfx'] },
@@ -2545,7 +2562,7 @@
         (document.head || document.documentElement).appendChild(l);
     }
     const LOLEX_MS_ICONS = {
-        update: 'info', lang: 'language', airmove: 'swap_horiz', course: 'flag', besttimes: 'timer',
+        update: 'info', lang: 'language', airmove: 'swap_horiz', course: 'flag', besttimes: 'timer', chattr: 'translate',
         visual: 'palette', keydisplay: 'keyboard', yt: 'music_note',
         modsview: 'visibility', modsfx: 'auto_fix_high', modsreplay: 'videocam',
         help_basic: 'menu_book', help_quick: 'bolt', help_game: 'flag', help_look: 'palette', help_music: 'music_note', help_view: 'visibility', help_rec: 'videocam'
@@ -2705,6 +2722,138 @@
         if (sv && !sv.dataset.lxBound) { sv.dataset.lxBound = '1'; sv.addEventListener('click', rpAction); }
     }
 
+    // ================================================================================================
+    //  ★ チャット自動翻訳
+    //     選択中の言語(getLang)を翻訳先にして、それ以外の言語の発言を発言の下に表示します。
+    //     言語の判定はGoogle翻訳の自動判定なので、日本語・韓国語・中国語に限らず全言語が対象です。
+    //     ※ゲームは #feed / #feed-history の中身を innerHTML で丸ごと作り直すため、
+    //       DOMの変化を監視して、作り直されるたびに翻訳を付け直しています。
+    // ================================================================================================
+    const CT = { cache: new Map(), pending: new Set(), queue: [], running: 0, targets: [], obs: null, timer: null, booted: false };
+    const CT_MAX_CONCURRENT = 2, CT_CACHE_LIMIT = 500;
+    const chatTrOn = () => getStoredBool(STORAGE.CHAT_TR, true);
+    const chatTrTarget = () => (getLang() === 'en' ? 'en' : 'ja');
+
+    function chatTrHttpGet(url) {
+        return new Promise((resolve, reject) => {
+            if (typeof GM_xmlhttpRequest === 'function') {
+                GM_xmlhttpRequest({
+                    method: 'GET', url, timeout: 8000,
+                    onload: (r) => (r.status >= 200 && r.status < 300 ? resolve(r.responseText) : reject(new Error('HTTP ' + r.status))),
+                    onerror: () => reject(new Error('network')),
+                    ontimeout: () => reject(new Error('timeout')),
+                });
+            } else {
+                fetch(url).then(r => (r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)))).then(resolve, reject);
+            }
+        });
+    }
+
+    // 翻訳先 tl に翻訳。発言がすでに tl の言語、または翻訳結果が原文と同じなら null(=表示しない)
+    async function chatTrTranslate(text, tl) {
+        const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' +
+            encodeURIComponent(tl) + '&dt=t&q=' + encodeURIComponent(text);
+        const data = JSON.parse(await chatTrHttpGet(url));
+        const detected = String(data[2] || '').toLowerCase();
+        const out = (data[0] || []).map(s => (s && s[0]) || '').join('');
+        if (detected === tl) return null;
+        if (!out || out.trim().toLowerCase() === text.trim().toLowerCase()) return null;
+        return out;
+    }
+
+    function chatTrSetCache(key, val) {
+        CT.cache.set(key, val);
+        if (CT.cache.size > CT_CACHE_LIMIT) CT.cache.delete(CT.cache.keys().next().value);
+    }
+
+    function chatTrPump() {
+        while (CT.running < CT_MAX_CONCURRENT && CT.queue.length) {
+            const job = CT.queue.shift();
+            CT.running++;
+            chatTrTranslate(job.text, job.tl)
+                .then(out => chatTrSetCache(job.key, out))
+                .catch(() => chatTrSetCache(job.key, null))   // 失敗した発言は何も表示しない
+                .finally(() => { CT.pending.delete(job.key); CT.running--; chatTrScheduleScan(); chatTrPump(); });
+        }
+    }
+
+    function chatTrEnqueue(text, tl, key) {
+        if (CT.pending.has(key)) return;
+        CT.pending.add(key);
+        CT.queue.push({ text, tl, key });
+        chatTrPump();
+    }
+
+    function chatTrEnsureStyle() {
+        if (document.getElementById('lolex-chat-tr-style')) return;
+        const st = document.createElement('style'); st.id = 'lolex-chat-tr-style';
+        st.textContent = '.lolex-chat-tr{display:block;font-size:.85em;opacity:.9;color:#8fd3ff;padding-left:1vh;word-break:break-word;}';
+        (document.head || document.documentElement).appendChild(st);
+    }
+
+    function chatTrExtract(msg) {
+        const name = msg.querySelector('.namelabel');
+        if (!name) return '';
+        const clone = msg.cloneNode(true);
+        clone.querySelectorAll('.lolex-chat-tr').forEach(n => n.remove());
+        return (clone.textContent || '').slice((name.textContent || '').length).replace(/^\s*:\s*/, '').trim();
+    }
+
+    function chatTrAnnotate(root, tl) {
+        root.querySelectorAll('.chatmsg').forEach(msg => {
+            if (msg.querySelector('.lolex-chat-tr')) return;
+            const text = chatTrExtract(msg);
+            if (text.length < 2 || !/\p{L}/u.test(text)) return;
+            const key = tl + '\u0000' + text;
+            if (!CT.cache.has(key)) { chatTrEnqueue(text, tl, key); return; }
+            const out = CT.cache.get(key);
+            if (!out) return;
+            const span = document.createElement('span');
+            span.className = 'lolex-chat-tr';
+            span.textContent = '↳ ' + out;
+            msg.appendChild(span);
+        });
+    }
+
+    function chatTrObserve() { CT.targets.forEach(tg => CT.obs.observe(tg, { childList: true, subtree: true })); }
+    function chatTrScheduleScan() { if (CT.timer) return; CT.timer = setTimeout(() => { CT.timer = null; chatTrScan(); }, 30); }
+
+    function chatTrScan() {
+        if (!CT.booted || !chatTrOn()) return;
+        CT.obs.disconnect();   // 自分の変更で再発火しないようにする
+        try {
+            const tl = chatTrTarget();
+            CT.targets.forEach(tg => chatTrAnnotate(tg, tl));
+            const h = document.getElementById('feed-history');
+            if (h && h.dataset.lolexTrStick === '1') h.scrollTop = h.scrollHeight;
+        } finally { chatTrObserve(); }
+    }
+
+    function chatTrRemoveAll() { document.querySelectorAll('.lolex-chat-tr').forEach(n => n.remove()); }
+    function chatTrApply() { if (chatTrOn()) chatTrScan(); else chatTrRemoveAll(); }
+    function chatTrReset() { chatTrRemoveAll(); chatTrScan(); }   // 言語を切り替えたとき
+
+    function chatTrBoot() {
+        const tryBoot = () => {
+            const feed = document.getElementById('feed'), hist = document.getElementById('feed-history');
+            if (!feed && !hist) return false;
+            chatTrEnsureStyle();
+            [feed, hist].filter(Boolean).forEach(tg => CT.targets.push(tg));
+            if (hist) hist.addEventListener('scroll', () => {
+                hist.dataset.lolexTrStick = hist.scrollTop + hist.clientHeight >= hist.scrollHeight - 8 ? '1' : '0';
+            });
+            CT.obs = new MutationObserver(() => chatTrScheduleScan());
+            CT.booted = true;
+            chatTrObserve();
+            chatTrScan();
+            return true;
+        };
+        if (tryBoot()) return;
+        const iv = setInterval(() => { if (tryBoot()) clearInterval(iv); }, 500);
+        setTimeout(() => clearInterval(iv), 300000);
+    }
+
+    chatTrBoot();
     initializeScript();
 
 })();

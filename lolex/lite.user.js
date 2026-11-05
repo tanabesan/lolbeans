@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         LOL.ex Lite ver0.85
+// @name         LOL.ex Lite ver0.91
 // @namespace    http://tampermonkey.net/
-// @version      0.85
-// @description  LOLBeans extension (Lite) - No next round preview / no per-course Air Move auto switch
+// @version      0.91
+// @description  LOLBeans extension (Lite) - Youtube player, background designer, key display, best times, instant replay, chat translate
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
 // @match        https://bean.lol/*
@@ -11,6 +11,7 @@
 // @grant        unsafeWindow
 // @grant        GM_xmlhttpRequest
 // @connect      s.lolbeans.io
+// @connect      translate.googleapis.com
 // @run-at       document-start
 // @updateURL    https://tanabesan.github.io/lolbeans/lolex/lite.user.js
 // @downloadURL  https://tanabesan.github.io/lolbeans/lolex/lite.user.js
@@ -19,7 +20,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '0.85';
+    const SCRIPT_VERSION = '0.91';
 
     const STORAGE = {
         VIDEO:          'yt-videoId',
@@ -30,6 +31,7 @@
         IS_VISIBLE:     'yt-is-visible',
         LOOP:           'yt-loop',
         SHUFFLE:        'yt-shuffle',
+        AIR_MOVE_AUTO:  'airMoveAutoSwitchEnabled',
         LANGUAGE:       'lolex-language',
         PRIMARY_COLOR:  'lolex-primary-color',
         SECONDARY_COLOR:'lolex-secondary-color',
@@ -38,10 +40,13 @@
         BAR_VISIBLE:    'yt-card-visible',
         YT_HOTKEY:      'lolex-yt-hotkey',
         FLOAT_BTN:      'lolex-yt-float-btn',
+        YT_ENABLED:     'lolex-yt-enabled',
         // ★ キー表示機能
         KEYDISPLAY_ENABLED: 'lolex-keydisplay-enabled',
         KEYDISPLAY_KEYS:    'lolex-keydisplay-keys',
         KEYDISPLAY_POS:     'lolex-keydisplay-pos',
+        // ★ チャット自動翻訳
+        CHAT_TR:            'lolex-chat-translate',
     };
 
     const DEFAULT = {
@@ -83,6 +88,39 @@
     let _cachedLang      = null;
 
     // ------------------------------------------------------------------------------------------------
+    //  コースデータ
+    // ------------------------------------------------------------------------------------------------
+    const COURSES = [
+        { id: 'beacon-bay',    keyword: 'BeaconBay',          message: '🚨 Beacon Bay 🚨',         displayName: 'Beacon Bay' },
+        { id: 'boulder-hill',  keyword: 'BoulderHill',        message: '🐛 Boulder Hill 🐛',       displayName: 'Boulder Hill' },
+        { id: 'circus-contest',keyword: 'CircusContest',      message: '🎪 Circus Contest 🎪',     displayName: 'Circus Contest' },
+        { id: 'devils-trick',  keyword: 'DevilsTrick',        message: "👿 Devil's Trick 👿",      displayName: "Devils Trick" },
+        { id: 'dash-cup',      keyword: 'FastRace',           message: '🏆 Dash Cup 🏆',           displayName: 'Dash Cup' },
+        { id: 'escape-tsunami',keyword: 'EscapeTsunami',      message: '🌊 Escape Tsunami 🌊',     displayName: 'Escape Tsunami' },
+        { id: 'gravity-gates', keyword: 'GravityGates',       message: '🌌 Gravity Gates 🌌',      displayName: 'Gravity Gates' },
+        { id: 'hammer-ville',  keyword: 'HammerVille',        message: '🍩 Hammer Ville 🍩',       displayName: 'Hammer Ville' },
+        { id: 'jungle-temple', keyword: 'JungleTemple',       message: '🐍 Jungle Temple 🐍',      displayName: 'Jungle Temple' },
+        { id: 'kittie-kegs',   keyword: 'KittieKegs',         message: '🐱 Kittie Kegs 🙀',        displayName: 'Kittie Kegs' },
+        { id: 'lava-lake',     keyword: 'FloorIsLava',        message: '🌋 Lava Lake 🌋',          displayName: 'Lava Lake' },
+        { id: 'mecha-maze',    keyword: 'MechaMaze',          message: '🤖 Mecha Maze 🤖',         displayName: 'Mecha Maze' },
+        { id: 'mill-valley',   keyword: 'MillValley',         message: '🌾 Mill Valley 🍃',        displayName: 'Mill Valley' },
+        { id: 'monster-manor', keyword: 'MonsterManor',       message: '🎃 Monster Manor 💀',      displayName: 'Monster Manor' },
+        { id: 'neon-city',     keyword: 'NeonCity',           message: '🏢 Neon City 👾',          displayName: 'Neon City' },
+        { id: 'polar-path',    keyword: 'PolarPath',          message: '🧊 Polar Path 🧊',         displayName: 'Polar Path' },
+        { id: '123-red-light', keyword: 'RedLightGreenLight', message: '🦑 1-2-3 Red Light 🦑',    displayName: '1-2-3 Red Light' },
+        { id: 'nasty-seals',   keyword: 'NastySeals',         message: '🦑 Nasty Seals 🦑',        displayName: 'Nasty Seals' },
+        { id: 'rickety-run',   keyword: 'RicketyRun',         message: '🟦 Rickety Run 🟪',        displayName: 'Rickety Run' },
+        { id: 'risky-cliffs',  keyword: 'RiskyCliffs',        message: '🎅 Risky Cliffs 🎅',       displayName: 'Risky Cliffs' },
+        { id: 'shark-park',    keyword: 'SharkPark',          message: '🦈 Shark Park 🦈',         displayName: 'Shark Park' },
+        { id: 'silly-slide',   keyword: 'SillySlide',         message: '🛝 Silly Slide 🛝',        displayName: 'Silly Slide' },
+        { id: 'spiky-slopes',  keyword: 'SpikySlopes',        message: '🔨 Spiky Slopes 🔨',       displayName: 'Spiky Slopes' },
+        { id: 'splash-dash',   keyword: 'SplashDash',         message: '🏊 Splash Dash 🏊',        displayName: 'Splash Dash' },
+        { id: 'tumble-town',   keyword: 'TumbleTown',         message: '✋ Tumble Town ✋',        displayName: 'Tumble Town' },
+        { id: 'tricky-traps',  keyword: 'TrickyTraps',        message: '🎁 Tricky Traps 🎁',       displayName: 'Tricky Traps' },
+        { id: 'ufo-attack',    keyword: 'UFOAttack',          message: '🛸 UFO Attack 🛸',         displayName: 'UFO Attack' },
+    ];
+
+    // ------------------------------------------------------------------------------------------------
     //  言語辞書
     // ------------------------------------------------------------------------------------------------
     const LANG_DATA = {
@@ -90,8 +128,14 @@
             tabTitle:            `LOL.ex v${SCRIPT_VERSION}`,
             discordInvite:       'Discordサーバーに参加する',
             latestUpdates:       '最新アップデート情報',
-            updateInfo:          '・キー/マウス入力表示を実際のキーボード配列風レイアウトに対応しました。<br>・ベストタイム計算機能を追加しました。<br>・サムネイル付きタイム一覧のPNG保存機能を追加しました。<br>・全体的な安定性を向上させました。',
+            updateInfo:          '・LOL.ex Lite: 軽量版です。YouTube BGM・背景・キー表示・ベストタイム・リプレイ・チャット翻訳のみ搭載。',
             language:            '言語',
+            airMoveAutoSwitch:   'Air Move 自動切り替え全体制御',
+            enableAutoSwitch:    'Air Move 自動切り替え機能を有効化',
+            autoSwitchOff:       '[OFFの場合]: コースが変わってもAir Moveの状態は変わりません (手動設定を維持)。',
+            autoSwitchOn:        '[ONの場合]: コースが変わるたびに「コース別設定」に基づいてAir Moveが自動で切り替わります。',
+            courseSettings:      'コース別 Air Move ON/OFF設定',
+            courseSettingLabel:  'の Air Move設定:',
             on:                  'ON',
             off:                 'OFF',
             visualCustomization: '視覚カスタマイズ',
@@ -120,6 +164,7 @@
             ytLoadButton:        'Load',
             ytInvalidUrl:        '無効なYouTube URLまたはIDです。',
             ytHotkeyLabel:       '音楽プレイヤー表示キー',
+            ytEnable:            'YouTube BGMプレイヤーを使う',
             ytHotkeyHint:        'キーを押して設定...',
             ytHotkeyNone:        '未設定',
             ytFloatBtn:          'フロートボタン',
@@ -129,6 +174,7 @@
             ytNowPlaying:        '再生中',
             ytNoTrack:           '--- 未読込 ---',
             ytVolume:            '音量',
+            nextRound:           'Next Round...',
             bestTimes:           'ベストタイム計算',
             bestTimesCalc:       'タイムを計算',
             bestTimesSave:       '保存',
@@ -152,13 +198,74 @@
             posBottomRight:      '右下',
             posTopLeft:          '左上',
             posTopRight:         '右上',
+            // ★ ゲーム演出 (v0.86)
+            modsViewTitle:       '視点',
+            modsFpv:             '一人称視点',
+            modsFpvEye:          '目の高さ',
+            modsFpvFwd:          '目の前後位置',
+            modsFpvHideHead:     '自分の頭を隠す',
+            modsFovOn:           'FOV制限を解除して指定値を使う',
+            modsViewNote:        '見た目だけの機能で、自分の画面にしか反映されません。Alt+V でも切り替えできます。',
+            modsFxTitle:         '画面演出・キャラ',
+            modsFlipX:           '画面を左右反転',
+            modsFlipY:           '画面を上下反転',
+            modsRot:             '画面の回転',
+            modsSpin:            'ぐるぐる回転 (度/秒)',
+            modsFilter:          '色フィルター',
+            modsFNone:           'なし',
+            modsFGray:           '白黒',
+            modsFSepia:          'セピア',
+            modsFNeon:           'ネオン',
+            modsFInvert:         '反転色',
+            modsFCold:           '寒色',
+            modsFPsyche:         'サイケ',
+            modsFDrunk:          '酔っぱらい',
+            modsPixel:           'ドット絵 (描画解像度)',
+            modsTarget:          'キャラ拡大の対象',
+            modsTargetMe:        '自分だけ',
+            modsTargetAll:       '全員',
+            modsHead:            '頭の大きさ',
+            modsHand:            '手の大きさ',
+            modsFoot:            '足の大きさ',
+            modsFxReset:         '演出をリセット',
+            modsFxNote:          '画面の反転・回転・色フィルターは録画には入りません(ドット絵は入ります)。',
+            modsReplayTitle:     'インスタントリプレイ',
+            modsReplayEnable:    '常に直近の映像を録画しておく',
+            modsReplayMin:       '最低保持秒数',
+            modsReplayBitrate:   '画質 (ビットレート)',
+            modsReplayUI:        'ゲームのUIも映像に合成する',
+            modsReplayStatus:    '状態',
+            modsReplaySave:      '今すぐ保存',
+            modsReplayStart:     '録画を開始',
+            modsReplayStopSave:  '録画を停止して保存',
+            modsReplayRecStarted:'リプレイ: 録画を開始しました',
+            modsReplayNote:      'Alt+S で「さっきの映像」をWebMで保存します。保存される長さは 最低保持秒数〜その2倍 です。常に保存がオフのときは、Alt+S / ボタンで録画の開始・停止保存ができます。音は入りません。',
+            modsReplayNotRec:    'リプレイ: 録画していません',
+            modsReplaySaved:     'リプレイ保存',
+            // ★ 設定カテゴリ (v0.87)
+            catInfo:             '情報・言語',
+            catGame:             'ゲーム補助',
+            catLook:             '見た目・表示',
+            chatTrTitle:         'チャット自動翻訳',
+            chatTrEnable:        'チャットを自動翻訳する',
+            chatTrNote:          '選択中の言語(日本語 / English)以外の発言を、その言語に翻訳して発言の下に表示します。すでにその言語の発言は翻訳しません。翻訳にはGoogle翻訳を利用します。',
+            catMusic:            '音楽',
+            catView:             '視点・演出',
+            catRec:              '録画',
+            catHelp:             '使い方',
         },
         en: {
             tabTitle:            `LOL.ex v${SCRIPT_VERSION}`,
             discordInvite:       'Join Discord Server',
             latestUpdates:       'Latest Updates',
-            updateInfo:          '・Key/mouse input display now uses a real keyboard-layout arrangement.<br>・Added best time calculator feature.<br>・Added PNG save for time list with thumbnails.<br>・Improved overall stability.',
+            updateInfo:          '・LOL.ex Lite: the lightweight edition with YouTube BGM, backgrounds, key display, best times, replay and chat translate only.',
             language:            'Language',
+            airMoveAutoSwitch:   'Air Move Auto Switch Control',
+            enableAutoSwitch:    'Enable Air Move Auto Switch',
+            autoSwitchOff:       '[OFF]: Air Move state remains unchanged when the course changes.',
+            autoSwitchOn:        '[ON]: Air Move automatically switches based on "Course Settings" when the course changes.',
+            courseSettings:      'Course Specific Air Move ON/OFF Settings',
+            courseSettingLabel:  'Air Move Setting:',
             on:                  'ON',
             off:                 'OFF',
             visualCustomization: 'Visual Customization',
@@ -187,6 +294,7 @@
             ytLoadButton:        'Load',
             ytInvalidUrl:        'Invalid YouTube URL or ID.',
             ytHotkeyLabel:       'Music Player Toggle Key',
+            ytEnable:            'Enable YouTube BGM player',
             ytHotkeyHint:        'Press a key to set...',
             ytHotkeyNone:        'Not set',
             ytFloatBtn:          'Float Button',
@@ -196,6 +304,7 @@
             ytNowPlaying:        'Now Playing',
             ytNoTrack:           '--- No Track ---',
             ytVolume:            'Volume',
+            nextRound:           'Next Round...',
             bestTimes:           'Best Times',
             bestTimesCalc:       'Calc Times',
             bestTimesSave:       'Save',
@@ -219,6 +328,61 @@
             posBottomRight:      'Bottom Right',
             posTopLeft:          'Top Left',
             posTopRight:         'Top Right',
+            // ★ Game effects (v0.86)
+            modsViewTitle:       'View',
+            modsFpv:             'First-person view',
+            modsFpvEye:          'Eye height',
+            modsFpvFwd:          'Eye forward offset',
+            modsFpvHideHead:     'Hide own head',
+            modsFovOn:           'Unlock FOV limit and use the value below',
+            modsViewNote:        'Visual only; affects your own screen only. Alt+V also toggles it.',
+            modsFxTitle:         'Screen effects & Character',
+            modsFlipX:           'Flip screen horizontally',
+            modsFlipY:           'Flip screen vertically',
+            modsRot:             'Screen rotation',
+            modsSpin:            'Spin (deg/sec)',
+            modsFilter:          'Color filter',
+            modsFNone:           'None',
+            modsFGray:           'Grayscale',
+            modsFSepia:          'Sepia',
+            modsFNeon:           'Neon',
+            modsFInvert:         'Invert',
+            modsFCold:           'Cold',
+            modsFPsyche:         'Psychedelic',
+            modsFDrunk:          'Drunk',
+            modsPixel:           'Pixel art (render resolution)',
+            modsTarget:          'Character scaling target',
+            modsTargetMe:        'Me only',
+            modsTargetAll:       'Everyone',
+            modsHead:            'Head size',
+            modsHand:            'Hand size',
+            modsFoot:            'Foot size',
+            modsFxReset:         'Reset effects',
+            modsFxNote:          'Flip / rotation / color filters are not included in recordings (pixel art is).',
+            modsReplayTitle:     'Instant Replay',
+            modsReplayEnable:    'Keep recording the most recent footage',
+            modsReplayMin:       'Minimum kept length',
+            modsReplayBitrate:   'Quality (bitrate)',
+            modsReplayUI:        'Include game UI in the video',
+            modsReplayStatus:    'Status',
+            modsReplaySave:      'Save now',
+            modsReplayStart:     'Start recording',
+            modsReplayStopSave:  'Stop & save',
+            modsReplayRecStarted:'Replay: recording started',
+            modsReplayNote:      'Alt+S saves the recent footage as WebM. Saved length is between the minimum and twice that. When always-on is off, Alt+S / the button starts and stops a manual recording. No audio.',
+            modsReplayNotRec:    'Replay: not recording',
+            modsReplaySaved:     'Replay saved',
+            // ★ Settings categories (v0.87)
+            catInfo:             'Info',
+            catGame:             'Game Helpers',
+            catLook:             'Appearance',
+            chatTrTitle:         'Chat Auto-Translate',
+            chatTrEnable:        'Auto-translate chat messages',
+            chatTrNote:          'Messages written in a language other than the one selected above (English / 日本語) are translated into it and shown under the message. Messages already in that language are left alone. Uses Google Translate.',
+            catMusic:            'Music',
+            catView:             'View & Effects',
+            catRec:              'Recording',
+            catHelp:             'Guide',
         },
     };
 
@@ -341,6 +505,11 @@
         document.querySelectorAll('.yt-eq-col').forEach(col => { col.querySelectorAll('.yt-eq-seg').forEach((seg, si) => { seg.style.opacity = si === EQ_SEGS - 1 ? '0.15' : '0'; }); });
     }
 
+    function clickAirMoveRadio(enabled) {
+        const radio = document.querySelector(enabled ? '#air-movement-on' : '#air-movement-off');
+        if (radio && !radio.checked) radio.click();
+    }
+
     function parseYouTubeInput(val) {
         let videoId = null, playlistId = null;
         try {
@@ -406,6 +575,26 @@
             `;
             document.documentElement.appendChild(style);
         } catch (e) { console.error('[LOL.ex] Failed to apply custom background:', e); }
+    }
+
+    function updateCourseLabels(targetId = null) {
+        const targets = targetId ? COURSES.filter(c => c.id === targetId) : COURSES;
+        targets.forEach(({ id, displayName }) => {
+            const enabled = getStoredBool(`stopAirMove_${id}`);
+            const checkbox = document.getElementById(`courseAirMoveToggle_${id}`);
+            if (!checkbox) return;
+            const row = checkbox.closest('.lolex-setting-row');
+            if (!row) return;
+            const labelEl = row.querySelector('.setting-name');
+            if (!labelEl) return;
+            labelEl.innerHTML = '';
+            const icon = document.createElement('i'); icon.className = 'fas fa-bolt';
+            const name = document.createTextNode(displayName);
+            const badge = document.createElement('span');
+            badge.style.cssText = `margin-left:6px;padding:1px 5px;border-radius:3px;font-size:0.72em;font-weight:700;background:${enabled ? 'rgba(3,218,198,0.15)' : 'rgba(187,134,252,0.12)'};color:${enabled ? 'var(--secondary-color)' : 'var(--col-muted)'};border:1px solid ${enabled ? 'rgba(3,218,198,0.3)' : 'rgba(255,255,255,0.08)'};`;
+            badge.textContent = enabled ? t('on') : t('off');
+            labelEl.appendChild(icon); labelEl.appendChild(name); labelEl.appendChild(badge);
+        });
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -690,7 +879,7 @@
         if (container) container.remove();
         container = el('div', { id: 'lolex-keydisplay' });
         container.classList.add('pos-' + getKeyDisplayPos());
-        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true)) container.classList.add('lolex-kd-hidden');
+        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, false)) container.classList.add('lolex-kd-hidden');
 
         const keys = getKeyDisplayKeys();
         const mouseKeys = keys.filter(k => isMouseCode(k.code));
@@ -767,14 +956,14 @@
 
     function refreshKeyDisplayVisibility() {
         const el2 = $('lolex-keydisplay'); if (!el2) return;
-        el2.classList.toggle('lolex-kd-hidden', !getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true));
+        el2.classList.toggle('lolex-kd-hidden', !getStoredBool(STORAGE.KEYDISPLAY_ENABLED, false));
     }
 
     function refreshKeyDisplayPosition() {
         const el2 = $('lolex-keydisplay'); if (!el2) return;
         el2.className = '';
         el2.classList.add('pos-' + getKeyDisplayPos());
-        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true)) el2.classList.add('lolex-kd-hidden');
+        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, false)) el2.classList.add('lolex-kd-hidden');
     }
 
     function setKeyPressedVisual(code, pressed) {
@@ -807,11 +996,14 @@
             #tab5:checked ~ nav + section > .tab5 { display: block !important; }
             .pc-tab section > .tab5 { display: none; }
             #settings-screen .pc-tab nav ul li.tab5 label[for="tab5"] {
-                background-image: url('https://tanabesan.github.io/lolbeans/file/page/icon.png') !important;
-                background-size: 20px 20px !important; background-repeat: repeat !important;
-                background-position: center !important; color: #fff !important; font-weight: bold;
-                text-shadow: 1px 1px 3px #000; padding: 0 14px !important; line-height: 40px !important;
-                height: 40px !important; display: inline-block !important;
+                background: #000 !important; background-image: none !important;
+                color: var(--primary-color) !important; font-weight: bold; text-shadow: none !important;
+                border: 1.5px solid var(--primary-color) !important; border-radius: 6px !important;
+                box-sizing: border-box; padding: 0 14px !important; line-height: 37px !important;
+                height: 40px !important; display: inline-block !important; transition: background 0.2s;
+            }
+            #tab5:checked ~ nav ul li.tab5 label[for="tab5"], #settings-screen .pc-tab nav ul li.tab5 label[for="tab5"]:hover {
+                background: color-mix(in srgb, var(--primary-color) 18%, #000) !important;
             }
             :root { --col-bg:#0d0d14; --col-surface:#18181f; --col-border:#2c2c3a; --col-text:#dcdce8; --col-sub:#9090aa; --col-muted:#9090aa; --background-color:#0d0d14; --card-color:#18181f; --text-color-dark:#dcdce8; --input-bg:#1c1c26; --border-color:#2c2c3a; }
             #settings-screen .pc-tab > section > div.tab5 { background: var(--col-bg) !important; color: var(--col-text) !important; padding: 10px 12px 18px; height: auto !important; max-height: none !important; overflow-y: visible !important; }
@@ -902,7 +1094,7 @@
     function initYouTubePlayerUI() {
         if ($('yt-card')) return;
         addYouTubeStyleSheet(); addModernStyleSheet();
-        const isVisible = getStoredBool(STORAGE.BAR_VISIBLE, true);
+        const isVisible = getStoredBool(STORAGE.BAR_VISIBLE, false);
         const volume    = parseInt(localStorage.getItem(STORAGE.VOLUME) ?? '80', 10);
         const hiddenDiv = el('div', { id: 'yt-hidden-player', innerHTML: '<div id="yt-player"></div>' });
         document.body.appendChild(hiddenDiv);
@@ -1060,6 +1252,20 @@
         if (mode === 'hide')  btn.classList.add('lolex-float-hidden');
     }
 
+    function ytDestroy() {
+        try { saveTime(); } catch (_) {}
+        try { clearInterval(saveTimeInterval); } catch (_) {}
+        try { cancelAnimationFrame(_eqAnimId); } catch (_) {}
+        try { if (player) { player.stopVideo?.(); player.destroy?.(); } } catch (_) {}
+        player = null;
+        try { isApiReady = false; } catch (_) {}
+        ['yt-card', 'yt-hidden-player', 'yt-url-panel', 'yt-float-btn'].forEach(id => document.getElementById(id)?.remove());
+    }
+    function ytSetEnabled(v) {
+        setStoredBool(STORAGE.YT_ENABLED, v);
+        if (v) initYouTubePlayerUI(); else ytDestroy();
+    }
+
     function toggleYouTubeVisibility() {
         const card = $('yt-card'); if (!card) return;
         const isVisible = card.classList.toggle('yt-card-visible');
@@ -1179,7 +1385,10 @@
                 <svg width="22" height="16" viewBox="0 0 24 18" fill="none"><path d="M20.317 1.492a19.825 19.825 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.295 18.295 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 1.492a.07.07 0 0 0-.032.027C.533 6.093-.32 10.56.099 14.971a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 12.278c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" fill="#7289da"/></svg>
                 ${t('discordInvite')}
             </a>
-            <div class="lolex-update-text"><p>${t('updateInfo')}</p><span class="lolex-version-badge">v${SCRIPT_VERSION}</span></div>
+            <div class="lolex-update-text">
+                <div class="lolex-upd-head"><span class="lolex-version-badge">v${SCRIPT_VERSION}</span></div>
+                <ul class="lolex-upd-list">${t('updateInfo').split('<br>').map(x => x.replace(/^・/, '').trim()).filter(Boolean).map(x => `<li>${x}</li>`).join('')}</ul>
+            </div>
         `;
         container.appendChild(updateFs);
 
@@ -1198,7 +1407,7 @@
         `;
         container.appendChild(langFs);
 
-        // ── 2. 視覚カスタマイズ ──
+        // ── 4. 視覚カスタマイズ ──
         const visualFs = document.createElement('fieldset');
         visualFs.innerHTML = `
             <legend><i class="fas fa-paint-brush"></i> ${t('visualCustomization')}</legend>
@@ -1230,7 +1439,7 @@
         const kdLegend = document.createElement('legend'); kdLegend.innerHTML = `<i class="fas fa-keyboard"></i> ${t('keyDisplaySettings')}`;
         kdFs.appendChild(kdLegend);
 
-        const kdEnableRow = makeToggleRow('keyDisplayEnableToggle', `<i class="fas fa-eye"></i>${t('keyDisplayEnable')}`, getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true));
+        const kdEnableRow = makeToggleRow('keyDisplayEnableToggle', `<i class="fas fa-eye"></i>${t('keyDisplayEnable')}`, getStoredBool(STORAGE.KEYDISPLAY_ENABLED, false));
         kdFs.appendChild(kdEnableRow);
 
         const kdPosRow = document.createElement('div'); kdPosRow.className = 'lolex-setting-row';
@@ -1266,8 +1475,12 @@
         const ytFs = document.createElement('fieldset');
         const ytLegend = document.createElement('legend'); ytLegend.innerHTML = `<i class="fab fa-youtube"></i> ${t('ytSettings')}`;
         ytFs.appendChild(ytLegend);
+        const ytOn = getStoredBool(STORAGE.YT_ENABLED, true);
+        const ytMasterRow = makeToggleRow('ytEnableToggle', `<i class="fas fa-power-off"></i>${t('ytEnable')}`, ytOn);
+        ytMasterRow.classList.add('lolex-yt-master'); ytFs.appendChild(ytMasterRow);
+        if (!ytOn) ytFs.classList.add('lolex-yt-off');
 
-        const hotkeyRow = document.createElement('div'); hotkeyRow.className = 'lolex-setting-row';
+        const hotkeyRow = document.createElement('div'); hotkeyRow.className = 'lolex-setting-row lolex-hk-row';
         const hotkeyLabel_el = document.createElement('label'); hotkeyLabel_el.className = 'setting-name'; hotkeyLabel_el.innerHTML = `<i class="fas fa-keyboard"></i>${t('ytHotkeyLabel')}`;
         const hotkeyBtn = document.createElement('button'); hotkeyBtn.id = 'yt-hotkey-btn'; hotkeyBtn.textContent = hotkeyLabel(); hotkeyBtn.style.cssText = 'min-width:90px;font-size:0.80em;';
         let _waitingHotkey = false;
@@ -1323,7 +1536,17 @@
         btFs.appendChild(btNote);
         container.appendChild(btFs);
 
-        [[updateFs,'update'],[langFs,'lang'],[visualFs,'visual'],[kdFs,'keydisplay'],[ytFs,'yt'],[btFs,'besttimes']].forEach(([fs, key]) => makeCollapsibleFieldset(fs, key));
+        // ── チャット自動翻訳 ──
+        const chatFs = document.createElement('fieldset');
+        const chatLegend = document.createElement('legend'); chatLegend.innerHTML = `<i class="fas fa-language"></i> ${t('chatTrTitle')}`; chatFs.appendChild(chatLegend);
+        chatFs.appendChild(makeToggleRow('chatTrToggle', `<i class="fas fa-comments"></i>${t('chatTrEnable')}`, getStoredBool(STORAGE.CHAT_TR, true)));
+        const chatNote = document.createElement('div'); chatNote.className = 'lolex-note'; chatNote.textContent = t('chatTrNote'); chatFs.appendChild(chatNote);
+        container.appendChild(chatFs);
+
+        const modsList = modsBuildSettings(container);
+        const fsList = [[updateFs,'update'],[langFs,'lang'],[visualFs,'visual'],[kdFs,'keydisplay'],[ytFs,'yt'],[btFs,'besttimes'],[chatFs,'chattr'],...modsList,...lolexBuildHelp(container)];
+        fsList.forEach(([fs, key]) => makeCollapsibleFieldset(fs, key));
+        lolexApplySettingsCategories(container, fsList);
 
         panel.appendChild(container);
         renderKeyDisplayChips();
@@ -1331,12 +1554,13 @@
     }
 
     function bindSettingsEvents() {
-        $('language-switcher')?.addEventListener('change', (e) => { localStorage.setItem(STORAGE.LANGUAGE, e.target.value); invalidateLangCache(); createSettings(); updateProfileUILang(); });
+        $('language-switcher')?.addEventListener('change', (e) => { localStorage.setItem(STORAGE.LANGUAGE, e.target.value); invalidateLangCache(); createSettings(); updateProfileUILang(); chatTrReset(); });
+        $('chatTrToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.CHAT_TR, e.target.checked); chatTrApply(); });
         $('lolex-bg-edit-list-button')?.addEventListener('click', showBackgroundModal);
         $('background-reset-to-default-button')?.addEventListener('click', () => { if (!confirm(t('resetListConfirm'))) return; localStorage.setItem(STORAGE.BG_LIST, DEFAULT.BG_URLS.join('\n')); applyCustomBackground(true); });
         $('background-shuffle-button')?.addEventListener('click', () => { applyCustomBackground(true); });
-        $('primary-color-picker')?.addEventListener('input', (e) => { localStorage.setItem(STORAGE.PRIMARY_COLOR, e.target.value); applyColorTheme(e.target.value, getSecondaryColor()); });
-        $('secondary-color-picker')?.addEventListener('input', (e) => { localStorage.setItem(STORAGE.SECONDARY_COLOR, e.target.value); applyColorTheme(getPrimaryColor(), e.target.value); });
+        $('primary-color-picker')?.addEventListener('input', (e) => { localStorage.setItem(STORAGE.PRIMARY_COLOR, e.target.value); applyColorTheme(e.target.value, getSecondaryColor()); updateCourseLabels(); });
+        $('secondary-color-picker')?.addEventListener('input', (e) => { localStorage.setItem(STORAGE.SECONDARY_COLOR, e.target.value); applyColorTheme(getPrimaryColor(), e.target.value); updateCourseLabels(); });
         $('color-reset-button')?.addEventListener('click', resetColors);
         // ★ キー表示
         $('keyDisplayEnableToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.KEYDISPLAY_ENABLED, e.target.checked); refreshKeyDisplayVisibility(); });
@@ -1348,8 +1572,65 @@
         });
         $('ytLoopToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.LOOP, e.target.checked); try { if (player) player.setLoop(e.target.checked); } catch (_) {} });
         $('ytShuffleToggle')?.addEventListener('change', (e) => { setStoredBool(STORAGE.SHUFFLE, e.target.checked); });
+        const ytEn = $('ytEnableToggle');
+        if (ytEn && !ytEn.dataset.lxBound) {
+            ytEn.dataset.lxBound = '1';
+            ytEn.addEventListener('change', (e) => { ytSetEnabled(e.target.checked); e.target.closest('fieldset')?.classList.toggle('lolex-yt-off', !e.target.checked); });
+        }
+        modsBindSettings();
         $('lb-calc-btn')?.addEventListener('click', fetchBestTimes);
         $('lb-save-btn')?.addEventListener('click', () => { saveTimesAsImage($('lb-save-btn'), $('lb-total-display')?.textContent || ''); });
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    //  console.log フック / マップロード処理
+    // ------------------------------------------------------------------------------------------------
+    function hookConsoleLog() {
+        const originalLog = unsafeWindow.console.log;
+        if (originalLog._lolexHooked) return;
+        unsafeWindow.console.log = function (...args) {
+            try { if (args[0] === 'Loading map' && typeof args[1] === 'string') handleMapLoad(String(args[1])); } catch (_) {}
+            return originalLog.apply(unsafeWindow.console, args);
+        };
+        unsafeWindow.console.log._lolexHooked = true;
+    }
+
+    let _pendingNextRoundLabel = null, _nextRoundObserver = null;
+
+    function handleMapLoad(mapName) { return; // Lite: Air Move自動切替・ラウンドスコープなし
+        if (getStoredBool(STORAGE.AIR_MOVE_AUTO)) {
+            const course = COURSES.find(c => mapName.toLowerCase().includes(c.keyword.toLowerCase()));
+            const id = course ? course.id : mapName.toLowerCase().replace(/\s+/g, '-');
+            clickAirMoveRadio(getStoredBool(`stopAirMove_${id}`));
+        }
+        const course = COURSES.find(c => mapName.toLowerCase().includes(c.keyword.toLowerCase()));
+        _pendingNextRoundLabel = `${t('nextRound')} ${course ? course.message : mapName}`;
+        _tryInjectNextRoundLabel();
+        _startNextRoundObserver();
+    }
+
+    function _tryInjectNextRoundLabel() {
+        if (!_pendingNextRoundLabel) return;
+        const header = document.getElementById('end-match-header');
+        if (header) _injectLabel(header, 'next-round-display-header', _pendingNextRoundLabel, { fontSize: '14px', color: '#fff', marginTop: '8px', textAlign: 'center' });
+        const deathSection = document.querySelector('#death-screen .top-section');
+        if (deathSection) _injectLabel(deathSection, 'next-round-display-death', _pendingNextRoundLabel, { fontSize: '1.5rem', color: '#fff', textAlign: 'center', fontWeight: 'bold', paddingTop: '50px', textShadow: '2px 2px 4px rgba(0,0,0,0.7)' });
+    }
+
+    function _injectLabel(parent, id, text, styles) {
+        let elem = document.getElementById(id);
+        if (!elem) { elem = document.createElement('div'); elem.id = id; Object.assign(elem.style, styles); parent.appendChild(elem); }
+        elem.textContent = text;
+    }
+
+    function _startNextRoundObserver() {
+        if (_nextRoundObserver) return;
+        _nextRoundObserver = new MutationObserver(() => {
+            if (!_pendingNextRoundLabel) { _nextRoundObserver.disconnect(); _nextRoundObserver = null; return; }
+            _tryInjectNextRoundLabel();
+            if (document.getElementById('next-round-display-header') && document.getElementById('next-round-display-death')) { _nextRoundObserver.disconnect(); _nextRoundObserver = null; }
+        });
+        _nextRoundObserver.observe(document.body, { childList: true, subtree: true });
     }
 
     // ── 共通化: YouTubeホットキー設定の取得 ──
@@ -1364,6 +1645,7 @@
         if (_hotkeyHandler) { document.removeEventListener('keydown', _hotkeyHandler, { capture: true }); window.removeEventListener('keydown', _hotkeyHandler, { capture: true }); _hotkeyHandler = null; }
         const cfg = getHotkeyConfig();
         _hotkeyHandler = (e) => {
+            if (!getStoredBool(STORAGE.YT_ENABLED, true)) return;
             const match = e.key.toLowerCase() === cfg.key.toLowerCase() && !!e.ctrlKey === !!cfg.ctrlKey && !!e.altKey === !!cfg.altKey && !!e.shiftKey === !!cfg.shiftKey;
             if (!match) return;
             e.preventDefault(); e.stopImmediatePropagation(); toggleYouTubeVisibility();
@@ -1390,12 +1672,13 @@
         document.getElementById('yt-url-panel')?.remove();
         applyColorTheme(getPrimaryColor(), getSecondaryColor());
         applyCustomBackground(false);
+        hookConsoleLog();
         setupHotkey();
         createSettings();
         createBackgroundModal();
         buildKeyDisplayUI();
         bindKeyDisplayInputListeners();
-        setTimeout(() => { initYouTubePlayerUI(); }, 1000);
+        setTimeout(() => { if (getStoredBool(STORAGE.YT_ENABLED, true)) initYouTubePlayerUI(); }, 1000);
         window.addEventListener('beforeunload', saveTime);
         document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveTime(); });
     }
@@ -1467,6 +1750,1034 @@
         else document.addEventListener('DOMContentLoaded', () => { observer.observe(document.body, { childList: true, subtree: true }); init(); tryInsertProfileUI(); });
     }
 
+    // ================================================================================================
+    //  ★ ゲーム演出モジュール (v0.86)
+    //     一人称視点 / FOV制限解除 / 画面エフェクト / キャラの頭・手・足スケール / インスタントリプレイ
+    //     すべて「自分の画面だけ」の見た目の機能です(サーバーには何も送りません)
+    // ================================================================================================
+    const MODS_KEY = 'lolex-mods';
+    const M = {
+        fpv: false, fpvEyeY: 0.35, fpvFwd: 0.18, fpvHideHead: true,
+        fovOn: false, fov: 100,
+        flipX: false, flipY: false, rot: 0, spin: 0, filter: 'none', pixel: 100,
+        target: 'me', head: 1, hand: 1, foot: 1,
+        replayOn: false, replayMin: 60, replayMbps: 4, replayUI: true,
+    };
+    try { Object.assign(M, JSON.parse(localStorage.getItem(MODS_KEY) || '{}')); } catch (_) {}
+    // 一人称視点は固定設定(ON/OFFのみ)・FOVはゲーム標準のまま
+    Object.assign(M, { fpvEyeY: 0.53, fpvFwd: 0.35, fpvHideHead: true, fovOn: false });
+    try { const _t = localStorage.getItem('lolex-mods-target'); if (_t === 'me' || _t === 'all') M.target = _t; } catch (_) {}
+    Object.assign(M, { fpv: false, flipX: false, flipY: false, rot: 0, spin: 0, filter: 'none', pixel: 100, target: 'me', head: 1, hand: 1, foot: 1 });   // Lite: 一人称/エフェクト/拡大縮小は無効
+    const modsSave = () => { try { localStorage.setItem(MODS_KEY, JSON.stringify(M)); localStorage.setItem('lolex-mods-target', M.target); } catch (_) {} };
+
+    const MW = unsafeWindow;            // ページ本体の window
+    let modsT = null;                   // THREE
+    const modsRenderers = new Set();
+    const modsBasePR = new WeakMap();   // ゲームが指定したピクセル比
+    // ---------- 簡易メニュー (Alt+Q) : 設定画面の入力欄を直接操作するのでUIと常に同期 ----------
+    const QM_SECTIONS = [
+        { title: () => (getLang() === 'ja' ? '表示' : 'Display'), icon: 'fa-keyboard', rows: [
+            ['check', 'keyDisplayEnableToggle'], ['fn', () => toggleYouTubeVisibility(), () => t('ytSettings')] ] },
+        { title: () => t('modsReplayTitle'), icon: 'fa-video', rows: [
+            ['check', 'modsReplayOn'], ['btn', 'modsReplaySave'] ] },
+    ];
+
+    function qmEnsureStyle() {
+        if (document.getElementById('lolex-qm-style')) return;
+        const st = document.createElement('style'); st.id = 'lolex-qm-style';
+        st.textContent = [
+            '#lolex-qm{position:fixed;top:16px;right:16px;width:300px;max-height:calc(100vh - 32px);overflow-y:auto;z-index:100001;background:rgba(13,13,20,.96);color:var(--col-text,#dcdce8);border:1px solid var(--col-border,#2c2c3a);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.55);font-size:13px;transform:translateX(calc(100% + 24px));transition:transform .22s ease;}',
+            '#lolex-qm.qm-open{transform:none;}',
+            '#lolex-qm .qm-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--col-border,#2c2c3a);background:color-mix(in srgb,var(--primary-color) 13%,transparent);position:sticky;top:0;}',
+            '#lolex-qm .qm-title{font-weight:800;flex:1;}',
+            '#lolex-qm .qm-key{font-size:.8em;color:var(--col-sub,#9090aa);border:1px solid var(--col-border,#2c2c3a);border-radius:4px;padding:1px 6px;}',
+            '#lolex-qm .qm-x{cursor:pointer;color:var(--col-sub,#9090aa);font-size:16px;line-height:1;padding:2px 4px;}',
+            '#lolex-qm .qm-x:hover{color:#fff;}',
+            '#lolex-qm .qm-sec{padding:8px 12px 2px;font-size:.78em;font-weight:700;color:var(--col-sub,#9090aa);}',
+            '#lolex-qm .qm-sec i{color:var(--primary-color);margin-right:4px;}',
+            '#lolex-qm .qm-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px;}',
+            '#lolex-qm .qm-row:hover{background:rgba(255,255,255,.035);}',
+            '#lolex-qm .qm-name{flex:1;line-height:1.35;}',
+            '#lolex-qm .qm-name i{color:var(--col-sub,#9090aa);width:1.25em;text-align:center;margin-right:4px;}',
+            '#lolex-qm input[type=range]{width:110px;accent-color:var(--primary-color);}',
+            '#lolex-qm .qm-val{min-width:44px;text-align:right;font-variant-numeric:tabular-nums;color:var(--col-sub,#9090aa);}',
+            '#lolex-qm select{height:26px;max-width:130px;background:var(--input-bg,#1c1c26);color:inherit;border:1px solid var(--col-border,#2c2c3a);border-radius:6px;}',
+            '#lolex-qm button.qm-btn{background:transparent;color:var(--primary-color);border:1px solid var(--primary-color);border-radius:6px;padding:5px 10px;font-weight:700;cursor:pointer;font-size:.92em;}',
+            '#lolex-qm button.qm-btn:hover{background:var(--primary-color);color:#0d0d14;}',
+            '#lolex-qm button.qm-btn.qm-rec{color:#ff7070;border-color:#ff7070;}',
+            '#lolex-qm .qm-foot{padding:8px 12px 10px;font-size:.78em;color:var(--col-sub,#9090aa);}',
+            '#lolex-qm-bd{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.35);}',
+            '#lolex-qm-handle{position:fixed;right:0;top:45%;width:8px;height:64px;border-radius:8px 0 0 8px;background:var(--primary-color);opacity:.35;z-index:99999;}',
+            '#lolex-qm-handle:before{content:"";position:absolute;inset:-14px -4px -14px -22px;}',
+            '@media (pointer:coarse){#lolex-qm .qm-key{display:none;} #lolex-qm .qm-row{padding:10px 14px;} #lolex-qm .qm-x{font-size:20px;padding:6px 10px;} #lolex-qm select{height:34px;max-width:150px;font-size:16px;} #lolex-qm input[type=range]{width:120px;height:30px;} #lolex-qm button.qm-btn{padding:8px 12px;}}',
+            '@media (max-width:700px){#lolex-qm{top:8px;right:8px;width:min(330px,88vw);max-height:calc(100vh - 16px);}}'
+        ].join(' ');
+        document.head.appendChild(st);
+    }
+
+    function qmRow(kind, a, b) {
+        const row = document.createElement('div'); row.className = 'qm-row';
+        const name = document.createElement('span'); name.className = 'qm-name';
+        const send = (src, type) => src.dispatchEvent(new Event(type, { bubbles: true }));
+        if (kind === 'fn') {
+            if (!getStoredBool(STORAGE.YT_ENABLED, true)) return null;
+            const btn = document.createElement('button'); btn.className = 'qm-btn'; btn.type = 'button';
+            name.textContent = b(); btn.innerHTML = '<i class="fas fa-music"></i>'; btn.addEventListener('click', a);
+            row.appendChild(name); row.appendChild(btn); return row;
+        }
+        const src = document.getElementById(a); if (!src) return null;
+        const lab = document.querySelector(`label[for="${a}"]`);
+        if (kind === 'btn') {
+            const btn = document.createElement('button'); btn.className = 'qm-btn'; btn.type = 'button';
+            const sync = () => { btn.innerHTML = src.innerHTML; btn.classList.toggle('qm-rec', src.classList.contains('danger')); };
+            sync(); btn.addEventListener('click', () => src.click());
+            const ob = new MutationObserver(sync); ob.observe(src, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+            (qmObs = qmObs || []).push(ob);
+            row.style.justifyContent = 'flex-end'; row.appendChild(btn); return row;
+        }
+        name.innerHTML = lab ? lab.innerHTML : a; row.appendChild(name);
+        if (kind === 'check') {
+            const sw = document.createElement('label'); sw.className = 'switch';
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = src.checked;
+            const sp = document.createElement('span'); sp.className = 'slider-toggle';
+            cb.addEventListener('change', () => { src.checked = cb.checked; send(src, 'change'); });
+            sw.appendChild(cb); sw.appendChild(sp); row.appendChild(sw);
+        } else if (kind === 'range') {
+            const box = document.createElement('div'); box.style.cssText = 'display:flex;align-items:center;gap:6px;';
+            const r = document.createElement('input'); r.type = 'range'; r.min = src.min; r.max = src.max; r.step = src.step; r.value = src.value;
+            const v = document.createElement('span'); v.className = 'qm-val'; v.textContent = modsFmt(src.value, src.dataset.fmt);
+            r.addEventListener('input', () => { v.textContent = modsFmt(parseFloat(r.value), src.dataset.fmt); src.value = r.value; send(src, 'input'); });
+            box.appendChild(r); box.appendChild(v); row.appendChild(box);
+        } else if (kind === 'select') {
+            const sel = document.createElement('select');
+            Array.from(src.options).forEach(o => { const n = document.createElement('option'); n.value = o.value; n.textContent = o.textContent; sel.appendChild(n); });
+            sel.value = src.value;
+            sel.addEventListener('change', () => { src.value = sel.value; send(src, 'change'); });
+            row.appendChild(sel);
+        }
+        return row;
+    }
+
+    let qmObs = null;
+    const qmIsTouch = () => { try { return matchMedia('(pointer:coarse)').matches; } catch (_) { return false; } };
+    const qmIsOpen = () => { const e = document.getElementById('lolex-qm'); return !!e && !e.classList.contains('qm-closing'); };
+    function qmClose(immediate) {
+        if (qmObs) { qmObs.forEach(o => o.disconnect()); qmObs = null; }
+        const bd = document.getElementById('lolex-qm-bd'); if (bd) bd.remove();
+        const el = document.getElementById('lolex-qm'); if (!el) return;
+        if (immediate === true) { el.remove(); return; }
+        el.classList.remove('qm-open'); el.classList.add('qm-closing');
+        setTimeout(() => el.remove(), 230);
+    }
+    function qmOpen() {
+        qmEnsureStyle(); qmClose(true);
+        const el = document.createElement('div'); el.id = 'lolex-qm';
+        const head = document.createElement('div'); head.className = 'qm-head';
+        head.innerHTML = `<span class="qm-title"><i class="fas fa-sliders-h"></i> ${getLang() === 'ja' ? '簡易メニュー' : 'Quick Menu'}</span><span class="qm-key">Alt+Q</span><span class="qm-x" title="Esc">✕</span>`;
+        head.querySelector('.qm-x').addEventListener('click', () => qmClose());
+        el.appendChild(head);
+        QM_SECTIONS.forEach(sec => {
+            const rows = sec.rows.map(r => qmRow(r[0], r[1], r[2])).filter(Boolean);
+            if (!rows.length) return;
+            const h = document.createElement('div'); h.className = 'qm-sec'; h.innerHTML = `<i class="fas ${sec.icon}"></i>${sec.title()}`;
+            el.appendChild(h); rows.forEach(r => el.appendChild(r));
+        });
+        const foot = document.createElement('div'); foot.className = 'qm-foot';
+        const ja = getLang() === 'ja';
+        foot.textContent = qmIsTouch()
+            ? (ja ? '右にスワイプ・✕・外側タップで閉じる' : 'Swipe right, tap ✕ or outside to close')
+            : (ja ? 'Alt+Q / Esc で閉じる ・ 詳細は設定画面' : 'Alt+Q / Esc to close · More in Settings');
+        el.appendChild(foot);
+        ['keydown', 'keyup', 'mousedown', 'mouseup', 'wheel'].forEach(ev => el.addEventListener(ev, e => e.stopPropagation()));
+        // 右へスワイプで閉じる(スライダー/セレクト操作中は除く)
+        let sx = null;
+        el.addEventListener('touchstart', e => { sx = (e.touches.length === 1 && !(e.target.closest && e.target.closest('input,select'))) ? e.touches[0].clientX : null; }, { passive: true });
+        el.addEventListener('touchend', e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (dx > 70) qmClose(); }, { passive: true });
+        if (qmIsTouch()) {
+            const bd = document.createElement('div'); bd.id = 'lolex-qm-bd';
+            bd.addEventListener('click', () => qmClose());
+            document.body.appendChild(bd);
+        }
+        document.body.appendChild(el);
+        requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('qm-open')));
+        try { if (document.exitPointerLock) document.exitPointerLock(); } catch (_) {}
+    }
+    window.addEventListener('keydown', (e) => {
+        if (e.altKey && !e.ctrlKey && !e.shiftKey && e.code === 'KeyQ') {
+            qmIsOpen() ? qmClose() : qmOpen();
+            e.preventDefault(); e.stopImmediatePropagation();
+        } else if (e.code === 'Escape' && qmIsOpen()) {
+            qmClose(); e.preventDefault(); e.stopImmediatePropagation();
+        }
+    }, true);
+    // 画面右端から左へスワイプで開く(スマホ)
+    (function qmEdgeSwipe() {
+        const EDGE = 28; let st = null;
+        window.addEventListener('touchstart', (e) => {
+            const p = e.touches[0];
+            st = (e.touches.length === 1 && !qmIsOpen() && p.clientX >= window.innerWidth - EDGE) ? { x: p.clientX, y: p.clientY, t: Date.now() } : null;
+        }, { capture: true, passive: true });
+        window.addEventListener('touchcancel', () => { st = null; }, { capture: true, passive: true });
+        window.addEventListener('touchend', (e) => {
+            if (!st) return;
+            const p = e.changedTouches[0], dx = p.clientX - st.x, dy = p.clientY - st.y, dt = Date.now() - st.t;
+            st = null;
+            if (dx < -50 && Math.abs(dy) < Math.abs(dx) * 0.8 && dt < 800) qmOpen();
+        }, { capture: true, passive: true });
+        // 端のスワイプが効かない端末向けの小さなつまみ(タッチ端末のみ)
+        const mk = () => {
+            if (!qmIsTouch() || document.getElementById('lolex-qm-handle')) return;
+            qmEnsureStyle();
+            const h = document.createElement('div'); h.id = 'lolex-qm-handle';
+            h.addEventListener('click', () => { qmIsOpen() ? qmClose() : qmOpen(); });
+            document.body.appendChild(h);
+        };
+        if (document.body) mk(); else document.addEventListener('DOMContentLoaded', mk);
+    })();
+
+    const modsLastF = new WeakMap();    // 最後に掛けた倍率
+    const modsT0 = performance.now();
+
+    function modsToast(msg) {
+        let tt = document.getElementById('lolex-mods-toast');
+        if (!tt) {
+            tt = document.createElement('div'); tt.id = 'lolex-mods-toast';
+            tt.style.cssText = 'position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:100000;background:rgba(0,0,0,.75);color:#fff;font:14px sans-serif;padding:8px 14px;border-radius:8px;pointer-events:none;transition:opacity .4s;';
+            document.body.appendChild(tt);
+        }
+        tt.textContent = msg; tt.style.opacity = 1;
+        clearTimeout(tt._h); tt._h = setTimeout(() => { tt.style.opacity = 0; }, 2500);
+    }
+
+    // ---------- メインキャンバス ----------
+    let _mainCanvasCache = null, _mainCanvasAt = 0;
+    function modsMainCanvas() {
+        const now = performance.now();
+        if (_mainCanvasCache && _mainCanvasCache.isConnected && now - _mainCanvasAt < 500) return _mainCanvasCache;
+        let best = null, area = 0;
+        document.querySelectorAll('canvas').forEach(c => {
+            const a = c.clientWidth * c.clientHeight;
+            if (a > area && c.clientWidth > 300) { area = a; best = c; }
+        });
+        _mainCanvasCache = best; _mainCanvasAt = now;
+        return best;
+    }
+    const modsIsMain = r => r.domElement && r.domElement.isConnected && r.domElement.clientWidth >= window.innerWidth * 0.8;
+
+    // ---------- 自分のプレイヤーを特定 ----------
+    function modsLocalPlayer(scene, camera) {
+        const T = modsT, off = new T.Vector3(), v = new T.Vector3();
+        let best = null, bestErr = 1.5;
+        for (const o of scene.children) {
+            if (!o.isPlayer || !o.input || !o.input.direction) continue;
+            v.set(0, 3, -7).applyEuler(o.input.direction);          // ゲームの三人称カメラのオフセット
+            off.copy(camera.position).sub(o.position);
+            const err = off.distanceTo(v);
+            if (err < bestErr) { bestErr = err; best = o; }
+        }
+        if (best) return best;
+        let bd = 1.5;                                                  // 一人称などでカメラが体の近くにある場合
+        for (const o of scene.children) {
+            if (!o.isPlayer) continue;
+            const d = o.position.distanceTo(camera.position);
+            if (d < bd) { bd = d; best = o; }
+        }
+        return best;
+    }
+
+    // ---------- 一人称視点 ----------
+    const FPV_FOV = 100;   // 一人称視点のときのFOV
+    let _fpvWasOn = false, _fpvNearSet = false;
+    function modsApplyFPV(p, camera) {
+        const T = modsT, dir = p.input.direction;
+        const flat = new T.Vector3(0, 0, 1).applyEuler(new T.Euler(0, dir.y, 0, 'YXZ'));
+        camera.position.copy(p.position);
+        camera.position.y += M.fpvEyeY;
+        camera.position.addScaledVector(flat, M.fpvFwd);
+        const look = camera.position.clone().add(new T.Vector3(0, 0, 1).applyEuler(dir));
+        camera.up.set(0, 1, 0);
+        camera.lookAt(look);
+        if (camera.near !== 0.03 || camera.fov !== FPV_FOV) { camera.near = 0.03; camera.fov = FPV_FOV; camera.updateProjectionMatrix(); }
+        _fpvNearSet = true;
+    }
+
+    // ---------- FOV ----------
+    function modsApplyFOV(camera) {
+        if (M.fovOn) {
+            const f = Math.max(10, Math.min(170, M.fov));
+            if (camera.fov !== f) { camera.fov = f; camera.updateProjectionMatrix(); }
+        } else if (_fovWasOn) {
+            let g = 75; try { g = parseFloat(localStorage.getItem('FOV')) || 75; } catch (_) {}
+            camera.fov = g; camera.updateProjectionMatrix();
+        }
+        _fovWasOn = M.fovOn;
+    }
+    let _fovWasOn = false;
+
+    // ---------- 骨スケール(頭・手・足) ----------
+    const MODS_GROUPS = [['head', /head$/i], ['hand', /hand$/i], ['foot', /foot$/i]];
+    let _bonesEver = false;
+    function modsBoneGroups(p) {
+        if (p.__lolexBones) return p.__lolexBones;
+        const g = { head: [], hand: [], foot: [] };
+        const bones = (p.skeleton && p.skeleton.bones) || [];
+        for (const b of bones) for (const [k, re] of MODS_GROUPS) if (re.test(b.name)) g[k].push(b);
+        p.__lolexBones = g;
+        return g;
+    }
+    function modsSetBone(b, f) {
+        let base;
+        if (b.__lxLast && b.scale.equals(b.__lxLast)) base = b.__lxBase;   // アニメが上書きしていなければ前回の元値
+        else base = b.scale.clone();
+        b.__lxBase = base;
+        b.scale.copy(base).multiplyScalar(f);
+        b.__lxLast = b.scale.clone();
+        b.updateMatrixWorld(true);
+    }
+    function modsApplyBones(scene, lp) {
+        const fpvHead = M.fpv && M.fpvHideHead;
+        const active = M.head !== 1 || M.hand !== 1 || M.foot !== 1 || fpvHead || _fpvWasOn;
+        if (!active && !_bonesEver) return;
+        let list;
+        if (M.target === 'all') list = scene.children.filter(o => o.isPlayer && o.skeleton);
+        else list = lp && lp.skeleton ? [lp] : [];
+        for (const p of list) {
+            const g = modsBoneGroups(p);
+            const isMe = p === lp;
+            for (const k of ['head', 'hand', 'foot']) {
+                const f = (k === 'head' && fpvHead && isMe) ? 0.001 : M[k];
+                for (const b of g[k]) if (f !== 1 || b.__lxLast) modsSetBone(b, f);
+            }
+        }
+        if (active) _bonesEver = true;
+    }
+    MW.lolexBoneNames = () => {
+        const p = MW.__lolexPlayer;
+        if (!p || !p.skeleton) { console.log('[LOL.ex] プレイヤー未検出。試合に入ってから実行してください'); return; }
+        console.log('[LOL.ex] bones:', p.skeleton.bones.map(b => b.name));
+    };
+
+    // ---------- 画面エフェクト(CSS) + ドット絵 ----------
+    const MODS_FILTERS = {
+        none: () => '',
+        gray: () => 'grayscale(1)',
+        sepia: () => 'sepia(1)',
+        neon: () => 'saturate(2.4) contrast(1.25) brightness(1.05)',
+        invert: () => 'invert(1)',
+        cold: () => 'hue-rotate(180deg) saturate(1.4)',
+        psyche: tt => `hue-rotate(${(tt * 90) % 360}deg) saturate(2.2)`,
+        drunk: tt => `blur(${(1.2 + Math.sin(tt * 1.3)).toFixed(2)}px) hue-rotate(${Math.sin(tt * 0.7) * 25}deg)`,
+    };
+    function modsApplyStyle() {
+        const c = modsMainCanvas();
+        if (!c) return;
+        const tt = (performance.now() - modsT0) / 1000;
+        let ang = M.rot + (M.spin ? tt * M.spin : 0);
+        if (M.filter === 'drunk') ang += Math.sin(tt * 0.9) * 4;
+        let tf = '';
+        if (M.flipX) tf += ' scaleX(-1)';
+        if (M.flipY) tf += ' scaleY(-1)';
+        if (ang) {
+            const rad = ang * Math.PI / 180, cs = Math.abs(Math.cos(rad)), sn = Math.abs(Math.sin(rad));
+            const W = window.innerWidth, H = window.innerHeight;
+            const k = Math.max(cs + (W / H) * sn, cs + (H / W) * sn);
+            tf += ` rotate(${ang}deg) scale(${k.toFixed(3)})`;
+        }
+        tf = tf.trim();
+        const fl = (MODS_FILTERS[M.filter] || MODS_FILTERS.none)(tt);
+        const px = M.pixel < 100 ? 'pixelated' : '';
+        if (c.style.transform !== tf) c.style.transform = tf;
+        if (c.style.filter !== fl) c.style.filter = fl;
+        if (c.style.imageRendering !== px) c.style.imageRendering = px;
+    }
+    (function modsLoop() { try { modsApplyStyle(); } catch (_) {} requestAnimationFrame(modsLoop); })();
+
+    const modsPixelFactor = () => Math.max(0.03, Math.min(1, M.pixel / 100));
+    function modsSyncPixel() {
+        for (const r of modsRenderers) {
+            if (!modsBasePR.has(r) || !r.domElement || !r.domElement.isConnected) continue;
+            const want = modsIsMain(r) ? modsPixelFactor() : 1;
+            if (modsLastF.get(r) !== want) r.setPixelRatio(modsBasePR.get(r));
+        }
+    }
+    setInterval(modsSyncPixel, 500);
+
+    // ---------- インスタントリプレイ ----------
+    const rp = { canvas: null, stream: null, comp: null, cctx: null, ov: null, octx: null, lastOv: 0,
+                 compose: false, frames: 0, startedAt: 0, slots: [], stagger: null, tick: null };
+    const RP_FPS = 60, RP_OV_FPS = 20;
+    const rpMime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+        .find(m => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(m));
+
+    function rpEffOpacity(e0) {
+        let o = 1;
+        for (let e = e0; e && e.nodeType === 1; e = e.parentElement) { const v = parseFloat(getComputedStyle(e).opacity); if (!isNaN(v)) o *= v; }
+        return o;
+    }
+    function rpVisible(e) {
+        if (e.checkVisibility) return e.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true, opacityProperty: true, visibilityProperty: true });
+        const cs = getComputedStyle(e); return cs.display !== 'none' && cs.visibility !== 'hidden';
+    }
+    const rpIgnored = e => e.tagName === 'CANVAS' || e.tagName === 'SCRIPT' || e.tagName === 'STYLE' || e.id === 'lolex-mods-toast';
+    function rpSameOrigin(src) {
+        try { const u = new URL(src, location.href); return u.origin === location.origin || u.protocol === 'data:' || u.protocol === 'blob:'; } catch (_) { return false; }
+    }
+    function rpDrawText(n, cs, k) {
+        const o = rp.octx, range = document.createRange(); range.selectNodeContents(n);
+        const rects = range.getClientRects(); if (!rects.length) return;
+        const r = rects[0];
+        let text = n.textContent.replace(/\s+/g, ' ').trim();
+        if (cs.textTransform === 'uppercase') text = text.toUpperCase(); else if (cs.textTransform === 'lowercase') text = text.toLowerCase();
+        o.font = `${cs.fontStyle} ${cs.fontWeight} ${parseFloat(cs.fontSize) * k.sx}px ${cs.fontFamily}`;
+        try { o.letterSpacing = ((parseFloat(cs.letterSpacing) || 0) * k.sx) + 'px'; } catch (_) {}
+        o.fillStyle = cs.color; o.textBaseline = 'middle'; o.textAlign = 'left';
+        const sh = /(rgba?\([^)]+\))\s+(-?[\d.]+)px\s+(-?[\d.]+)px(?:\s+(-?[\d.]+)px)?/.exec(cs.textShadow || '');
+        if (sh) { o.shadowColor = sh[1]; o.shadowOffsetX = parseFloat(sh[2]) * k.sx; o.shadowOffsetY = parseFloat(sh[3]) * k.sy; o.shadowBlur = (parseFloat(sh[4]) || 0) * k.sx; }
+        o.fillText(text, (r.left - k.ox) * k.sx, ((r.top + r.bottom) / 2 - k.oy) * k.sy);
+        o.shadowColor = 'transparent'; o.shadowBlur = 0; o.shadowOffsetX = o.shadowOffsetY = 0;
+    }
+    function rpWalk(e, k) {
+        const o = rp.octx;
+        if (rpIgnored(e) || !rpVisible(e)) return;
+        const rect = e.getBoundingClientRect(), cs = getComputedStyle(e);
+        const op = Math.max(0, Math.min(1, rpEffOpacity(e)));
+        if (op > 0 && (rect.width > 0 || rect.height > 0)) {
+            o.globalAlpha = op;
+            const x = (rect.left - k.ox) * k.sx, y = (rect.top - k.oy) * k.sy, w = rect.width * k.sx, h = rect.height * k.sy;
+            const rad = (parseFloat(cs.borderTopLeftRadius) || 0) * k.sx;
+            const bg = cs.backgroundColor;
+            if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)' && !(rp.canvas && e.contains(rp.canvas))) {
+                o.fillStyle = bg; o.beginPath(); if (o.roundRect) o.roundRect(x, y, w, h, rad); else o.rect(x, y, w, h); o.fill();
+            }
+            const bw = parseFloat(cs.borderTopWidth) || 0;
+            if (bw > 0 && cs.borderTopStyle !== 'none' && cs.borderTopColor !== 'rgba(0, 0, 0, 0)') {
+                o.strokeStyle = cs.borderTopColor; o.lineWidth = bw * k.sx; o.beginPath();
+                if (o.roundRect) o.roundRect(x + bw * k.sx / 2, y + bw * k.sy / 2, w - bw * k.sx, h - bw * k.sy, rad); else o.rect(x, y, w, h);
+                o.stroke();
+            }
+            if (e.tagName === 'IMG' && e.complete && e.naturalWidth && rpSameOrigin(e.currentSrc || e.src)) { try { o.drawImage(e, x, y, w, h); } catch (_) {} }
+            for (const n of e.childNodes) if (n.nodeType === 3 && n.textContent.trim()) rpDrawText(n, cs, k);
+            o.globalAlpha = 1;
+        }
+        for (const c of e.children) rpWalk(c, k);
+    }
+    function rpUpdateOverlay() {
+        const c = rp.canvas, w = c.width, h = c.height;
+        if (rp.ov.width !== w || rp.ov.height !== h) { rp.ov.width = w; rp.ov.height = h; }
+        rp.octx.clearRect(0, 0, w, h);
+        const br = c.getBoundingClientRect();
+        const k = { sx: w / br.width, sy: h / br.height, ox: br.left, oy: br.top };
+        Array.from(document.body.children).forEach(el => rpWalk(el, k));
+    }
+    function rpComposeFrame() {
+        const c = rp.canvas, w = c.width, h = c.height;
+        if (rp.comp.width !== w || rp.comp.height !== h) { rp.comp.width = w; rp.comp.height = h; }
+        rp.cctx.drawImage(c, 0, 0);                    // 描画直後なのでWebGLの中身が読める
+        if (M.replayUI) {
+            const now = performance.now();
+            if (now - rp.lastOv >= 1000 / RP_OV_FPS) { rp.lastOv = now; rpUpdateOverlay(); }
+            rp.cctx.drawImage(rp.ov, 0, 0);
+        }
+        rp.frames++;
+    }
+    function rpStartSlot() {
+        const chunks = [];
+        const rec = new MediaRecorder(rp.stream, { mimeType: rpMime, videoBitsPerSecond: M.replayMbps * 1e6 });
+        rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+        rec.start(1000);
+        const slot = { rec, chunks, start: performance.now() };
+        rp.slots.push(slot);
+        return slot;
+    }
+    function rpStopSlot(s) {
+        try { s.rec.ondataavailable = null; if (s.rec.state !== 'inactive') s.rec.stop(); } catch (_) {}
+        rp.slots = rp.slots.filter(x => x !== s);
+    }
+    function rpStopAll() {
+        clearTimeout(rp.stagger); clearInterval(rp.tick);
+        rp.slots.slice().forEach(rpStopSlot);
+        if (rp.stream) { rp.stream.getTracks().forEach(x => x.stop()); rp.stream = null; }
+        rp.canvas = null;
+    }
+    function rpStartAll() {
+        if ((!M.replayOn && !rp.manual) || !rpMime) return;
+        rp.canvas = modsMainCanvas();
+        if (!rp.canvas) { rp.stagger = setTimeout(rpStartAll, 1000); return; }
+        try {
+            if (rp.compose) {
+                rp.comp = rp.comp || document.createElement('canvas'); rp.cctx = rp.cctx || rp.comp.getContext('2d');
+                rp.ov = rp.ov || document.createElement('canvas'); rp.octx = rp.octx || rp.ov.getContext('2d');
+                rp.comp.width = rp.canvas.width; rp.comp.height = rp.canvas.height; rp.frames = 0;
+                rp.stream = rp.comp.captureStream(RP_FPS);
+            } else {
+                rp.stream = rp.canvas.captureStream(RP_FPS);
+            }
+        } catch (e) { console.error('[LOL.ex replay]', e); return; }
+        rp.startedAt = performance.now();
+        rpStartSlot();
+        if (!rp.manual) rp.stagger = setTimeout(() => { if (M.replayOn) rpStartSlot(); }, M.replayMin * 1000);
+        rp.tick = setInterval(rpTick, 1000);
+    }
+    function rpRestart() { rpStopAll(); rp.compose = true; rpStartAll(); }
+    function rpTick() {
+        if (!rp.canvas || !rp.canvas.isConnected) { if (rp.manual) { rpManualStop(true); } else rpRestart(); return; }
+        if (rp.compose && rp.frames === 0 && performance.now() - rp.startedAt > 5000) {
+            console.warn('[LOL.ex replay] 合成フレームが来ないため、キャンバスのみ録画に切り替えます');
+            rpStopAll(); rp.compose = false; rpStartAll(); return;
+        }
+        const now = performance.now();
+        if (!rp.manual) for (const s of rp.slots.slice()) if (now - s.start >= M.replayMin * 2000) { rpStopSlot(s); rpStartSlot(); }
+        modsUpdateReplayStatus();
+    }
+    async function rpSave() {
+        if (!rp.slots.length) { modsToast(t('modsReplayNotRec')); return; }
+        const slot = rp.slots.reduce((a, b) => (a.start <= b.start ? a : b));
+        const sec = Math.round((performance.now() - slot.start) / 1000);
+        await new Promise(res => {
+            const prev = slot.rec.ondataavailable;
+            slot.rec.ondataavailable = e => { prev && prev(e); slot.rec.ondataavailable = prev; res(); };
+            try { slot.rec.requestData(); } catch (_) { res(); }
+            setTimeout(res, 1500);
+        });
+        const blob = new Blob(slot.chunks, { type: 'video/webm' });
+        const d = new Date(), p2 = n => String(n).padStart(2, '0');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `lolbeans-replay-${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}.webm`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+        modsToast(`${t('modsReplaySaved')}: ${sec}s (${(blob.size / 1048576).toFixed(1)}MB)`);
+    }
+    // 常に保存オフ時の手動録画
+    function rpManualStart() {
+        if (M.replayOn || rp.manual) return;
+        if (!rpMime) { modsToast('MediaRecorder/WebM 非対応'); return; }
+        rp.manual = true; rp.compose = true; rpStartAll();
+        modsToast(t('modsReplayRecStarted')); modsUpdateReplayStatus();
+    }
+    async function rpManualStop(save) {
+        if (!rp.manual) return;
+        try { if (save) await rpSave(); } finally { rp.manual = false; rpStopAll(); modsUpdateReplayStatus(); }
+    }
+    function rpAction() { if (M.replayOn) rpSave(); else if (rp.manual) rpManualStop(true); else rpManualStart(); }
+    function modsSyncReplayButton() {
+        const b = document.getElementById('modsReplaySave'); if (!b) return;
+        const mode = M.replayOn ? 'save' : (rp.manual ? 'stop' : 'start');
+        if (b.dataset.mode === mode) return; b.dataset.mode = mode;
+        const icon = mode === 'save' ? 'fa-save' : (mode === 'stop' ? 'fa-stop' : 'fa-circle');
+        const label = mode === 'save' ? t('modsReplaySave') : (mode === 'stop' ? t('modsReplayStopSave') : t('modsReplayStart'));
+        b.innerHTML = `<i class="fas ${icon}"></i> ${label}<span class="lolex-hk"> (Alt+S)</span>`;
+        b.classList.toggle('danger', mode === 'stop'); b.classList.toggle('accent', mode !== 'stop');
+    }
+    function modsUpdateReplayStatus() {
+        modsSyncReplayButton();
+        const s = document.getElementById('modsReplayStatus');
+        if (!s) return;
+        if (rp.manual) { const st = rp.slots.length ? Math.round((performance.now() - rp.slots[0].start) / 1000) : 0; s.textContent = `REC — ${st}s`; return; }
+        if (!M.replayOn) { s.textContent = 'OFF'; return; }
+        const oldest = rp.slots.length ? Math.round((performance.now() - Math.min(...rp.slots.map(x => x.start))) / 1000) : 0;
+        s.textContent = `ON — ${oldest}s${rp.compose ? ' (UI)' : ''}`;
+    }
+
+    // ---------- レンダラーを包む(render はインスタンスごとに定義されるためコンストラクタごと) ----------
+    function modsHookRenderer(r) {
+        const spr = r.setPixelRatio;
+        if (typeof spr === 'function' && !spr.__lolex) {
+            const w = function (v) {
+                modsBasePR.set(r, v);
+                const f = modsIsMain(r) ? modsPixelFactor() : 1;
+                modsLastF.set(r, f);
+                return spr.call(this, v * f);
+            };
+            w.__lolex = true; r.setPixelRatio = w;
+        }
+        const orig = r.render;
+        if (typeof orig === 'function' && !orig.__lolex) {
+            const rw = function (scene, camera) {
+                try {
+                    if (camera && camera.isPerspectiveCamera && camera.rotation.order === 'YXZ' && scene && scene.children) {
+                        const lp = modsLocalPlayer(scene, camera);
+                        if (lp) MW.__lolexPlayer = lp;
+                        if (M.fpv && lp) { modsApplyFPV(lp, camera); _fpvWasOn = true; }
+                        else if (_fpvWasOn) { _fpvWasOn = false; if (_fpvNearSet) { camera.near = 0.1; let g = 75; try { g = parseFloat(localStorage.getItem('FOV')) || 75; } catch (_) {} camera.fov = g; camera.updateProjectionMatrix(); _fpvNearSet = false; } }
+                        modsApplyFOV(camera);
+                        modsApplyBones(scene, lp);
+                    }
+                } catch (e) { console.error('[LOL.ex mods]', e); }
+                const res = orig.apply(this, arguments);
+                try { if (rp.stream && rp.compose && rp.canvas && r.domElement === rp.canvas) rpComposeFrame(); } catch (e) { console.error('[LOL.ex replay]', e); }
+                return res;
+            };
+            rw.__lolex = true; r.render = rw;
+        }
+        modsRenderers.add(r);
+    }
+    function modsInstall() {
+        const T = MW.THREE;
+        if (!T || !T.WebGLRenderer) return false;
+        if (T.WebGLRenderer.__lolexHooked) return true;
+        modsT = T;
+        const Orig = T.WebGLRenderer;
+        const Wrapped = function (...args) {
+            const r = Reflect.construct(Orig, args, new.target || Wrapped);
+            modsHookRenderer(r);
+            return r;
+        };
+        Wrapped.prototype = Orig.prototype;
+        Object.setPrototypeOf(Wrapped, Orig);
+        Wrapped.__lolexHooked = true;
+        T.WebGLRenderer = Wrapped;
+        console.log('[LOL.ex] game hooks installed');
+        return true;
+    }
+    const _modsHookTimer = setInterval(() => { if (modsInstall()) clearInterval(_modsHookTimer); }, 20);
+
+    // ---------- ホットキー ----------
+    window.addEventListener('keydown', (e) => {
+        if (!e.altKey) return;
+        if (e.code === 'KeyS') {
+            rpAction(); e.preventDefault(); e.stopImmediatePropagation();
+        }
+    }, true);
+
+    // ---------- 起動 ----------
+    (function modsBoot() {
+        if (!rpMime) { console.warn('[LOL.ex replay] MediaRecorder/WebM 非対応'); return; }
+        const go = () => { rp.compose = true; rpStartAll(); };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+    })();
+
+    // ---------- 設定UI ----------
+    function modsRangeRow(id, labelHtml, min, max, step, value, fmt) {
+        const row = document.createElement('div'); row.className = 'lolex-setting-row';
+        const label = document.createElement('label'); label.htmlFor = id; label.className = 'setting-name'; label.innerHTML = labelHtml;
+        const box = document.createElement('div'); box.style.cssText = 'display:flex;align-items:center;gap:8px;';
+        const input = document.createElement('input'); input.type = 'range'; input.id = id; input.min = min; input.max = max; input.step = step; input.value = value;
+        input.dataset.fmt = fmt || '';
+        const val = document.createElement('span'); val.className = 'lolex-range-val'; val.id = id + 'Val';
+        val.textContent = modsFmt(value, fmt);
+        box.appendChild(input); box.appendChild(val); row.appendChild(label); row.appendChild(box);
+        return row;
+    }
+    function modsFmt(v, fmt) {
+        if (fmt === 'x') return '×' + Number(v).toFixed(1);
+        if (fmt === 'deg') return Math.round(v) + '°';
+        if (fmt === 'pct') return Math.round(v) + '%';
+        return String(v);
+    }
+    function modsSelectRow(id, labelHtml, options, value) {
+        const row = document.createElement('div'); row.className = 'lolex-setting-row';
+        const label = document.createElement('label'); label.htmlFor = id; label.className = 'setting-name'; label.innerHTML = labelHtml;
+        const sel = document.createElement('select'); sel.id = id;
+        options.forEach(([v, text]) => { const o = document.createElement('option'); o.value = v; o.textContent = text; if (String(v) === String(value)) o.selected = true; sel.appendChild(o); });
+        row.appendChild(label); row.appendChild(sel);
+        return row;
+    }
+
+    // ---------- 使い方ガイド ----------
+    function lolexBuildHelp(container) {
+        const ja = getLang() === 'ja';
+        const T = [
+            ['help_basic', 'fas fa-book', ja ? '基本' : 'Basics', ja ? [
+                "画面上のタブ「LOL.ex」から設定を開き、上のカテゴリタブで切り替えます。",
+                "カードの見出しをタップ(クリック)すると、折りたためます。",
+                "設定は自動で保存され、再読み込みしても残ります。",
+                "見た目に関する機能は、自分の画面にだけ反映されます。"
+            ] : [
+                "Open the LOL.ex tab at the top and switch pages with the category tabs.",
+                "Tap (click) a card header to collapse it.",
+                "Settings are saved automatically and stay after reloading.",
+                "Visual features only affect your own screen."
+            ]],
+            ['help_quick', 'fas fa-bolt', ja ? '簡易メニュー' : 'Quick Menu', ja ? [
+                "PC: Alt+Q で開閉します(Esc・✕でも閉じます)。",
+                "スマホ: 画面の右端から左へスワイプ、または右端のつまみをタップで開きます。右へスワイプ・✕・外側タップで閉じます。",
+                "キー表示・音楽・録画を、設定画面を開かずにすぐ切り替えられます。"
+            ] : [
+                "PC: Alt+Q toggles it (Esc or the X also closes it).",
+                "Mobile: swipe left from the right screen edge, or tap the small handle on the right edge. Swipe right, tap X or tap outside to close.",
+                "Quickly switch key display, music and recording without opening Settings."
+            ]],
+            ['help_game', 'fas fa-flag-checkered', ja ? 'ゲーム補助' : 'Game Helpers', ja ? [
+                "ベストタイム計算: 「タイムを計算」でAPIからベストタイムを取得して合計を出します(同名コースは最速タイムのみ)。「保存」でサムネイル付きの一覧をPNGで保存できます。"
+            ] : [
+                "Best times: press Calculate to fetch your best times from the API and total them (only the fastest time per course name). Save exports the list with thumbnails as a PNG."
+            ]],
+            ['help_look', 'fas fa-paint-brush', ja ? '見た目・表示' : 'Appearance', ja ? [
+                "UIメイン/サブカラーでテーマ色を変えられます。背景画像はURLリストからランダムに適用でき、「リストを編集」で管理します。",
+                "キー/マウス入力表示: 押しているキーやマウスボタンをゲーム画面に表示します。表示するキーの追加と表示位置の変更ができます。"
+            ] : [
+                "Change the theme colors with the UI main/sub color pickers. Background images are applied at random from a URL list you manage with Edit list.",
+                "Key/mouse input display: shows the keys and mouse buttons you press on the game screen. You can add keys and change its position."
+            ]],
+            ['help_music', 'fas fa-music', ja ? '音楽 (YouTube)' : 'Music (YouTube)', ja ? [
+                "YouTubeのURLまたはIDを入力してEnterで読み込みます。再生・曲送り・音量はプレイヤーのカードで操作します。",
+                "プレイヤーの表示/非表示は、設定した表示キー(初期設定 Ctrl+M)か、右下のフロートボタンで切り替えます。",
+                "「YouTube BGMプレイヤーを使う」をオフにすると、プレイヤー機能ごと無効になります。"
+            ] : [
+                "Enter a YouTube URL or ID and press Enter to load it. Play, skip and volume are on the player card.",
+                "Show or hide the player with the toggle key (default Ctrl+M) or the floating button at the bottom right.",
+                "Turning off Enable YouTube BGM player disables the whole player feature."
+            ]],
+            ['help_rec', 'fas fa-video', ja ? '録画 (リプレイ)' : 'Recording', ja ? [
+                "「常に保存」がオン: 直近の映像を常に保持します。Alt+S か「今すぐ保存」で保存します(長さは最低保持秒数〜その2倍)。",
+                "「常に保存」がオフ: ボタンか Alt+S で録画を開始し、もう一度押すと停止して保存します。",
+                "保存形式はWebMで、音は入りません。"
+            ] : [
+                "Always-on ON: the most recent footage is always kept. Alt+S or Save now saves it (length is between the minimum and twice that).",
+                "Always-on OFF: the button or Alt+S starts a recording; press again to stop and save.",
+                "Files are saved as WebM, without audio."
+            ]]
+        ];
+        return T.map(([key, icon, title, items]) => {
+            const fs = document.createElement('fieldset');
+            fs.innerHTML = `<legend><i class="${icon}"></i> ${title}</legend><div class="lolex-update-text"><ul class="lolex-upd-list">${items.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+            container.appendChild(fs);
+            return [fs, key];
+        });
+    }
+
+    function modsBuildSettings(container) {
+        if (!document.getElementById('lolex-mods-style')) {
+            const st = document.createElement('style'); st.id = 'lolex-mods-style';
+            st.textContent = '.lolex-setting-row input[type=range]{width:150px;accent-color:var(--primary-color);} .lolex-range-val{min-width:46px;text-align:right;font-variant-numeric:tabular-nums;}';
+            document.head.appendChild(st);
+        }
+        const out = [];
+
+        // ── インスタントリプレイ ──
+        const rpFs = document.createElement('fieldset');
+        const rl = document.createElement('legend'); rl.innerHTML = `<i class="fas fa-video"></i> ${t('modsReplayTitle')}`; rpFs.appendChild(rl);
+        rpFs.appendChild(makeToggleRow('modsReplayOn', `<i class="fas fa-circle"></i>${t('modsReplayEnable')}`, M.replayOn));
+        rpFs.appendChild(modsSelectRow('modsReplayMin', `<i class="fas fa-clock"></i>${t('modsReplayMin')}`, [[30, '30s'], [60, '60s'], [90, '90s'], [120, '120s']], M.replayMin));
+        rpFs.appendChild(modsSelectRow('modsReplayMbps', `<i class="fas fa-tachometer-alt"></i>${t('modsReplayBitrate')}`, [[2, '2 Mbps'], [4, '4 Mbps'], [6, '6 Mbps'], [8, '8 Mbps']], M.replayMbps));
+        rpFs.appendChild(makeToggleRow('modsReplayUI', `<i class="fas fa-layer-group"></i>${t('modsReplayUI')}`, M.replayUI));
+        const sr = document.createElement('div'); sr.className = 'lolex-setting-row';
+        sr.innerHTML = `<span class="setting-name"><i class="fas fa-info-circle"></i>${t('modsReplayStatus')}</span><span id="modsReplayStatus" class="lolex-range-val" style="min-width:90px"></span>`;
+        rpFs.appendChild(sr);
+        const rg = document.createElement('div'); rg.className = 'lolex-btn-group';
+        rg.innerHTML = `<button id="modsReplaySave" class="accent"><i class="fas fa-save"></i> ${t('modsReplaySave')}<span class="lolex-hk"> (Alt+S)</span></button>`;
+        rpFs.appendChild(rg);
+        const rn = document.createElement('div'); rn.className = 'lolex-note'; rn.textContent = t('modsReplayNote'); rpFs.appendChild(rn);
+        container.appendChild(rpFs); out.push([rpFs, 'modsreplay']);
+        setTimeout(modsUpdateReplayStatus, 0);
+        return out;
+    }
+
+    // ---------- 設定画面をカテゴリ(タブ)で分ける ----------
+    const LOLEX_CATS = [
+        { id: 'info',  icon: 'fa-info-circle', label: 'catInfo',  keys: ['update', 'lang'] },
+        { id: 'game',  icon: 'fa-flag-checkered', label: 'catGame', keys: ['besttimes', 'chattr'] },
+        { id: 'look',  icon: 'fa-paint-brush', label: 'catLook',  keys: ['visual', 'keydisplay'] },
+        { id: 'music', icon: 'fa-music',       label: 'catMusic', keys: ['yt'] },
+        { id: 'rec',   icon: 'fa-video',       label: 'catRec',   keys: ['modsreplay'] },
+        { id: 'help',  icon: 'fa-question-circle', label: 'catHelp', keys: ['help_basic', 'help_quick', 'help_game', 'help_look', 'help_music', 'help_rec'] },
+    ];
+    // Google Fonts の Material Symbols を読み込む(読み込み完了後にだけアイコンを表示)
+    function lolexEnsureMaterialFont() {
+        if (document.getElementById('lolex-ms-font')) return;
+        const l = document.createElement('link'); l.id = 'lolex-ms-font'; l.rel = 'stylesheet';
+        l.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&display=block';
+        l.onload = () => {
+            try {
+                document.fonts.load('20px "Material Symbols Rounded"', 'language')
+                    .then(() => document.documentElement.classList.add('lolex-ms-ready'))
+                    .catch(() => {});
+            } catch (_) {}
+        };
+        (document.head || document.documentElement).appendChild(l);
+    }
+    const LOLEX_MS_ICONS = {
+        update: 'info', lang: 'language', airmove: 'swap_horiz', course: 'flag', besttimes: 'timer', chattr: 'translate',
+        visual: 'palette', keydisplay: 'keyboard', yt: 'music_note',
+        modsview: 'visibility', modsfx: 'auto_fix_high', modsreplay: 'videocam',
+        help_basic: 'menu_book', help_quick: 'bolt', help_game: 'flag', help_look: 'palette', help_music: 'music_note', help_view: 'visibility', help_rec: 'videocam'
+    };
+    function lolexApplySettingsCategories(container, fsList) {
+        lolexEnsureMaterialFont();
+        if (!document.getElementById('lolex-cat-style')) {
+            const st = document.createElement('style'); st.id = 'lolex-cat-style';
+            st.textContent = [
+                /* ===== カテゴリタブ(下線タイプ・フラット) ===== */
+                '.lolex-cat-bar{display:flex;flex-wrap:wrap;gap:2px;margin:0 0 14px;position:sticky;top:0;z-index:5;padding:0;background:var(--col-bg);border-bottom:1px solid var(--col-border);}',
+                '.lolex-cat-bar button{padding:9px 14px;border:none;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--col-sub);cursor:pointer;font-size:.88em;font-weight:600;margin-bottom:-1px;transition:color .15s,border-color .15s;}',
+                '.lolex-cat-bar button i{margin-right:5px;opacity:.8;}',
+                '.lolex-cat-bar button:hover{color:var(--col-text);}',
+                '.lolex-cat-bar button.active{color:var(--primary-color);border-bottom-color:var(--primary-color);background:transparent;font-weight:700;}',
+                /* ===== カード配置(1行に複数) ===== */
+                '#lolex-settings{display:grid !important;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start;}',
+                '#lolex-settings > :not(fieldset){grid-column:1/-1;}',
+                '#lolex-settings > fieldset{min-width:0;margin:0;border:1px solid var(--col-border);border-radius:10px;background:var(--col-surface);box-shadow:none;}',
+                '#lolex-settings > fieldset:hover{border-color:var(--col-border);}',
+                /* ===== カード見出し(塗りなし・フラット) ===== */
+                /* legendがfieldsetの枠線にまたがる標準描画をやめ、カード内の通常ヘッダーにする */
+                '#lolex-settings legend{float:left;width:100%;box-sizing:border-box;padding:10px 12px;font-size:.86em;font-weight:700;letter-spacing:0;text-transform:none;color:var(--col-text);background:rgba(255,255,255,.05);background:color-mix(in srgb,var(--primary-color) 13%,transparent);border-bottom:1px solid var(--col-border);border-radius:0;}',
+                '#lolex-settings legend + *{clear:both;}',
+                '#lolex-settings fieldset.lolex-collapsed legend{border-bottom-color:transparent;}',
+                '#lolex-settings legend i{color:var(--primary-color);margin-right:2px;}',
+                '#lolex-settings legend .legend-arrow{opacity:.45;}',
+                '#lolex-settings legend:hover .legend-arrow{opacity:.9;}',
+                /* ===== 設定行(ラベル左・操作右・ホバーで行ハイライト) ===== */
+                '#lolex-settings .lolex-setting-row{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05);transition:background .12s;}',
+                '#lolex-settings .lolex-setting-row:hover{background:rgba(255,255,255,.035);}',
+                '#lolex-settings .lolex-setting-row .setting-name{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.4;}',
+                /* ラベルのアイコンは控えめに(色付きドットなど個別指定のものは除外) */
+                '#lolex-settings .lolex-setting-row .setting-name i:not([style]){color:var(--col-sub);width:1.25em;text-align:center;}',
+                /* ===== 操作部品を統一 ===== */
+                '#lolex-settings .lolex-setting-row select,#lolex-settings .lolex-setting-row input[type=text]{min-width:0;max-width:150px;height:28px;padding:0 8px;border-radius:6px;}',
+                '#lolex-settings .lolex-setting-row input[type=range]{width:120px;}',
+                '#lolex-settings .lolex-setting-row button{background:transparent;color:var(--primary-color);border:1px solid var(--primary-color);}',
+                '#lolex-settings .lolex-setting-row button:hover{background:var(--primary-color);color:#0d0d14;}',
+                /* ===== ボタン群:通常は枠線、強調だけ塗り ===== */
+                '#lolex-settings .lolex-btn-group{padding:8px 12px;flex-wrap:wrap;}',
+                '#lolex-settings .lolex-btn-group button:not(.accent):not(.danger):not(.muted){background:transparent;color:var(--primary-color);border:1px solid var(--primary-color);}',
+                '#lolex-settings .lolex-btn-group button:not(.accent):not(.danger):not(.muted):hover{background:var(--primary-color);color:#0d0d14;}',
+                /* ===== 補足文は控えめに ===== */
+                '#lolex-settings .lolex-note{color:var(--col-sub);padding:6px 12px 8px;}',
+                '#lolex-settings .lolex-update-text{padding:10px 12px 6px;}',
+                /* ===== カード見出しのGoogleアイコン(Material Symbols)。読み込めた時だけ表示、失敗時は従来アイコン ===== */
+                '.lolex-ic{display:none;font-family:"Material Symbols Rounded";font-weight:400;font-style:normal;font-size:20px;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;direction:ltr;-webkit-font-feature-settings:"liga";font-feature-settings:"liga";-webkit-font-smoothing:antialiased;color:var(--primary-color);}',
+                '.lolex-ms-ready .lolex-ic{display:inline-block;}',
+                '.lolex-ms-ready #lolex-settings legend > i,.lolex-ms-ready #lolex-settings legend .legend-left > i{display:none;}',
+                /* ===== 最新アップデート情報(箇条書きカード・横幅いっぱい) ===== */
+                '#lolex-settings[data-cat="info"]{grid-template-columns:repeat(2,minmax(0,1fr));}',
+                '#lolex-settings .lolex-update-text{padding:10px 14px 8px;}',
+                '#lolex-settings .lolex-upd-head{margin-bottom:4px;}',
+                '#lolex-settings .lolex-version-badge{margin:0;padding:2px 10px;color:var(--primary-color);border-color:var(--primary-color);font-weight:700;font-size:.8em;}',
+                '#lolex-settings .lolex-upd-list{list-style:none;margin:0;padding:0;}',
+                '#lolex-settings .lolex-upd-list li{position:relative;padding:8px 0 8px 18px;font-size:.9em;line-height:1.6;border-bottom:1px solid rgba(255,255,255,.07);}',
+                '#lolex-settings .lolex-upd-list li:last-child{border-bottom:none;}',
+                '#lolex-settings .lolex-upd-list li:before{content:"";position:absolute;left:4px;top:1.1em;width:6px;height:6px;border-radius:50%;background:var(--primary-color);}',
+                /* ===== YouTubeプレイヤー機能オフ時は親トグル以外を隠す ===== */
+                '#lolex-settings fieldset.lolex-yt-off .lolex-setting-row:not(.lolex-yt-master),#lolex-settings fieldset.lolex-yt-off .lolex-note{display:none;}',
+                /* ===== スマホ対応 ===== */
+                '@media (pointer:coarse){.lolex-hk,#lolex-settings .lolex-hk-row{display:none !important;} #lolex-settings .switch{transform:scale(1.15);margin-right:3px;}}',
+                '@media (max-width:700px){',
+                '#lolex-settings,#lolex-settings[data-cat]{grid-template-columns:minmax(0,1fr);gap:10px;}',
+                '.lolex-cat-bar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}',
+                '.lolex-cat-bar::-webkit-scrollbar{display:none;}',
+                '.lolex-cat-bar button{white-space:nowrap;flex:0 0 auto;padding:11px 14px;}',
+                '#lolex-settings legend{padding:13px 12px;}',
+                '#lolex-settings .lolex-setting-row{padding:11px 12px;min-height:46px;}',
+                '#lolex-settings .lolex-setting-row select,#lolex-settings .lolex-setting-row input[type=text]{height:34px;max-width:150px;font-size:16px;}',
+                '#lolex-settings .lolex-setting-row input[type=range]{width:100px;}',
+                '#lolex-settings .lolex-setting-row button{padding:8px 12px;}',
+                '#lolex-settings .lolex-btn-group button{padding:10px 12px;}',
+                'html #yt-card{width:150px;height:150px;right:10px;bottom:-200px;}',
+                'html #yt-card.yt-card-visible{bottom:10px;}',
+                'html #yt-url-panel{right:10px;bottom:178px;width:min(240px,calc(100vw - 20px));}',
+                'html #yt-url-panel input{font-size:16px;}',
+                'html #yt-float-btn{right:10px;bottom:170px;width:44px;height:44px;}',
+                'html .yt-card-btn{padding:8px 6px;font-size:16px;}',
+                'html #yt-card-volume{width:40px;}',
+                '}'
+            ].join(' ');
+            document.head.appendChild(st);
+        }
+        if (!document.getElementById('lolex-sub-style')) {
+            const st2 = document.createElement('style'); st2.id = 'lolex-sub-style';
+            st2.textContent = [
+                /* ===== サブカラーを細部のアクセントに ===== */
+                '#lolex-settings .lolex-setting-row input[type=range],#lolex-settings input[type=checkbox],#lolex-qm input[type=range]{accent-color:var(--secondary-color);}',
+                '#lolex-settings .lolex-range-val{color:var(--secondary-color);font-weight:700;}',
+                '#lolex-settings > fieldset:hover{border-color:var(--secondary-color);}',
+                '#lolex-settings .lolex-setting-row select:focus,#lolex-settings .lolex-setting-row input:focus{outline:none;border-color:var(--secondary-color);box-shadow:0 0 0 1px var(--secondary-color);}',
+                '#lolex-settings .lolex-setting-row:hover{box-shadow:inset 2px 0 0 var(--secondary-color);}',
+                '#lolex-settings legend .legend-arrow{color:var(--secondary-color);}',
+                '#lolex-settings .lolex-upd-list li:before{background:var(--secondary-color);}',
+                '#lolex-settings .lolex-cat-bar button:hover i,.lolex-cat-bar button:hover i{color:var(--secondary-color);opacity:1;}',
+                '.lolex-cat-bar button.active i{color:var(--secondary-color);opacity:1;}',
+                '#lolex-settings .lolex-setting-row .setting-name i:not([style]){color:var(--secondary-color);opacity:.75;}',
+            ].join('')+'';
+            document.head.appendChild(st2);
+        }
+        const keyToCat = {};
+        LOLEX_CATS.forEach(c => c.keys.forEach(k => { keyToCat[k] = c.id; }));
+        fsList.forEach(([fs, key]) => { fs.dataset.lolexCat = keyToCat[key] || 'info'; });
+        fsList.forEach(([fs, key]) => {
+            fs.dataset.lolexKey = key;
+            const name = LOLEX_MS_ICONS[key]; const lg = fs.querySelector(':scope > legend');
+            if (!name || !lg || lg.querySelector('.lolex-ic')) return;
+            const sp = document.createElement('span'); sp.className = 'lolex-ic'; sp.textContent = name;
+            const host = lg.querySelector('.legend-left') || lg;
+            host.insertBefore(sp, host.firstChild);
+        });
+        let cur = null; try { cur = localStorage.getItem('lolex-settings-cat'); } catch (_) {}
+        if (!LOLEX_CATS.some(c => c.id === cur)) cur = 'info';
+        const bar = document.createElement('div'); bar.className = 'lolex-cat-bar';
+        const show = (id) => {
+            container.dataset.cat = id;
+            container.querySelectorAll(':scope > fieldset').forEach(fs => { fs.style.display = fs.dataset.lolexCat === id ? '' : 'none'; });
+            bar.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.cat === id));
+            try { localStorage.setItem('lolex-settings-cat', id); } catch (_) {}
+        };
+        LOLEX_CATS.forEach(c => {
+            const b = document.createElement('button'); b.type = 'button'; b.dataset.cat = c.id;
+            b.innerHTML = `<i class="fas ${c.icon}"></i> ${t(c.label)}`;
+            b.addEventListener('click', () => show(c.id));
+            bar.appendChild(b);
+        });
+        container.insertBefore(bar, container.firstChild);
+        show(cur);
+    }
+
+    function modsBindSettings() {
+        const bindRange = (id, apply) => {
+            const el = document.getElementById(id); if (!el || el.dataset.lxBound) return; el.dataset.lxBound = '1';
+            el.addEventListener('input', () => {
+                const v = parseFloat(el.value);
+                const lab = document.getElementById(id + 'Val'); if (lab) lab.textContent = modsFmt(v, el.dataset.fmt);
+                apply(v); modsSave();
+            });
+        };
+        const bindCheck = (id, apply) => {
+            const el = document.getElementById(id); if (!el || el.dataset.lxBound) return; el.dataset.lxBound = '1';
+            el.addEventListener('change', () => { apply(el.checked); modsSave(); });
+        };
+        const bindSel = (id, apply) => {
+            const el = document.getElementById(id); if (!el || el.dataset.lxBound) return; el.dataset.lxBound = '1';
+            el.addEventListener('change', () => { apply(el.value); modsSave(); });
+        };
+        bindCheck('modsReplayOn', async v => { if (v && rp.manual) await rpManualStop(true); M.replayOn = v; if (v) { rp.compose = true; rpStartAll(); } else rpStopAll(); modsUpdateReplayStatus(); });
+        bindSel('modsReplayMin', v => { M.replayMin = parseInt(v); rpRestart(); });
+        bindSel('modsReplayMbps', v => { M.replayMbps = parseInt(v); rpRestart(); });
+        bindCheck('modsReplayUI', v => { M.replayUI = v; });
+        const sv = document.getElementById('modsReplaySave');
+        if (sv && !sv.dataset.lxBound) { sv.dataset.lxBound = '1'; sv.addEventListener('click', rpAction); }
+    }
+
+    // ================================================================================================
+    //  ★ チャット自動翻訳
+    //     選択中の言語(getLang)を翻訳先にして、それ以外の言語の発言を発言の下に表示します。
+    //     言語の判定はGoogle翻訳の自動判定なので、日本語・韓国語・中国語に限らず全言語が対象です。
+    //     ※ゲームは #feed / #feed-history の中身を innerHTML で丸ごと作り直すため、
+    //       DOMの変化を監視して、作り直されるたびに翻訳を付け直しています。
+    // ================================================================================================
+    const CT = { cache: new Map(), pending: new Set(), queue: [], running: 0, targets: [], obs: null, timer: null, booted: false };
+    const CT_MAX_CONCURRENT = 2, CT_CACHE_LIMIT = 500;
+    const chatTrOn = () => getStoredBool(STORAGE.CHAT_TR, true);
+    const chatTrTarget = () => (getLang() === 'en' ? 'en' : 'ja');
+
+    function chatTrHttpGet(url) {
+        return new Promise((resolve, reject) => {
+            if (typeof GM_xmlhttpRequest === 'function') {
+                GM_xmlhttpRequest({
+                    method: 'GET', url, timeout: 8000,
+                    onload: (r) => (r.status >= 200 && r.status < 300 ? resolve(r.responseText) : reject(new Error('HTTP ' + r.status))),
+                    onerror: () => reject(new Error('network')),
+                    ontimeout: () => reject(new Error('timeout')),
+                });
+            } else {
+                fetch(url).then(r => (r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)))).then(resolve, reject);
+            }
+        });
+    }
+
+    // 翻訳先 tl に翻訳。発言がすでに tl の言語、または翻訳結果が原文と同じなら null(=表示しない)
+    async function chatTrTranslate(text, tl) {
+        const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' +
+            encodeURIComponent(tl) + '&dt=t&q=' + encodeURIComponent(text);
+        const data = JSON.parse(await chatTrHttpGet(url));
+        const detected = String(data[2] || '').toLowerCase();
+        const out = (data[0] || []).map(s => (s && s[0]) || '').join('');
+        if (detected === tl) return null;
+        if (!out || out.trim().toLowerCase() === text.trim().toLowerCase()) return null;
+        return out;
+    }
+
+    function chatTrSetCache(key, val) {
+        CT.cache.set(key, val);
+        if (CT.cache.size > CT_CACHE_LIMIT) CT.cache.delete(CT.cache.keys().next().value);
+    }
+
+    function chatTrPump() {
+        while (CT.running < CT_MAX_CONCURRENT && CT.queue.length) {
+            const job = CT.queue.shift();
+            CT.running++;
+            chatTrTranslate(job.text, job.tl)
+                .then(out => chatTrSetCache(job.key, out))
+                .catch(() => chatTrSetCache(job.key, null))   // 失敗した発言は何も表示しない
+                .finally(() => { CT.pending.delete(job.key); CT.running--; chatTrScheduleScan(); chatTrPump(); });
+        }
+    }
+
+    function chatTrEnqueue(text, tl, key) {
+        if (CT.pending.has(key)) return;
+        CT.pending.add(key);
+        CT.queue.push({ text, tl, key });
+        chatTrPump();
+    }
+
+    function chatTrEnsureStyle() {
+        if (document.getElementById('lolex-chat-tr-style')) return;
+        const st = document.createElement('style'); st.id = 'lolex-chat-tr-style';
+        st.textContent = '.lolex-chat-tr{display:block;font-size:.85em;opacity:.9;color:#8fd3ff;padding-left:1vh;word-break:break-word;}';
+        (document.head || document.documentElement).appendChild(st);
+    }
+
+    function chatTrExtract(msg) {
+        const name = msg.querySelector('.namelabel');
+        if (!name) return '';
+        const clone = msg.cloneNode(true);
+        clone.querySelectorAll('.lolex-chat-tr').forEach(n => n.remove());
+        return (clone.textContent || '').slice((name.textContent || '').length).replace(/^\s*:\s*/, '').trim();
+    }
+
+    function chatTrAnnotate(root, tl) {
+        root.querySelectorAll('.chatmsg').forEach(msg => {
+            if (msg.querySelector('.lolex-chat-tr')) return;
+            const text = chatTrExtract(msg);
+            if (text.length < 2 || !/\p{L}/u.test(text)) return;
+            const key = tl + '\u0000' + text;
+            if (!CT.cache.has(key)) { chatTrEnqueue(text, tl, key); return; }
+            const out = CT.cache.get(key);
+            if (!out) return;
+            const span = document.createElement('span');
+            span.className = 'lolex-chat-tr';
+            span.textContent = '↳ ' + out;
+            msg.appendChild(span);
+        });
+    }
+
+    function chatTrObserve() { CT.targets.forEach(tg => CT.obs.observe(tg, { childList: true, subtree: true })); }
+    function chatTrScheduleScan() { if (CT.timer) return; CT.timer = setTimeout(() => { CT.timer = null; chatTrScan(); }, 30); }
+
+    function chatTrScan() {
+        if (!CT.booted || !chatTrOn()) return;
+        CT.obs.disconnect();   // 自分の変更で再発火しないようにする
+        try {
+            const tl = chatTrTarget();
+            CT.targets.forEach(tg => chatTrAnnotate(tg, tl));
+            const h = document.getElementById('feed-history');
+            if (h && h.dataset.lolexTrStick === '1') h.scrollTop = h.scrollHeight;
+        } finally { chatTrObserve(); }
+    }
+
+    function chatTrRemoveAll() { document.querySelectorAll('.lolex-chat-tr').forEach(n => n.remove()); }
+    function chatTrApply() { if (chatTrOn()) chatTrScan(); else chatTrRemoveAll(); }
+    function chatTrReset() { chatTrRemoveAll(); chatTrScan(); }   // 言語を切り替えたとき
+
+    function chatTrBoot() {
+        const tryBoot = () => {
+            const feed = document.getElementById('feed'), hist = document.getElementById('feed-history');
+            if (!feed && !hist) return false;
+            chatTrEnsureStyle();
+            [feed, hist].filter(Boolean).forEach(tg => CT.targets.push(tg));
+            if (hist) hist.addEventListener('scroll', () => {
+                hist.dataset.lolexTrStick = hist.scrollTop + hist.clientHeight >= hist.scrollHeight - 8 ? '1' : '0';
+            });
+            CT.obs = new MutationObserver(() => chatTrScheduleScan());
+            CT.booted = true;
+            chatTrObserve();
+            chatTrScan();
+            return true;
+        };
+        if (tryBoot()) return;
+        const iv = setInterval(() => { if (tryBoot()) clearInterval(iv); }, 500);
+        setTimeout(() => clearInterval(iv), 300000);
+    }
+
+    chatTrBoot();
     initializeScript();
 
 })();

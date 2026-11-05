@@ -12,148 +12,44 @@
     <script src="https://tanabesan.github.io/lolbeans/nav-menu.js" defer></script>
     
     <style>
-        :root {
-            --primary-color: #ff00ff;
-            --secondary-color: #00ffff;
-            --background-color: #12141f;
-            --card-color: #1a1d2b;
-            --panel-line: #2c3044;
-            --text-color-dark: #d8dce8;
-            --text-color-light: #d8dce8;
-            --shadow-light: 0 0 10px rgba(255, 0, 255, 0.12);
-            --shadow-hover: 0 0 22px rgba(255, 0, 255, 0.32);
-        }
-
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            margin: 0;
-            padding: 0;
-            background-color: var(--background-color);
-            background-image:
-                linear-gradient(var(--panel-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--panel-line) 1px, transparent 1px);
-            background-size: 28px 28px;
-            color: var(--text-color-dark);
-            line-height: 1.8;
-            scroll-behavior: smooth;
-        }
-
-        /* Hero Section - 背景画像 */
-        .hero-section {
-            background: linear-gradient(rgba(18, 20, 31, 0.82), rgba(13, 15, 26, 0.9)), 
-                        url('https://tanabesan.github.io/lolbeans/file/page/icon2.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: var(--text-color-light);
-            padding: 120px 20px;
-            text-align: center;
-        }
-        .hero-section h1 {
-            font-size: 3em;
-            font-weight: 700;
-            margin: 0 0 10px;
-            color: var(--secondary-color);
-            letter-spacing: 1px;
-            text-shadow: 3px 3px 0 var(--primary-color);
-        }
-
-        /* Contact Content - フォームの削除によりシンプルなデザインに変更 */
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-        .contact-info-container {
-            background-color: var(--card-color);
-            border: 2px solid var(--panel-line);
-            padding: 40px;
-            border-radius: 0;
-            box-shadow: var(--shadow-light);
-            text-align: left; /* コンテンツは左寄せに */
-        }
-        .contact-info-container h2 {
-            color: var(--primary-color);
-            font-size: 2em;
-            margin-top: 0;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .contact-info-container p#info-desc {
-            font-size: 1.1em;
-            color: var(--secondary-color);
-            margin-bottom: 40px;
-            text-align: center;
-        }
-        .contact-info-item {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid var(--panel-line);
-            transition: background-color 0.3s ease;
-        }
-        .contact-info-item:hover {
-            background-color: var(--background-color);
-            border-radius: 0;
-        }
-        .contact-info-item:last-child {
-            border-bottom: none;
-        }
-        .contact-info-item i {
-            color: var(--primary-color);
-            font-size: 2em;
-            margin-right: 20px;
-        }
-        .contact-info-item div {
-            flex-grow: 1;
-        }
-        .contact-info-item p {
-            margin: 0;
-            line-height: 1.4;
-        }
-        .contact-info-item .contact-label {
-            font-weight: 600;
-            color: var(--text-color-dark);
-        }
-        .contact-info-item .contact-detail {
-            font-size: 0.9em;
-            color: var(--secondary-color);
-        }
-        .contact-info-item a {
-            text-decoration: none;
-            color: inherit; 
-            display: flex; 
-            width: 100%;
-            align-items: center;
-        }
-        
-        /* Footer (流用) */
-        .footer-section {
-            background-color: #0d0f1a;
-            color: var(--text-color-light);
-            padding: 40px 20px;
-            text-align: center;
-            margin-top: 40px;
-        }
-        .footer-section .social-icons a {
-            color: var(--text-color-light);
-            font-size: 1.3em;
-            margin: 0 12px;
-            transition: color 0.3s ease;
-        }
-        .footer-section .social-icons a:hover {
-            color: var(--primary-color);
-        }
-        .footer-section p {
-            margin-top: 15px;
-            font-size: 0.85em;
-        }
-
-        /* Media Queries (流用) */
+        :root{--p:#ff2bd6;--s:#19f4ff;--y:#ffe14d;--bg:#06040d;--card:rgba(16,11,32,.78);--line:rgba(255,43,214,.28);--tx:#e9e6f7;--sub:#9a93b8;
+            --primary-color:var(--p);--secondary-color:var(--s);--background-color:var(--bg);--card-color:var(--card);--panel-line:var(--line);--text-color-dark:var(--tx);--text-color-light:var(--tx);
+            --glow-p:0 0 6px var(--p),0 0 18px var(--p),0 0 42px rgba(255,43,214,.55);--glow-s:0 0 6px var(--s),0 0 18px var(--s),0 0 42px rgba(25,244,255,.5)}
+        *{box-sizing:border-box}html{scroll-behavior:smooth}
+        body{margin:0;font-family:'JetBrains Mono',monospace;color:var(--tx);line-height:1.75;background:var(--bg);overflow-x:hidden;
+            background-image:radial-gradient(60vw 50vh at 10% -5%,rgba(255,43,214,.28),transparent 70%),radial-gradient(50vw 50vh at 100% 20%,rgba(25,244,255,.2),transparent 70%),radial-gradient(40vw 40vh at 50% 110%,rgba(120,60,255,.22),transparent 70%);background-attachment:fixed}
+        .floor{position:fixed;left:-50%;right:-50%;bottom:0;height:55vh;z-index:-1;pointer-events:none;opacity:.5;
+            background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,rgba(25,244,255,.35) 1px,transparent 1px);background-size:60px 60px;
+            transform:perspective(500px) rotateX(62deg);transform-origin:bottom;mask-image:linear-gradient(to top,#000 10%,transparent 90%);-webkit-mask-image:linear-gradient(to top,#000 10%,transparent 90%);animation:floor 3s linear infinite}
+        @keyframes floor{to{background-position:0 60px,0 0}}
+        body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px)}
+        a{color:inherit}
+        .hero-section{padding:100px 20px 50px;text-align:center}
+        .tag{display:inline-block;font:400 .66em 'Press Start 2P',monospace;color:var(--y);border:1px solid var(--y);padding:7px 10px;margin-bottom:22px;box-shadow:0 0 10px rgba(255,225,77,.4);text-shadow:0 0 8px var(--y)}
+        .hero-section h1{font-size:clamp(2.2em,6vw,3.8em);line-height:1.1;margin:0 0 14px;font-weight:800;color:#fff;text-shadow:var(--glow-s);animation:flicker 6s infinite}
+        .hero-section p{margin:0;color:#e7c9ff;text-shadow:0 0 10px rgba(255,43,214,.6)}
+        .container{max-width:900px;margin:0 auto;padding:30px 20px 10px}
+        .footer-section{margin-top:80px;padding:44px 20px;text-align:center;border-top:1px solid var(--s);background:rgba(4,3,10,.9);box-shadow:0 -6px 30px rgba(25,244,255,.2)}
+        .footer-section .social-icons a{font-size:1.5em;margin:0 14px;color:var(--tx);transition:.2s}.footer-section .social-icons a:hover{color:var(--s);text-shadow:var(--glow-s)}
+        .footer-section p{margin-top:16px;font-size:.85em;color:var(--sub)}
+        @keyframes flicker{0%,18%,22%,25%,53%,57%,100%{text-shadow:var(--glow-s);opacity:1}20%,24%,55%{text-shadow:none;opacity:.85}}
+        @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+        .container{max-width:640px}
+        .contact-info-container{background:var(--card);border:1px solid var(--line);padding:34px 30px;backdrop-filter:blur(4px);clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%);box-shadow:inset 0 0 24px rgba(255,43,214,.06)}
+        .contact-info-container h2{margin:0 0 8px;text-align:center;font-size:1.7em;color:#fff;text-shadow:var(--glow-p)}
+        .contact-info-container h2:before{content:"// ";color:var(--s);text-shadow:var(--glow-s)}
+        .contact-info-container p#info-desc{text-align:center;color:var(--sub);margin:0 0 30px}
+        .contact-info-item{position:relative;display:flex;align-items:center;padding:6px;margin-bottom:14px;border:1px solid var(--line);background:rgba(255,255,255,.02);transition:.25s;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%)}
+        .contact-info-item:hover{border-color:var(--s);box-shadow:var(--glow-s);transform:translateY(-3px)}
+        .contact-info-item>i{color:var(--s);text-shadow:var(--glow-s);font-size:1.9em;margin:0 8px 0 16px;width:1.2em;text-align:center}
+        .contact-info-item a{display:flex;align-items:center;width:100%;padding:12px 14px;text-decoration:none;color:inherit}
+        .contact-info-item div{flex-grow:1}.contact-info-item p{margin:0;line-height:1.45}
+        .contact-label{font-weight:700;color:#fff;text-shadow:0 0 8px var(--p)}.contact-detail{font-size:.85em;color:var(--sub)}
+        .contact-info-item .fa-arrow-right{margin-left:auto;color:var(--p)!important;text-shadow:var(--glow-p);transition:.2s}.contact-info-item:hover .fa-arrow-right{transform:translateX(6px)}
     </style>
 </head>
 <body data-nav-current="contact">
+<div class="floor"></div>
 
     <header class="hero-section">
         <h1 id="hero-title">お問い合わせ</h1>
@@ -170,34 +66,25 @@
 
             <div class="contact-info-item">
                 <i class="fab fa-discord"></i>
-                <a href="https://discord.gg/Cpu8vFDmH3" style="text-decoration: none; color: inherit; display: flex; width: 100%; align-items: center;">
+                <a href="https://discord.gg/Cpu8vFDmH3" target="_blank" rel="noopener">
                     <div>
                         <p class="contact-label" id="discord-label">Discordサーバー</p>
                         <p class="contact-detail" id="discord-text">問題報告やコミュニティでの交流にご利用ください。</p>
                     </div>
-                    <i class="fas fa-arrow-right" style="margin-left: auto; color: var(--secondary-color); font-size: 1.2em;"></i>
+                    <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
 
             <div class="contact-info-item">
-                <i class="fab fa-youtube"></i> <a href="#" style="text-decoration: none; color: inherit; display: flex; width: 100%; align-items: center;">
+                <i class="fab fa-youtube"></i> <a href="https://www.youtube.com/@lol-extension" target="_blank" rel="noopener">
                     <div>
                         <p class="contact-label" id="youtube-label">YouTube</p> <p class="contact-detail" id="youtube-text">デモ動画のコメント欄やメッセージでご意見をお寄せください。</p>
                     </div>
-                    <i class="fas fa-arrow-right" style="margin-left: auto; color: var(--secondary-color); font-size: 1.2em;"></i>
+                    <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
     </main>
-
-    <footer class="footer-section">
-        <div class="social-icons">
-            <a href="https://www.youtube.com/@lol-extension"><i class="fab fa-youtube"></i></a>
-            <a href="https://discord.gg/Cpu8vFDmH3"><i class="fab fa-discord"></i></a>
-            <a href="https://github.com/tanabesan/"><i class="fab fa-github"></i></a>
-        </div>
-        <p>&copy; 2025 Yuki. </p>
-    </footer>
 
     <script>
         // 言語データ (YouTubeに合わせて修正)

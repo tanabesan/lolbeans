@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LOL.ex ver0.91
+// @name         LOL.ex ver0.91.2
 // @namespace    http://tampermonkey.net/
-// @version      0.91
+// @version      0.91.2
 // @description  LOLBeans extension
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
@@ -20,7 +20,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '0.91';
+    const SCRIPT_VERSION = '0.91.2';
 
     const STORAGE = {
         VIDEO:          'yt-videoId',

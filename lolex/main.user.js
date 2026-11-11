@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LOL.ex ver0.92
+// @name         LOL.ex ver0.93
 // @namespace    http://tampermonkey.net/
-// @version      0.92
+// @version      0.93
 // @description  LOLBeans extension
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
@@ -14,13 +14,13 @@
 // @connect      translate.googleapis.com
 // @run-at       document-start
 // @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
-// @downloadURL  https://tanabesan.github.io/lolbeans/lolex/main.user.js
+// @downloadURL  https://tanabesan.github.io/lolbeans/lolex//main.user.js
 // ==/UserScript==
 
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '0.92';
+    const SCRIPT_VERSION = '0.93';
 
     const STORAGE = {
         VIDEO:          'yt-videoId',
@@ -239,7 +239,7 @@
             modsReplayStart:     '録画を開始',
             modsReplayStopSave:  '録画を停止して保存',
             modsReplayRecStarted:'リプレイ: 録画を開始しました',
-            modsReplayNote:      'Alt+S で「さっきの映像」をWebMで保存します。保存される長さは 最低保持秒数〜その2倍 です。常に保存がオフのときは、Alt+S / ボタンで録画の開始・停止保存ができます。音は入りません。',
+            modsReplayNote:      'Alt+S で「さっきの映像」を動画ファイル(MP4 / WebM)で保存します。保存される長さは 最低保持秒数〜その2倍 です。常に保存がオフのときは、Alt+S / ボタンで録画の開始・停止保存ができます。音は入りません。',
             modsReplayNotRec:    'リプレイ: 録画していません',
             modsReplaySaved:     'リプレイ保存',
             // ★ 設定カテゴリ (v0.87)
@@ -369,7 +369,7 @@
             modsReplayStart:     'Start recording',
             modsReplayStopSave:  'Stop & save',
             modsReplayRecStarted:'Replay: recording started',
-            modsReplayNote:      'Alt+S saves the recent footage as WebM. Saved length is between the minimum and twice that. When always-on is off, Alt+S / the button starts and stops a manual recording. No audio.',
+            modsReplayNote:      'Alt+S saves the recent footage as a video file (MP4 / WebM). Saved length is between the minimum and twice that. When always-on is off, Alt+S / the button starts and stops a manual recording. No audio.',
             modsReplayNotRec:    'Replay: not recording',
             modsReplaySaved:     'Replay saved',
             // ★ Settings categories (v0.87)
@@ -1790,7 +1790,7 @@
         fovOn: false, fov: 100,
         flipX: false, flipY: false, rot: 0, spin: 0, filter: 'none', pixel: 100,
         target: 'me', head: 1, hand: 1, foot: 1,
-        replayOn: false, replayMin: 60, replayMbps: 4, replayUI: true, replayQ: 'standard',
+        replayOn: false, replayMin: 60, replayMbps: 4, replayUI: true, replayQ: 'standard', replayFmt: 'mp4',
     };
     try { Object.assign(M, JSON.parse(localStorage.getItem(MODS_KEY) || '{}')); } catch (_) {}
     // 一人称視点は固定設定(ON/OFFのみ)・FOVはゲーム標準のまま
@@ -2154,8 +2154,12 @@
     const RP_Q = { light: { fps: 30, scale: 0.5, ov: 8 }, standard: { fps: 30, scale: 0.75, ov: 10 }, high: { fps: 60, scale: 1, ov: 20 } };
     const rpQ = () => RP_Q[M.replayQ] || RP_Q.standard;
     // H.264(多くのPCでハード圧縮)を最優先。VP9のソフト圧縮が一番重いので最後に回す
-    const rpMime = ['video/webm;codecs=h264', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm']
-        .find(m => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(m));
+    const rpSup = (list) => list.find(m => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(m));
+    const rpMp4  = rpSup(['video/mp4;codecs=avc1', 'video/mp4;codecs=h264', 'video/mp4']);
+    const rpWebm = rpSup(['video/webm;codecs=h264', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm']);
+    const rpPickMime = () => (M.replayFmt === 'webm' ? (rpWebm || rpMp4) : (rpMp4 || rpWebm));   // MP4が使えない環境は自動でWebM
+    let rpMime = rpPickMime();
+    const rpExt = () => (rpMime && rpMime.indexOf('mp4') !== -1 ? 'mp4' : 'webm');
 
     function rpEffOpacity(e0) {
         let o = 1;
@@ -2290,11 +2294,11 @@
             try { slot.rec.requestData(); } catch (_) { res(); }
             setTimeout(res, 1500);
         });
-        const blob = new Blob(slot.chunks, { type: 'video/webm' });
+        const blob = new Blob(slot.chunks, { type: rpExt() === 'mp4' ? 'video/mp4' : 'video/webm' });
         const d = new Date(), p2 = n => String(n).padStart(2, '0');
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `lolbeans-replay-${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}.webm`;
+        a.download = `lolbeans-replay-${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}.${rpExt()}`;
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 30000);
         modsToast(`${t('modsReplaySaved')}: ${sec}s (${(blob.size / 1048576).toFixed(1)}MB)`);
@@ -2302,7 +2306,7 @@
     // 常に保存オフ時の手動録画
     function rpManualStart() {
         if (M.replayOn || rp.manual) return;
-        if (!rpMime) { modsToast('MediaRecorder/WebM 非対応'); return; }
+        if (!rpMime) { modsToast('MediaRecorder 非対応'); return; }
         rp.manual = true; rp.compose = true; rpStartAll();
         modsToast(t('modsReplayRecStarted')); modsUpdateReplayStatus();
     }
@@ -2398,7 +2402,7 @@
 
     // ---------- 起動 ----------
     (function modsBoot() {
-        if (!rpMime) { console.warn('[LOL.ex replay] MediaRecorder/WebM 非対応'); return; }
+        if (!rpMime) { console.warn('[LOL.ex replay] MediaRecorder 非対応'); return; }
         const go = () => { rp.compose = true; rpStartAll(); };
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
     })();
@@ -2487,11 +2491,11 @@
             ['help_rec', 'fas fa-video', ja ? '録画 (リプレイ)' : 'Recording', ja ? [
                 "「常に保存」がオン: 直近の映像を常に保持します。Alt+S か「今すぐ保存」で保存します(長さは最低保持秒数〜その2倍)。",
                 "「常に保存」がオフ: ボタンか Alt+S で録画を開始し、もう一度押すと停止して保存します。",
-                "保存形式はWebMで、音は入りません。"
+                "保存形式はMP4(非対応のブラウザはWebM)で、音は入りません。"
             ] : [
                 "Always-on ON: the most recent footage is always kept. Alt+S or Save now saves it (length is between the minimum and twice that).",
                 "Always-on OFF: the button or Alt+S starts a recording; press again to stop and save.",
-                "Files are saved as WebM, without audio."
+                "Files are saved as MP4 (WebM on browsers without MP4 support), without audio."
             ]]
         ];
         return T.map(([key, icon, title, items]) => {
@@ -2543,6 +2547,7 @@
         const rl = document.createElement('legend'); rl.innerHTML = `<i class="fas fa-video"></i> ${t('modsReplayTitle')}`; rpFs.appendChild(rl);
         rpFs.appendChild(makeToggleRow('modsReplayOn', `<i class="fas fa-circle"></i>${t('modsReplayEnable')}`, M.replayOn));
         rpFs.appendChild(modsSelectRow('modsReplayMin', `<i class="fas fa-clock"></i>${t('modsReplayMin')}`, [[30, '30s'], [60, '60s'], [90, '90s'], [120, '120s']], M.replayMin));
+        rpFs.appendChild(modsSelectRow('modsReplayFmt', `<i class="fas fa-file-video"></i>${getLang() === 'ja' ? '保存形式' : 'File format'}`, [['mp4', 'MP4' + (rpMp4 ? '' : (getLang() === 'ja' ? ' (非対応→WebM)' : ' (unsupported → WebM)'))], ['webm', 'WebM']], M.replayFmt));
         rpFs.appendChild(modsSelectRow('modsReplayQ', `<i class="fas fa-film"></i>${getLang() === 'ja' ? '画質(重いときは軽量)' : 'Quality (use Light if laggy)'}`, [['light', getLang() === 'ja' ? '軽量 (低解像度・30fps)' : 'Light (low res, 30fps)'], ['standard', getLang() === 'ja' ? '標準 (75%・30fps)' : 'Standard (75%, 30fps)'], ['high', getLang() === 'ja' ? '高画質 (等倍・60fps)' : 'High (full res, 60fps)']], M.replayQ));
         rpFs.appendChild(modsSelectRow('modsReplayMbps', `<i class="fas fa-tachometer-alt"></i>${t('modsReplayBitrate')}`, [[2, '2 Mbps'], [4, '4 Mbps'], [6, '6 Mbps'], [8, '8 Mbps']], M.replayMbps));
         rpFs.appendChild(makeToggleRow('modsReplayUI', `<i class="fas fa-layer-group"></i>${t('modsReplayUI')}`, M.replayUI));
@@ -2755,6 +2760,7 @@
         bindCheck('modsReplayOn', async v => { if (v && rp.manual) await rpManualStop(true); M.replayOn = v; if (v) { rp.compose = true; rpStartAll(); } else rpStopAll(); modsUpdateReplayStatus(); });
         bindSel('modsReplayMin', v => { M.replayMin = parseInt(v); rpRestart(); });
         bindSel('modsReplayMbps', v => { M.replayMbps = parseInt(v); rpRestart(); });
+        bindSel('modsReplayFmt', v => { M.replayFmt = v; rpMime = rpPickMime(); rpRestart(); });
         bindSel('modsReplayQ', v => { M.replayQ = v; rpRestart(); });
         bindCheck('modsReplayUI', v => { M.replayUI = v; rpRestart(); });
         const sv = document.getElementById('modsReplaySave');

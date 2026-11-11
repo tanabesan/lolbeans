@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LOL.ex ver0.91
+// @name         LOL.ex ver0.92
 // @namespace    http://tampermonkey.net/
-// @version      0.91
+// @version      0.92
 // @description  LOLBeans extension
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
@@ -14,13 +14,13 @@
 // @connect      translate.googleapis.com
 // @run-at       document-start
 // @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
-// @downloadURL  https://tanabesan.github.io/lolbeans/lolex//main.user.js
+// @downloadURL  https://tanabesan.github.io/lolbeans/lolex/main.user.js
 // ==/UserScript==
 
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '0.91';
+    const SCRIPT_VERSION = '0.92';
 
     const STORAGE = {
         VIDEO:          'yt-videoId',
@@ -879,7 +879,7 @@
         if (container) container.remove();
         container = el('div', { id: 'lolex-keydisplay' });
         container.classList.add('pos-' + getKeyDisplayPos());
-        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true)) container.classList.add('lolex-kd-hidden');
+        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, false)) container.classList.add('lolex-kd-hidden');
 
         const keys = getKeyDisplayKeys();
         const mouseKeys = keys.filter(k => isMouseCode(k.code));
@@ -956,14 +956,14 @@
 
     function refreshKeyDisplayVisibility() {
         const el2 = $('lolex-keydisplay'); if (!el2) return;
-        el2.classList.toggle('lolex-kd-hidden', !getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true));
+        el2.classList.toggle('lolex-kd-hidden', !getStoredBool(STORAGE.KEYDISPLAY_ENABLED, false));
     }
 
     function refreshKeyDisplayPosition() {
         const el2 = $('lolex-keydisplay'); if (!el2) return;
         el2.className = '';
         el2.classList.add('pos-' + getKeyDisplayPos());
-        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true)) el2.classList.add('lolex-kd-hidden');
+        if (!getStoredBool(STORAGE.KEYDISPLAY_ENABLED, false)) el2.classList.add('lolex-kd-hidden');
     }
 
     function setKeyPressedVisual(code, pressed) {
@@ -1094,7 +1094,7 @@
     function initYouTubePlayerUI() {
         if ($('yt-card')) return;
         addYouTubeStyleSheet(); addModernStyleSheet();
-        const isVisible = getStoredBool(STORAGE.BAR_VISIBLE, true);
+        const isVisible = getStoredBool(STORAGE.BAR_VISIBLE, false);
         const volume    = parseInt(localStorage.getItem(STORAGE.VOLUME) ?? '80', 10);
         const hiddenDiv = el('div', { id: 'yt-hidden-player', innerHTML: '<div id="yt-player"></div>' });
         document.body.appendChild(hiddenDiv);
@@ -1463,7 +1463,7 @@
         const kdLegend = document.createElement('legend'); kdLegend.innerHTML = `<i class="fas fa-keyboard"></i> ${t('keyDisplaySettings')}`;
         kdFs.appendChild(kdLegend);
 
-        const kdEnableRow = makeToggleRow('keyDisplayEnableToggle', `<i class="fas fa-eye"></i>${t('keyDisplayEnable')}`, getStoredBool(STORAGE.KEYDISPLAY_ENABLED, true));
+        const kdEnableRow = makeToggleRow('keyDisplayEnableToggle', `<i class="fas fa-eye"></i>${t('keyDisplayEnable')}`, getStoredBool(STORAGE.KEYDISPLAY_ENABLED, false));
         kdFs.appendChild(kdEnableRow);
 
         const kdPosRow = document.createElement('div'); kdPosRow.className = 'lolex-setting-row';
@@ -1790,12 +1790,13 @@
         fovOn: false, fov: 100,
         flipX: false, flipY: false, rot: 0, spin: 0, filter: 'none', pixel: 100,
         target: 'me', head: 1, hand: 1, foot: 1,
-        replayOn: true, replayMin: 60, replayMbps: 4, replayUI: true,
+        replayOn: false, replayMin: 60, replayMbps: 4, replayUI: true, replayQ: 'standard',
     };
     try { Object.assign(M, JSON.parse(localStorage.getItem(MODS_KEY) || '{}')); } catch (_) {}
     // 一人称視点は固定設定(ON/OFFのみ)・FOVはゲーム標準のまま
     Object.assign(M, { fpvEyeY: 0.53, fpvFwd: 0.35, fpvHideHead: true, fovOn: false });
-    const modsSave = () => { try { localStorage.setItem(MODS_KEY, JSON.stringify(M)); } catch (_) {} };
+    try { const _t = localStorage.getItem('lolex-mods-target'); if (_t === 'me' || _t === 'all') M.target = _t; } catch (_) {}
+    const modsSave = () => { try { localStorage.setItem(MODS_KEY, JSON.stringify(M)); localStorage.setItem('lolex-mods-target', M.target); } catch (_) {} };
 
     const MW = unsafeWindow;            // ページ本体の window
     let modsT = null;                   // THREE
@@ -1996,24 +1997,27 @@
     const modsIsMain = r => r.domElement && r.domElement.isConnected && r.domElement.clientWidth >= window.innerWidth * 0.8;
 
     // ---------- 自分のプレイヤーを特定 ----------
+    let _lpSticky = null;   // 一度自分だと確定したプレイヤーは、見失っても保持する(他人に切り替わらないように)
     function modsLocalPlayer(scene, camera) {
-        const T = modsT, off = new T.Vector3(), v = new T.Vector3();
-        let best = null, bestErr = 1.5;
+        const T = modsT, v = new T.Vector3(), off = new T.Vector3(), q = new T.Vector3();
+        const errOf = (o) => {
+            // ゲームの三人称カメラは(0,3,-7)の位置から、後ろに物があると同じ向きのまま手前に寄る。
+            // → カメラは「プレイヤーからその線分上のどこか」にあるはず。線分までの距離を誤差とする
+            v.set(0, 3, -7).applyEuler(o.input.direction);
+            off.copy(camera.position).sub(o.position);
+            const t = Math.max(0.02, Math.min(1.05, off.dot(v) / v.lengthSq()));
+            return q.copy(v).multiplyScalar(t).distanceTo(off);
+        };
+        const alive = (o) => o && o.parent === scene && o.isPlayer && o.input && o.input.direction;
+        if (alive(_lpSticky) && errOf(_lpSticky) < 0.6) return _lpSticky;
+        let best = null, bestErr = 0.6;
         for (const o of scene.children) {
             if (!o.isPlayer || !o.input || !o.input.direction) continue;
-            v.set(0, 3, -7).applyEuler(o.input.direction);          // ゲームの三人称カメラのオフセット
-            off.copy(camera.position).sub(o.position);
-            const err = off.distanceTo(v);
+            const err = errOf(o);
             if (err < bestErr) { bestErr = err; best = o; }
         }
-        if (best) return best;
-        let bd = 1.5;                                                  // 一人称などでカメラが体の近くにある場合
-        for (const o of scene.children) {
-            if (!o.isPlayer) continue;
-            const d = o.position.distanceTo(camera.position);
-            if (d < bd) { bd = d; best = o; }
-        }
-        return best;
+        if (best) _lpSticky = best;
+        return best || (alive(_lpSticky) ? _lpSticky : null);
     }
 
     // ---------- 一人称視点 ----------
@@ -2048,6 +2052,7 @@
     // ---------- 骨スケール(頭・手・足) ----------
     const MODS_GROUPS = [['head', /head$/i], ['hand', /hand$/i], ['foot', /foot$/i]];
     let _bonesEver = false;
+    const _boneTouched = new Set();
     function modsBoneGroups(p) {
         if (p.__lolexBones) return p.__lolexBones;
         const g = { head: [], hand: [], foot: [] };
@@ -2075,10 +2080,19 @@
         for (const p of list) {
             const g = modsBoneGroups(p);
             const isMe = p === lp;
+            _boneTouched.add(p);
             for (const k of ['head', 'hand', 'foot']) {
                 const f = (k === 'head' && fpvHead && isMe) ? 0.001 : M[k];
                 for (const b of g[k]) if (f !== 1 || b.__lxLast) modsSetBone(b, f);
             }
+        }
+        // 対象から外れた(別人と誤認していた/対象を「自分だけ」に戻した)プレイヤーの骨は元の大きさに戻す
+        for (const p of Array.from(_boneTouched)) {
+            if (list.indexOf(p) !== -1) continue;
+            if (!p.parent) { _boneTouched.delete(p); continue; }
+            const g = modsBoneGroups(p);
+            for (const k of ['head', 'hand', 'foot']) for (const b of g[k]) if (b.__lxLast) modsSetBone(b, 1);
+            _boneTouched.delete(p);
         }
         if (active) _bonesEver = true;
     }
@@ -2135,9 +2149,12 @@
 
     // ---------- インスタントリプレイ ----------
     const rp = { canvas: null, stream: null, comp: null, cctx: null, ov: null, octx: null, lastOv: 0,
-                 compose: false, frames: 0, startedAt: 0, slots: [], stagger: null, tick: null };
-    const RP_FPS = 60, RP_OV_FPS = 20;
-    const rpMime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+                 compose: false, frames: 0, lastFrame: 0, startedAt: 0, slots: [], stagger: null, tick: null };
+    // 画質プリセット: 録画の負荷(エンコード+コピー)は「解像度×fps」にほぼ比例するので、既定は軽め
+    const RP_Q = { light: { fps: 30, scale: 0.5, ov: 8 }, standard: { fps: 30, scale: 0.75, ov: 10 }, high: { fps: 60, scale: 1, ov: 20 } };
+    const rpQ = () => RP_Q[M.replayQ] || RP_Q.standard;
+    // H.264(多くのPCでハード圧縮)を最優先。VP9のソフト圧縮が一番重いので最後に回す
+    const rpMime = ['video/webm;codecs=h264', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm']
         .find(m => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(m));
 
     function rpEffOpacity(e0) {
@@ -2201,19 +2218,21 @@
         Array.from(document.body.children).forEach(el => rpWalk(el, k));
     }
     function rpComposeFrame() {
-        const c = rp.canvas, w = c.width, h = c.height;
+        const q = rpQ(), now = performance.now();
+        if (now - rp.lastFrame < 1000 / q.fps - 3) return;   // 録画fpsに間引く(60fps描画でも30fps録画なら半分で済む)
+        rp.lastFrame = now;
+        const c = rp.canvas, w = Math.max(2, Math.round(c.width * q.scale)), h = Math.max(2, Math.round(c.height * q.scale));
         if (rp.comp.width !== w || rp.comp.height !== h) { rp.comp.width = w; rp.comp.height = h; }
-        rp.cctx.drawImage(c, 0, 0);                    // 描画直後なのでWebGLの中身が読める
+        rp.cctx.drawImage(c, 0, 0, w, h);              // 描画直後なのでWebGLの中身が読める
         if (M.replayUI) {
-            const now = performance.now();
-            if (now - rp.lastOv >= 1000 / RP_OV_FPS) { rp.lastOv = now; rpUpdateOverlay(); }
-            rp.cctx.drawImage(rp.ov, 0, 0);
+            if (now - rp.lastOv >= 1000 / q.ov) { rp.lastOv = now; rpUpdateOverlay(); }
+            rp.cctx.drawImage(rp.ov, 0, 0, w, h);
         }
         rp.frames++;
     }
     function rpStartSlot() {
         const chunks = [];
-        const rec = new MediaRecorder(rp.stream, { mimeType: rpMime, videoBitsPerSecond: M.replayMbps * 1e6 });
+        const rec = new MediaRecorder(rp.stream, { mimeType: rpMime, videoBitsPerSecond: M.replayMbps * 1e6 * Math.min(1, rpQ().scale * rpQ().scale * 1.3) });
         rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
         rec.start(1000);
         const slot = { rec, chunks, start: performance.now() };
@@ -2233,15 +2252,16 @@
     function rpStartAll() {
         if ((!M.replayOn && !rp.manual) || !rpMime) return;
         rp.canvas = modsMainCanvas();
+        if (rp.compose && !M.replayUI && rpQ().scale >= 1) rp.compose = false;   // UI合成も縮小も不要なら、コピーせずキャンバスを直接録画
         if (!rp.canvas) { rp.stagger = setTimeout(rpStartAll, 1000); return; }
         try {
             if (rp.compose) {
                 rp.comp = rp.comp || document.createElement('canvas'); rp.cctx = rp.cctx || rp.comp.getContext('2d');
                 rp.ov = rp.ov || document.createElement('canvas'); rp.octx = rp.octx || rp.ov.getContext('2d');
-                rp.comp.width = rp.canvas.width; rp.comp.height = rp.canvas.height; rp.frames = 0;
-                rp.stream = rp.comp.captureStream(RP_FPS);
+                rp.comp.width = Math.max(2, Math.round(rp.canvas.width * rpQ().scale)); rp.comp.height = Math.max(2, Math.round(rp.canvas.height * rpQ().scale)); rp.frames = 0;
+                rp.stream = rp.comp.captureStream(rpQ().fps);
             } else {
-                rp.stream = rp.canvas.captureStream(RP_FPS);
+                rp.stream = rp.canvas.captureStream(rpQ().fps);
             }
         } catch (e) { console.error('[LOL.ex replay]', e); return; }
         rp.startedAt = performance.now();
@@ -2523,6 +2543,7 @@
         const rl = document.createElement('legend'); rl.innerHTML = `<i class="fas fa-video"></i> ${t('modsReplayTitle')}`; rpFs.appendChild(rl);
         rpFs.appendChild(makeToggleRow('modsReplayOn', `<i class="fas fa-circle"></i>${t('modsReplayEnable')}`, M.replayOn));
         rpFs.appendChild(modsSelectRow('modsReplayMin', `<i class="fas fa-clock"></i>${t('modsReplayMin')}`, [[30, '30s'], [60, '60s'], [90, '90s'], [120, '120s']], M.replayMin));
+        rpFs.appendChild(modsSelectRow('modsReplayQ', `<i class="fas fa-film"></i>${getLang() === 'ja' ? '画質(重いときは軽量)' : 'Quality (use Light if laggy)'}`, [['light', getLang() === 'ja' ? '軽量 (低解像度・30fps)' : 'Light (low res, 30fps)'], ['standard', getLang() === 'ja' ? '標準 (75%・30fps)' : 'Standard (75%, 30fps)'], ['high', getLang() === 'ja' ? '高画質 (等倍・60fps)' : 'High (full res, 60fps)']], M.replayQ));
         rpFs.appendChild(modsSelectRow('modsReplayMbps', `<i class="fas fa-tachometer-alt"></i>${t('modsReplayBitrate')}`, [[2, '2 Mbps'], [4, '4 Mbps'], [6, '6 Mbps'], [8, '8 Mbps']], M.replayMbps));
         rpFs.appendChild(makeToggleRow('modsReplayUI', `<i class="fas fa-layer-group"></i>${t('modsReplayUI')}`, M.replayUI));
         const sr = document.createElement('div'); sr.className = 'lolex-setting-row';
@@ -2648,6 +2669,23 @@
             ].join(' ');
             document.head.appendChild(st);
         }
+        if (!document.getElementById('lolex-sub-style')) {
+            const st2 = document.createElement('style'); st2.id = 'lolex-sub-style';
+            st2.textContent = [
+                /* ===== サブカラーを細部のアクセントに ===== */
+                '#lolex-settings .lolex-setting-row input[type=range],#lolex-settings input[type=checkbox],#lolex-qm input[type=range]{accent-color:var(--secondary-color);}',
+                '#lolex-settings .lolex-range-val{color:var(--secondary-color);font-weight:700;}',
+                '#lolex-settings > fieldset:hover{border-color:var(--secondary-color);}',
+                '#lolex-settings .lolex-setting-row select:focus,#lolex-settings .lolex-setting-row input:focus{outline:none;border-color:var(--secondary-color);box-shadow:0 0 0 1px var(--secondary-color);}',
+                '#lolex-settings .lolex-setting-row:hover{box-shadow:inset 2px 0 0 var(--secondary-color);}',
+                '#lolex-settings legend .legend-arrow{color:var(--secondary-color);}',
+                '#lolex-settings .lolex-upd-list li:before{background:var(--secondary-color);}',
+                '#lolex-settings .lolex-cat-bar button:hover i,.lolex-cat-bar button:hover i{color:var(--secondary-color);opacity:1;}',
+                '.lolex-cat-bar button.active i{color:var(--secondary-color);opacity:1;}',
+                '#lolex-settings .lolex-setting-row .setting-name i:not([style]){color:var(--secondary-color);opacity:.75;}',
+            ].join('')+'';
+            document.head.appendChild(st2);
+        }
         const keyToCat = {};
         LOLEX_CATS.forEach(c => c.keys.forEach(k => { keyToCat[k] = c.id; }));
         fsList.forEach(([fs, key]) => { fs.dataset.lolexCat = keyToCat[key] || 'info'; });
@@ -2717,7 +2755,8 @@
         bindCheck('modsReplayOn', async v => { if (v && rp.manual) await rpManualStop(true); M.replayOn = v; if (v) { rp.compose = true; rpStartAll(); } else rpStopAll(); modsUpdateReplayStatus(); });
         bindSel('modsReplayMin', v => { M.replayMin = parseInt(v); rpRestart(); });
         bindSel('modsReplayMbps', v => { M.replayMbps = parseInt(v); rpRestart(); });
-        bindCheck('modsReplayUI', v => { M.replayUI = v; });
+        bindSel('modsReplayQ', v => { M.replayQ = v; rpRestart(); });
+        bindCheck('modsReplayUI', v => { M.replayUI = v; rpRestart(); });
         const sv = document.getElementById('modsReplaySave');
         if (sv && !sv.dataset.lxBound) { sv.dataset.lxBound = '1'; sv.addEventListener('click', rpAction); }
     }

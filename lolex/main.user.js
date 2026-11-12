@@ -2239,6 +2239,7 @@
         const chunks = [];
         const rec = new MediaRecorder(rp.stream, { mimeType: rpMime, videoBitsPerSecond: M.replayMbps * 1e6 * Math.min(1, rpQ().scale * rpQ().scale * 1.3) });
         rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+        rec.onerror = (e) => { console.warn('[LOL.ex replay] 録画エラー: 録り直します', e && e.error); if (rp.slots.some(x => x.rec === rec) && !rp.manual) setTimeout(rpRestart, 500); };   // エンコーダ失敗で録画が止まったままにならないように
         rec.start(1000);
         const slot = { rec, chunks, start: performance.now() };
         rp.slots.push(slot);

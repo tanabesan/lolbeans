@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LOL.ex ver0.93
+// @name         LOL.ex ver0.94
 // @namespace    http://tampermonkey.net/
-// @version      0.93
+// @version      0.94
 // @description  LOLBeans extension
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
@@ -14,13 +14,13 @@
 // @connect      translate.googleapis.com
 // @run-at       document-start
 // @updateURL    https://tanabesan.github.io/lolbeans/lolex/main.user.js
-// @downloadURL  https://tanabesan.github.io/lolbeans/lolex//main.user.js
+// @downloadURL  https://tanabesan.github.io/lolbeans/lolex/main.user.js
 // ==/UserScript==
 
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '0.93';
+    const SCRIPT_VERSION = '0.94';
 
     const STORAGE = {
         VIDEO:          'yt-videoId',
@@ -2156,7 +2156,7 @@
     // H.264(多くのPCでハード圧縮)を最優先。VP9のソフト圧縮が一番重いので最後に回す
     const rpSup = (list) => list.find(m => typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(m));
     const rpMp4  = rpSup(['video/mp4;codecs=avc1', 'video/mp4;codecs=h264', 'video/mp4']);
-    const rpWebm = rpSup(['video/webm;codecs=h264', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm']);
+    const rpWebm = rpSup(['video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm']);   // H.264入りWebMは再生できないプレイヤーが多いので避ける
     const rpPickMime = () => (M.replayFmt === 'webm' ? (rpWebm || rpMp4) : (rpMp4 || rpWebm));   // MP4が使えない環境は自動でWebM
     let rpMime = rpPickMime();
     const rpExt = () => (rpMime && rpMime.indexOf('mp4') !== -1 ? 'mp4' : 'webm');
@@ -2225,12 +2225,13 @@
         const q = rpQ(), now = performance.now();
         if (now - rp.lastFrame < 1000 / q.fps - 3) return;   // 録画fpsに間引く(60fps描画でも30fps録画なら半分で済む)
         rp.lastFrame = now;
-        const c = rp.canvas, w = Math.max(2, Math.round(c.width * q.scale)), h = Math.max(2, Math.round(c.height * q.scale));
-        if (rp.comp.width !== w || rp.comp.height !== h) { rp.comp.width = w; rp.comp.height = h; }
-        rp.cctx.drawImage(c, 0, 0, w, h);              // 描画直後なのでWebGLの中身が読める
+        const c = rp.canvas, W = rp.comp.width, H = rp.comp.height;   // 録画中は映像サイズを固定(途中で変わるとMP4が壊れる)
+        const k = Math.min(W / c.width, H / c.height), w = Math.round(c.width * k), h = Math.round(c.height * k), x0 = Math.round((W - w) / 2), y0 = Math.round((H - h) / 2);
+        if (x0 || y0) rp.cctx.clearRect(0, 0, W, H);
+        rp.cctx.drawImage(c, x0, y0, w, h);            // 描画直後なのでWebGLの中身が読める
         if (M.replayUI) {
             if (now - rp.lastOv >= 1000 / q.ov) { rp.lastOv = now; rpUpdateOverlay(); }
-            rp.cctx.drawImage(rp.ov, 0, 0, w, h);
+            rp.cctx.drawImage(rp.ov, x0, y0, w, h);
         }
         rp.frames++;
     }
@@ -2268,7 +2269,7 @@
                 rp.stream = rp.canvas.captureStream(rpQ().fps);
             }
         } catch (e) { console.error('[LOL.ex replay]', e); return; }
-        rp.startedAt = performance.now();
+        rp.startedAt = performance.now(); rp.size = rp.canvas.width + 'x' + rp.canvas.height;
         rpStartSlot();
         if (!rp.manual) rp.stagger = setTimeout(() => { if (M.replayOn) rpStartSlot(); }, M.replayMin * 1000);
         rp.tick = setInterval(rpTick, 1000);
@@ -2276,6 +2277,7 @@
     function rpRestart() { rpStopAll(); rp.compose = true; rpStartAll(); }
     function rpTick() {
         if (!rp.canvas || !rp.canvas.isConnected) { if (rp.manual) { rpManualStop(true); } else rpRestart(); return; }
+        if (!rp.compose && !rp.manual && rp.size !== rp.canvas.width + 'x' + rp.canvas.height) { rpRestart(); return; }   // 直接録画は画面サイズが変わったら録り直す
         if (rp.compose && rp.frames === 0 && performance.now() - rp.startedAt > 5000) {
             console.warn('[LOL.ex replay] 合成フレームが来ないため、キャンバスのみ録画に切り替えます');
             rpStopAll(); rp.compose = false; rpStartAll(); return;
@@ -2284,17 +2286,135 @@
         if (!rp.manual) for (const s of rp.slots.slice()) if (now - s.start >= M.replayMin * 2000) { rpStopSlot(s); rpStartSlot(); }
         modsUpdateReplayStatus();
     }
+    // ---------- MP4の整形: ブラウザが出す「細切れMP4」を、長さ・シークバーが正しく出る通常のMP4に直す ----------
+    function rpFixMp4(buf) {
+        const u = new Uint8Array(buf), dv = new DataView(buf);
+        const rd32 = (o) => dv.getUint32(o), rd64 = (o) => dv.getUint32(o) * 4294967296 + dv.getUint32(o + 4);
+        const type = (o) => String.fromCharCode(u[o + 4], u[o + 5], u[o + 6], u[o + 7]);
+        const kids = (o, end) => { const r = []; while (o + 8 <= end) { let sz = rd32(o), h = 8; if (sz === 1) { sz = rd64(o + 8); h = 16; } else if (sz === 0) sz = end - o; if (sz < h || o + sz > end) break; r.push({ t: type(o), o, h, e: o + sz }); o += sz; } return r; };
+        const find = (o, end, t) => kids(o, end).find(k => k.t === t);
+        const top = kids(0, u.length);
+        const ftyp = top.find(b => b.t === 'ftyp'), moov = top.find(b => b.t === 'moov');
+        if (!ftyp || !moov || top.some(b => b.t === 'moof') === false) return buf;      // 細切れMP4でなければそのまま
+        const traks = kids(moov.o + moov.h, moov.e).filter(k => k.t === 'trak');
+        if (traks.length !== 1) return buf;                                              // 映像1本だけ対応
+        const mvex = find(moov.o + moov.h, moov.e, 'mvex');
+        let tr = { dur: 0, size: 0, flags: 0 };
+        if (mvex) { const t = find(mvex.o + mvex.h, mvex.e, 'trex'); if (t) { const p = t.o + 8; tr = { dur: rd32(p + 12), size: rd32(p + 16), flags: rd32(p + 20) }; } }
+        // サンプル収集
+        const samples = [];
+        for (const mf of top.filter(b => b.t === 'moof')) {
+            for (const traf of kids(mf.o + mf.h, mf.e).filter(k => k.t === 'traf')) {
+                const tfhd = find(traf.o + traf.h, traf.e, 'tfhd'); if (!tfhd) continue;
+                const tf = rd32(tfhd.o + 8) & 0xffffff; let p = tfhd.o + 16, base = mf.o;
+                if (tf & 1) { base = rd64(p); p += 8; } if (tf & 2) p += 4;
+                const dDur = (tf & 8) ? rd32(p) : tr.dur; if (tf & 8) p += 4;
+                const dSize = (tf & 0x10) ? rd32(p) : tr.size; if (tf & 0x10) p += 4;
+                const dFlags = (tf & 0x20) ? rd32(p) : tr.flags;
+                for (const trun of kids(traf.o + traf.h, traf.e).filter(k => k.t === 'trun')) {
+                    const ver = u[trun.o + 8], fl = rd32(trun.o + 8) & 0xffffff; let q = trun.o + 12;
+                    const n = rd32(q); q += 4; let off = base;
+                    if (fl & 1) { off = base + dv.getInt32(q); q += 4; } else if (samples.length) off = samples[samples.length - 1].off + samples[samples.length - 1].size;
+                    let first = null; if (fl & 4) { first = rd32(q); q += 4; }
+                    for (let i = 0; i < n; i++) {
+                        const s = { dur: dDur, size: dSize, flags: dFlags, cto: 0, off };
+                        if (fl & 0x100) { s.dur = rd32(q); q += 4; } if (fl & 0x200) { s.size = rd32(q); q += 4; }
+                        if (fl & 0x400) { s.flags = rd32(q); q += 4; } else if (i === 0 && first !== null) s.flags = first;
+                        if (fl & 0x800) { s.cto = ver ? dv.getInt32(q) : rd32(q); q += 4; }
+                        samples.push(s); off += s.size;
+                    }
+                }
+            }
+        }
+        if (!samples.length) return buf;
+        // 書き出しヘルパー
+        const cat = (arrs) => { let n = 0; arrs.forEach(a => n += a.length); const r = new Uint8Array(n); let p = 0; arrs.forEach(a => { r.set(a, p); p += a.length; }); return r; };
+        const be32 = (v) => new Uint8Array([v >>> 24 & 255, v >>> 16 & 255, v >>> 8 & 255, v & 255]);
+        const box = (t, ...parts) => { const body = cat(parts); return cat([be32(body.length + 8), new TextEncoder().encode(t), body]); };
+        const full = (t, ver, ...parts) => box(t, new Uint8Array([ver, 0, 0, 0]), ...parts);
+        // 通常MP4用のテーブル
+        const N = samples.length;
+        let total = 0; samples.forEach(s => total += s.dur);
+        const stts = []; for (const s of samples) { const l = stts[stts.length - 1]; if (l && l[1] === s.dur) l[0]++; else stts.push([1, s.dur]); }
+        const stss = []; samples.forEach((s, i) => { if (!(s.flags & 0x10000)) stss.push(i + 1); });
+        const neg = samples.some(s => s.cto < 0), hasCto = samples.some(s => s.cto !== 0);
+        const ctts = []; for (const s of samples) { const l = ctts[ctts.length - 1]; if (l && l[1] === s.cto) l[0]++; else ctts.push([1, s.cto]); }
+        const tabs = { stts: full('stts', 0, be32(stts.length), ...stts.map(r => cat([be32(r[0]), be32(r[1] >>> 0)]))),
+            stsc: full('stsc', 0, be32(1), be32(1), be32(N), be32(1)),
+            stsz: full('stsz', 0, be32(0), be32(N), ...samples.map(s => be32(s.size))),
+            stss: stss.length < N ? full('stss', 0, be32(stss.length), ...stss.map(be32)) : null,
+            ctts: hasCto ? full('ctts', neg ? 1 : 0, be32(ctts.length), ...ctts.map(r => cat([be32(r[0]), be32(r[1] >>> 0)]))) : null };
+        // moov を作り直す(stblを差し替え、mvexを外し、長さを書き込む)
+        const mvhdK = find(moov.o + moov.h, moov.e, 'mvhd');
+        const mvVer = u[mvhdK.o + 8], mvTs = rd32(mvhdK.o + 8 + 4 + (mvVer ? 16 : 8));
+        const trakK = traks[0], mdia = find(trakK.o + trakK.h, trakK.e, 'mdia'), mdhdK = find(mdia.o + mdia.h, mdia.e, 'mdhd');
+        const mdVer = u[mdhdK.o + 8], mdTs = rd32(mdhdK.o + 8 + 4 + (mdVer ? 16 : 8));
+        const movDur = Math.round(total * mvTs / mdTs);
+        let stcoPos = -1;
+        const rebuild = (k, path) => {
+            const raw = u.subarray(k.o, k.e);
+            const patchDur = (hdr, ver, tsOff, dur) => { const c = raw.slice(); const d = new DataView(c.buffer); const p = k.h + 4 + (ver ? 16 : 8) + tsOff; if (ver) { d.setUint32(p, Math.floor(dur / 4294967296)); d.setUint32(p + 4, dur >>> 0); } else d.setUint32(p, dur); return c; };
+            if (k.t === 'mvhd') return patchDur(0, mvVer, 4, movDur);
+            if (k.t === 'mdhd') return patchDur(0, mdVer, 4, total);
+            if (k.t === 'tkhd') { const ver = u[k.o + 8]; const c = raw.slice(); const d = new DataView(c.buffer); const p = k.h + 4 + (ver ? 16 : 8) + 4 + 4; /* track_ID(4)+reserved(4) → duration */ if (ver) { d.setUint32(p, Math.floor(movDur / 4294967296)); d.setUint32(p + 4, movDur >>> 0); } else d.setUint32(p, movDur); return c; }
+            if (k.t === 'stbl') {
+                const keep = kids(k.o + k.h, k.e).filter(c => ['stsd'].indexOf(c.t) !== -1).map(c => u.subarray(c.o, c.e));
+                const co = full('stco', 0, be32(1), be32(0));
+                const parts = [...keep, tabs.stts, ...(tabs.ctts ? [tabs.ctts] : []), tabs.stsc, tabs.stsz, ...(tabs.stss ? [tabs.stss] : []), co];
+                const out = box('stbl', ...parts);
+                stcoPos = { stbl: out, co };   // 後でオフセットを書く
+                return out;
+            }
+            if (['moov', 'trak', 'mdia', 'minf'].indexOf(k.t) !== -1) {
+                const parts = kids(k.o + k.h, k.e).filter(c => c.t !== 'mvex').map(c => rebuild(c));
+                return box(k.t, ...parts);
+            }
+            return raw;
+        };
+        let newMoov = rebuild(moov);
+        const ftypB = u.subarray(ftyp.o, ftyp.e);
+        const mdatStart = ftypB.length + newMoov.length + 8;
+        // stco のオフセットを書き込む(stcoは末尾付近の固定位置にある)
+        const idx = (() => { const key = [0x73, 0x74, 0x63, 0x6f]; for (let i = newMoov.length - 8; i >= 0; i--) if (newMoov[i] === key[0] && newMoov[i + 1] === key[1] && newMoov[i + 2] === key[2] && newMoov[i + 3] === key[3]) return i; return -1; })();
+        if (idx < 0) return buf;
+        new DataView(newMoov.buffer, newMoov.byteOffset).setUint32(idx + 12, mdatStart);
+        // mdat 本体
+        let dataLen = 0; samples.forEach(s => dataLen += s.size);
+        const data = new Uint8Array(dataLen); let w = 0;
+        for (const s of samples) { data.set(u.subarray(s.off, s.off + s.size), w); w += s.size; }
+        return cat([ftypB, newMoov, be32(dataLen + 8), new TextEncoder().encode('mdat'), data]).buffer;
+    }
     async function rpSave() {
+        if (rp.saving) return;                      // 連打で二重に保存・録り直しが走らないように
         if (!rp.slots.length) { modsToast(t('modsReplayNotRec')); return; }
+        rp.saving = true;
+        try { await rpSaveInner(); } finally { rp.saving = false; }
+    }
+    async function rpSaveInner() {
         const slot = rp.slots.reduce((a, b) => (a.start <= b.start ? a : b));
         const sec = Math.round((performance.now() - slot.start) / 1000);
-        await new Promise(res => {
-            const prev = slot.rec.ondataavailable;
-            slot.rec.ondataavailable = e => { prev && prev(e); slot.rec.ondataavailable = prev; res(); };
-            try { slot.rec.requestData(); } catch (_) { res(); }
-            setTimeout(res, 1500);
-        });
-        const blob = new Blob(slot.chunks, { type: rpExt() === 'mp4' ? 'video/mp4' : 'video/webm' });
+        if (rpExt() === 'mp4') {
+            // MP4は requestData() だと「いま書いている区切り」が出てこず、直前の数秒が欠ける。
+            // 一度止めて最後まで出し切り、すぐ録り直す(常時録画のとき)
+            await new Promise(res => {
+                slot.rec.addEventListener('stop', res, { once: true });
+                try { slot.rec.stop(); } catch (_) { res(); }
+                setTimeout(res, 3000);
+            });
+            rp.slots = rp.slots.filter(x => x !== slot);
+            if (!rp.manual && M.replayOn && rp.stream) rpStartSlot();
+        } else {
+            await new Promise(res => {
+                const prev = slot.rec.ondataavailable;
+                slot.rec.ondataavailable = e => { prev && prev(e); slot.rec.ondataavailable = prev; res(); };
+                try { slot.rec.requestData(); } catch (_) { res(); }
+                setTimeout(res, 1500);
+            });
+        }
+        let blob = new Blob(slot.chunks, { type: rpExt() === 'mp4' ? 'video/mp4' : 'video/webm' });
+        if (rpExt() === 'mp4') {   // 長さ・シークバーが正しく出る通常のMP4に整形(失敗したらそのまま保存)
+            try { blob = new Blob([rpFixMp4(await blob.arrayBuffer())], { type: 'video/mp4' }); } catch (e) { console.warn('[LOL.ex replay] MP4整形に失敗(そのまま保存します)', e); }
+        }
         const d = new Date(), p2 = n => String(n).padStart(2, '0');
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);

@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         LOL.ex Lite ver0.91
+// @name         LOL.ex Lite ver0.94
 // @namespace    http://tampermonkey.net/
-// @version      0.91
+// @version      0.94
 // @description  LOLBeans extension (Lite) - Youtube player, background designer, key display, best times, instant replay, chat translate
 // @author       ユウキ / Yuki
 // @match        https://lolbeans.io/*
@@ -20,7 +20,7 @@
 (function () {
     'use strict';
 
-    const SCRIPT_VERSION = '0.91';
+    const SCRIPT_VERSION = '0.94';
 
     const STORAGE = {
         VIDEO:          'yt-videoId',
